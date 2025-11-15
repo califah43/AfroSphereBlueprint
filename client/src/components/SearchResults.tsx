@@ -73,7 +73,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick }: 
               autoFocus
               data-testid="input-search-query"
             />
-            
+
             {showSuggestions && searchQuery.startsWith("#") && filteredHashtags.length > 0 && (
               <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden z-10">
                 {filteredHashtags.slice(0, 5).map((hashtag) => (
@@ -96,7 +96,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick }: 
                 ))}
               </div>
             )}
-            
+
             {showSuggestions && !searchQuery.startsWith("#") && searchQuery.length === 0 && (
               <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden z-10">
                 <div className="p-3 border-b border-border">

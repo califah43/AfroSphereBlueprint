@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, MoreVertical } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 export interface Post {
@@ -39,6 +49,7 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
   const [showHeart, setShowHeart] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
 
   const handleLike = () => {
@@ -74,6 +85,15 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
     });
   };
 
+  const handleDelete = () => {
+    toast({
+      title: "Post deleted",
+      description: "Your post has been removed",
+      variant: "destructive",
+    });
+    setShowDeleteDialog(false);
+  };
+
   return (
     <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${post.id}`}>
       <div className="flex items-center justify-between p-4">
@@ -98,11 +118,35 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Report</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete post
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Flag className="mr-2 h-4 w-4" />
+              Report
+            </DropdownMenuItem>
             <DropdownMenuItem>Not interested</DropdownMenuItem>
             <DropdownMenuItem>Copy link</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete post?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. Your post will be permanently removed from AfroSphere.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="relative" onDoubleClick={handleDoubleClick}>
