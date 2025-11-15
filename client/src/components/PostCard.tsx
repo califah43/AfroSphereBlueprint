@@ -212,7 +212,7 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
         </div>
 
         <div>
-          <p className="font-semibold text-sm mb-1" data-testid={`text-likes-${post.id}`}>
+          <p className="text-sm font-medium transition-all duration-300" data-testid={`text-likes-${post.id}`}>
             {likes.toLocaleString()} likes
           </p>
           <p className="text-sm">

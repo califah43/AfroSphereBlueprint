@@ -110,7 +110,7 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
             {categories.map((category) => (
               <button
                 key={category.name}
-                className="relative h-36 rounded-xl overflow-hidden group hover-elevate"
+                className="relative h-36 rounded-xl overflow-hidden group hover-elevate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow"
                 data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
               >
                 <img
@@ -135,7 +135,7 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
               <button
                 key={post.id}
                 onClick={() => onPostClick?.(post.id)}
-                className="aspect-square hover-elevate overflow-hidden rounded-lg"
+                className="aspect-square hover-elevate overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 data-testid={`popular-post-${post.id}`}
               >
                 <img

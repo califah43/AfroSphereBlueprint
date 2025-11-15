@@ -47,12 +47,17 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
       </div>
 
       <div className="relative">
-        <img
-          src={bannerImage}
-          alt="Profile banner"
-          className="w-full h-48 object-cover"
-          data-testid="img-profile-banner"
-        />
+        <div className="h-48 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 relative overflow-hidden">
+          {bannerImage ? (
+            <img
+              src={bannerImage}
+              alt="Profile banner"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/80 via-pink-500/80 to-purple-600/80" />
+          )}
+        </div>
       </div>
 
       <div className="max-w-md mx-auto px-4">

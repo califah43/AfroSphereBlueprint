@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,12 +55,13 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
     }
 
     console.log("Posting:", { caption, category, hashtags, mediaPreviews, filters: { brightness, contrast, saturation } });
-    
+
     toast({
-      title: "Post created! 🎉",
-      description: "Your content is live on AfroSphere",
+      title: "✨ Post created!",
+      description: "Your post has been shared with the community.",
+      className: "border-primary/20 bg-card",
     });
-    
+
     onPost?.({ caption, category, hashtags, mediaPreviews });
     onClose();
   };
@@ -130,7 +130,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
                     <Sparkles className="h-4 w-4 text-primary" />
                     <Label className="text-sm font-semibold">Filters</Label>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">

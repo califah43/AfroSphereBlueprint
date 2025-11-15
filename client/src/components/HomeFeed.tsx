@@ -8,6 +8,16 @@ import fashionImage from "@assets/generated_images/African_fashion_post_example_
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
 import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
 
+// Placeholder for FeedSkeleton component
+const FeedSkeleton = () => (
+  <div className="animate-pulse space-y-4">
+    <div className="h-48 bg-gray-300 rounded-lg"></div>
+    <div className="h-12 bg-gray-300 rounded-lg"></div>
+    <div className="h-12 bg-gray-300 rounded-lg"></div>
+    <div className="h-12 bg-gray-300 rounded-lg"></div>
+  </div>
+);
+
 interface HomeFeedProps {
   onOpenShare?: () => void;
 }
@@ -55,6 +65,7 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
@@ -102,6 +113,20 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
       setShowStoryViewer(true);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsRefreshing(false);
+  };
+
 
   return (
     <>
@@ -154,16 +179,22 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
         </div>
 
         <div className="max-w-md mx-auto px-4 pt-4">
-          {filteredPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onLike={(id) => console.log("Liked:", id)}
-              onComment={(id) => console.log("Comment:", id)}
-              onShare={(id) => onOpenShare?.()}
-              onBookmark={(id) => console.log("Bookmark:", id)}
-            />
-          ))}
+          {isInitialLoading ? (
+            <FeedSkeleton />
+          ) : (
+            <>
+              {filteredPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onLike={(id) => console.log("Liked:", id)}
+                  onComment={(id) => console.log("Comment:", id)}
+                  onShare={(id) => onOpenShare?.()}
+                  onBookmark={(id) => console.log("Bookmark:", id)}
+                />
+              ))}
+            </>
+          )}
         </div>
       </div>
 
