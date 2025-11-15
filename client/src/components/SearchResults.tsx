@@ -21,10 +21,13 @@ const mockUsers = [
 ];
 
 const mockHashtags = [
-  { tag: "AfricanFashion", posts: "12.5K" },
-  { tag: "AfroBeats", posts: "45.2K" },
-  { tag: "AfricanArt", posts: "8.9K" },
-  { tag: "AnkaraPrint", posts: "6.3K" },
+  { tag: "AfricanFashion", posts: "12.5K", trending: true },
+  { tag: "AfroBeats", posts: "45.2K", trending: true },
+  { tag: "AfricanArt", posts: "8.9K", trending: false },
+  { tag: "AnkaraPrint", posts: "6.3K", trending: false },
+  { tag: "AfricanCulture", posts: "23.1K", trending: true },
+  { tag: "AfricanMusic", posts: "18.7K", trending: false },
+  { tag: "AfroVibes", posts: "31.4K", trending: true },
 ];
 
 const mockPosts = [
@@ -39,6 +42,15 @@ const mockPosts = [
 export default function SearchResults({ onClose, onHashtagClick, onUserClick }: SearchResultsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const filteredHashtags = searchQuery.startsWith("#")
+    ? mockHashtags.filter((h) =>
+        h.tag.toLowerCase().includes(searchQuery.slice(1).toLowerCase())
+      )
+    : [];
+
+  const trendingHashtags = mockHashtags.filter((h) => h.trending);
 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -52,11 +64,63 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick }: 
             <Input
               placeholder="Search AfroSphere..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(e.target.value.length > 0);
+              }}
+              onFocus={() => setShowSuggestions(searchQuery.length > 0)}
               className="pl-10 rounded-full bg-muted"
               autoFocus
               data-testid="input-search-query"
             />
+            
+            {showSuggestions && searchQuery.startsWith("#") && filteredHashtags.length > 0 && (
+              <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden z-10">
+                {filteredHashtags.slice(0, 5).map((hashtag) => (
+                  <button
+                    key={hashtag.tag}
+                    onClick={() => {
+                      onHashtagClick?.(hashtag.tag);
+                      setShowSuggestions(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-muted"
+                    data-testid={`suggestion-${hashtag.tag}`}
+                  >
+                    <Hash className="h-5 w-5 text-primary" />
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold text-sm">#{hashtag.tag}</p>
+                      <p className="text-xs text-muted-foreground">{hashtag.posts} posts</p>
+                    </div>
+                    {hashtag.trending && <TrendingUp className="h-4 w-4 text-primary" />}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {showSuggestions && !searchQuery.startsWith("#") && searchQuery.length === 0 && (
+              <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden z-10">
+                <div className="p-3 border-b border-border">
+                  <p className="text-xs font-semibold text-muted-foreground">TRENDING HASHTAGS</p>
+                </div>
+                {trendingHashtags.slice(0, 4).map((hashtag) => (
+                  <button
+                    key={hashtag.tag}
+                    onClick={() => {
+                      onHashtagClick?.(hashtag.tag);
+                      setShowSuggestions(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-muted"
+                  >
+                    <Hash className="h-5 w-5 text-primary" />
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold text-sm">#{hashtag.tag}</p>
+                      <p className="text-xs text-muted-foreground">{hashtag.posts} posts</p>
+                    </div>
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

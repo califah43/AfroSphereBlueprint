@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Post {
   id: string;
@@ -38,11 +39,19 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
   const [showHeart, setShowHeart] = useState(false);
+  const { toast } = useToast();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(isLiked ? likes - 1 : likes + 1);
     onLike?.(post.id);
+
+    if (!isLiked) {
+      toast({
+        title: "Post liked! ❤️",
+        description: "Added to your liked posts",
+      });
+    }
   };
 
   const handleDoubleClick = () => {
@@ -58,6 +67,11 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
     onBookmark?.(post.id);
+
+    toast({
+      title: isBookmarked ? "Removed from saved" : "Post saved! 📌",
+      description: isBookmarked ? "Removed from your collection" : "Added to your saved collection",
+    });
   };
 
   return (
@@ -131,7 +145,10 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
               size="icon"
               onClick={() => {
                 onShare?.(post.id);
-                onOpenShare?.(post.id);
+                toast({
+                  title: "Share sheet opened",
+                  description: "Choose how you want to share this post",
+                });
               }}
               className="hover-elevate active-elevate-2"
               data-testid={`button-share-${post.id}`}
