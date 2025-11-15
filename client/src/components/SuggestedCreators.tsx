@@ -56,22 +56,27 @@ export default function SuggestedCreators() {
             className="flex items-start gap-3"
             data-testid={`suggested-${creator.username}`}
           >
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-12 h-12 shrink-0">
               <AvatarFallback>{creator.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pr-2">
               <div className="flex items-center gap-2 mb-1">
-                <p className="font-semibold text-sm">{creator.username}</p>
-                {creator.badge && <CreatorBadge type={creator.badge} size="sm" />}
+                <p className="font-semibold text-sm truncate">{creator.username}</p>
               </div>
-              <p className="text-xs text-muted-foreground mb-1">{creator.bio}</p>
-              <p className="text-xs text-muted-foreground">{creator.followers} followers</p>
+              {creator.badge && (
+                <div className="mb-1">
+                  <CreatorBadge type={creator.badge} />
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground line-clamp-2">{creator.bio}</p>
+              <p className="text-xs text-muted-foreground mt-1">{creator.followers} followers</p>
             </div>
             <Button
               size="sm"
               variant={followStates[creator.username] ? "outline" : "default"}
               onClick={() => toggleFollow(creator.username)}
               data-testid={`button-follow-suggested-${creator.username}`}
+              className="shrink-0 self-start mt-1"
             >
               {followStates[creator.username] ? "Following" : "Follow"}
             </Button>
