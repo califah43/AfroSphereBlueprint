@@ -1,6 +1,4 @@
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import fashionHero from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
 import musicHero from "@assets/generated_images/Music_category_hero_image_83aae00b.png";
@@ -8,6 +6,11 @@ import artHero from "@assets/generated_images/Art_category_hero_image_74aa53e3.p
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
 import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
+
+interface ExploreProps {
+  onSearchClick?: () => void;
+  onPostClick?: (postId: string) => void;
+}
 
 const trendingCreators = [
   { username: "adikeafrica", followers: "12.5K" },
@@ -31,20 +34,22 @@ const popularPosts = [
   { id: "6", image: musicImage },
 ];
 
-export default function Explore() {
+export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
   return (
     <div className="pb-20" data-testid="container-explore">
       <div className="sticky top-0 bg-background z-10 border-b border-border">
         <div className="max-w-md mx-auto px-4 py-3 space-y-4">
           <h1 className="text-2xl font-bold" data-testid="text-explore-title">Explore</h1>
-          <div className="relative">
+          <button
+            onClick={onSearchClick}
+            className="relative w-full text-left"
+            data-testid="button-open-search"
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search creators, hashtags..."
-              className="pl-10 rounded-full bg-muted"
-              data-testid="input-search"
-            />
-          </div>
+            <div className="pl-10 pr-4 py-2 rounded-full bg-muted text-muted-foreground text-sm">
+              Search creators, hashtags...
+            </div>
+          </button>
         </div>
       </div>
 
@@ -104,6 +109,7 @@ export default function Explore() {
             {popularPosts.map((post) => (
               <button
                 key={post.id}
+                onClick={() => onPostClick?.(post.id)}
                 className="aspect-square hover-elevate overflow-hidden rounded"
                 data-testid={`popular-post-${post.id}`}
               >

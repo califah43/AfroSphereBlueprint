@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings } from "lucide-react";
+import CreatorBadge from "./CreatorBadge";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
@@ -12,6 +13,7 @@ interface ProfileProps {
   isOwnProfile?: boolean;
   onEditProfile?: () => void;
   onSettings?: () => void;
+  onPostClick?: (postId: string) => void;
 }
 
 const mockPosts = [
@@ -23,7 +25,7 @@ const mockPosts = [
   { id: "6", image: musicImage },
 ];
 
-export default function Profile({ isOwnProfile = true, onEditProfile, onSettings }: ProfileProps) {
+export default function Profile({ isOwnProfile = true, onEditProfile, onSettings, onPostClick }: ProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
 
   return (
@@ -56,9 +58,14 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
         </div>
 
         <div className="mb-4">
-          <h1 className="text-2xl font-bold mb-1" data-testid="text-profile-username">
-            adikeafrica
-          </h1>
+          <div className="flex items-center gap-2 mb-2">
+            <h1 className="text-2xl font-bold" data-testid="text-profile-username">
+              adikeafrica
+            </h1>
+          </div>
+          <div className="mb-3">
+            <CreatorBadge type="fashion-vanguard" size="sm" />
+          </div>
           <p className="text-sm text-muted-foreground mb-3" data-testid="text-profile-bio">
             Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design
           </p>
@@ -111,6 +118,7 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
           {mockPosts.map((post) => (
             <button
               key={post.id}
+              onClick={() => onPostClick?.(post.id)}
               className="aspect-square hover-elevate overflow-hidden rounded"
               data-testid={`post-grid-${post.id}`}
             >

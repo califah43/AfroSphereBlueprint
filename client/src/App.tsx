@@ -14,17 +14,23 @@ import CreatePost from "./components/CreatePost";
 import EditProfile from "./components/EditProfile";
 import Settings from "./components/Settings";
 import Comments from "./components/Comments";
+import SearchResults from "./components/SearchResults";
+import HashtagFeed from "./components/HashtagFeed";
+import PostDetail from "./components/PostDetail";
 import BottomNav from "./components/BottomNav";
+import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "main";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
   const [activeTab, setActiveTab] = useState<MainView>("home");
   const [modalView, setModalView] = useState<ModalView>("none");
   const [commentsPostData, setCommentsPostData] = useState<any>(null);
+  const [selectedHashtag, setSelectedHashtag] = useState<string>("");
+  const [selectedPostId, setSelectedPostId] = useState<string>("");
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -62,6 +68,16 @@ export default function App() {
     setModalView("none");
   };
 
+  const handleOpenPostDetail = (postId: string) => {
+    setSelectedPostId(postId);
+    setModalView("post-detail");
+  };
+
+  const handleOpenHashtagFeed = (hashtag: string) => {
+    setSelectedHashtag(hashtag);
+    setModalView("hashtag");
+  };
+
   if (appState === "splash") {
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
@@ -84,13 +100,19 @@ export default function App() {
       <TooltipProvider>
         <div className="min-h-screen bg-background text-foreground">
           {activeTab === "home" && <HomeFeed />}
-          {activeTab === "explore" && <Explore />}
+          {activeTab === "explore" && (
+            <Explore
+              onSearchClick={() => setModalView("search")}
+              onPostClick={handleOpenPostDetail}
+            />
+          )}
           {activeTab === "notifications" && <Notifications />}
           {activeTab === "profile" && (
             <Profile
               isOwnProfile={true}
               onEditProfile={() => setModalView("edit-profile")}
               onSettings={() => setModalView("settings")}
+              onPostClick={handleOpenPostDetail}
             />
           )}
 
@@ -128,6 +150,52 @@ export default function App() {
               postId={commentsPostData.postId}
               postImage={commentsPostData.image}
               postCaption={commentsPostData.caption}
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "search" && (
+            <SearchResults
+              onClose={() => setModalView("none")}
+              onHashtagClick={handleOpenHashtagFeed}
+              onUserClick={(username) => {
+                console.log("Navigate to user:", username);
+                setModalView("none");
+              }}
+            />
+          )}
+
+          {modalView === "hashtag" && selectedHashtag && (
+            <HashtagFeed
+              hashtag={selectedHashtag}
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "post-detail" && selectedPostId && (
+            <PostDetail
+              postId={selectedPostId}
+              author={{ username: "adikeafrica" }}
+              imageUrl={fashionImage}
+              caption="Celebrating our roots with modern style. Ankara fusion fashion dropping soon! 🔥 #AfricanFashion"
+              likes={1247}
+              timeAgo="2h ago"
+              comments={[
+                {
+                  id: "1",
+                  author: "zara_style",
+                  text: "This is absolutely stunning! 🔥",
+                  likes: 23,
+                  timeAgo: "1h ago",
+                },
+                {
+                  id: "2",
+                  author: "kwame_creative",
+                  text: "Love the fusion of traditional and modern!",
+                  likes: 15,
+                  timeAgo: "45m ago",
+                },
+              ]}
               onClose={() => setModalView("none")}
             />
           )}

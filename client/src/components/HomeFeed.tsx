@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
+import Stories from "./Stories";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
 import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
@@ -35,6 +36,13 @@ const mockPosts: Post[] = [
   },
 ];
 
+const mockStories = [
+  { id: "1", username: "zara_style", hasStory: true, isViewed: false },
+  { id: "2", username: "kojoart", hasStory: true, isViewed: false },
+  { id: "3", username: "amaarabeats", hasStory: true, isViewed: true },
+  { id: "4", username: "adike", hasStory: true, isViewed: false },
+];
+
 export default function HomeFeed() {
   const [activeCategory, setActiveCategory] = useState("for-you");
 
@@ -63,6 +71,14 @@ export default function HomeFeed() {
             </TabsList>
           </Tabs>
         </div>
+      </div>
+
+      <div className="max-w-md mx-auto pt-4 border-b border-border">
+        <Stories
+          stories={mockStories}
+          onAddStory={() => console.log("Add story")}
+          onViewStory={(id) => console.log("View story:", id)}
+        />
       </div>
 
       <div className="max-w-md mx-auto px-4 pt-4">
