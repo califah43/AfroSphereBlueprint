@@ -106,11 +106,11 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
           <h2 className="text-lg font-semibold mb-4" data-testid="text-categories">
             Categories
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {categories.map((category) => (
               <button
                 key={category.name}
-                className="relative h-32 rounded-lg overflow-hidden group hover-elevate"
+                className="relative h-36 rounded-xl overflow-hidden group hover-elevate"
                 data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
               >
                 <img
@@ -118,8 +118,8 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
                   alt={category.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
-                  <p className="text-white font-semibold">{category.name}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                  <p className="text-white font-semibold text-sm">{category.name}</p>
                 </div>
               </button>
             ))}
@@ -130,12 +130,12 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
           <h2 className="text-lg font-semibold mb-4" data-testid="text-popular-posts">
             Popular Posts
           </h2>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-3 gap-2">
             {popularPosts.map((post) => (
               <button
                 key={post.id}
                 onClick={() => onPostClick?.(post.id)}
-                className="aspect-square hover-elevate overflow-hidden rounded"
+                className="aspect-square hover-elevate overflow-hidden rounded-lg"
                 data-testid={`popular-post-${post.id}`}
               >
                 <img
