@@ -78,13 +78,13 @@ export default function FollowersList({
               {mockFollowers.map((user) => (
                 <div
                   key={user.username}
-                  className="flex items-center gap-3 p-2 hover-elevate rounded-lg"
+                  className="flex items-start gap-3 p-2 hover-elevate rounded-lg"
                   data-testid={`follower-${user.username}`}
                 >
-                  <Avatar className="w-12 h-12">
+                  <Avatar className="w-12 h-12 flex-shrink-0">
                     <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">{user.username}</p>
                     <p className="text-xs text-muted-foreground">{user.name}</p>
                   </div>
@@ -92,6 +92,7 @@ export default function FollowersList({
                     size="sm"
                     variant={followStates[user.username] ? "outline" : "default"}
                     onClick={() => toggleFollow(user.username)}
+                    className="mt-1 flex-shrink-0"
                     data-testid={`button-follow-${user.username}`}
                   >
                     {followStates[user.username] ? "Following" : "Follow"}
