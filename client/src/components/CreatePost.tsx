@@ -5,9 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { X, Upload, Image as ImageIcon, Sparkles, Crop, Contrast, Sun, UserPlus } from "lucide-react";
+import { X, Upload, Image as ImageIcon, Sparkles, Crop, Contrast, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import CollaborativePost from "./CollaborativePost";
 
 interface CreatePostProps {
   onClose: () => void;
@@ -22,8 +21,6 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
   const [brightness, setBrightness] = useState([100]);
   const [contrast, setContrast] = useState([100]);
   const [saturation, setSaturation] = useState([100]);
-  const [collaborators, setCollaborators] = useState<string[]>([]);
-  const [showCollaborators, setShowCollaborators] = useState(false);
   const { toast } = useToast();
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,17 +54,15 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       return;
     }
 
-    console.log("Posting:", { caption, category, hashtags, mediaPreviews, collaborators, filters: { brightness, contrast, saturation } });
+    console.log("Posting:", { caption, category, hashtags, mediaPreviews, filters: { brightness, contrast, saturation } });
 
     toast({
       title: "✨ Post created!",
-      description: collaborators.length > 0 
-        ? `Shared with ${collaborators.length} collaborator${collaborators.length > 1 ? 's' : ''}`
-        : "Your post has been shared with the community.",
+      description: "Your post has been shared with the community.",
       className: "border-primary/20 bg-card",
     });
 
-    onPost?.({ caption, category, hashtags, mediaPreviews, collaborators });
+    onPost?.({ caption, category, hashtags, mediaPreviews });
     onClose();
   };
 
@@ -255,55 +250,11 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>Collaborators (Optional)</Label>
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => setShowCollaborators(true)}
-            type="button"
-          >
-            <UserPlus className="h-4 w-4 mr-2" />
-            {collaborators.length > 0
-              ? `${collaborators.length} collaborator${collaborators.length > 1 ? 's' : ''} added`
-              : "Add collaborators"}
-          </Button>
-          {collaborators.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {collaborators.map((username) => (
-                <div
-                  key={username}
-                  className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-full text-xs"
-                >
-                  <span>{username}</span>
-                  <button
-                    onClick={() => setCollaborators(collaborators.filter((u) => u !== username))}
-                    className="hover:bg-primary/20 rounded-full p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         <div className="bg-muted/50 rounded-lg p-4">
           <p className="text-sm text-muted-foreground italic">
             💡 Tip: Share something that celebrates African creativity and culture!
           </p>
         </div>
-      </div>
-
-      {showCollaborators && (
-        <CollaborativePost
-          onClose={() => setShowCollaborators(false)}
-          onAddCollaborators={(newCollaborators) => {
-            setCollaborators(newCollaborators);
-            setShowCollaborators(false);
-          }}
-        />
-      )}
       </div>
     </div>
   );

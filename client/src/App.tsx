@@ -20,9 +20,7 @@ import PostDetail from "./components/PostDetail";
 import FollowersList from "./components/FollowersList";
 import ShareSheet from "./components/ShareSheet";
 import BottomNav from "./components/BottomNav";
-import CulturalCalendar from "./components/CulturalCalendar";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
-import { Button } from "@/components/ui/button";
 
 type AppState = "splash" | "onboarding" | "auth" | "main";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
@@ -35,12 +33,6 @@ export default function App() {
   const [commentsPostData, setCommentsPostData] = useState<any>(null);
   const [selectedHashtag, setSelectedHashtag] = useState<string>("");
   const [selectedPostId, setSelectedPostId] = useState<string>("");
-  const [showFollowersList, setShowFollowersList] = useState(false);
-  const [followListType, setFollowListType] = useState<"followers" | "following">("followers");
-  const [showCulturalCalendar, setShowCulturalCalendar] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [showPostDetail, setShowPostDetail] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -111,24 +103,10 @@ export default function App() {
         <div className="min-h-screen bg-background text-foreground">
           {activeTab === "home" && <HomeFeed onOpenShare={() => setModalView("share")} />}
           {activeTab === "explore" && (
-            <>
-              <div className="sticky top-0 bg-background z-10 border-b border-border">
-                <div className="max-w-md mx-auto px-4 py-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full bg-gradient-to-r from-primary/10 to-orange-500/10 border-primary/20"
-                    onClick={() => setShowCulturalCalendar(true)}
-                  >
-                    📅 Cultural Calendar - Upcoming Events
-                  </Button>
-                </div>
-              </div>
-              <Explore
-                onSearchClick={() => setModalView("search")}
-                onPostClick={handleOpenPostDetail}
-              />
-            </>
+            <Explore
+              onSearchClick={() => setModalView("search")}
+              onPostClick={handleOpenPostDetail}
+            />
           )}
           {activeTab === "notifications" && <Notifications />}
           {activeTab === "profile" && (
@@ -226,17 +204,12 @@ export default function App() {
             />
           )}
 
-          {showFollowersList && (
-            <FollowersList type={followListType} onClose={() => setShowFollowersList(false)} />
-          )}
-
-          {showCulturalCalendar && (
-            <CulturalCalendar
-              onClose={() => setShowCulturalCalendar(false)}
-              onCreateEventPost={(eventId) => {
-                setShowCulturalCalendar(false);
-                setShowCreatePost(true);
-              }}
+          {modalView === "followers" && (
+            <FollowersList
+              username="adikeafrica"
+              followerCount="1.2K"
+              followingCount="485"
+              onClose={() => setModalView("none")}
             />
           )}
 
