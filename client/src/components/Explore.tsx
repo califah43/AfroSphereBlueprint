@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search } from "lucide-react";
+import SuggestedCreators from "./SuggestedCreators";
 import fashionHero from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
 import musicHero from "@assets/generated_images/Music_category_hero_image_83aae00b.png";
 import artHero from "@assets/generated_images/Art_category_hero_image_74aa53e3.png";
@@ -54,6 +55,8 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-8">
+        <SuggestedCreators />
+        
         <div>
           <h2 className="text-lg font-semibold mb-4" data-testid="text-trending-creators">
             Trending Creators

@@ -17,12 +17,14 @@ import Comments from "./components/Comments";
 import SearchResults from "./components/SearchResults";
 import HashtagFeed from "./components/HashtagFeed";
 import PostDetail from "./components/PostDetail";
+import FollowersList from "./components/FollowersList";
+import ShareSheet from "./components/ShareSheet";
 import BottomNav from "./components/BottomNav";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "main";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
@@ -99,7 +101,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="min-h-screen bg-background text-foreground">
-          {activeTab === "home" && <HomeFeed />}
+          {activeTab === "home" && <HomeFeed onOpenShare={() => setModalView("share")} />}
           {activeTab === "explore" && (
             <Explore
               onSearchClick={() => setModalView("search")}
@@ -113,6 +115,8 @@ export default function App() {
               onEditProfile={() => setModalView("edit-profile")}
               onSettings={() => setModalView("settings")}
               onPostClick={handleOpenPostDetail}
+              onFollowersClick={() => setModalView("followers")}
+              onFollowingClick={() => setModalView("followers")}
             />
           )}
 
@@ -197,6 +201,23 @@ export default function App() {
                 },
               ]}
               onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "followers" && (
+            <FollowersList
+              username="adikeafrica"
+              followerCount="1.2K"
+              followingCount="485"
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "share" && (
+            <ShareSheet
+              postUrl="https://afrosphere.app/post/123"
+              onClose={() => setModalView("none")}
+              onShare={(platform) => console.log("Shared to:", platform)}
             />
           )}
         </div>

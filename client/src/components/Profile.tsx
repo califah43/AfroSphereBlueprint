@@ -14,6 +14,8 @@ interface ProfileProps {
   onEditProfile?: () => void;
   onSettings?: () => void;
   onPostClick?: (postId: string) => void;
+  onFollowersClick?: () => void;
+  onFollowingClick?: () => void;
 }
 
 const mockPosts = [
@@ -25,11 +27,25 @@ const mockPosts = [
   { id: "6", image: musicImage },
 ];
 
-export default function Profile({ isOwnProfile = true, onEditProfile, onSettings, onPostClick }: ProfileProps) {
+export default function Profile({ isOwnProfile = true, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
 
   return (
     <div className="pb-20" data-testid="container-profile">
+      <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-10">
+        <h2 className="text-lg font-semibold">adikeafrica</h2>
+        {isOwnProfile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onSettings}
+            data-testid="button-settings"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+
       <div className="relative">
         <img
           src={bannerImage}
@@ -37,17 +53,6 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
           className="w-full h-48 object-cover"
           data-testid="img-profile-banner"
         />
-        {isOwnProfile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 bg-background/50 backdrop-blur-sm"
-            onClick={onSettings}
-            data-testid="button-settings"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
-        )}
       </div>
 
       <div className="max-w-md mx-auto px-4">
@@ -71,15 +76,23 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
           </p>
 
           <div className="flex gap-6 mb-4">
-            <div className="text-center">
+            <button
+              onClick={onFollowersClick}
+              className="text-center hover-elevate px-2 py-1 rounded"
+              data-testid="button-view-followers"
+            >
               <p className="font-bold" data-testid="text-followers-count">1.2K</p>
               <p className="text-xs text-muted-foreground">Followers</p>
-            </div>
-            <div className="text-center">
+            </button>
+            <button
+              onClick={onFollowingClick}
+              className="text-center hover-elevate px-2 py-1 rounded"
+              data-testid="button-view-following"
+            >
               <p className="font-bold" data-testid="text-following-count">485</p>
               <p className="text-xs text-muted-foreground">Following</p>
-            </div>
-            <div className="text-center">
+            </button>
+            <div className="text-center px-2 py-1">
               <p className="font-bold" data-testid="text-posts-count">127</p>
               <p className="text-xs text-muted-foreground">Posts</p>
             </div>

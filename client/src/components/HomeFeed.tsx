@@ -6,6 +6,10 @@ import fashionImage from "@assets/generated_images/African_fashion_post_example_
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
 import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
 
+interface HomeFeedProps {
+  onOpenShare?: () => void;
+}
+
 const mockPosts: Post[] = [
   {
     id: "1",
@@ -43,7 +47,7 @@ const mockStories = [
   { id: "4", username: "adike", hasStory: true, isViewed: false },
 ];
 
-export default function HomeFeed() {
+export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
   const [activeCategory, setActiveCategory] = useState("for-you");
 
   return (
@@ -90,6 +94,7 @@ export default function HomeFeed() {
             onComment={(id) => console.log("Comment:", id)}
             onShare={(id) => console.log("Share:", id)}
             onBookmark={(id) => console.log("Bookmark:", id)}
+            onOpenShare={onOpenShare}
           />
         ))}
       </div>

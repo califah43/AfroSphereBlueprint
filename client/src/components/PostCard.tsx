@@ -30,9 +30,10 @@ interface PostCardProps {
   onComment?: (postId: string) => void;
   onShare?: (postId: string) => void;
   onBookmark?: (postId: string) => void;
+  onOpenShare?: (postId: string) => void;
 }
 
-export default function PostCard({ post, onLike, onComment, onShare, onBookmark }: PostCardProps) {
+export default function PostCard({ post, onLike, onComment, onShare, onBookmark, onOpenShare }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
@@ -128,7 +129,10 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark 
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onShare?.(post.id)}
+              onClick={() => {
+                onShare?.(post.id);
+                onOpenShare?.(post.id);
+              }}
               className="hover-elevate active-elevate-2"
               data-testid={`button-share-${post.id}`}
             >
