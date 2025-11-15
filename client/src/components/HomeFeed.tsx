@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
 import Stories from "./Stories";
+import StoryViewer from "./StoryViewer";
+import { Loader2 } from "lucide-react";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
 import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
@@ -40,64 +42,138 @@ const mockPosts: Post[] = [
   },
 ];
 
-const mockStories = [
-  { id: "1", username: "zara_style", hasStory: true, isViewed: false },
-  { id: "2", username: "kojoart", hasStory: true, isViewed: false },
-  { id: "3", username: "amaarabeats", hasStory: true, isViewed: true },
-  { id: "4", username: "adike", hasStory: true, isViewed: false },
+const mockStoryData = [
+  { id: "1", username: "zara_style", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: false },
+  { id: "2", username: "kojoart", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: false },
+  { id: "3", username: "amaarabeats", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: true },
+  { id: "4", username: "adike", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: false },
 ];
 
 export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
   const [activeCategory, setActiveCategory] = useState("for-you");
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+
+  const filteredPosts = activeCategory === "for-you"
+    ? mockPosts
+    : mockPosts.filter(post =>
+        post.caption.toLowerCase().includes(activeCategory)
+      );
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (scrollContainerRef.current?.scrollTop === 0) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (scrollContainerRef.current?.scrollTop === 0 && !isRefreshing) {
+      const currentY = e.touches[0].clientY;
+      const distance = currentY - touchStartY.current;
+
+      if (distance > 0 && distance < 150) {
+        setPullDistance(distance);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 80 && !isRefreshing) {
+      setIsRefreshing(true);
+      // Simulate refresh
+      setTimeout(() => {
+        setIsRefreshing(false);
+        setPullDistance(0);
+      }, 1500);
+    } else {
+      setPullDistance(0);
+    }
+  };
+
+  const handleViewStory = (storyId: string) => {
+    const index = mockStoryData.findIndex(s => s.id === storyId);
+    if (index !== -1) {
+      setSelectedStoryIndex(index);
+      setShowStoryViewer(true);
+    }
+  };
 
   return (
-    <div className="pb-20" data-testid="container-home-feed">
-      <div className="sticky top-0 bg-background z-10 border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <h1 className="text-2xl font-bold mb-4" data-testid="text-feed-title">AfroSphere</h1>
-          <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-            <TabsList className="w-full grid grid-cols-5 h-auto">
-              <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
-                For You
-              </TabsTrigger>
-              <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
-                Culture
-              </TabsTrigger>
-              <TabsTrigger value="music" className="text-xs" data-testid="tab-music">
-                Music
-              </TabsTrigger>
-              <TabsTrigger value="art" className="text-xs" data-testid="tab-art">
-                Art
-              </TabsTrigger>
-              <TabsTrigger value="lifestyle" className="text-xs" data-testid="tab-lifestyle">
-                Lifestyle
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+    <>
+      <div
+        className="pb-20"
+        data-testid="container-home-feed"
+        ref={scrollContainerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ overflowY: "auto", height: "100vh" }} // Ensure scrollable
+      >
+        {isRefreshing && (
+          <div className="flex justify-center items-center h-20">
+            <Loader2 className="animate-spin" size={24} />
+          </div>
+        )}
+
+        <div className="sticky top-0 bg-background z-10 border-b border-border">
+          <div className="max-w-md mx-auto px-4 py-3">
+            <h1 className="text-2xl font-bold mb-4" data-testid="text-feed-title">AfroSphere</h1>
+            <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+              <TabsList className="w-full grid grid-cols-5 h-auto">
+                <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
+                  For You
+                </TabsTrigger>
+                <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
+                  Culture
+                </TabsTrigger>
+                <TabsTrigger value="music" className="text-xs" data-testid="tab-music">
+                  Music
+                </TabsTrigger>
+                <TabsTrigger value="art" className="text-xs" data-testid="tab-art">
+                  Art
+                </TabsTrigger>
+                <TabsTrigger value="lifestyle" className="text-xs" data-testid="tab-lifestyle">
+                  Lifestyle
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+
+        <div className="max-w-md mx-auto pt-4 border-b border-border">
+          <Stories
+            stories={mockStoryData}
+            onAddStory={() => console.log("Add story")}
+            onViewStory={handleViewStory}
+          />
+        </div>
+
+        <div className="max-w-md mx-auto px-4 pt-4">
+          {filteredPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onLike={(id) => console.log("Liked:", id)}
+              onComment={(id) => console.log("Comment:", id)}
+              onShare={(id) => onOpenShare?.()}
+              onBookmark={(id) => console.log("Bookmark:", id)}
+            />
+          ))}
         </div>
       </div>
 
-      <div className="max-w-md mx-auto pt-4 border-b border-border">
-        <Stories
-          stories={mockStories}
-          onAddStory={() => console.log("Add story")}
-          onViewStory={(id) => console.log("View story:", id)}
+      {showStoryViewer && (
+        <StoryViewer
+          stories={mockStoryData}
+          initialStoryIndex={selectedStoryIndex}
+          onClose={() => setShowStoryViewer(false)}
         />
-      </div>
-
-      <div className="max-w-md mx-auto px-4 pt-4">
-        {mockPosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            onLike={(id) => console.log("Liked:", id)}
-            onComment={(id) => console.log("Comment:", id)}
-            onShare={(id) => console.log("Share:", id)}
-            onBookmark={(id) => console.log("Bookmark:", id)}
-            onOpenShare={onOpenShare}
-          />
-        ))}
-      </div>
-    </div>
+      )}
+    </>
   );
 }
