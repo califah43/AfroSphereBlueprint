@@ -65,7 +65,7 @@ export default function SuggestedCreators() {
               </div>
               {creator.badge && (
                 <div className="mb-1">
-                  <CreatorBadge type={creator.badge} />
+                  <CreatorBadge type={creator.badge} size="sm" />
                 </div>
               )}
               <p className="text-xs text-muted-foreground line-clamp-2">{creator.bio}</p>
