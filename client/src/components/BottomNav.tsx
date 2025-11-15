@@ -1,0 +1,49 @@
+import { Home, Compass, PlusCircle, Bell, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface BottomNavProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const navItems = [
+    { id: "home", icon: Home, label: "Home" },
+    { id: "explore", icon: Compass, label: "Explore" },
+    { id: "create", icon: PlusCircle, label: "Create" },
+    { id: "notifications", icon: Bell, label: "Notifications" },
+    { id: "profile", icon: User, label: "Profile" },
+  ];
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border backdrop-blur-lg bg-opacity-95 z-50">
+      <div className="max-w-md mx-auto flex items-center justify-around px-2 py-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          const isCreate = item.id === "create";
+
+          return (
+            <Button
+              key={item.id}
+              variant="ghost"
+              size="icon"
+              onClick={() => onTabChange(item.id)}
+              className={`relative ${isCreate ? "scale-110" : ""}`}
+              data-testid={`button-nav-${item.id}`}
+            >
+              <Icon
+                className={`h-6 w-6 ${
+                  isActive ? "text-primary fill-primary" : isCreate ? "text-primary" : ""
+                }`}
+              />
+              {isActive && !isCreate && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+              )}
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
