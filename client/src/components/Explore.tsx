@@ -110,15 +110,15 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
             {categories.map((category) => (
               <button
                 key={category.name}
-                className="relative h-36 rounded-xl overflow-hidden group hover-elevate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow"
+                className="relative h-36 rounded-xl overflow-hidden group hover-elevate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
                 data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
               >
                 <img
                   src={category.image}
                   alt={category.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/90 flex items-end p-4 transition-colors duration-300">
                   <p className="text-white font-semibold text-sm">{category.name}</p>
                 </div>
               </button>

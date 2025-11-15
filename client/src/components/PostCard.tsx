@@ -158,7 +158,7 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
         />
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart className="w-24 h-24 text-white fill-white animate-pulse" />
+            <Heart className="w-24 h-24 text-white fill-white animate-pulse transition-all duration-300" style={{ animation: 'pulse 0.6s ease-out' }} />
           </div>
         )}
       </div>

@@ -125,28 +125,44 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="posts" data-testid="tab-posts">Posts</TabsTrigger>
-            <TabsTrigger value="liked" data-testid="tab-liked">Liked</TabsTrigger>
-            <TabsTrigger value="saved" data-testid="tab-saved">Saved</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-3 bg-muted/50">
+            <TabsTrigger value="posts" data-testid="tab-posts" className="data-[state=active]:bg-background">Posts</TabsTrigger>
+            <TabsTrigger value="liked" data-testid="tab-liked" className="data-[state=active]:bg-background">Liked</TabsTrigger>
+            <TabsTrigger value="saved" data-testid="tab-saved" className="data-[state=active]:bg-background">Saved</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <div className="grid grid-cols-3 gap-1 mt-4">
-          {mockPosts.map((post) => (
-            <button
-              key={post.id}
-              onClick={() => onPostClick?.(post.id)}
-              className="aspect-square hover-elevate overflow-hidden rounded"
-              data-testid={`post-grid-${post.id}`}
-            >
-              <img
-                src={post.image}
-                alt="Post"
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
+        <div className="mt-4">
+          {activeTab === "posts" && (
+            <div className="grid grid-cols-3 gap-1">
+              {mockPosts.map((post) => (
+                <button
+                  key={post.id}
+                  onClick={() => onPostClick?.(post.id)}
+                  className="aspect-square hover-elevate overflow-hidden rounded"
+                  data-testid={`post-grid-${post.id}`}
+                >
+                  <img
+                    src={post.image}
+                    alt="Post"
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+          {activeTab === "liked" && (
+            <div className="py-12 text-center">
+              <p className="text-muted-foreground text-sm">No liked posts yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Posts you like will appear here</p>
+            </div>
+          )}
+          {activeTab === "saved" && (
+            <div className="py-12 text-center">
+              <p className="text-muted-foreground text-sm">No saved posts yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Save posts to view them later</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

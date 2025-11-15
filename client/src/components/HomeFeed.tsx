@@ -139,9 +139,14 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
         onTouchEnd={handleTouchEnd}
         style={{ overflowY: "auto", height: "100vh" }} // Ensure scrollable
       >
+        {pullDistance > 0 && !isRefreshing && (
+          <div className="flex justify-center items-center py-4" style={{ height: `${pullDistance}px` }}>
+            <Loader2 className="text-primary" size={20} style={{ opacity: pullDistance / 80 }} />
+          </div>
+        )}
         {isRefreshing && (
           <div className="flex justify-center items-center h-20">
-            <Loader2 className="animate-spin" size={24} />
+            <Loader2 className="animate-spin text-primary" size={24} />
           </div>
         )}
 
