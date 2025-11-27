@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import splashLogo from "@assets/generated_images/AfroSphere_glowing_logo_splash_151b3d9c.png";
+import splashLogo from "@assets/generated_images/elegant_african_continent_logo_with_sunrise.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
