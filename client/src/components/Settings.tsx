@@ -561,10 +561,10 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
           <div className="space-y-3">
             <Button 
               onClick={async () => { 
-                const newSettings = {...settings, display: {...settings.display, textSize: "normal"}};
+                const newSettings = {...settings, display: {...settings.display, textSize: "normal" as const}};
                 setSettings(newSettings);
                 document.documentElement.setAttribute("data-text-size", "normal");
-                await handleToggle("display", "textSize", "normal");
+                await handleToggle("display", "textSize", true);
               }} 
               variant={settings.display.textSize === "normal" ? "default" : "outline"} 
               className="w-full justify-start"
@@ -574,10 +574,10 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
             </Button>
             <Button 
               onClick={async () => { 
-                const newSettings = {...settings, display: {...settings.display, textSize: "large"}};
+                const newSettings = {...settings, display: {...settings.display, textSize: "large" as const}};
                 setSettings(newSettings);
                 document.documentElement.setAttribute("data-text-size", "large");
-                await handleToggle("display", "textSize", "large");
+                await handleToggle("display", "textSize", true);
               }} 
               variant={settings.display.textSize === "large" ? "default" : "outline"} 
               className="w-full justify-start"
@@ -587,10 +587,10 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
             </Button>
             <Button 
               onClick={async () => { 
-                const newSettings = {...settings, display: {...settings.display, textSize: "extra-large"}};
+                const newSettings = {...settings, display: {...settings.display, textSize: "extra-large" as const}};
                 setSettings(newSettings);
                 document.documentElement.setAttribute("data-text-size", "extra-large");
-                await handleToggle("display", "textSize", "extra-large");
+                await handleToggle("display", "textSize", true);
               }} 
               variant={settings.display.textSize === "extra-large" ? "default" : "outline"} 
               className="w-full justify-start"

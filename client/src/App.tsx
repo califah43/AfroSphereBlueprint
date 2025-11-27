@@ -30,7 +30,21 @@ type MainView = "home" | "explore" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
 export default function App() {
-  const [appState, setAppState] = useState<AppState>("splash");
+  // Check if user is already logged in on startup
+  const getInitialAppState = (): AppState => {
+    const userId = localStorage.getItem("currentUserId");
+    const userData = localStorage.getItem("currentUserData");
+    
+    // If user is logged in, go straight to main app
+    if (userId && userData) {
+      return "main";
+    }
+    
+    // Otherwise, show splash screen
+    return "splash";
+  };
+
+  const [appState, setAppState] = useState<AppState>(getInitialAppState());
   const [activeTab, setActiveTab] = useState<MainView>("home");
   const [modalView, setModalView] = useState<ModalView>("none");
   const [commentsPostData, setCommentsPostData] = useState<any>(null);
@@ -133,6 +147,9 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    // Clear all user data from localStorage on logout
+    localStorage.removeItem("currentUserId");
+    localStorage.removeItem("currentUserData");
     setAppState("auth");
     setActiveTab("home");
     setModalView("none");
