@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import splashLogo from "@assets/generated_images/transparent_outlined_african_continent_logo.png";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 interface AuthScreenProps {
   onAuthComplete: () => void;
@@ -14,17 +17,37 @@ interface AuthScreenProps {
 export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenProps) {
   const [signupData, setSignupData] = useState({ email: "", username: "", password: "" });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signup:", signupData);
-    onAuthComplete();
+    setIsLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
+      console.log("Signup:", userCredential.user);
+      toast({ title: "Account created!", description: "Welcome to AfroSphere" });
+      onAuthComplete();
+    } catch (error: any) {
+      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login:", loginData);
-    onAuthComplete();
+    setIsLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
+      console.log("Login:", userCredential.user);
+      toast({ title: "Welcome back!", description: "Successfully signed in" });
+      onAuthComplete();
+    } catch (error: any) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,8 +106,8 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
                   <button type="button" className="text-sm text-primary hover:underline" data-testid="button-forgot-password">
                     Forgot password?
                   </button>
-                  <Button type="submit" className="w-full" data-testid="button-login-submit">
-                    Sign In
+                  <Button type="submit" disabled={isLoading} className="w-full" data-testid="button-login-submit">
+                    {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                   <Button type="button" variant="outline" className="w-full" data-testid="button-google-login">
                     Continue with Google
@@ -137,8 +160,8 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" data-testid="button-signup-submit">
-                    Create Account
+                  <Button type="submit" disabled={isLoading} className="w-full" data-testid="button-signup-submit">
+                    {isLoading ? "Creating..." : "Create Account"}
                   </Button>
                   <Button type="button" variant="outline" className="w-full" data-testid="button-google-signup">
                     Continue with Google
