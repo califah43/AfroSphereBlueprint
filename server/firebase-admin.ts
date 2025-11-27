@@ -1,28 +1,48 @@
 import * as admin from "firebase-admin";
 
 let firebaseApp: admin.app.App | null = null;
+let initAttempted = false;
 
 export const initializeFirebaseAdmin = () => {
+  // Only attempt once to avoid re-initialization errors
+  if (initAttempted) {
+    return firebaseApp;
+  }
+  initAttempted = true;
+
   try {
     const adminKeyStr = process.env.FIREBASE_ADMIN_KEY;
     
     if (!adminKeyStr) {
-      console.warn("FIREBASE_ADMIN_KEY not configured - push notifications disabled");
+      console.warn("⚠️ FIREBASE_ADMIN_KEY not configured - push notifications will be disabled");
       return null;
     }
 
     // Parse the admin key JSON
-    const adminKey = JSON.parse(adminKeyStr);
+    let adminKey;
+    try {
+      adminKey = JSON.parse(adminKeyStr);
+    } catch (parseError) {
+      console.error("❌ Failed to parse FIREBASE_ADMIN_KEY JSON:", parseError);
+      return null;
+    }
 
+    // Validate required fields
+    if (!adminKey.project_id || !adminKey.private_key || !adminKey.client_email) {
+      console.error("❌ FIREBASE_ADMIN_KEY missing required fields (project_id, private_key, client_email)");
+      return null;
+    }
+
+    // Initialize with credential
     firebaseApp = admin.initializeApp({
       credential: admin.credential.cert(adminKey as admin.ServiceAccount),
       projectId: adminKey.project_id,
     });
 
-    console.log("Firebase Admin SDK initialized successfully");
+    console.log("✅ Firebase Admin SDK initialized successfully");
     return firebaseApp;
   } catch (error) {
-    console.error("Failed to initialize Firebase Admin SDK:", error);
+    console.error("❌ Failed to initialize Firebase Admin SDK:", error);
     return null;
   }
 };
