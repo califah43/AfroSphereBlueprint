@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
-import SnapchatStories from "./SnapchatStories";
-import StoryViewer from "./StoryViewer";
 import { Loader2 } from "lucide-react";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
@@ -51,26 +49,11 @@ const mockPosts: Post[] = [
   },
 ];
 
-const mockStoryCarousel = [
-  { id: "1", username: "zara_style", avatar: "", isViewed: false },
-  { id: "2", username: "kojoart", avatar: "", isViewed: false },
-  { id: "3", username: "amaarabeats", avatar: "", isViewed: true },
-  { id: "4", username: "adike", avatar: "", isViewed: false },
-];
-
-const mockStoryData = [
-  { id: "1", username: "zara_style", avatar: "", media: "image", timestamp: "2h" },
-  { id: "2", username: "kojoart", avatar: "", media: "image", timestamp: "4h" },
-  { id: "3", username: "amaarabeats", avatar: "", media: "video", timestamp: "1h" },
-  { id: "4", username: "adike", avatar: "", media: "image", timestamp: "3h" },
-];
 
 export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showStoryViewer, setShowStoryViewer] = useState(false);
-  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -111,14 +94,6 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
     }
   };
 
-  const handleViewStory = (storyId: string) => {
-    const index = mockStoryData.findIndex(s => s.id === storyId);
-    if (index !== -1) {
-      setSelectedStoryIndex(index);
-      setShowStoryViewer(true);
-    }
-  };
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
@@ -151,14 +126,6 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
         <div className="sticky top-0 bg-background z-10 border-b border-border">
           <div className="max-w-md mx-auto px-4 py-3">
             <h1 className="text-2xl font-bold mb-4" data-testid="text-feed-title">AfroSphere</h1>
-            
-            {/* Snapchat-style Stories */}
-            <SnapchatStories
-              stories={mockStoryCarousel}
-              onAddStory={() => console.log("Add story")}
-              onViewStory={handleViewStory}
-            />
-            
             <Tabs value={activeCategory} onValueChange={setActiveCategory}>
               <TabsList className="w-full grid grid-cols-6 h-auto">
                 <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
@@ -204,13 +171,6 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
         </div>
       </div>
 
-      {showStoryViewer && (
-        <StoryViewer
-          stories={mockStoryData}
-          initialStoryIndex={selectedStoryIndex}
-          onClose={() => setShowStoryViewer(false)}
-        />
-      )}
     </>
   );
 }
