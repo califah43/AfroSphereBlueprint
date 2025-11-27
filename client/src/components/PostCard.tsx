@@ -112,7 +112,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         <button 
           onClick={() => onAuthorClick?.(authorUsername)}
           className="flex items-center gap-3 hover-elevate flex-1 rounded px-2 py-1 transition-all group"
-          data-testid={`button-author-profile-${post.id}`}
+          data-testid={`button-author-profile-${postId}`}
         >
           <Avatar className="w-10 h-10">
             <AvatarImage src={authorAvatar} />
@@ -274,25 +274,25 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             size="icon"
             onClick={handleBookmark}
             className="hover-elevate active-elevate-2"
-            data-testid={`button-bookmark-${post.id}`}
+            data-testid={`button-bookmark-${postId}`}
           >
             <Bookmark className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`} />
           </Button>
         </div>
 
         <div>
-          <p className="text-sm font-medium transition-all duration-300" data-testid={`text-likes-${post.id}`}>
+          <p className="text-sm font-medium transition-all duration-300" data-testid={`text-likes-${postId}`}>
             {likes.toLocaleString()} likes
           </p>
           <p className="text-sm">
-            <span className="font-semibold">{post.author.username}</span>{" "}
-            <span data-testid={`text-caption-${post.id}`}>{post.caption}</span>
+            <span className="font-semibold">{authorUsername}</span>{" "}
+            <span data-testid={`text-caption-${postId}`}>{post.caption}</span>
           </p>
-          {post.comments > 0 && (
+          {(post.comments ?? 0) > 0 && (
             <button
-              onClick={() => onComment?.(post.id)}
+              onClick={() => onComment?.(postId)}
               className="text-sm text-muted-foreground mt-1 hover:text-foreground"
-              data-testid={`button-view-comments-${post.id}`}
+              data-testid={`button-view-comments-${postId}`}
             >
               View all {post.comments} comments
             </button>
