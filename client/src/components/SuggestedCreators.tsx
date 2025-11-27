@@ -39,9 +39,24 @@ const suggestedCreators: Creator[] = [
 
 export default function SuggestedCreators() {
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
 
-  const toggleFollow = (username: string) => {
-    setFollowStates((prev) => ({ ...prev, [username]: !prev[username] }));
+  const toggleFollow = async (username: string) => {
+    setLoading((prev) => ({ ...prev, [username]: true }));
+    try {
+      const isFollowing = followStates[username];
+      const endpoint = isFollowing ? `/api/follows/unfollow/${username}` : `/api/follows/${username}`;
+      const method = isFollowing ? 'DELETE' : 'POST';
+      
+      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
+      if (res.ok) {
+        setFollowStates((prev) => ({ ...prev, [username]: !prev[username] }));
+      }
+    } catch (error) {
+      console.error('Failed to toggle follow:', error);
+    } finally {
+      setLoading((prev) => ({ ...prev, [username]: false }));
+    }
   };
 
   return (
@@ -75,10 +90,11 @@ export default function SuggestedCreators() {
               size="sm"
               variant={followStates[creator.username] ? "outline" : "default"}
               onClick={() => toggleFollow(creator.username)}
+              disabled={loading[creator.username]}
               data-testid={`button-follow-suggested-${creator.username}`}
               className="shrink-0 self-start mt-1"
             >
-              {followStates[creator.username] ? "Following" : "Follow"}
+              {loading[creator.username] ? "..." : (followStates[creator.username] ? "Following" : "Follow")}
             </Button>
           </div>
         ))}

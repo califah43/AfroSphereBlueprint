@@ -44,9 +44,24 @@ export default function FollowersList({
       [...mockFollowers, ...mockFollowing].map((u) => [u.username, u.isFollowing || false])
     )
   );
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
 
-  const toggleFollow = (user: string) => {
-    setFollowStates((prev) => ({ ...prev, [user]: !prev[user] }));
+  const toggleFollow = async (user: string) => {
+    setLoading((prev) => ({ ...prev, [user]: true }));
+    try {
+      const isFollowing = followStates[user];
+      const endpoint = isFollowing ? `/api/follows/unfollow/${user}` : `/api/follows/${user}`;
+      const method = isFollowing ? 'DELETE' : 'POST';
+      
+      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
+      if (res.ok) {
+        setFollowStates((prev) => ({ ...prev, [user]: !prev[user] }));
+      }
+    } catch (error) {
+      console.error('Failed to toggle follow:', error);
+    } finally {
+      setLoading((prev) => ({ ...prev, [user]: false }));
+    }
   };
 
   return (
@@ -92,10 +107,11 @@ export default function FollowersList({
                     size="sm"
                     variant={followStates[user.username] ? "outline" : "default"}
                     onClick={() => toggleFollow(user.username)}
+                    disabled={loading[user.username]}
                     className="mt-1 flex-shrink-0"
                     data-testid={`button-follow-${user.username}`}
                   >
-                    {followStates[user.username] ? "Following" : "Follow"}
+                    {loading[user.username] ? "..." : (followStates[user.username] ? "Following" : "Follow")}
                   </Button>
                 </div>
               ))}
@@ -121,6 +137,7 @@ export default function FollowersList({
                     size="sm"
                     variant="outline"
                     onClick={() => toggleFollow(user.username)}
+                    disabled={loading[user.username]}
                     data-testid={`button-unfollow-${user.username}`}
                   >
                     Following
