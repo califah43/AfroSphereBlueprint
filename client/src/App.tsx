@@ -30,21 +30,8 @@ type MainView = "home" | "explore" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
 export default function App() {
-  // Check if user is already logged in on startup
-  const getInitialAppState = (): AppState => {
-    const userId = localStorage.getItem("currentUserId");
-    const userData = localStorage.getItem("currentUserData");
-    
-    // If user is logged in, go straight to main app
-    if (userId && userData) {
-      return "main";
-    }
-    
-    // Otherwise, show splash screen
-    return "splash";
-  };
-
-  const [appState, setAppState] = useState<AppState>(getInitialAppState());
+  // All users see splash screen first
+  const [appState, setAppState] = useState<AppState>("splash");
   const [activeTab, setActiveTab] = useState<MainView>("home");
   const [modalView, setModalView] = useState<ModalView>("none");
   const [commentsPostData, setCommentsPostData] = useState<any>(null);
@@ -129,7 +116,17 @@ export default function App() {
   }, [logoClickCount]);
 
   const handleSplashComplete = () => {
-    setAppState("onboarding");
+    // Check if user is already logged in
+    const userId = localStorage.getItem("currentUserId");
+    const userData = localStorage.getItem("currentUserData");
+    
+    // If returning user, go straight to main app
+    if (userId && userData) {
+      setAppState("main");
+    } else {
+      // New user, show onboarding
+      setAppState("onboarding");
+    }
   };
 
   const handleOnboardingComplete = () => {
