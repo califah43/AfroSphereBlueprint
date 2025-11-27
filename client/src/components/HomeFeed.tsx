@@ -54,9 +54,52 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
     },
   });
 
-  // Update displayed posts from API
+  // Update displayed posts from API with user data enrichment
   useEffect(() => {
-    setDisplayedPosts(apiPosts as Post[]);
+    const enrichPosts = async () => {
+      try {
+        const enriched = await Promise.all(
+          (apiPosts || []).map(async (post: any) => {
+            try {
+              const userRes = await fetch(`/api/users/${post.userId}`);
+              const user = await userRes.json();
+              
+              return {
+                ...post,
+                id: post.id || post.userId,
+                author: {
+                  username: user.username || post.userId,
+                  avatar: user.avatar || null
+                },
+                imageUrl: post.image,
+                likes: post.likes || 0,
+                comments: post.comments || 0,
+                timeAgo: post.timeAgo || "now"
+              };
+            } catch {
+              // Fallback if user fetch fails
+              return {
+                ...post,
+                id: post.id || post.userId,
+                author: {
+                  username: post.userId,
+                  avatar: null
+                },
+                imageUrl: post.image,
+                likes: post.likes || 0,
+                comments: post.comments || 0,
+                timeAgo: post.timeAgo || "now"
+              };
+            }
+          })
+        );
+        setDisplayedPosts(enriched);
+      } catch {
+        setDisplayedPosts(apiPosts as Post[]);
+      }
+    };
+    
+    enrichPosts();
   }, [apiPosts]);
 
   const filteredPosts = activeCategory === "for-you"
@@ -233,7 +276,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
                     
                     return (
                       <PostCard
-                        key={post.id || (post as any).userId}
+                        key={post.id}
                         post={post}
                         isOwnPost={isOwnPost}
                         onLike={(id) => console.log("Liked:", id)}
