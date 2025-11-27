@@ -11,6 +11,9 @@ import { GENRE_LIST } from "@shared/genres";
 import fashionHero from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
 import musicHero from "@assets/generated_images/Music_category_hero_image_83aae00b.png";
 import artHero from "@assets/generated_images/Art_category_hero_image_74aa53e3.png";
+import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
+import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
+import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
 import { useState, useEffect } from "react";
 
 interface ExploreProps {
@@ -31,6 +34,20 @@ const categories = [
   { name: "Visual Art", image: artHero },
 ];
 
+const popularPosts = [
+  { id: "1", image: fashionImage },
+  { id: "2", image: artImage },
+  { id: "3", image: musicImage },
+  { id: "4", image: fashionImage },
+  { id: "5", image: artImage },
+  { id: "6", image: musicImage },
+];
+
+// Mock posts for the 'all' tab, simulating a larger dataset
+const mockAllPosts = Array.from({ length: 18 }, (_, i) => ({
+  id: `mock-${i + 1}`,
+  image: [fashionImage, artImage, musicImage][i % 3],
+}));
 
 
 export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
@@ -103,6 +120,27 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
           </div>
         </div>
 
+        <div>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-popular-posts">
+            <span>🔥</span> Popular Posts
+          </h2>
+          <div className="grid grid-cols-3 gap-2">
+            {popularPosts.map((post) => (
+              <button
+                key={post.id}
+                onClick={() => onPostClick?.(post.id)}
+                className="aspect-square overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 group hover-elevate"
+                data-testid={`popular-post-${post.id}`}
+              >
+                <img
+                  src={post.image}
+                  alt="Post"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

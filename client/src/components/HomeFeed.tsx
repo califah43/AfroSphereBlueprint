@@ -4,6 +4,7 @@ import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { mockPosts } from "@/data/mockData";
 
 const PostSkeleton = () => (
   <div className="mb-4 animate-pulse space-y-3 bg-muted/50 rounded-lg p-4 border border-border">
@@ -34,7 +35,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
+  const [displayedPosts, setDisplayedPosts] = useState<Post[]>(mockPosts);
   const [hasNewPosts, setHasNewPosts] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -49,22 +50,16 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
         const res = await fetch('/api/posts?limit=50');
         return res.json();
       } catch {
-        return [];
+        return mockPosts;
       }
     },
   });
 
-  // Update displayed posts from API
+  // Fallback to mock data if API returns empty
   useEffect(() => {
-    const transformed = (apiPosts || []).map((post: any) => ({
-      ...post,
-      id: post.id || post.userId,
-      imageUrl: post.image,
-      likes: post.likes || 0,
-      commentCount: post.commentCount || post.comments || 0,
-      timeAgo: post.timeAgo || "now"
-    }));
-    setDisplayedPosts(transformed as Post[]);
+    if (apiPosts && apiPosts.length > 0) {
+      setDisplayedPosts(apiPosts as Post[]);
+    }
   }, [apiPosts]);
 
   const filteredPosts = activeCategory === "for-you"
@@ -234,24 +229,18 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
             <>
               {filteredPosts.length > 0 ? (
                 <>
-                  {filteredPosts.map((post) => {
-                    const currentUserId = localStorage.getItem("currentUserId");
-                    const postUserId = (post as any).userId;
-                    const isOwnPost = currentUserId === postUserId;
-                    
-                    return (
-                      <PostCard
-                        key={post.id}
-                        post={post}
-                        isOwnPost={isOwnPost}
-                        onLike={(id) => console.log("Liked:", id)}
-                        onComment={(id) => console.log("Comment:", id)}
-                        onShare={(id) => onOpenShare?.()}
-                        onBookmark={(id) => console.log("Bookmark:", id)}
-                        onAuthorClick={(username) => onUserProfileClick?.(username)}
-                      />
-                    );
-                  })}
+                  {filteredPosts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      isOwnPost={post.author.username === "adikeafrica"}
+                      onLike={(id) => console.log("Liked:", id)}
+                      onComment={(id) => console.log("Comment:", id)}
+                      onShare={(id) => onOpenShare?.()}
+                      onBookmark={(id) => console.log("Bookmark:", id)}
+                      onAuthorClick={(username) => onUserProfileClick?.(username)}
+                    />
+                  ))}
                   
                   {/* Loading More Indicator */}
                   {isLoadingMore && (

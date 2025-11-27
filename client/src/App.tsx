@@ -153,11 +153,6 @@ export default function App() {
     setModalView("user-profile");
   };
 
-  const handleOpenOtherUserProfile = (username: string) => {
-    setSelectedUsername(username);
-    setModalView("user-profile");
-  };
-
   const handleLogoClick = () => {
     if (logoClickCount >= 17) {
       setLogoClickCount(18);
@@ -337,17 +332,14 @@ export default function App() {
             />
           )}
 
-          {modalView === "followers" && (() => {
-            const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
-            return (
-              <FollowersList
-                username={currentUserData.username || "user"}
-                followerCount={currentUserData.followerCount?.toString() || "0"}
-                followingCount={currentUserData.followingCount?.toString() || "0"}
-                onClose={() => setModalView("none")}
-              />
-            );
-          })()}
+          {modalView === "followers" && (
+            <FollowersList
+              username="adikeafrica"
+              followerCount="1.2K"
+              followingCount="485"
+              onClose={() => setModalView("none")}
+            />
+          )}
 
           {modalView === "share" && (
             <ShareSheet
@@ -357,24 +349,20 @@ export default function App() {
             />
           )}
 
-          {modalView === "user-profile" && selectedUsername && (() => {
-            const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
-            const isOwnProfile = selectedUsername === currentUserData.username;
-            return (
-              <div className="flex-1 overflow-y-auto">
-                <Profile
-                  isOwnProfile={isOwnProfile}
-                  username={selectedUsername}
-                  onClose={() => setModalView("none")}
-                  onEditProfile={() => setModalView("edit-profile")}
-                  onSettings={() => setModalView("settings")}
-                  onPostClick={handleOpenPostDetail}
-                  onFollowersClick={() => setModalView("followers")}
-                  onFollowingClick={() => setModalView("followers")}
-                />
-              </div>
-            );
-          })()}
+          {modalView === "user-profile" && selectedUsername && (
+            <div className="flex-1 overflow-y-auto">
+              <Profile
+                isOwnProfile={selectedUsername === "adikeafrica"}
+                username={selectedUsername}
+                onClose={() => setModalView("none")}
+                onEditProfile={() => setModalView("edit-profile")}
+                onSettings={() => setModalView("settings")}
+                onPostClick={handleOpenPostDetail}
+                onFollowersClick={() => setModalView("followers")}
+                onFollowingClick={() => setModalView("followers")}
+              />
+            </div>
+          )}
           </div>
         </div>
         <Toaster />

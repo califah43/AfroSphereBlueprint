@@ -22,21 +22,18 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export interface Post {
-  id?: string;
-  userId?: string;
-  author?: {
+  id: string;
+  author: {
     username: string;
     avatar?: string;
   };
-  imageUrl?: string;
-  image?: string;
+  imageUrl: string;
   caption: string;
-  likes?: number;
-  comments?: number;
-  timeAgo?: string;
+  likes: number;
+  comments: number;
+  timeAgo: string;
   isLiked?: boolean;
   isBookmarked?: boolean;
-  category?: string;
 }
 
 interface PostCardProps {
@@ -51,15 +48,9 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick }: PostCardProps) {
-  // Handle both API response format and mock format
-  const authorUsername = post.author?.username || post.userId || "unknown";
-  const authorAvatar = post.author?.avatar;
-  const imageUrl = post.imageUrl || post.image || "";
-  const postId = post.id || "unknown";
-  
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
-  const [likes, setLikes] = useState(post.likes || 0);
+  const [likes, setLikes] = useState(post.likes);
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
@@ -67,7 +58,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(isLiked ? likes - 1 : likes + 1);
-    onLike?.(postId);
+    onLike?.(post.id);
 
     if (!isLiked) {
       toast({
@@ -81,7 +72,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     if (!isLiked) {
       setIsLiked(true);
       setLikes(likes + 1);
-      onLike?.(postId);
+      onLike?.(post.id);
     }
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1000);
@@ -89,7 +80,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
-    onBookmark?.(postId);
+    onBookmark?.(post.id);
 
     toast({
       title: isBookmarked ? "Removed from saved" : "Post saved! 📌",
@@ -107,23 +98,23 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   return (
-    <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${postId}`}>
+    <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${post.id}`}>
       <div className="flex items-center justify-between p-4">
         <button 
-          onClick={() => onAuthorClick?.(authorUsername)}
+          onClick={() => onAuthorClick?.(post.author.username)}
           className="flex items-center gap-3 hover-elevate flex-1 rounded px-2 py-1 transition-all group"
-          data-testid={`button-author-profile-${postId}`}
+          data-testid={`button-author-profile-${post.id}`}
         >
           <Avatar className="w-10 h-10">
-            <AvatarImage src={authorAvatar} />
-            <AvatarFallback>{authorUsername[0]?.toUpperCase() || "?"}</AvatarFallback>
+            <AvatarImage src={post.author.avatar} />
+            <AvatarFallback>{post.author.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="text-left">
-            <p className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`text-username-${postId}`}>
-              {authorUsername}
+            <p className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`text-username-${post.id}`}>
+              {post.author.username}
             </p>
-            <p className="text-xs text-muted-foreground" data-testid={`text-time-${postId}`}>
-              {post.timeAgo || "just now"}
+            <p className="text-xs text-muted-foreground" data-testid={`text-time-${post.id}`}>
+              {post.timeAgo}
             </p>
           </div>
         </button>
@@ -133,7 +124,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               variant="ghost" 
               size="icon" 
               className="hover-elevate"
-              data-testid={`button-menu-${postId}`}
+              data-testid={`button-menu-${post.id}`}
             >
               <MoreVertical className="h-5 w-5" />
             </Button>
@@ -144,7 +135,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 <DropdownMenuItem 
                   onClick={() => setShowDeleteDialog(true)} 
                   className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                  data-testid={`button-delete-own-${postId}`}
+                  data-testid={`button-delete-own-${post.id}`}
                 >
                   <Trash2 className="mr-3 h-4 w-4" />
                   <span className="font-medium">Delete post for me</span>
@@ -157,7 +148,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 <DropdownMenuItem 
                   onClick={() => console.log("Not interested")}
                   className="cursor-pointer"
-                  data-testid={`button-not-interested-${postId}`}
+                  data-testid={`button-not-interested-${post.id}`}
                 >
                   <Eye className="mr-3 h-4 w-4" />
                   <span>Not interested</span>
@@ -165,7 +156,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 <DropdownMenuItem 
                   onClick={() => setShowDeleteDialog(true)} 
                   className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                  data-testid={`button-report-${postId}`}
+                  data-testid={`button-report-${post.id}`}
                 >
                   <Flag className="mr-3 h-4 w-4" />
                   <span className="font-medium">Report post</span>
@@ -175,14 +166,14 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             )}
             <DropdownMenuItem 
               onClick={() => {
-                navigator.clipboard.writeText(`https://afrosphere.app/post/${postId}`);
+                navigator.clipboard.writeText(`https://afrosphere.app/post/${post.id}`);
                 toast({
                   title: "Link copied!",
                   description: "Post link copied to clipboard",
                 });
               }}
               className="cursor-pointer"
-              data-testid={`button-copy-link-${postId}`}
+              data-testid={`button-copy-link-${post.id}`}
             >
               <Copy className="mr-3 h-4 w-4" />
               <span>Copy link</span>
@@ -217,10 +208,10 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
       <div className="relative" onDoubleClick={handleDoubleClick}>
         <img
-          src={imageUrl}
+          src={post.imageUrl}
           alt="Post content"
           className="w-full aspect-[3/4] object-cover cursor-pointer"
-          data-testid={`img-post-${postId}`}
+          data-testid={`img-post-${post.id}`}
         />
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -240,16 +231,16 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               size="icon"
               onClick={handleLike}
               className="hover-elevate active-elevate-2"
-              data-testid={`button-like-${postId}`}
+              data-testid={`button-like-${post.id}`}
             >
               <Heart className={`h-6 w-6 ${isLiked ? "fill-primary text-primary" : ""}`} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onComment?.(postId)}
+              onClick={() => onComment?.(post.id)}
               className="hover-elevate active-elevate-2"
-              data-testid={`button-comment-${postId}`}
+              data-testid={`button-comment-${post.id}`}
             >
               <MessageCircle className="h-6 w-6" />
             </Button>
@@ -257,14 +248,14 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               variant="ghost"
               size="icon"
               onClick={() => {
-                onShare?.(postId);
+                onShare?.(post.id);
                 toast({
                   title: "Share sheet opened",
                   description: "Choose how you want to share this post",
                 });
               }}
               className="hover-elevate active-elevate-2"
-              data-testid={`button-share-${postId}`}
+              data-testid={`button-share-${post.id}`}
             >
               <Share2 className="h-6 w-6" />
             </Button>
@@ -274,25 +265,25 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             size="icon"
             onClick={handleBookmark}
             className="hover-elevate active-elevate-2"
-            data-testid={`button-bookmark-${postId}`}
+            data-testid={`button-bookmark-${post.id}`}
           >
             <Bookmark className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`} />
           </Button>
         </div>
 
         <div>
-          <p className="text-sm font-medium transition-all duration-300" data-testid={`text-likes-${postId}`}>
+          <p className="text-sm font-medium transition-all duration-300" data-testid={`text-likes-${post.id}`}>
             {likes.toLocaleString()} likes
           </p>
           <p className="text-sm">
-            <span className="font-semibold">{authorUsername}</span>{" "}
-            <span data-testid={`text-caption-${postId}`}>{post.caption}</span>
+            <span className="font-semibold">{post.author.username}</span>{" "}
+            <span data-testid={`text-caption-${post.id}`}>{post.caption}</span>
           </p>
-          {(post.comments ?? 0) > 0 && (
+          {post.comments > 0 && (
             <button
-              onClick={() => onComment?.(postId)}
+              onClick={() => onComment?.(post.id)}
               className="text-sm text-muted-foreground mt-1 hover:text-foreground"
-              data-testid={`button-view-comments-${postId}`}
+              data-testid={`button-view-comments-${post.id}`}
             >
               View all {post.comments} comments
             </button>

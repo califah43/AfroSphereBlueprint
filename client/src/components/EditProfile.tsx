@@ -1,11 +1,10 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Camera, MapPin, Link as LinkIcon, Briefcase } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 
 interface EditProfileProps {
@@ -15,10 +14,6 @@ interface EditProfileProps {
 
 export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   // Load real user data from localStorage
-  const { toast } = useToast();
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
-
   const getInitialData = () => {
     const stored = localStorage.getItem("currentUserData");
     if (stored) {
@@ -31,8 +26,6 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           location: userData.location || "Your Location",
           website: userData.website || "yourwebsite.com",
           profession: userData.profession || "Creator",
-          avatar: userData.avatar || "",
-          banner: userData.banner || "",
         };
       } catch (e) {
         console.log("Error loading user data");
@@ -45,39 +38,12 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       location: "Your Location",
       website: "yourwebsite.com",
       profession: "Creator",
-      avatar: "",
-      banner: "",
     };
   };
 
   const [formData, setFormData] = useState(getInitialData());
+
   const [charCount, setCharCount] = useState(formData.bio.length);
-
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        setFormData({ ...formData, avatar: base64 });
-        toast({ title: "Profile photo updated", description: "Your new profile photo is ready to save" });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        setFormData({ ...formData, banner: base64 });
-        toast({ title: "Banner updated", description: "Your new banner is ready to save" });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -96,11 +62,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       location: formData.location,
       website: formData.website,
       profession: formData.profession,
-      avatar: formData.avatar,
-      banner: formData.banner,
     };
     localStorage.setItem("currentUserData", JSON.stringify(updated));
-    toast({ title: "Profile saved!", description: "Your profile updates have been saved" });
     console.log("Saving profile:", formData);
     onSave?.(formData);
     onClose();
@@ -136,29 +99,22 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           <div className="relative h-40 rounded-lg overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
               <img
-                src={formData.banner || bannerImage}
+                src={bannerImage}
                 alt="Banner"
                 className="w-full h-full object-cover opacity-90"
                 data-testid="img-edit-banner"
               />
             </div>
             <div className="absolute inset-0 bg-black/20" />
-            <button
-              onClick={() => bannerInputRef.current?.click()}
-              className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm border border-white/20 hover:bg-background/90 rounded px-3 py-1.5 text-sm flex items-center gap-1 hover-elevate"
+            <Button
+              variant="outline"
+              size="sm"
+              className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm border-white/20 hover:bg-background/90"
               data-testid="button-change-banner"
             >
-              <Camera className="h-4 w-4" />
+              <Camera className="h-4 w-4 mr-2" />
               Change Banner
-            </button>
-            <input
-              ref={bannerInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleBannerUpload}
-              className="hidden"
-              data-testid="input-banner-file"
-            />
+            </Button>
           </div>
         </div>
 
@@ -167,24 +123,16 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           <div className="flex items-center gap-4">
             <div className="relative">
               <Avatar className="w-20 h-20 ring-4 ring-background border-2 border-primary/20" data-testid="avatar-edit">
-                {formData.avatar && <AvatarImage src={formData.avatar} alt="Profile" />}
-                <AvatarFallback className="text-xl font-bold">{formData.username[0].toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="text-xl font-bold">AC</AvatarFallback>
               </Avatar>
-              <button
-                onClick={() => avatarInputRef.current?.click()}
-                className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-primary text-white border-2 border-background hover:bg-primary/90 flex items-center justify-center hover-elevate"
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-primary text-white border-primary hover:bg-primary/90"
                 data-testid="button-change-avatar"
               >
                 <Camera className="h-3.5 w-3.5" />
-              </button>
-              <input
-                ref={avatarInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="hidden"
-                data-testid="input-avatar-file"
-              />
+              </Button>
             </div>
             <div className="flex-1">
               <p className="font-semibold">Profile Photo</p>
@@ -195,25 +143,10 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
         {/* Form Fields */}
         <div className="space-y-4">
-          {/* Username - Read Only */}
-          <div className="space-y-2 opacity-75">
-            <Label htmlFor="username">Username (Cannot be changed)</Label>
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
-              <span className="text-primary font-semibold">@</span>
-              <Input 
-                id="username"
-                value={formData.username}
-                disabled={true}
-                className="border-0 bg-transparent px-0"
-                data-testid="input-username-readonly"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">Your unique handle is permanent and used for tagging & mentions</p>
-          </div>
           {/* Display Name */}
           <div className="space-y-2">
             <Label htmlFor="displayName" className="font-semibold text-sm flex items-center gap-2">
-              Display Name (Customizable)
+              Display Name
             </Label>
             <Input
               id="displayName"
@@ -223,7 +156,18 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               className="border-border/50 bg-card/50 h-10 rounded-lg"
               data-testid="input-displayname"
             />
-            <p className="text-xs text-muted-foreground">This is how your name appears publicly - you can change this anytime</p>
+            <p className="text-xs text-muted-foreground">This is how your name appears publicly</p>
+          </div>
+
+          {/* Username - Read Only Info */}
+          <div className="space-y-2">
+            <Label htmlFor="username" className="font-semibold text-sm flex items-center gap-2">
+              Username
+            </Label>
+            <div className="px-4 py-2.5 rounded-lg border border-border/50 bg-muted/30 text-sm font-medium text-muted-foreground">
+              @{formData.username}
+            </div>
+            <p className="text-xs text-muted-foreground">Username cannot be changed</p>
           </div>
 
           {/* Bio */}

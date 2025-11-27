@@ -27,18 +27,6 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     setSignupError("");
     setIsLoading(true);
     try {
-      // Check if username is available
-      const usernameCheckRes = await fetch(`/api/auth/check-username/${signupData.username}`);
-      const usernameCheckData = await usernameCheckRes.json();
-      
-      if (!usernameCheckData.available) {
-        const errorMsg = "Username already taken. Choose a different one.";
-        setSignupError(errorMsg);
-        toast({ title: "Username unavailable", description: errorMsg, variant: "destructive", duration: 4000 });
-        setIsLoading(false);
-        return;
-      }
-
       const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
       const userData = {
         id: userCredential.user.uid,

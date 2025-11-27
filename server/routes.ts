@@ -5,18 +5,6 @@ import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSche
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // ============ AUTH ROUTES ============
-  app.get("/api/auth/check-username/:username", async (req, res) => {
-    try {
-      const existingUser = await storage.getUserByUsername(req.params.username);
-      if (existingUser) {
-        return res.status(409).json({ available: false, error: "Username already taken" });
-      }
-      res.json({ available: true });
-    } catch (error) {
-      res.status(400).json({ error: "Invalid request" });
-    }
-  });
-
   app.post("/api/auth/register", async (req, res) => {
     try {
       const parsed = insertUserSchema.parse(req.body);
@@ -30,7 +18,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ error: "Invalid request" });
     }
   });
-
 
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -74,19 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const offset = parseInt(req.query.offset as string) || 0;
     const posts = await storage.listPosts(limit, offset);
-    
-    // Enrich posts with author data
-    const enriched = posts.map(post => {
-      const user = storage.getUserSync?.(post.userId) || { username: post.userId, avatar: null };
-      return {
-        ...post,
-        author: {
-          username: user.username,
-          avatar: user.avatar || null
-        }
-      };
-    });
-    res.json(enriched);
+    res.json(posts);
   });
 
   app.get("/api/posts/category/:category", async (req, res) => {
@@ -97,19 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/posts/user/:userId", async (req, res) => {
     const posts = await storage.listPostsByUser(req.params.userId);
-    
-    // Enrich posts with author data
-    const enriched = posts.map(post => {
-      const user = storage.getUserSync?.(post.userId) || { username: post.userId, avatar: null };
-      return {
-        ...post,
-        author: {
-          username: user.username,
-          avatar: user.avatar || null
-        }
-      };
-    });
-    res.json(enriched);
+    res.json(posts);
   });
 
   app.get("/api/posts/:id", async (req, res) => {

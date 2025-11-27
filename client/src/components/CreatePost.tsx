@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { X, Upload, ImageIcon, Sparkles, Sun, Contrast } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 import { GENRE_LIST } from "@shared/genres";
 
 interface CreatePostProps {
@@ -58,10 +57,8 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
     }
 
     try {
-      const userId = localStorage.getItem("currentUserId") || "current-user";
-      
       const postData = {
-        userId,
+        userId: "current-user",
         caption,
         category: category || "lifestyle",
         image: mediaPreviews[0],
@@ -73,13 +70,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
         body: JSON.stringify(postData),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to create post");
-      }
-
-      // Invalidate posts query to refresh the feed
-      await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      if (!res.ok) throw new Error("Failed to create post");
 
       toast({
         title: "✨ Post created!",
@@ -90,10 +81,9 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       onPost?.(postData);
       onClose();
     } catch (error: any) {
-      console.error("Post creation error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create post",
+        description: error.message,
         variant: "destructive",
       });
     }
