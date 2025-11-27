@@ -53,10 +53,10 @@ const mockPosts: Post[] = [
 ];
 
 const mockStoryData = [
-  { id: "1", username: "zara_style", avatar: "", hasStory: true, isViewed: false },
-  { id: "2", username: "kojoart", avatar: "", hasStory: true, isViewed: false },
-  { id: "3", username: "amaarabeats", avatar: "", hasStory: true, isViewed: true },
-  { id: "4", username: "adike", avatar: "", hasStory: true, isViewed: false },
+  { id: "1", username: "zara_style", avatar: "", media: "image", timestamp: "2h" },
+  { id: "2", username: "kojoart", avatar: "", media: "image", timestamp: "4h" },
+  { id: "3", username: "amaarabeats", avatar: "", media: "video", timestamp: "1h" },
+  { id: "4", username: "adike", avatar: "", media: "image", timestamp: "3h" },
 ];
 
 export default function HomeFeed({ onOpenShare }: HomeFeedProps) {

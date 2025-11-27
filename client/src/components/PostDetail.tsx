@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, X, Send } from "lucide-react";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { GENRES } from "@shared/genres";
 
 interface Comment {
   id: string;
@@ -29,6 +31,7 @@ interface PostDetailProps {
   likes: number;
   timeAgo: string;
   comments: Comment[];
+  genre?: string;
   onClose: () => void;
 }
 
@@ -40,8 +43,10 @@ export default function PostDetail({
   likes: initialLikes,
   timeAgo,
   comments: initialComments,
+  genre,
   onClose,
 }: PostDetailProps) {
+  const genreData = genre ? GENRES[genre.toUpperCase()] : null;
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
@@ -83,15 +88,22 @@ export default function PostDetail({
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
               <Avatar className="w-10 h-10">
                 <AvatarFallback>{author.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div>
+              <div className="flex-1">
                 <p className="font-semibold text-sm" data-testid="text-detail-username">
                   {author.username}
                 </p>
-                <p className="text-xs text-muted-foreground">{timeAgo}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">{timeAgo}</p>
+                  {genreData && (
+                    <Badge variant="outline" className="text-xs">
+                      {genreData.emoji} {genreData.name}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             <DropdownMenu>
