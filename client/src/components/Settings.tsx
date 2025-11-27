@@ -238,8 +238,18 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
       return;
     }
     try {
-      toast({ title: "Success", description: "Password changed" });
-      setEditMode("none");
+      const response = await fetch(`/api/settings/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: editData.newPassword }),
+      });
+      if (response.ok) {
+        toast({ title: "Success", description: "Password changed successfully" });
+        setEditData({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
+        setEditMode("none");
+      } else {
+        toast({ title: "Error", description: "Failed to change password", variant: "destructive" });
+      }
     } catch (error) {
       toast({ title: "Error", description: "Failed to change password", variant: "destructive" });
     }
