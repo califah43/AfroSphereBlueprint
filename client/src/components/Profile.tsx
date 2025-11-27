@@ -90,8 +90,30 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
           };
         } catch (e) {
           console.log("Error parsing user data");
+          // Return user data instead of falling back to mock
+          return {
+            displayName: "Your Profile",
+            username: "user",
+            bio: "Creative on AfroSphere",
+            followers: "0",
+            following: "0",
+            posts: "0",
+            avatar: "",
+            banner: "",
+          };
         }
       }
+      // Return user data instead of falling back to mock
+      return {
+        displayName: "Your Profile",
+        username: "user",
+        bio: "Creative on AfroSphere",
+        followers: "0",
+        following: "0",
+        posts: "0",
+        avatar: "",
+        banner: "",
+      };
     }
     return userProfiles[username] || userProfiles.adikeafrica;
   };
