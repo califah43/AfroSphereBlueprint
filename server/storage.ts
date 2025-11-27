@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification } from "@shared/schema";
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -45,6 +45,12 @@ export interface IStorage {
   createNotification(notification: any): Promise<Notification>;
   listNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(id: string): Promise<void>;
+
+  // Settings
+  getUserSettings(userId: string): Promise<UserSettings | undefined>;
+  saveUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings>;
+  saveFCMToken(userId: string, token: string): Promise<void>;
+  getFCMToken(userId: string): Promise<string | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -55,6 +61,7 @@ export class MemStorage implements IStorage {
   private follows: Map<string, Follow> = new Map();
   private badges: Map<string, CreatorBadge> = new Map();
   private notifications: Map<string, Notification> = new Map();
+  private settings: Map<string, UserSettings> = new Map();
   private fcmTokens: Map<string, string> = new Map(); // userId -> fcmToken
 
   // ============ USERS ============
@@ -358,13 +365,50 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // ============ SETTINGS ============
+  async getUserSettings(userId: string): Promise<UserSettings | undefined> {
+    return Array.from(this.settings.values()).find(s => s.userId === userId);
+  }
+
+  async saveUserSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
+    let settings = Array.from(this.settings.values()).find(s => s.userId === userId);
+    if (!settings) {
+      settings = {
+        userId,
+        privateAccount: false,
+        allowComments: true,
+        allowMentions: true,
+        notificationsLikes: true,
+        notificationsComments: true,
+        notificationsFollows: true,
+        notificationsTrending: true,
+        notificationsPush: true,
+        notificationsEmail: true,
+        privacyActivityStatus: true,
+        privacyReadReceipts: true,
+        contentHideExplicit: false,
+        contentMutedWords: false,
+        contentRestrictedMode: false,
+        displayDarkMode: true,
+        displayTextSize: "normal",
+        displayLanguage: "en",
+        updatedAt: new Date(),
+      } as UserSettings;
+      this.settings.set(userId, settings);
+    } else {
+      settings = { ...settings, ...updates, updatedAt: new Date(), userId };
+      this.settings.set(userId, settings);
+    }
+    return settings;
+  }
+
   // ============ FCM TOKENS ============
   async saveFCMToken(userId: string, token: string): Promise<void> {
     this.fcmTokens.set(userId, token);
   }
 
-  async getFCMToken(userId: string): Promise<string | null> {
-    return this.fcmTokens.get(userId) || null;
+  async getFCMToken(userId: string): Promise<string | undefined> {
+    return this.fcmTokens.get(userId);
   }
 
   async getAllFCMTokens(): Promise<Map<string, string>> {

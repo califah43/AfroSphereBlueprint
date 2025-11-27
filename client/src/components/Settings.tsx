@@ -6,7 +6,8 @@ import {
   Heart, Share2, Volume2, Smartphone, Mail, AlertCircle,
   HelpCircle, Info, Trash2, CheckCircle2, Moon, Sun, Globe
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SettingsProps {
   onClose: () => void;
@@ -75,15 +76,125 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
       restrictedMode: false,
     },
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+  const userId = localStorage.getItem("currentUserId") || "default-user";
 
-  const handleToggle = (section: keyof SettingsSections, key: string, value: boolean) => {
-    setSettings(prev => ({
-      ...prev,
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await fetch(`/api/settings/${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSettings({
+            account: {
+              privateAccount: data.privateAccount || false,
+              allowComments: data.allowComments ?? true,
+              allowMentions: data.allowMentions ?? true,
+            },
+            notifications: {
+              likes: data.notificationsLikes ?? true,
+              comments: data.notificationsComments ?? true,
+              follows: data.notificationsFollows ?? true,
+              trending: data.notificationsTrending ?? true,
+              pushNotifications: data.notificationsPush ?? true,
+              emailNotifications: data.notificationsEmail ?? true,
+            },
+            privacy: {
+              downloadData: false,
+              activityStatus: data.privacyActivityStatus ?? true,
+              readReceipts: data.privacyReadReceipts ?? true,
+            },
+            display: {
+              darkMode: data.displayDarkMode ?? true,
+              textSize: data.displayTextSize || "normal",
+              language: data.displayLanguage || "en",
+            },
+            content: {
+              hideExplicit: data.contentHideExplicit || false,
+              mutedWords: data.contentMutedWords || false,
+              restrictedMode: data.contentRestrictedMode || false,
+            },
+          });
+        }
+      } catch (error) {
+        console.log("Using default settings");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSettings();
+  }, [userId]);
+
+  const handleToggle = async (section: keyof SettingsSections, key: string, value: boolean) => {
+    const newSettings = {
+      ...settings,
       [section]: {
-        ...prev[section],
+        ...settings[section],
         [key]: value
       }
-    }));
+    };
+    setSettings(newSettings);
+
+    setSaving(true);
+    try {
+      const payload: any = {};
+      if (section === "account") {
+        payload.privateAccount = newSettings.account.privateAccount;
+        payload.allowComments = newSettings.account.allowComments;
+        payload.allowMentions = newSettings.account.allowMentions;
+      } else if (section === "notifications") {
+        payload.notificationsLikes = newSettings.notifications.likes;
+        payload.notificationsComments = newSettings.notifications.comments;
+        payload.notificationsFollows = newSettings.notifications.follows;
+        payload.notificationsTrending = newSettings.notifications.trending;
+        payload.notificationsPush = newSettings.notifications.pushNotifications;
+        payload.notificationsEmail = newSettings.notifications.emailNotifications;
+      } else if (section === "privacy") {
+        payload.privacyActivityStatus = newSettings.privacy.activityStatus;
+        payload.privacyReadReceipts = newSettings.privacy.readReceipts;
+      } else if (section === "display") {
+        payload.displayDarkMode = newSettings.display.darkMode;
+        payload.displayTextSize = newSettings.display.textSize;
+        payload.displayLanguage = newSettings.display.language;
+      } else if (section === "content") {
+        payload.contentHideExplicit = newSettings.content.hideExplicit;
+        payload.contentMutedWords = newSettings.content.mutedWords;
+        payload.contentRestrictedMode = newSettings.content.restrictedMode;
+      }
+
+      const res = await fetch(`/api/settings/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Settings saved",
+          description: "Your preferences have been updated",
+          className: "border-primary/20 bg-card",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save settings",
+          variant: "destructive",
+        });
+        setSettings(settings);
+      }
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to save settings. Please try again.",
+        variant: "destructive",
+      });
+      setSettings(settings);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const SettingButton = ({ icon: Icon, label, description, onClick }: any) => (
@@ -144,7 +255,10 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 pb-32 space-y-6">
-        
+        {isLoading ? (
+          <div className="py-12 text-center text-muted-foreground">Loading settings...</div>
+        ) : (
+        <>
         {/* ACCOUNT SECTION */}
         <div>
           <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Account</h3>
@@ -420,8 +534,10 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-6 border-t border-border">
           <p>AfroSphere v1.0.0</p>
-          <p className="mt-1">Made with 🌍 for African creators</p>
+          <p className="mt-1">Made with care for African creators</p>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

@@ -230,6 +230,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // ============ SETTINGS ROUTES ============
+  app.get("/api/settings/:userId", async (req, res) => {
+    try {
+      const settings = await storage.getUserSettings(req.params.userId);
+      if (!settings) {
+        return res.json({
+          userId: req.params.userId,
+          privateAccount: false,
+          allowComments: true,
+          allowMentions: true,
+          notificationsLikes: true,
+          notificationsComments: true,
+          notificationsFollows: true,
+          notificationsTrending: true,
+          notificationsPush: true,
+          notificationsEmail: true,
+          privacyActivityStatus: true,
+          privacyReadReceipts: true,
+          contentHideExplicit: false,
+          contentMutedWords: false,
+          contentRestrictedMode: false,
+          displayDarkMode: true,
+          displayTextSize: "normal",
+          displayLanguage: "en",
+        });
+      }
+      res.json(settings);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to load settings" });
+    }
+  });
+
+  app.post("/api/settings/:userId", async (req, res) => {
+    try {
+      const settings = await storage.saveUserSettings(req.params.userId, req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to save settings" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {

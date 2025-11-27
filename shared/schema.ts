@@ -120,3 +120,28 @@ export const notifications = pgTable("notifications", {
 });
 
 export type Notification = typeof notifications.$inferSelect;
+
+// ============ USER SETTINGS ============
+export const userSettings = pgTable("user_settings", {
+  userId: varchar("user_id").primaryKey(),
+  privateAccount: boolean("private_account").default(false),
+  allowComments: boolean("allow_comments").default(true),
+  allowMentions: boolean("allow_mentions").default(true),
+  notificationsLikes: boolean("notifications_likes").default(true),
+  notificationsComments: boolean("notifications_comments").default(true),
+  notificationsFollows: boolean("notifications_follows").default(true),
+  notificationsTrending: boolean("notifications_trending").default(true),
+  notificationsPush: boolean("notifications_push").default(true),
+  notificationsEmail: boolean("notifications_email").default(true),
+  privacyActivityStatus: boolean("privacy_activity_status").default(true),
+  privacyReadReceipts: boolean("privacy_read_receipts").default(true),
+  contentHideExplicit: boolean("content_hide_explicit").default(false),
+  contentMutedWords: boolean("content_muted_words").default(false),
+  contentRestrictedMode: boolean("content_restricted_mode").default(false),
+  displayDarkMode: boolean("display_dark_mode").default(true),
+  displayTextSize: text("display_text_size").default("normal"),
+  displayLanguage: text("display_language").default("en"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UserSettings = typeof userSettings.$inferSelect;
