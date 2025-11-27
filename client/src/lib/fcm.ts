@@ -41,8 +41,9 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
 export const getFCMToken = async (): Promise<string | null> => {
   try {
     const msg = initializeMessaging();
+    const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
-    const token = await getToken(msg);
+    const token = await getToken(msg, { vapidKey });
 
     if (token) {
       console.log("FCM Token obtained:", token.substring(0, 20) + "...");
