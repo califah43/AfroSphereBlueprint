@@ -284,25 +284,35 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
           {/* Post Grid - Sophisticated */}
           <div className="mt-6">
             {activeTab === "posts" && (
-              <div className="grid grid-cols-3 gap-2">
-                {mockPosts.map((post) => (
-                  <button
-                    key={post.id}
-                    onClick={() => onPostClick?.(post.id)}
-                    className="aspect-square hover-elevate overflow-hidden rounded-lg group transition-all duration-300 ring-1 ring-border/50"
-                    data-testid={`post-grid-${post.id}`}
-                  >
-                    <img
-                      src={post.image}
-                      alt="Post"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <Heart className="h-5 w-5 text-white" />
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <>
+                {isOwnProfile && userProfile.posts === "0" ? (
+                  <div className="py-16 text-center">
+                    <Share2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground font-medium">No posts yet</p>
+                    <p className="text-xs text-muted-foreground mt-1">Share your first post to get started</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {mockPosts.map((post) => (
+                      <button
+                        key={post.id}
+                        onClick={() => onPostClick?.(post.id)}
+                        className="aspect-square hover-elevate overflow-hidden rounded-lg group transition-all duration-300 ring-1 ring-border/50"
+                        data-testid={`post-grid-${post.id}`}
+                      >
+                        <img
+                          src={post.image}
+                          alt="Post"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Heart className="h-5 w-5 text-white" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
             
             {activeTab === "liked" && (
