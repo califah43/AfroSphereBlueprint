@@ -143,10 +143,25 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
         {/* Form Fields */}
         <div className="space-y-4">
+          {/* Username - Read Only */}
+          <div className="space-y-2 opacity-75">
+            <Label htmlFor="username">Username (Cannot be changed)</Label>
+            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
+              <span className="text-primary font-semibold">@</span>
+              <Input 
+                id="username"
+                value={formData.username}
+                disabled={true}
+                className="border-0 bg-transparent px-0"
+                data-testid="input-username-readonly"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Your unique handle is permanent and used for tagging & mentions</p>
+          </div>
           {/* Display Name */}
           <div className="space-y-2">
             <Label htmlFor="displayName" className="font-semibold text-sm flex items-center gap-2">
-              Display Name
+              Display Name (Customizable)
             </Label>
             <Input
               id="displayName"
@@ -156,18 +171,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               className="border-border/50 bg-card/50 h-10 rounded-lg"
               data-testid="input-displayname"
             />
-            <p className="text-xs text-muted-foreground">This is how your name appears publicly</p>
-          </div>
-
-          {/* Username - Read Only Info */}
-          <div className="space-y-2">
-            <Label htmlFor="username" className="font-semibold text-sm flex items-center gap-2">
-              Username
-            </Label>
-            <div className="px-4 py-2.5 rounded-lg border border-border/50 bg-muted/30 text-sm font-medium text-muted-foreground">
-              @{formData.username}
-            </div>
-            <p className="text-xs text-muted-foreground">Username cannot be changed</p>
+            <p className="text-xs text-muted-foreground">This is how your name appears publicly - you can change this anytime</p>
           </div>
 
           {/* Bio */}
