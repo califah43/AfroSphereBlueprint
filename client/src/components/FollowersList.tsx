@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { X } from "lucide-react";
+import { X, Heart, Users } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -19,20 +19,6 @@ interface FollowersListProps {
   onClose: () => void;
 }
 
-const mockFollowers: User[] = [
-  { username: "zara_style", name: "Zara Fashion", isFollowing: true },
-  { username: "kwame_creative", name: "Kwame Art", isFollowing: false },
-  { username: "amara_music", name: "Amara Beats", isFollowing: true },
-  { username: "kofi_designs", name: "Kofi Design", isFollowing: false },
-  { username: "nia_culture", name: "Nia Culture", isFollowing: true },
-];
-
-const mockFollowing: User[] = [
-  { username: "adebayo_art", name: "Adebayo Artist", isFollowing: true },
-  { username: "yara_fashion", name: "Yara Style", isFollowing: true },
-  { username: "malik_beats", name: "Malik Music", isFollowing: true },
-];
-
 export default function FollowersList({
   username,
   followerCount,
@@ -40,129 +26,125 @@ export default function FollowersList({
   onClose,
 }: FollowersListProps) {
   const [activeTab, setActiveTab] = useState("followers");
-  const [followStates, setFollowStates] = useState<Record<string, boolean>>(
-    Object.fromEntries(
-      [...mockFollowers, ...mockFollowing].map((u) => [u.username, u.isFollowing || false])
-    )
-  );
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
-  const toggleFollow = async (user: string) => {
-    setLoading((prev) => ({ ...prev, [user]: true }));
-    try {
-      const isFollowing = followStates[user];
-      const endpoint = isFollowing ? `/api/follows/unfollow/${user}` : `/api/follows/${user}`;
-      const method = isFollowing ? 'DELETE' : 'POST';
-      
-      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
-      if (res.ok) {
-        setFollowStates((prev) => ({ ...prev, [user]: !prev[user] }));
-        toast({
-          title: isFollowing ? "Unfollowed" : "Following",
-          description: isFollowing ? `You unfollowed @${user}` : `You're now following @${user}`,
-          className: "border-primary/20 bg-card",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${user}`,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Failed to toggle follow:', error);
-      toast({
-        title: "Connection Error",
-        description: "Unable to process your request. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading((prev) => ({ ...prev, [user]: false }));
-    }
-  };
+  const followers: User[] = [];
+  const following: User[] = [];
 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
-      <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center">
-        <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-followers">
-          <X className="h-5 w-5" />
-        </Button>
-        <h2 className="text-lg font-semibold ml-2" data-testid="text-followers-title">
-          {username}
-        </h2>
+      {/* Header */}
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4 flex items-center justify-between z-20">
+        <div className="flex items-center gap-3 flex-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            data-testid="button-close-followers"
+            className="hover-elevate"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <div>
+            <h2 className="text-lg font-bold" data-testid="text-followers-title">
+              @{username}
+            </h2>
+            <p className="text-xs text-muted-foreground">Network</p>
+          </div>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <div className="sticky top-14 bg-background border-b border-border px-4">
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="followers" data-testid="tab-followers">
+        {/* Tabs */}
+        <div className="sticky top-16 bg-background border-b border-border px-0 z-10">
+          <TabsList className="w-full grid grid-cols-2 bg-transparent rounded-none border-0 h-auto p-0">
+            <TabsTrigger 
+              value="followers" 
+              data-testid="tab-followers"
+              className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-sm"
+            >
+              <Users className="h-4 w-4 mr-2" />
               {followerCount} Followers
             </TabsTrigger>
-            <TabsTrigger value="following" data-testid="tab-following">
+            <TabsTrigger 
+              value="following" 
+              data-testid="tab-following"
+              className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-sm"
+            >
+              <Heart className="h-4 w-4 mr-2" />
               {followingCount} Following
             </TabsTrigger>
           </TabsList>
         </div>
 
+        {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <TabsContent value="followers" className="mt-0 p-4">
-            <div className="space-y-2">
-              {mockFollowers.map((user) => (
-                <div
-                  key={user.username}
-                  className="flex items-start gap-3 p-2 hover-elevate rounded-lg"
-                  data-testid={`follower-${user.username}`}
-                >
-                  <Avatar className="w-12 h-12 flex-shrink-0">
-                    <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{user.username}</p>
-                    <p className="text-xs text-muted-foreground">{user.name}</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant={followStates[user.username] ? "outline" : "default"}
-                    onClick={() => toggleFollow(user.username)}
-                    disabled={loading[user.username]}
-                    className="mt-1 flex-shrink-0"
-                    data-testid={`button-follow-${user.username}`}
-                  >
-                    {loading[user.username] ? "..." : (followStates[user.username] ? "Following" : "Follow")}
-                  </Button>
+          {/* Followers Tab */}
+          <TabsContent value="followers" className="mt-0 p-0">
+            {followers.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center p-6 py-24 text-center">
+                <div className="bg-muted/40 rounded-full p-4 mb-4 border border-border/50">
+                  <Users className="h-8 w-8 text-muted-foreground" />
                 </div>
-              ))}
-            </div>
+                <h3 className="text-lg font-semibold mb-1">No followers yet</h3>
+                <p className="text-sm text-muted-foreground mb-4 max-w-xs">Start creating amazing content and building your community on AfroSphere</p>
+                <div className="text-xs text-muted-foreground bg-card/50 border border-border/50 rounded-lg p-3 w-full">
+                  💡 <span className="ml-1">Share posts, engage with creators, and grow your audience</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-0.5 divide-y divide-border/30">
+                {followers.map((user) => (
+                  <div
+                    key={user.username}
+                    className="flex items-center gap-3 p-4 hover-elevate transition-all"
+                    data-testid={`follower-${user.username}`}
+                  >
+                    <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                      <AvatarFallback className="font-bold">{user.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm">@{user.username}</p>
+                      <p className="text-xs text-muted-foreground">{user.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="following" className="mt-0 p-4">
-            <div className="space-y-2">
-              {mockFollowing.map((user) => (
-                <div
-                  key={user.username}
-                  className="flex items-center gap-3 p-2 hover-elevate rounded-lg"
-                  data-testid={`following-${user.username}`}
-                >
-                  <Avatar className="w-12 h-12">
-                    <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm">{user.username}</p>
-                    <p className="text-xs text-muted-foreground">{user.name}</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => toggleFollow(user.username)}
-                    disabled={loading[user.username]}
-                    data-testid={`button-unfollow-${user.username}`}
-                  >
-                    Following
-                  </Button>
+          {/* Following Tab */}
+          <TabsContent value="following" className="mt-0 p-0">
+            {following.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center p-6 py-24 text-center">
+                <div className="bg-muted/40 rounded-full p-4 mb-4 border border-border/50">
+                  <Heart className="h-8 w-8 text-muted-foreground" />
                 </div>
-              ))}
-            </div>
+                <h3 className="text-lg font-semibold mb-1">Not following anyone yet</h3>
+                <p className="text-sm text-muted-foreground mb-4 max-w-xs">Discover and follow creators to see their amazing content on your feed</p>
+                <div className="text-xs text-muted-foreground bg-card/50 border border-border/50 rounded-lg p-3 w-full">
+                  ✨ <span className="ml-1">Explore trending creators and artists in the Explore tab</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-0.5 divide-y divide-border/30">
+                {following.map((user) => (
+                  <div
+                    key={user.username}
+                    className="flex items-center gap-3 p-4 hover-elevate transition-all"
+                    data-testid={`following-${user.username}`}
+                  >
+                    <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                      <AvatarFallback className="font-bold">{user.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm">@{user.username}</p>
+                      <p className="text-xs text-muted-foreground">{user.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </div>
       </Tabs>
