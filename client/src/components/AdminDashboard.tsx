@@ -5,6 +5,7 @@ import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, 
 import UserManagement from "./UserManagement";
 import PostManagement from "./PostManagement";
 import BadgesManagement from "./BadgesManagement";
+import NotificationsCenter from "./NotificationsCenter";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -47,6 +48,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "badges") {
     return <BadgesManagement onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "notifications") {
+    return <NotificationsCenter onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (
