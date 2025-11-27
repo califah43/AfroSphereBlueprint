@@ -18,9 +18,11 @@ export const users = pgTable("users", {
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
+  id: true,
   username: true,
   password: true,
-});
+  displayName: true,
+}).partial({ id: true, displayName: true });
 
 export const updateUserSchema = createInsertSchema(users).pick({
   displayName: true,
