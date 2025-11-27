@@ -101,24 +101,32 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="flex items-center justify-center min-h-screen bg-black">
-          <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground overflow-hidden flex flex-col">
+          <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground flex flex-col">
             {activeTab === "home" && <HomeFeed onOpenShare={() => setModalView("share")} />}
           {activeTab === "explore" && (
-            <Explore
-              onSearchClick={() => setModalView("search")}
-              onPostClick={handleOpenPostDetail}
-            />
+            <div className="flex-1 overflow-y-auto">
+              <Explore
+                onSearchClick={() => setModalView("search")}
+                onPostClick={handleOpenPostDetail}
+              />
+            </div>
           )}
-          {activeTab === "notifications" && <Notifications />}
+          {activeTab === "notifications" && (
+            <div className="flex-1 overflow-y-auto">
+              <Notifications />
+            </div>
+          )}
           {activeTab === "profile" && (
-            <Profile
-              isOwnProfile={true}
-              onEditProfile={() => setModalView("edit-profile")}
-              onSettings={() => setModalView("settings")}
-              onPostClick={handleOpenPostDetail}
-              onFollowersClick={() => setModalView("followers")}
-              onFollowingClick={() => setModalView("followers")}
-            />
+            <div className="flex-1 overflow-y-auto">
+              <Profile
+                isOwnProfile={true}
+                onEditProfile={() => setModalView("edit-profile")}
+                onSettings={() => setModalView("settings")}
+                onPostClick={handleOpenPostDetail}
+                onFollowersClick={() => setModalView("followers")}
+                onFollowingClick={() => setModalView("followers")}
+              />
+            </div>
           )}
 
           <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
