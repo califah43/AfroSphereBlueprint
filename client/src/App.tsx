@@ -108,7 +108,14 @@ export default function App() {
       <TooltipProvider>
         <div className="flex items-center justify-center min-h-screen bg-black">
           <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground flex flex-col">
-            {activeTab === "home" && <HomeFeed onOpenShare={() => setModalView("share")} />}
+            {activeTab === "home" && (
+            <div className="flex-1 overflow-y-auto">
+              <HomeFeed 
+                onOpenShare={() => setModalView("share")}
+                onUserProfileClick={handleOpenUserProfile}
+              />
+            </div>
+          )}
           {activeTab === "explore" && (
             <div className="flex-1 overflow-y-auto">
               <Explore
@@ -119,7 +126,7 @@ export default function App() {
           )}
           {activeTab === "notifications" && (
             <div className="flex-1 overflow-y-auto">
-              <Notifications />
+              <Notifications onUserClick={handleOpenUserProfile} />
             </div>
           )}
           {activeTab === "profile" && (

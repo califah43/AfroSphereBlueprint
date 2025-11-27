@@ -126,13 +126,17 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0">
+                <button 
+                  onClick={() => onUserClick?.(notif.user)}
+                  className="flex-1 min-w-0 text-left hover-elevate rounded px-1 py-0.5 transition-all group"
+                  data-testid={`button-notification-user-${notif.id}`}
+                >
                   <p className="text-sm">
-                    <span className="font-bold text-foreground">{notif.user}</span>
+                    <span className="font-bold text-foreground group-hover:text-primary transition-colors">{notif.user}</span>
                     <span className="text-muted-foreground"> {notif.text}</span>
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">{notif.timeAgo}</p>
-                </div>
+                </button>
 
                 {/* Post Thumbnail or Follow Button */}
                 {notif.postThumbnail && (
@@ -183,13 +187,17 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0">
+                <button 
+                  onClick={() => onUserClick?.(notif.user)}
+                  className="flex-1 min-w-0 text-left hover-elevate rounded px-1 py-0.5 transition-all group"
+                  data-testid={`button-notification-user-${notif.id}`}
+                >
                   <p className="text-sm">
-                    <span className="font-bold text-foreground">{notif.user}</span>
+                    <span className="font-bold text-foreground group-hover:text-primary transition-colors">{notif.user}</span>
                     <span className="text-muted-foreground"> {notif.text}</span>
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">{notif.timeAgo}</p>
-                </div>
+                </button>
 
                 {/* Post Thumbnail */}
                 {notif.postThumbnail && (
