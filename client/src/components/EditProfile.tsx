@@ -71,7 +71,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
       {/* Sticky Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center justify-between z-20">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-between z-20">
         <Button 
           variant="ghost" 
           size="icon" 
