@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Text Size Scaling */
+:root {
+  --text-scale: 1;
+}
+
+:root[data-text-size="normal"] {
+  --text-scale: 1;
+}
+
+:root[data-text-size="large"] {
+  --text-scale: 1.15;
+}
+
+:root[data-text-size="extra-large"] {
+  --text-scale: 1.3;
+}
+
+/* Apply text scaling globally */
+@layer base {
+  body {
+    font-size: calc(16px * var(--text-scale));
+  }
+  
+  h1 {
+    font-size: calc(2rem * var(--text-scale));
+  }
+  
+  h2 {
+    font-size: calc(1.5rem * var(--text-scale));
+  }
+  
+  h3 {
+    font-size: calc(1.25rem * var(--text-scale));
+  }
+  
+  p, span, label, button, input, textarea, div {
+    font-size: inherit;
+  }
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);

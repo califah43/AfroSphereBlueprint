@@ -86,13 +86,23 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   const userId = localStorage.getItem("currentUserId") || "default-user";
   const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
 
+  // Apply text size and dark mode to DOM
+  const applyDisplaySettings = (textSize: string, darkMode: boolean) => {
+    document.documentElement.setAttribute("data-text-size", textSize);
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await fetch(`/api/settings/${userId}`);
         if (res.ok) {
           const data = await res.json();
-          setSettings({
+          const newSettings = {
             account: {
               privateAccount: data.privateAccount || false,
               allowComments: data.allowComments ?? true,
@@ -121,10 +131,13 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               mutedWords: data.contentMutedWords || false,
               restrictedMode: data.contentRestrictedMode || false,
             },
-          });
+          };
+          setSettings(newSettings);
+          applyDisplaySettings(newSettings.display.textSize, newSettings.display.darkMode);
         }
       } catch (error) {
         console.log("Using default settings");
+        applyDisplaySettings("normal", true);
       } finally {
         setIsLoading(false);
       }
@@ -132,7 +145,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
     loadSettings();
   }, [userId]);
 
-  const handleToggle = async (section: keyof SettingsSections, settingKey: string, value: boolean) => {
+  const handleToggle = async (section: keyof SettingsSections, settingKey: string, value: boolean | string) => {
     // Update UI immediately for instant feedback
     const newSettings = {
       ...settings,
@@ -150,6 +163,10 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
       } else {
         document.documentElement.classList.remove("dark");
       }
+    }
+    
+    if (section === "display" && settingKey === "textSize") {
+      document.documentElement.setAttribute("data-text-size", String(value));
     }
 
     try {
@@ -543,9 +560,11 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
           <p className="text-xs text-muted-foreground">Choose a text size that's comfortable for you. Preview the changes below:</p>
           <div className="space-y-3">
             <Button 
-              onClick={() => { 
-                setSettings({...settings, display: {...settings.display, textSize: "normal"}}); 
-                handleToggle("display", "textSize", true); 
+              onClick={async () => { 
+                const newSettings = {...settings, display: {...settings.display, textSize: "normal"}};
+                setSettings(newSettings);
+                document.documentElement.setAttribute("data-text-size", "normal");
+                await handleToggle("display", "textSize", "normal");
               }} 
               variant={settings.display.textSize === "normal" ? "default" : "outline"} 
               className="w-full justify-start"
@@ -554,9 +573,11 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               <span className="text-sm">Normal Text</span>
             </Button>
             <Button 
-              onClick={() => { 
-                setSettings({...settings, display: {...settings.display, textSize: "large"}}); 
-                handleToggle("display", "textSize", true); 
+              onClick={async () => { 
+                const newSettings = {...settings, display: {...settings.display, textSize: "large"}};
+                setSettings(newSettings);
+                document.documentElement.setAttribute("data-text-size", "large");
+                await handleToggle("display", "textSize", "large");
               }} 
               variant={settings.display.textSize === "large" ? "default" : "outline"} 
               className="w-full justify-start"
@@ -565,9 +586,11 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               <span className="text-base">Large Text</span>
             </Button>
             <Button 
-              onClick={() => { 
-                setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); 
-                handleToggle("display", "textSize", true); 
+              onClick={async () => { 
+                const newSettings = {...settings, display: {...settings.display, textSize: "extra-large"}};
+                setSettings(newSettings);
+                document.documentElement.setAttribute("data-text-size", "extra-large");
+                await handleToggle("display", "textSize", "extra-large");
               }} 
               variant={settings.display.textSize === "extra-large" ? "default" : "outline"} 
               className="w-full justify-start"
