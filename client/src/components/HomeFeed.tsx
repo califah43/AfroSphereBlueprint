@@ -2,9 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw } from "lucide-react";
-import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
-import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
-import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
+import { mockPosts } from "@/data/mockData";
 
 const PostSkeleton = () => (
   <div className="mb-4 animate-pulse space-y-3 bg-muted/50 rounded-lg p-4 border border-border">
@@ -30,36 +28,6 @@ interface HomeFeedProps {
   onOpenShare?: () => void;
 }
 
-const mockPosts: Post[] = [
-  {
-    id: "1",
-    author: { username: "adikeafrica" },
-    imageUrl: fashionImage,
-    caption: "Celebrating our roots with modern style. Ankara fusion fashion dropping soon! 🔥 #AfricanFashion",
-    likes: 1247,
-    comments: 89,
-    timeAgo: "2h ago",
-  },
-  {
-    id: "2",
-    author: { username: "kojoart" },
-    imageUrl: artImage,
-    caption: "New piece inspired by Adinkra symbols. The journey continues. #AfricanArt #ContemporaryArt",
-    likes: 892,
-    comments: 54,
-    timeAgo: "5h ago",
-  },
-  {
-    id: "3",
-    author: { username: "amaarabeats" },
-    imageUrl: musicImage,
-    caption: "Late night sessions creating the future of Afrobeats. Studio vibes 🎵 #AfricanMusic #Producer",
-    likes: 2103,
-    comments: 156,
-    timeAgo: "1d ago",
-  },
-];
-
 export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
@@ -75,7 +43,7 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
   const filteredPosts = activeCategory === "for-you"
     ? displayedPosts
     : displayedPosts.filter(post =>
-        post.caption.toLowerCase().includes(activeCategory)
+        post.category === activeCategory
       );
 
   const handleTouchStart = (e: React.TouchEvent) => {
