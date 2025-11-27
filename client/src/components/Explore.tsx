@@ -96,29 +96,6 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
         <SuggestedCreators />
 
         <div>
-          <h2 className="text-lg font-semibold mb-4" data-testid="text-trending-creators">
-            Trending Creators
-          </h2>
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {trendingCreators.map((creator) => (
-              <div
-                key={creator.username}
-                className="flex flex-col items-center gap-2 min-w-20"
-                data-testid={`creator-${creator.username}`}
-              >
-                <Avatar className="w-20 h-20 ring-2 ring-primary ring-offset-2 ring-offset-background">
-                  <AvatarFallback>{creator.username[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <p className="text-xs font-medium text-center truncate w-full">
-                  {creator.username}
-                </p>
-                <p className="text-xs text-muted-foreground">{creator.followers}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
           <h2 className="text-lg font-semibold mb-4" data-testid="text-categories">
             Categories
           </h2>
