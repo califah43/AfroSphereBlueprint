@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, LogOut } from "lucide-react";
 import UserManagement from "./UserManagement";
+import PostManagement from "./PostManagement";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -37,6 +38,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "users") {
     return <UserManagement onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "posts") {
+    return <PostManagement onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (
