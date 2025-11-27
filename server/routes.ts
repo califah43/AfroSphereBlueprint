@@ -96,7 +96,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/posts/user/:userId", async (req, res) => {
     const posts = await storage.listPostsByUser(req.params.userId);
-    res.json(posts);
+    
+    // Enrich posts with author data
+    const enriched = posts.map(post => {
+      const user = storage.getUserSync?.(post.userId) || { username: post.userId, avatar: null };
+      return {
+        ...post,
+        author: {
+          username: user.username,
+          avatar: user.avatar || null
+        }
+      };
+    });
+    res.json(enriched);
   });
 
   app.get("/api/posts/:id", async (req, res) => {

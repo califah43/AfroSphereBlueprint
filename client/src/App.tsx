@@ -153,6 +153,11 @@ export default function App() {
     setModalView("user-profile");
   };
 
+  const handleOpenOtherUserProfile = (username: string) => {
+    setSelectedUsername(username);
+    setModalView("user-profile");
+  };
+
   const handleLogoClick = () => {
     if (logoClickCount >= 17) {
       setLogoClickCount(18);
