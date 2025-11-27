@@ -100,8 +100,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-background text-foreground">
-          {activeTab === "home" && <HomeFeed onOpenShare={() => setModalView("share")} />}
+        <div className="flex items-center justify-center min-h-screen bg-black">
+          <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground overflow-hidden flex flex-col">
+            {activeTab === "home" && <HomeFeed onOpenShare={() => setModalView("share")} />}
           {activeTab === "explore" && (
             <Explore
               onSearchClick={() => setModalView("search")}
@@ -220,6 +221,7 @@ export default function App() {
               onShare={(platform) => console.log("Shared to:", platform)}
             />
           )}
+          </div>
         </div>
         <Toaster />
       </TooltipProvider>
