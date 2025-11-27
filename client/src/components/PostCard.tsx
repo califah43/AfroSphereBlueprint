@@ -22,18 +22,21 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export interface Post {
-  id: string;
-  author: {
+  id?: string;
+  userId?: string;
+  author?: {
     username: string;
     avatar?: string;
   };
-  imageUrl: string;
+  imageUrl?: string;
+  image?: string;
   caption: string;
-  likes: number;
-  comments: number;
-  timeAgo: string;
+  likes?: number;
+  comments?: number;
+  timeAgo?: string;
   isLiked?: boolean;
   isBookmarked?: boolean;
+  category?: string;
 }
 
 interface PostCardProps {
@@ -48,9 +51,15 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick }: PostCardProps) {
+  // Handle both API response format and mock format
+  const authorUsername = post.author?.username || post.userId || "unknown";
+  const authorAvatar = post.author?.avatar;
+  const imageUrl = post.imageUrl || post.image || "";
+  const postId = post.id || "unknown";
+  
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
-  const [likes, setLikes] = useState(post.likes);
+  const [likes, setLikes] = useState(post.likes || 0);
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
@@ -58,7 +67,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(isLiked ? likes - 1 : likes + 1);
-    onLike?.(post.id);
+    onLike?.(postId);
 
     if (!isLiked) {
       toast({
@@ -72,7 +81,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     if (!isLiked) {
       setIsLiked(true);
       setLikes(likes + 1);
-      onLike?.(post.id);
+      onLike?.(postId);
     }
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1000);
@@ -80,7 +89,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
-    onBookmark?.(post.id);
+    onBookmark?.(postId);
 
     toast({
       title: isBookmarked ? "Removed from saved" : "Post saved! 📌",
@@ -98,10 +107,10 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   return (
-    <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${post.id}`}>
+    <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${postId}`}>
       <div className="flex items-center justify-between p-4">
         <button 
-          onClick={() => onAuthorClick?.(post.author.username)}
+          onClick={() => onAuthorClick?.(authorUsername)}
           className="flex items-center gap-3 hover-elevate flex-1 rounded px-2 py-1 transition-all group"
           data-testid={`button-author-profile-${post.id}`}
         >
