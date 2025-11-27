@@ -71,25 +71,26 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
       {/* Sticky Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-3 py-1 flex items-center justify-between z-20">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 flex items-center justify-between z-20" style={{ height: "40px" }}>
         <button 
           onClick={onClose} 
-          className="p-0 text-foreground"
+          className="flex items-center justify-center"
           data-testid="button-close-edit"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
-        <h2 className="text-xs font-bold flex items-center gap-1" data-testid="text-edit-title">
-          <Sparkles className="h-3 w-3 text-primary" />
+        <h2 className="text-sm font-bold flex items-center gap-1.5" data-testid="text-edit-title">
+          <Sparkles className="h-4 w-4 text-primary" />
           Edit Profile
         </h2>
-        <button 
+        <Button 
           onClick={handleSave} 
-          className="bg-primary hover:bg-primary/90 font-semibold text-xs px-3 py-1 rounded text-white"
+          className="bg-primary hover:bg-primary/90 font-semibold text-xs"
+          size="sm"
           data-testid="button-save-profile"
         >
           Save
-        </button>
+        </Button>
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-6">
