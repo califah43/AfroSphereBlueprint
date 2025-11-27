@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, UserPlus, TrendingUp, Bell } from "lucide-react";
+import { useState, useEffect } from "react";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 interface Notification {
@@ -35,7 +36,7 @@ const mockNotifications: Notification[] = [
     id: "3",
     type: "comment",
     user: "amara_fashion",
-    text: "commented: \"This is amazing! 🔥\"",
+    text: "commented: \"This is amazing!\"",
     timeAgo: "3h ago",
     postThumbnail: fashionImage,
   },
@@ -92,6 +93,29 @@ interface NotificationsProps {
 }
 
 export default function Notifications({ onUserClick }: NotificationsProps) {
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("/api/notifications/current-user");
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data.length > 0 ? data : mockNotifications);
+        } else {
+          setNotifications(mockNotifications);
+        }
+      } catch (error) {
+        console.log("Using mock notifications");
+        setNotifications(mockNotifications);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
   return (
     <div className="pb-20" data-testid="container-notifications">
       {/* Sticky Header */}
