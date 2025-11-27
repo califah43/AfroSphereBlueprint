@@ -203,7 +203,7 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               key="likes"
             />
             <SettingToggle
-              icon={MessageCircle}
+              icon={Info}
               label="Comments"
               description="Get notified on new comments"
               section="notifications"
