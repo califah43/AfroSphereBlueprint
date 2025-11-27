@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
+import SnapchatStories from "./SnapchatStories";
 import StoryViewer from "./StoryViewer";
 import { Loader2 } from "lucide-react";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
@@ -48,6 +49,13 @@ const mockPosts: Post[] = [
     comments: 156,
     timeAgo: "1d ago",
   },
+];
+
+const mockStoryCarousel = [
+  { id: "1", username: "zara_style", avatar: "", isViewed: false },
+  { id: "2", username: "kojoart", avatar: "", isViewed: false },
+  { id: "3", username: "amaarabeats", avatar: "", isViewed: true },
+  { id: "4", username: "adike", avatar: "", isViewed: false },
 ];
 
 const mockStoryData = [
@@ -143,6 +151,14 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
         <div className="sticky top-0 bg-background z-10 border-b border-border">
           <div className="max-w-md mx-auto px-4 py-3">
             <h1 className="text-2xl font-bold mb-4" data-testid="text-feed-title">AfroSphere</h1>
+            
+            {/* Snapchat-style Stories */}
+            <SnapchatStories
+              stories={mockStoryCarousel}
+              onAddStory={() => console.log("Add story")}
+              onViewStory={handleViewStory}
+            />
+            
             <Tabs value={activeCategory} onValueChange={setActiveCategory}>
               <TabsList className="w-full grid grid-cols-6 h-auto">
                 <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
