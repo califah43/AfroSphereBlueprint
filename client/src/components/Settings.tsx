@@ -80,8 +80,8 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   });
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState<"none" | "email" | "password" | "phone">("none");
-  const [editData, setEditData] = useState({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "" });
+  const [editMode, setEditMode] = useState<"none" | "email" | "password" | "phone" | "help" | "report" | "about" | "guidelines" | "blocked" | "reportContent" | "textSize" | "download" | "sessions" | "2fa">("none");
+  const [editData, setEditData] = useState({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
   const { toast } = useToast();
   const userId = localStorage.getItem("currentUserId") || "default-user";
   const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
@@ -283,6 +283,57 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
     );
   };
 
+  // Modal renderers
+  const Modal = ({ title, children }: any) => (
+    <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+      <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
+        <h2 className="text-lg font-bold">{title}</h2>
+        <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
+      </div>
+      <div className="max-w-md mx-auto px-4 py-6 space-y-4">{children}</div>
+    </div>
+  );
+
+  if (editMode === "help") {
+    return <Modal title="Help Center"><div className="space-y-3"><p className="text-sm"><strong>Getting Started</strong></p><p className="text-xs text-muted-foreground">Learn how to create posts, follow creators, and explore content.</p><p className="text-sm mt-4"><strong>Common Questions</strong></p><p className="text-xs text-muted-foreground">How to edit my profile • How to report content • Privacy settings</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
+  }
+
+  if (editMode === "report") {
+    return <Modal title="Report a Problem"><div className="space-y-3"><textarea placeholder="Describe your issue..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { toast({ title: "Report sent", description: "Thank you for reporting!" }); setEditMode("none"); } }} className="w-full bg-primary">Send Report</Button></div></Modal>;
+  }
+
+  if (editMode === "about") {
+    return <Modal title="About AfroSphere"><div className="space-y-4"><p className="text-sm"><strong>AfroSphere v1.0.0</strong></p><p className="text-xs text-muted-foreground">Africa's creative home for emerging artists, musicians, and cultural creators.</p><p className="text-xs text-muted-foreground mt-2">Built with passion for African talent • Powered by community • Made for creators</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
+  }
+
+  if (editMode === "guidelines") {
+    return <Modal title="Community Guidelines"><div className="space-y-3"><p className="text-xs"><strong>Be Respectful</strong></p><p className="text-xs text-muted-foreground">Treat all creators with dignity and kindness.</p><p className="text-xs mt-2"><strong>No Harassment</strong></p><p className="text-xs text-muted-foreground">Don't engage in bullying or hateful behavior.</p><p className="text-xs mt-2"><strong>Original Content</strong></p><p className="text-xs text-muted-foreground">Share authentic, creative work. Respect others' rights.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">I Understand</Button></div></Modal>;
+  }
+
+  if (editMode === "blocked") {
+    return <Modal title="Blocked Users"><div className="space-y-3"><p className="text-xs text-muted-foreground">You currently have no blocked users.</p><p className="text-xs text-muted-foreground mt-2">Blocked users cannot see your posts or contact you.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></Modal>;
+  }
+
+  if (editMode === "reportContent") {
+    return <Modal title="Report Content"><div className="space-y-3"><textarea placeholder="Why are you reporting this post?..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { toast({ title: "Report submitted", description: "Our team will review this content." }); setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button></div></Modal>;
+  }
+
+  if (editMode === "textSize") {
+    return <Modal title="Text Size"><div className="space-y-3"><div className="flex gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "normal"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "normal" ? "default" : "outline"} className="flex-1">Normal</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "large" ? "default" : "outline"} className="flex-1">Large</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "extra-large" ? "default" : "outline"} className="flex-1">XL</Button></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></Modal>;
+  }
+
+  if (editMode === "download") {
+    return <Modal title="Download Your Data"><div className="space-y-3"><p className="text-xs text-muted-foreground">Get a copy of all your profile data, posts, and activity.</p><Button onClick={() => { toast({ title: "Download started", description: "Your data will be ready in a few minutes" }); setEditMode("none"); }} className="w-full bg-primary">Download Now</Button></div></Modal>;
+  }
+
+  if (editMode === "sessions") {
+    return <Modal title="Active Sessions"><div className="space-y-3"><div className="bg-card/50 border border-border/50 p-3 rounded"><p className="text-xs font-semibold">This Device</p><p className="text-xs text-muted-foreground">Last active now</p></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
+  }
+
+  if (editMode === "2fa") {
+    return <Modal title="Two-Factor Authentication"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { toast({ title: "2FA enabled", description: "Your account is now more secure" }); setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></Modal>;
+  }
+
   // Edit modals
   if (editMode === "email") {
     return (
@@ -462,7 +513,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               icon={Users}
               label="Blocked Users"
               description="Manage blocked accounts"
-              onClick={() => console.log("View blocked users")}
+              onClick={() => setEditMode("blocked")}
             />
             <SettingToggle
               icon={Eye}
@@ -482,7 +533,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               icon={AlertCircle}
               label="Report Content"
               description="Report inappropriate posts"
-              onClick={() => console.log("Report content")}
+              onClick={() => setEditMode("reportContent")}
             />
           </div>
         </div>
@@ -536,7 +587,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               icon={Sun}
               label="Text Size"
               description={`Current: ${settings.display.textSize === 'normal' ? 'Normal' : settings.display.textSize === 'large' ? 'Large' : 'Extra Large'}`}
-              onClick={() => console.log("Adjust text size")}
+              onClick={() => setEditMode("textSize")}
             />
           </div>
         </div>
@@ -549,19 +600,19 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               icon={Smartphone}
               label="Download Your Data"
               description="Get a copy of your data"
-              onClick={() => console.log("Download data")}
+              onClick={() => setEditMode("download")}
             />
             <SettingButton
               icon={Shield}
               label="Active Sessions"
               description="View and manage logged-in devices"
-              onClick={() => console.log("View sessions")}
+              onClick={() => setEditMode("sessions")}
             />
             <SettingButton
               icon={AlertCircle}
               label="Two-Factor Authentication"
               description="Add extra security to your account"
-              onClick={() => console.log("Enable 2FA")}
+              onClick={() => setEditMode("2fa")}
             />
           </div>
         </div>
@@ -574,25 +625,25 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               icon={HelpCircle}
               label="Help Center"
               description="Browse FAQs and guides"
-              onClick={() => console.log("Open help")}
+              onClick={() => setEditMode("help")}
             />
             <SettingButton
               icon={AlertCircle}
               label="Report a Problem"
               description="Tell us what's wrong"
-              onClick={() => console.log("Report issue")}
+              onClick={() => setEditMode("report")}
             />
             <SettingButton
               icon={Info}
               label="About AfroSphere"
               description="Version 1.0.0 • Learn more about us"
-              onClick={() => console.log("About")}
+              onClick={() => setEditMode("about")}
             />
             <SettingButton
               icon={Globe}
               label="Community Guidelines"
               description="Our values and rules"
-              onClick={() => console.log("Guidelines")}
+              onClick={() => setEditMode("guidelines")}
             />
           </div>
         </div>
