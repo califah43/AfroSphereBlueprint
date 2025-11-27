@@ -3,7 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
   ChevronRight, X, LogOut, Bell, Lock, Shield, Palette, Users, Eye, 
-  MessageCircle, Heart, Share2, Volume2, Smartphone, Mail, AlertCircle,
+  Heart, Share2, Volume2, Smartphone, Mail, AlertCircle,
   HelpCircle, Info, Trash2, CheckCircle2, Moon, Sun, Globe
 } from "lucide-react";
 import { useState } from "react";
@@ -16,7 +16,6 @@ interface SettingsProps {
 interface SettingsSections {
   account: {
     privateAccount: boolean;
-    allowMessages: boolean;
     allowComments: boolean;
     allowMentions: boolean;
   };
@@ -24,7 +23,6 @@ interface SettingsSections {
     likes: boolean;
     comments: boolean;
     follows: boolean;
-    messages: boolean;
     trending: boolean;
     pushNotifications: boolean;
     emailNotifications: boolean;
@@ -50,7 +48,6 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
   const [settings, setSettings] = useState<SettingsSections>({
     account: {
       privateAccount: false,
-      allowMessages: true,
       allowComments: true,
       allowMentions: true,
     },
@@ -58,7 +55,6 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
       likes: true,
       comments: true,
       follows: true,
-      messages: true,
       trending: true,
       pushNotifications: true,
       emailNotifications: true,
@@ -179,14 +175,7 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               key="privateAccount"
             />
             <SettingToggle
-              icon={MessageCircle}
-              label="Allow Direct Messages"
-              description="Anyone can message you"
-              section="account"
-              key="allowMessages"
-            />
-            <SettingToggle
-              icon={MessageCircle}
+              icon={Bell}
               label="Allow Comments"
               description="Anyone can comment on posts"
               section="account"
@@ -226,13 +215,6 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               description="Get notified when someone follows you"
               section="notifications"
               key="follows"
-            />
-            <SettingToggle
-              icon={Mail}
-              label="Direct Messages"
-              description="Get notified of new messages"
-              section="notifications"
-              key="messages"
             />
             <SettingToggle
               icon={Share2}

@@ -28,7 +28,7 @@ const MOCK_HISTORY: Notification[] = [
   {
     id: "1",
     title: "New Feature Alert",
-    message: "Check out our new Direct Messaging feature!",
+    message: "Check out our new Creator Badges system!",
     type: "push",
     targetAudience: "All users",
     priority: "high",

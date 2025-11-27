@@ -180,21 +180,12 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
               Edit Profile
             </Button>
           ) : (
-            <div className="flex gap-2">
-              <Button 
-                className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg h-9 text-sm" 
-                data-testid="button-follow"
-              >
-                Follow
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex-1 rounded-lg h-9 text-sm" 
-                data-testid="button-message"
-              >
-                Message
-              </Button>
-            </div>
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg h-9 text-sm" 
+              data-testid="button-follow"
+            >
+              Follow
+            </Button>
           )}
         </div>
 
