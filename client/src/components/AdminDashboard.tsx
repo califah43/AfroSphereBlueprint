@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, Settings, LogOut } from "lucide-react";
+import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, Settings, Users2, LogOut } from "lucide-react";
 import UserManagement from "./UserManagement";
 import PostManagement from "./PostManagement";
 import BadgesManagement from "./BadgesManagement";
 import NotificationsCenter from "./NotificationsCenter";
 import ReportsCenter from "./ReportsCenter";
 import SystemSettings from "./SystemSettings";
+import TeamManagement from "./TeamManagement";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -39,6 +40,7 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
     { label: "Notifications Center", icon: Bell, onClick: () => setCurrentSection("notifications"), variant: "default" as const },
     { label: "System Logs", icon: FileJson, onClick: () => setCurrentSection("logs"), variant: "default" as const },
     { label: "System Settings", icon: Settings, onClick: () => setCurrentSection("settings"), variant: "default" as const },
+    { label: "Team Management", icon: Users2, onClick: () => setCurrentSection("team"), variant: "default" as const },
   ];
 
   if (currentSection === "users") {
@@ -63,6 +65,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "settings") {
     return <SystemSettings onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "team") {
+    return <TeamManagement onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (
