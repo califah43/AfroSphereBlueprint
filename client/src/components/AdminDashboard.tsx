@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, LogOut } from "lucide-react";
+import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, Settings, LogOut } from "lucide-react";
 import UserManagement from "./UserManagement";
 import PostManagement from "./PostManagement";
 import BadgesManagement from "./BadgesManagement";
 import NotificationsCenter from "./NotificationsCenter";
 import ReportsCenter from "./ReportsCenter";
+import SystemSettings from "./SystemSettings";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -37,6 +38,7 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
     { label: "Badges Manager", icon: Badge, onClick: () => setCurrentSection("badges"), variant: "default" as const },
     { label: "Notifications Center", icon: Bell, onClick: () => setCurrentSection("notifications"), variant: "default" as const },
     { label: "System Logs", icon: FileJson, onClick: () => setCurrentSection("logs"), variant: "default" as const },
+    { label: "System Settings", icon: Settings, onClick: () => setCurrentSection("settings"), variant: "default" as const },
   ];
 
   if (currentSection === "users") {
@@ -57,6 +59,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "logs") {
     return <ReportsCenter onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "settings") {
+    return <SystemSettings onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (
@@ -113,7 +119,7 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
             <CardDescription>Manage platform content and users</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {actions.map((action) => {
                 const Icon = action.icon;
                 return (
