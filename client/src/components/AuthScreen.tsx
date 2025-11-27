@@ -39,19 +39,39 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         return;
       }
 
+      // Create Firebase account
       const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
+
+      // Link username to Firebase UID in backend
+      const setupRes = await fetch("/api/auth/setup-username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firebaseUid: userCredential.user.uid,
+          username: signupData.username,
+          email: signupData.email,
+          displayName: signupData.username,
+        }),
+      });
+
+      if (!setupRes.ok) {
+        throw new Error("Failed to setup username");
+      }
+
+      const backendUser = await setupRes.json();
       const userData = {
         id: userCredential.user.uid,
         email: userCredential.user.email,
-        username: signupData.username,
-        displayName: signupData.username,
-        bio: "",
-        location: "",
-        avatar: "",
-        followerCount: 0,
-        followingCount: 0,
-        postCount: 0,
+        username: backendUser.username,
+        displayName: backendUser.displayName,
+        bio: backendUser.bio || "",
+        location: backendUser.location || "",
+        avatar: backendUser.avatar || "",
+        followerCount: backendUser.followerCount || 0,
+        followingCount: backendUser.followingCount || 0,
+        postCount: backendUser.postCount || 0,
       };
+      
       localStorage.setItem("currentUserId", userCredential.user.uid);
       localStorage.setItem("currentUserData", JSON.stringify(userData));
       console.log("Signup:", userCredential.user);
@@ -75,23 +95,26 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
       localStorage.setItem("currentUserId", userCredential.user.uid);
       
-      // Check if user data exists in localStorage from signup
+      // Check if user data exists in localStorage
       let storedData = localStorage.getItem("currentUserData");
       
-      // If not, try to fetch from backend
+      // If not in localStorage, try to fetch from backend
       if (!storedData) {
         try {
-          const res = await fetch(`/api/settings/${userCredential.user.uid}`);
-          if (res.ok) {
-            const backendData = await res.json();
+          const userRes = await fetch(`/api/users/${userCredential.user.uid}`);
+          if (userRes.ok) {
+            const backendData = await userRes.json();
             storedData = JSON.stringify({
               id: userCredential.user.uid,
               email: userCredential.user.email,
-              username: backendData.username || userCredential.user.email?.split('@')[0] || "user",
-              displayName: backendData.displayName || userCredential.user.email?.split('@')[0] || "User",
+              username: backendData.username,
+              displayName: backendData.displayName,
               bio: backendData.bio || "",
-              location: "",
-              avatar: "",
+              location: backendData.location || "",
+              avatar: backendData.avatar || "",
+              followerCount: backendData.followerCount || 0,
+              followingCount: backendData.followingCount || 0,
+              postCount: backendData.postCount || 0,
             });
           }
         } catch (e) {
@@ -99,8 +122,9 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         }
       }
       
-      // If still no data, create minimal profile from email
       if (!storedData) {
+        // User doesn't have backend record - this shouldn't happen in production
+        // but for now we'll create a minimal profile
         const username = loginData.email.split('@')[0];
         storedData = JSON.stringify({
           id: userCredential.user.uid,
@@ -110,6 +134,9 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
           bio: "",
           location: "",
           avatar: "",
+          followerCount: 0,
+          followingCount: 0,
+          postCount: 0,
         });
       }
       
