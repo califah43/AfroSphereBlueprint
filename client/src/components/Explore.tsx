@@ -6,6 +6,8 @@ import { GridSkeleton } from "@/components/SkeletonLoader";
 import SuggestedCreators from "./SuggestedCreators";
 import FeaturedAfrican from "./FeaturedAfrican";
 import TrendingAfrican from "./TrendingAfrican";
+import GenreCard from "./GenreCard";
+import { GENRE_LIST } from "@shared/genres";
 import fashionHero from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
 import musicHero from "@assets/generated_images/Music_category_hero_image_83aae00b.png";
 import artHero from "@assets/generated_images/Art_category_hero_image_74aa53e3.png";
@@ -79,6 +81,18 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-8">
+        <FeaturedAfrican />
+        <TrendingAfrican />
+        
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Explore Genres</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {GENRE_LIST.map((genre) => (
+              <GenreCard key={genre.id} genreId={genre.id.toUpperCase()} postsCount={Math.floor(Math.random() * 50) + 10} />
+            ))}
+          </div>
+        </div>
+
         <SuggestedCreators />
 
         <div>

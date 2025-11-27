@@ -53,10 +53,10 @@ const mockPosts: Post[] = [
 ];
 
 const mockStoryData = [
-  { id: "1", username: "zara_style", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: false },
-  { id: "2", username: "kojoart", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: false },
-  { id: "3", username: "amaarabeats", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: true },
-  { id: "4", username: "adike", imageUrl: "https://picsum.photos/seed/picsum/200/300", hasStory: true, isViewed: false },
+  { id: "1", username: "zara_style", avatar: "", hasStory: true, isViewed: false },
+  { id: "2", username: "kojoart", avatar: "", hasStory: true, isViewed: false },
+  { id: "3", username: "amaarabeats", avatar: "", hasStory: true, isViewed: true },
+  { id: "4", username: "adike", avatar: "", hasStory: true, isViewed: false },
 ];
 
 export default function HomeFeed({ onOpenShare }: HomeFeedProps) {

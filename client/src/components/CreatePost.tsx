@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { X, Upload, Image as ImageIcon, Sparkles, Crop, Contrast, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { GENRE_LIST } from "@shared/genres";
 
 interface CreatePostProps {
   onClose: () => void;
