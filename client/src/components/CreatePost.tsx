@@ -46,7 +46,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
     setMediaPreviews(mediaPreviews.filter((_, i) => i !== index));
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (!caption || mediaPreviews.length === 0) {
       toast({
         title: "Missing fields",
@@ -56,16 +56,37 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       return;
     }
 
-    console.log("Posting:", { caption, category, hashtags, mediaPreviews, filters: { brightness, contrast, saturation } });
+    try {
+      const postData = {
+        userId: "current-user",
+        caption,
+        category: category || "lifestyle",
+        image: mediaPreviews[0],
+      };
 
-    toast({
-      title: "✨ Post created!",
-      description: "Your post has been shared with the community.",
-      className: "border-primary/20 bg-card",
-    });
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData),
+      });
 
-    onPost?.({ caption, category, hashtags, mediaPreviews });
-    onClose();
+      if (!res.ok) throw new Error("Failed to create post");
+
+      toast({
+        title: "✨ Post created!",
+        description: "Your post has been shared with the community.",
+        className: "border-primary/20 bg-card",
+      });
+
+      onPost?.(postData);
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const imageStyle = {

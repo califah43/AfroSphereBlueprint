@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
 
 const PostSkeleton = () => (
@@ -33,19 +35,39 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [displayedPosts, setDisplayedPosts] = useState<Post[]>(mockPosts);
   const [hasNewPosts, setHasNewPosts] = useState(false);
-  const [displayedPosts, setDisplayedPosts] = useState(mockPosts);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
 
+  // Fetch posts from API
+  const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
+    queryKey: ['/api/posts'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/posts?limit=50');
+        return res.json();
+      } catch {
+        return mockPosts;
+      }
+    },
+  });
+
+  // Fallback to mock data if API returns empty
+  useEffect(() => {
+    if (apiPosts && apiPosts.length > 0) {
+      setDisplayedPosts(apiPosts as Post[]);
+    }
+  }, [apiPosts]);
+
   const filteredPosts = activeCategory === "for-you"
     ? displayedPosts
-    : displayedPosts.filter(post =>
-        post.category === activeCategory
-      );
+    : displayedPosts.filter(post => {
+        const postCategory = (post as any).category?.toLowerCase() || "";
+        return postCategory === activeCategory.toLowerCase();
+      });
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (scrollContainerRef.current?.scrollTop === 0) {
@@ -86,25 +108,22 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
       const { scrollTop, scrollHeight, clientHeight } = container;
       
       // Load more when near bottom
-      if (scrollHeight - scrollTop - clientHeight < 500 && !isLoadingMore && displayedPosts.length < 20) {
-        setIsLoadingMore(true);
-        setTimeout(() => {
-          setDisplayedPosts([...displayedPosts, ...mockPosts]);
-          setIsLoadingMore(false);
-        }, 800);
+      if (scrollHeight - scrollTop - clientHeight < 500 && displayedPosts.length < 50) {
+        const offset = displayedPosts.length;
+        fetch(`/api/posts?limit=20&offset=${offset}`)
+          .then(res => res.json())
+          .then(newPosts => {
+            if (newPosts && newPosts.length > 0) {
+              setDisplayedPosts([...displayedPosts, ...newPosts]);
+            }
+          })
+          .catch(() => {});
       }
     };
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [displayedPosts, isLoadingMore]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [displayedPosts]);
 
   return (
     <>

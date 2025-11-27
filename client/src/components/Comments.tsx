@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,110 +30,89 @@ interface CommentsProps {
   onClose: () => void;
 }
 
-const mockComments: Comment[] = [
-  {
-    id: "1",
-    author: "zara_style",
-    text: "This is absolutely stunning! The colors are perfect 🔥",
-    likes: 23,
-    timeAgo: "1h ago",
-    isLiked: false,
-    replies: [
-      {
-        id: "1-1",
-        author: "adikeafrica",
-        text: "Thank you! Took forever to style this",
-        likes: 5,
-        timeAgo: "55m ago",
-        isLiked: false,
-      },
-      {
-        id: "1-2",
-        author: "kwame_creative",
-        text: "Right? It's insane",
-        likes: 2,
-        timeAgo: "50m ago",
-        isLiked: false,
-      },
-    ],
-  },
-  {
-    id: "2",
-    author: "kwame_creative",
-    text: "Love the fusion of traditional and modern!",
-    likes: 15,
-    timeAgo: "45m ago",
-    isLiked: false,
-    replies: [],
-  },
-  {
-    id: "3",
-    author: "amara_fashion",
-    text: "Where can I get this? Need it!",
-    likes: 8,
-    timeAgo: "30m ago",
-    isLiked: false,
-    replies: [
-      {
-        id: "3-1",
-        author: "zara_style",
-        text: "I found it on @africancouture_market",
-        likes: 3,
-        timeAgo: "25m ago",
-        isLiked: false,
-      },
-    ],
-  },
-];
-
 export default function Comments({ postId, postImage, postCaption, onClose }: CommentsProps) {
-  const [comments, setComments] = useState<Comment[]>(mockComments);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddComment = (e: React.FormEvent) => {
+  // Fetch comments on mount
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(`/api/comments/post/${postId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch comments", error);
+      }
+    };
+    fetchComments();
+  }, [postId]);
+
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newComment.trim()) {
-      const newCommentObj: Comment = {
-        id: Date.now().toString(),
-        author: "you",
-        text: newComment,
-        likes: 0,
-        timeAgo: "Just now",
-        isLiked: false,
-        replies: [],
-      };
-      setComments([...comments, newCommentObj]);
-      setNewComment("");
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            postId,
+            userId: "current-user",
+            text: newComment,
+            replyTo: null,
+          }),
+        });
+        if (res.ok) {
+          const newCommentObj = await res.json();
+          setComments([...comments, { ...newCommentObj, replies: [] }]);
+          setNewComment("");
+        }
+      } catch (error) {
+        console.error("Failed to add comment", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleAddReply = (commentId: string, e: React.FormEvent) => {
+  const handleAddReply = async (commentId: string, e: React.FormEvent) => {
     e.preventDefault();
     if (replyText.trim()) {
-      setComments(
-        comments.map((comment) =>
-          comment.id === commentId
-            ? {
-                ...comment,
-                replies: [
-                  ...comment.replies,
-                  {
-                    id: `${commentId}-${Date.now()}`,
-                    author: "you",
-                    text: replyText,
-                    likes: 0,
-                    timeAgo: "Just now",
-                    isLiked: false,
-                  },
-                ],
-              }
-            : comment
-        )
-      );
-      setReplyText("");
-      setReplyingTo(null);
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            postId,
+            userId: "current-user",
+            text: replyText,
+            replyTo: commentId,
+          }),
+        });
+        if (res.ok) {
+          const reply = await res.json();
+          setComments(
+            comments.map((c) =>
+              c.id === commentId
+                ? { ...c, replies: [...c.replies, reply] }
+                : c
+            )
+          );
+          setReplyText("");
+          setReplyingTo(null);
+        }
+      } catch (error) {
+        console.error("Failed to add reply", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -271,11 +250,12 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                       className="bg-slate-800/50 border border-primary/20 rounded-lg"
                       data-testid={`input-reply-${comment.id}`}
                       autoFocus
+                      disabled={isLoading}
                     />
                     <Button
                       type="submit"
                       size="icon"
-                      disabled={!replyText.trim()}
+                      disabled={!replyText.trim() || isLoading}
                       className="bg-primary hover:bg-primary/90"
                       data-testid={`button-send-reply-${comment.id}`}
                     >
@@ -341,11 +321,12 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
               onChange={(e) => setNewComment(e.target.value)}
               className="bg-slate-800/50 border border-primary/20 rounded-lg"
               data-testid="input-new-comment"
+              disabled={isLoading}
             />
             <Button
               type="submit"
               size="icon"
-              disabled={!newComment.trim()}
+              disabled={!newComment.trim() || isLoading}
               className="bg-primary hover:bg-primary/90 flex-shrink-0"
               data-testid="button-send-comment"
             >
