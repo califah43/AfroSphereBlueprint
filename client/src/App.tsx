@@ -37,10 +37,29 @@ export default function App() {
   const [selectedUsername, setSelectedUsername] = useState<string>("");
   const [logoClickCount, setLogoClickCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [clickResetTimer, setClickResetTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
+
+  // Reset click count after 3 seconds of inactivity
+  useEffect(() => {
+    if (logoClickCount > 0) {
+      if (clickResetTimer) {
+        clearTimeout(clickResetTimer);
+      }
+      const timer = setTimeout(() => {
+        setLogoClickCount(0);
+      }, 3000);
+      setClickResetTimer(timer);
+    }
+    return () => {
+      if (clickResetTimer) {
+        clearTimeout(clickResetTimer);
+      }
+    };
+  }, [logoClickCount]);
 
   const handleSplashComplete = () => {
     setAppState("onboarding");
@@ -90,11 +109,11 @@ export default function App() {
   };
 
   const handleLogoClick = () => {
-    const newCount = logoClickCount + 1;
-    setLogoClickCount(newCount);
-    if (newCount === 18) {
+    if (logoClickCount >= 17) {
+      setLogoClickCount(18);
       setShowAdminLogin(true);
-      setLogoClickCount(0);
+    } else {
+      setLogoClickCount(logoClickCount + 1);
     }
   };
 
