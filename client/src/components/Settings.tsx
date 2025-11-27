@@ -80,7 +80,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   });
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState<"none" | "email" | "password" | "phone" | "help" | "report" | "about" | "guidelines" | "blocked" | "reportContent" | "textSize" | "download" | "sessions" | "2fa">("none");
+  const [editMode, setEditMode] = useState<"none" | "email" | "password" | "phone" | "help" | "report" | "about" | "guidelines" | "blocked" | "reportContent" | "textSize" | "download" | "sessions" | "2fa" | "language">("none");
   const [editData, setEditData] = useState({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
   const { toast } = useToast();
   const userId = localStorage.getItem("currentUserId") || "default-user";
@@ -334,6 +334,10 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
     return <Modal title="Two-Factor Authentication"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { toast({ title: "2FA enabled", description: "Your account is now more secure" }); setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></Modal>;
   }
 
+  if (editMode === "language") {
+    return <Modal title="Language"><div className="space-y-3"><div className="flex flex-col gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "English selected" }); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full">English</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "Español selected" }); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full">Español</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "Français selected" }); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full">Français</Button></div></div></Modal>;
+  }
+
   // Edit modals
   if (editMode === "email") {
     return (
@@ -581,7 +585,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
               icon={Globe}
               label="Language"
               description={`Current: ${settings.display.language === 'en' ? 'English' : settings.display.language === 'es' ? 'Español' : 'Français'}`}
-              onClick={() => console.log("Change language")}
+              onClick={() => setEditMode("language")}
             />
             <SettingButton
               icon={Sun}
