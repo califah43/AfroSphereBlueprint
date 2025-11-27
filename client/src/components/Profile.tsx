@@ -32,8 +32,24 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
 
   return (
     <div className="pb-20" data-testid="container-profile">
-      {/* Elegant Header with Banner */}
-      <div className="relative h-56 overflow-hidden">
+      {/* Sticky Header */}
+      <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-20">
+        <h2 className="text-lg font-semibold">@adikeafrica</h2>
+        {isOwnProfile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onSettings}
+            data-testid="button-settings"
+            className="hover-elevate"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+
+      {/* Elegant Header with Banner - Compact */}
+      <div className="relative h-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
           {bannerImage && (
             <img
@@ -44,30 +60,15 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
           )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
-        
-        {/* Settings Button */}
-        {isOwnProfile && (
-          <div className="absolute top-4 right-4 z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onSettings}
-              className="bg-white/20 hover:bg-white/30 text-white rounded-full"
-              data-testid="button-settings"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Profile Content - Elegant Layout */}
-      <div className="max-w-md mx-auto px-4 -mt-20 relative z-10">
+      <div className="max-w-md mx-auto px-4 -mt-14 relative z-10">
         {/* Avatar & Name Section */}
-        <div className="mb-6">
-          <div className="flex items-end gap-4 mb-4">
-            <Avatar className="w-28 h-28 ring-4 ring-background border-4 border-primary/20 shadow-lg" data-testid="avatar-profile">
-              <AvatarFallback className="text-3xl font-bold">AC</AvatarFallback>
+        <div className="mb-4">
+          <div className="flex items-end gap-3 mb-3">
+            <Avatar className="w-20 h-20 ring-4 ring-background border-3 border-primary/20 shadow-lg" data-testid="avatar-profile">
+              <AvatarFallback className="text-2xl font-bold">AC</AvatarFallback>
             </Avatar>
             
             <div className="mb-2">
@@ -76,27 +77,24 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
           </div>
 
           {/* Name & Bio */}
-          <h1 className="text-3xl font-bold mb-1" data-testid="text-profile-displayname">
+          <h1 className="text-2xl font-bold mb-1" data-testid="text-profile-displayname">
             Adike Wilson
           </h1>
-          <p className="text-base text-primary font-semibold mb-3" data-testid="text-profile-username">
-            @adikeafrica
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-4" data-testid="text-profile-bio">
+          <p className="text-sm text-muted-foreground mb-2" data-testid="text-profile-bio">
             Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design
           </p>
 
           {/* Stats - Elegant Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-6 bg-muted/40 rounded-lg p-4 border border-border">
+          <div className="grid grid-cols-3 gap-3 mb-4 bg-muted/40 rounded-lg p-3 border border-border">
             <button
               onClick={onFollowersClick}
               className="text-center hover-elevate transition-all group"
               data-testid="button-view-followers"
             >
-              <p className="text-2xl font-bold text-primary group-hover:text-primary/80" data-testid="text-followers-count">
+              <p className="text-lg font-bold text-primary" data-testid="text-followers-count">
                 1.2K
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Followers</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Followers</p>
             </button>
             
             <div className="border-l border-r border-border" />
@@ -106,26 +104,26 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
               className="text-center hover-elevate transition-all group"
               data-testid="button-view-following"
             >
-              <p className="text-2xl font-bold text-primary group-hover:text-primary/80" data-testid="text-following-count">
+              <p className="text-lg font-bold text-primary" data-testid="text-following-count">
                 485
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Following</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Following</p>
             </button>
 
             <div className="border-l border-border" />
             
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary" data-testid="text-posts-count">
+              <p className="text-lg font-bold text-primary" data-testid="text-posts-count">
                 127
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Posts</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Posts</p>
             </div>
           </div>
 
           {/* Action Buttons - Elegant */}
           {isOwnProfile ? (
             <Button
-              className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-semibold h-11 rounded-lg"
+              className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-semibold h-9 rounded-lg text-sm"
               onClick={onEditProfile}
               data-testid="button-edit-profile"
             >
@@ -134,14 +132,14 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
           ) : (
             <div className="flex gap-2">
               <Button 
-                className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg" 
+                className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg h-9 text-sm" 
                 data-testid="button-follow"
               >
                 Follow
               </Button>
               <Button 
                 variant="outline" 
-                className="flex-1 rounded-lg" 
+                className="flex-1 rounded-lg h-9 text-sm" 
                 data-testid="button-message"
               >
                 Message
@@ -151,7 +149,7 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
         </div>
 
         {/* Posts Tabs - Minimal & Elegant */}
-        <div className="mt-8 border-t border-border pt-6">
+        <div className="mt-4 border-t border-border pt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-border rounded-none p-0 h-auto">
               <TabsTrigger 
