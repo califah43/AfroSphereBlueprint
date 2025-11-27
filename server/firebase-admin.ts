@@ -1,0 +1,100 @@
+import * as admin from "firebase-admin";
+
+let firebaseApp: admin.app.App | null = null;
+
+export const initializeFirebaseAdmin = () => {
+  try {
+    const adminKeyStr = process.env.FIREBASE_ADMIN_KEY;
+    
+    if (!adminKeyStr) {
+      console.warn("FIREBASE_ADMIN_KEY not configured - push notifications disabled");
+      return null;
+    }
+
+    // Parse the admin key JSON
+    const adminKey = JSON.parse(adminKeyStr);
+
+    firebaseApp = admin.initializeApp({
+      credential: admin.credential.cert(adminKey as admin.ServiceAccount),
+      projectId: adminKey.project_id,
+    });
+
+    console.log("Firebase Admin SDK initialized successfully");
+    return firebaseApp;
+  } catch (error) {
+    console.error("Failed to initialize Firebase Admin SDK:", error);
+    return null;
+  }
+};
+
+export const getFirebaseAdmin = (): admin.app.App | null => {
+  if (!firebaseApp) {
+    return initializeFirebaseAdmin();
+  }
+  return firebaseApp;
+};
+
+export const sendPushNotification = async (
+  fcmToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, string>
+): Promise<boolean> => {
+  try {
+    const app = getFirebaseAdmin();
+    if (!app) {
+      console.warn("Firebase Admin not initialized, cannot send notification");
+      return false;
+    }
+
+    const message: admin.messaging.Message = {
+      notification: {
+        title,
+        body,
+      },
+      data,
+      token: fcmToken,
+    };
+
+    const response = await admin.messaging().send(message);
+    console.log("Push notification sent successfully:", response);
+    return true;
+  } catch (error) {
+    console.error("Failed to send push notification:", error);
+    return false;
+  }
+};
+
+export const sendMulticastNotification = async (
+  fcmTokens: string[],
+  title: string,
+  body: string,
+  data?: Record<string, string>
+): Promise<{ successCount: number; failureCount: number }> => {
+  try {
+    const app = getFirebaseAdmin();
+    if (!app) {
+      console.warn("Firebase Admin not initialized");
+      return { successCount: 0, failureCount: fcmTokens.length };
+    }
+
+    const message: admin.messaging.MulticastMessage = {
+      notification: {
+        title,
+        body,
+      },
+      data,
+      tokens: fcmTokens,
+    };
+
+    const response = await admin.messaging().sendMulticast(message);
+    console.log(`Multicast notification: ${response.successCount} sent, ${response.failureCount} failed`);
+    return {
+      successCount: response.successCount,
+      failureCount: response.failureCount,
+    };
+  } catch (error) {
+    console.error("Failed to send multicast notification:", error);
+    return { successCount: 0, failureCount: fcmTokens.length };
+  }
+};
