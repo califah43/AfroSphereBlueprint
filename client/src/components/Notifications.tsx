@@ -87,7 +87,11 @@ const getNotificationColor = (type: string) => {
   }
 };
 
-export default function Notifications() {
+interface NotificationsProps {
+  onUserClick?: (username: string) => void;
+}
+
+export default function Notifications({ onUserClick }: NotificationsProps) {
   return (
     <div className="pb-20" data-testid="container-notifications">
       {/* Sticky Header */}
