@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, LogOut } from "lucide-react";
 import UserManagement from "./UserManagement";
 import PostManagement from "./PostManagement";
+import BadgesManagement from "./BadgesManagement";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -42,6 +43,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "posts") {
     return <PostManagement onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "badges") {
+    return <BadgesManagement onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (
