@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId, commentId } = req.body;
       const comment = await storage.getComment(commentId);
-      const hasLiked = comment && comment.likes > 0; // Simple check
+      const hasLiked = comment && (comment.likes || 0) > 0; // Simple check
       
       if (hasLiked) {
         await storage.unlikeComment(userId, commentId);

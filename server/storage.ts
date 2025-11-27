@@ -118,6 +118,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newPost: Post = {
       ...post,
+      caption: post.caption || null,
       id,
       likes: 0,
       commentCount: 0,
@@ -165,6 +166,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newComment: Comment = {
       ...comment,
+      replyTo: comment.replyTo || null,
       id,
       likes: 0,
       createdAt: new Date(),
@@ -193,7 +195,7 @@ export class MemStorage implements IStorage {
   // ============ LIKES ============
   async likePost(userId: string, postId: string): Promise<Like> {
     const id = randomUUID();
-    const like: Like = { id, userId, postId, commentId: undefined, createdAt: new Date() };
+    const like: Like = { id, userId, postId, commentId: null, createdAt: new Date() };
     this.likes.set(id, like);
     const post = this.posts.get(postId);
     if (post) {
@@ -221,7 +223,7 @@ export class MemStorage implements IStorage {
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
     const id = randomUUID();
-    const like: Like = { id, userId, postId: undefined, commentId, createdAt: new Date() };
+    const like: Like = { id, userId, postId: null, commentId, createdAt: new Date() };
     this.likes.set(id, like);
     const comment = this.comments.get(commentId);
     if (comment) {
