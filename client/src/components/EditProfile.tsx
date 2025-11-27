@@ -14,7 +14,7 @@ interface EditProfileProps {
 
 export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   const [formData, setFormData] = useState({
-    name: "Adike Africa",
+    displayName: "Adike Wilson",
     bio: "Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design",
     location: "Lagos, Nigeria",
   });
@@ -80,13 +80,14 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="displayName">Display Name</Label>
             <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              data-testid="input-name"
+              id="displayName"
+              value={formData.displayName}
+              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+              data-testid="input-displayname"
             />
+            <p className="text-xs text-muted-foreground">This is how your name appears on your profile</p>
           </div>
 
           <div className="space-y-2">

@@ -33,7 +33,7 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
   return (
     <div className="pb-20" data-testid="container-profile">
       <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-10">
-        <h2 className="text-lg font-semibold">adikeafrica</h2>
+        <h2 className="text-lg font-semibold">@adikeafrica</h2>
         {isOwnProfile && (
           <Button
             variant="ghost"
@@ -68,11 +68,14 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
         </div>
 
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-2xl font-bold" data-testid="text-profile-username">
-              adikeafrica
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold" data-testid="text-profile-displayname">
+              Adike Wilson
             </h1>
           </div>
+          <p className="text-sm text-muted-foreground mb-3" data-testid="text-profile-username">
+            @adikeafrica
+          </p>
           <div className="mb-3">
             <CreatorBadge type="fashion-vanguard" size="sm" />
           </div>
