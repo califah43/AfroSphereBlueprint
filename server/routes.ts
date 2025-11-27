@@ -31,40 +31,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/setup-username", async (req, res) => {
-    try {
-      const { firebaseUid, username, email, displayName } = req.body;
-      
-      if (!firebaseUid || !username) {
-        return res.status(400).json({ error: "Firebase UID and username required" });
-      }
-
-      // Check if username already exists
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(409).json({ error: "Username already taken" });
-      }
-
-      // Check if user already has an account
-      const existingByFirebaseId = await storage.getUser(firebaseUid);
-      if (existingByFirebaseId) {
-        return res.status(409).json({ error: "Account already created" });
-      }
-
-      // Create user account linked to Firebase UID
-      const user = await storage.createUser({
-        id: firebaseUid,
-        username,
-        email: email || "",
-        displayName: displayName || username,
-        password: "", // Not used with Firebase auth
-      });
-
-      res.json(user);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid request" });
-    }
-  });
 
   app.post("/api/auth/login", async (req, res) => {
     try {
