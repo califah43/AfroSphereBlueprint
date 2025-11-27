@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import splashLogo from "@assets/generated_images/elegant_african_continent_logo_with_sunrise.png";
+import splashLogo from "@assets/generated_images/transparent_outlined_african_continent_logo.png";
 
 interface AuthScreenProps {
   onAuthComplete: () => void;
