@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { X, Send, Heart, Reply as ReplyIcon } from "lucide-react";
+import { X, Send, Heart, MessageCircle } from "lucide-react";
 
 interface Reply {
   id: string;
@@ -95,18 +95,16 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (newComment.trim()) {
-      setComments([
-        ...comments,
-        {
-          id: Date.now().toString(),
-          author: "you",
-          text: newComment,
-          likes: 0,
-          timeAgo: "Just now",
-          isLiked: false,
-          replies: [],
-        },
-      ]);
+      const newCommentObj: Comment = {
+        id: Date.now().toString(),
+        author: "you",
+        text: newComment,
+        likes: 0,
+        timeAgo: "Just now",
+        isLiked: false,
+        replies: [],
+      };
+      setComments([...comments, newCommentObj]);
       setNewComment("");
     }
   };
@@ -175,9 +173,9 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
   };
 
   return (
-    <div className="fixed inset-0 bg-background z-50 flex flex-col">
+    <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="sticky top-0 bg-gradient-to-r from-background via-background to-primary/5 border-b border-primary/10 px-4 py-3 flex items-center justify-between backdrop-blur-sm">
+      <div className="sticky top-0 bg-gradient-to-r from-background via-background to-primary/5 border-b border-primary/10 px-4 py-3 flex items-center justify-between backdrop-blur-sm z-10">
         <Button
           variant="ghost"
           size="icon"
@@ -194,7 +192,7 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
       </div>
 
       {/* Post Preview */}
-      <div className="sticky top-14 bg-gradient-to-b from-primary/5 to-transparent border-b border-primary/10 p-4">
+      <div className="bg-gradient-to-b from-primary/5 to-transparent border-b border-primary/10 px-4 py-4">
         <div className="flex gap-3">
           <img
             src={postImage}
@@ -212,25 +210,25 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {comments.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-muted-foreground">
-            <p>No comments yet. Be the first to comment!</p>
+            <p>No comments yet. Be the first!</p>
           </div>
         ) : (
           comments.map((comment) => (
             <div key={comment.id} className="space-y-3" data-testid={`comment-${comment.id}`}>
               {/* Main Comment */}
-              <div className="flex gap-3 group">
+              <div className="flex gap-3">
                 <Avatar className="w-9 h-9 border border-primary/20 flex-shrink-0">
-                  <AvatarFallback className="bg-primary/20 text-primary font-bold">
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
                     {comment.author[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1">
-                  <div className="bg-gradient-to-r from-slate-800/50 to-slate-800/30 border border-primary/10 rounded-xl px-4 py-3 hover:border-primary/20 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="bg-slate-800/50 border border-primary/10 rounded-xl px-4 py-3">
                     <p className="font-semibold text-sm text-primary" data-testid={`text-comment-author-${comment.id}`}>
                       {comment.author}
                     </p>
-                    <p className="text-sm text-slate-200 mt-1" data-testid={`text-comment-text-${comment.id}`}>
+                    <p className="text-sm text-slate-200 mt-1 break-words" data-testid={`text-comment-text-${comment.id}`}>
                       {comment.text}
                     </p>
                   </div>
@@ -245,13 +243,9 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                       className="hover:text-primary transition-colors flex items-center gap-1"
                       data-testid={`button-like-comment-${comment.id}`}
                     >
-                      <Heart
-                        className={`h-4 w-4 ${
-                          comment.isLiked ? "fill-primary text-primary" : ""
-                        }`}
-                      />
+                      <Heart className={`h-4 w-4 ${comment.isLiked ? "fill-primary text-primary" : ""}`} />
                       <span className={comment.isLiked ? "text-primary font-semibold" : ""}>
-                        {comment.likes} {comment.likes === 1 ? "like" : "likes"}
+                        {comment.likes}
                       </span>
                     </button>
                     <button
@@ -259,7 +253,7 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                       className="hover:text-primary transition-colors flex items-center gap-1"
                       data-testid={`button-reply-comment-${comment.id}`}
                     >
-                      <ReplyIcon className="h-4 w-4" />
+                      <MessageCircle className="h-4 w-4" />
                       Reply
                     </button>
                   </div>
@@ -274,7 +268,7 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                       placeholder="Write a reply..."
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="bg-slate-800/50 border border-primary/20 rounded-lg focus:border-primary/50"
+                      className="bg-slate-800/50 border border-primary/20 rounded-lg"
                       data-testid={`input-reply-${comment.id}`}
                       autoFocus
                     />
@@ -302,12 +296,12 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                         </AvatarFallback>
                       </Avatar>
 
-                      <div className="flex-1">
-                        <div className="bg-slate-900/50 border border-primary/5 rounded-lg px-3 py-2 hover:border-primary/10 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-slate-900/50 border border-primary/5 rounded-lg px-3 py-2">
                           <p className="font-semibold text-xs text-primary/80" data-testid={`text-reply-author-${reply.id}`}>
                             {reply.author}
                           </p>
-                          <p className="text-sm text-slate-300 mt-0.5" data-testid={`text-reply-text-${reply.id}`}>
+                          <p className="text-sm text-slate-300 mt-0.5 break-words" data-testid={`text-reply-text-${reply.id}`}>
                             {reply.text}
                           </p>
                         </div>
@@ -320,14 +314,8 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                             className="hover:text-primary transition-colors flex items-center gap-1"
                             data-testid={`button-like-reply-${reply.id}`}
                           >
-                            <Heart
-                              className={`h-3 w-3 ${
-                                reply.isLiked ? "fill-primary text-primary" : ""
-                              }`}
-                            />
-                            <span className={reply.isLiked ? "text-primary font-semibold" : ""}>
-                              {reply.likes}
-                            </span>
+                            <Heart className={`h-3 w-3 ${reply.isLiked ? "fill-primary text-primary" : ""}`} />
+                            <span className={reply.isLiked ? "text-primary font-semibold" : ""}>{reply.likes}</span>
                           </button>
                         </div>
                       </div>
@@ -341,24 +329,24 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
       </div>
 
       {/* Comment Input */}
-      <form onSubmit={handleAddComment} className="sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent border-t border-primary/10 p-4 backdrop-blur-sm">
+      <form onSubmit={handleAddComment} className="bg-gradient-to-t from-background via-background to-transparent border-t border-primary/10 px-4 py-4 backdrop-blur-sm">
         <div className="flex gap-2">
           <Avatar className="w-9 h-9 border border-primary/20 flex-shrink-0">
-            <AvatarFallback className="bg-primary/20 text-primary font-bold">Y</AvatarFallback>
+            <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">Y</AvatarFallback>
           </Avatar>
-          <div className="flex-1 flex gap-2">
+          <div className="flex-1 flex gap-2 min-w-0">
             <Input
               placeholder="Add a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="bg-slate-800/50 border border-primary/20 rounded-lg focus:border-primary/50 placeholder:text-slate-500"
+              className="bg-slate-800/50 border border-primary/20 rounded-lg"
               data-testid="input-new-comment"
             />
             <Button
               type="submit"
               size="icon"
               disabled={!newComment.trim()}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 flex-shrink-0"
               data-testid="button-send-comment"
             >
               <Send className="h-4 w-4" />
