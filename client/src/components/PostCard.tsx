@@ -44,9 +44,10 @@ interface PostCardProps {
   onShare?: (postId: string) => void;
   onBookmark?: (postId: string) => void;
   onOpenShare?: (postId: string) => void;
+  onAuthorClick?: (username: string) => void;
 }
 
-export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare }: PostCardProps) {
+export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
@@ -99,20 +100,24 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   return (
     <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${post.id}`}>
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
+        <button 
+          onClick={() => onAuthorClick?.(post.author.username)}
+          className="flex items-center gap-3 hover-elevate flex-1 rounded px-2 py-1 transition-all group"
+          data-testid={`button-author-profile-${post.id}`}
+        >
           <Avatar className="w-10 h-10">
             <AvatarImage src={post.author.avatar} />
             <AvatarFallback>{post.author.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div>
-            <p className="font-semibold text-sm" data-testid={`text-username-${post.id}`}>
+          <div className="text-left">
+            <p className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`text-username-${post.id}`}>
               {post.author.username}
             </p>
             <p className="text-xs text-muted-foreground" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
-        </div>
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 

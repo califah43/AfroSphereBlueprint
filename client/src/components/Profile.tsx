@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, MessageCircle } from "lucide-react";
+import { Settings, Heart, Share2, MessageCircle, X } from "lucide-react";
 import CreatorBadge from "./CreatorBadge";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
@@ -11,6 +11,8 @@ import musicImage from "@assets/generated_images/African_music_creator_post_902d
 
 interface ProfileProps {
   isOwnProfile?: boolean;
+  username?: string;
+  onClose?: () => void;
   onEditProfile?: () => void;
   onSettings?: () => void;
   onPostClick?: (postId: string) => void;
@@ -27,14 +29,62 @@ const mockPosts = [
   { id: "6", image: musicImage },
 ];
 
-export default function Profile({ isOwnProfile = true, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
-  const [activeTab, setActiveTab] = useState("posts");
+const userProfiles: Record<string, any> = {
+  adikeafrica: {
+    displayName: "Adike Wilson",
+    username: "adikeafrica",
+    bio: "Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design",
+    followers: "1.2K",
+    following: "485",
+    posts: "127",
+  },
+  zara_style: {
+    displayName: "Zara Style",
+    username: "zara_style",
+    bio: "New collection: Bold patterns, sustainable fabrics. Shop local, think global 🌍",
+    followers: "8.5K",
+    following: "234",
+    posts: "89",
+  },
+  beat_masta: {
+    displayName: "Beat Master",
+    username: "beat_masta",
+    bio: "Producer | Beatmaker | Creating the future of music 🎵",
+    followers: "12.3K",
+    following: "567",
+    posts: "156",
+  },
+  kojoart: {
+    displayName: "Kojo Art",
+    username: "kojoart",
+    bio: "Contemporary artist exploring African heritage through modern art 🎨",
+    followers: "8.9K",
+    following: "342",
+    posts: "67",
+  },
+};
 
+export default function Profile({ isOwnProfile = true, username = "adikeafrica", onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
+  const [activeTab, setActiveTab] = useState("posts");
+  const userProfile = userProfiles[username] || userProfiles.adikeafrica;
   return (
     <div className="pb-20" data-testid="container-profile">
       {/* Sticky Header */}
       <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-20">
-        <h2 className="text-lg font-semibold">@adikeafrica</h2>
+        <div className="flex items-center gap-3 flex-1">
+          {!isOwnProfile && onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="hover-elevate"
+              data-testid="button-close-profile"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
+          <h2 className="text-lg font-semibold">@{username}</h2>
+        </div>
         {isOwnProfile && (
           <Button
             variant="ghost"
@@ -78,10 +128,10 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
 
           {/* Name & Bio */}
           <h1 className="text-2xl font-bold mb-1" data-testid="text-profile-displayname">
-            Adike Wilson
+            {userProfile.displayName}
           </h1>
           <p className="text-sm text-muted-foreground mb-2" data-testid="text-profile-bio">
-            Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design
+            {userProfile.bio}
           </p>
 
           {/* Stats - Elegant Grid */}
@@ -92,7 +142,7 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
               data-testid="button-view-followers"
             >
               <p className="text-lg font-bold text-primary" data-testid="text-followers-count">
-                1.2K
+                {userProfile.followers}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">Followers</p>
             </button>
@@ -105,7 +155,7 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
               data-testid="button-view-following"
             >
               <p className="text-lg font-bold text-primary" data-testid="text-following-count">
-                485
+                {userProfile.following}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">Following</p>
             </button>
@@ -114,7 +164,7 @@ export default function Profile({ isOwnProfile = true, onEditProfile, onSettings
             
             <div className="text-center">
               <p className="text-lg font-bold text-primary" data-testid="text-posts-count">
-                127
+                {userProfile.posts}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">Posts</p>
             </div>

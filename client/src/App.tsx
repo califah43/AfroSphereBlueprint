@@ -24,7 +24,7 @@ import fashionImage from "@assets/generated_images/African_fashion_post_example_
 
 type AppState = "splash" | "onboarding" | "auth" | "main";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
@@ -33,6 +33,7 @@ export default function App() {
   const [commentsPostData, setCommentsPostData] = useState<any>(null);
   const [selectedHashtag, setSelectedHashtag] = useState<string>("");
   const [selectedPostId, setSelectedPostId] = useState<string>("");
+  const [selectedUsername, setSelectedUsername] = useState<string>("");
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -78,6 +79,11 @@ export default function App() {
   const handleOpenHashtagFeed = (hashtag: string) => {
     setSelectedHashtag(hashtag);
     setModalView("hashtag");
+  };
+
+  const handleOpenUserProfile = (username: string) => {
+    setSelectedUsername(username);
+    setModalView("user-profile");
   };
 
   if (appState === "splash") {
@@ -228,6 +234,21 @@ export default function App() {
               onClose={() => setModalView("none")}
               onShare={(platform) => console.log("Shared to:", platform)}
             />
+          )}
+
+          {modalView === "user-profile" && selectedUsername && (
+            <div className="flex-1 overflow-y-auto">
+              <Profile
+                isOwnProfile={selectedUsername === "adikeafrica"}
+                username={selectedUsername}
+                onClose={() => setModalView("none")}
+                onEditProfile={() => setModalView("edit-profile")}
+                onSettings={() => setModalView("settings")}
+                onPostClick={handleOpenPostDetail}
+                onFollowersClick={() => setModalView("followers")}
+                onFollowingClick={() => setModalView("followers")}
+              />
+            </div>
           )}
           </div>
         </div>
