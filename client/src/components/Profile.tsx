@@ -117,7 +117,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         banner: "",
       };
     }
-    return userProfiles[username] || userProfiles.adikeafrica;
+    return userProfiles[username || "adikeafrica"] || userProfiles.adikeafrica;
   };
   
   const userProfile = getProfileData();
@@ -392,6 +392,14 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         </div>
       </div>
+
+      {showPictureModal && userProfile.avatar && (
+        <ProfilePictureModal
+          imageUrl={userProfile.avatar}
+          displayName={userProfile.displayName}
+          onClose={() => setShowPictureModal(false)}
+        />
+      )}
     </div>
   );
 }
