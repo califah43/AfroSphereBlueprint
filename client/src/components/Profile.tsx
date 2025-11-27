@@ -70,7 +70,31 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const userProfile = userProfiles[username] || userProfiles.adikeafrica;
+  
+  // Get real user data from localStorage if own profile
+  const getProfileData = () => {
+    if (isOwnProfile) {
+      const storedData = localStorage.getItem("currentUserData");
+      if (storedData) {
+        try {
+          const userData = JSON.parse(storedData);
+          return {
+            displayName: userData.displayName || userData.username || "No Name",
+            username: userData.username || "user",
+            bio: userData.bio || "Creative on AfroSphere",
+            followers: "0",
+            following: "0",
+            posts: "0",
+          };
+        } catch (e) {
+          console.log("Error parsing user data");
+        }
+      }
+    }
+    return userProfiles[username] || userProfiles.adikeafrica;
+  };
+  
+  const userProfile = getProfileData();
 
   const toggleFollow = async () => {
     setIsLoading(true);

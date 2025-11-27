@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { 
   ChevronRight, X, LogOut, Bell, Lock, Shield, Palette, Users, Eye, 
   Heart, Share2, Volume2, Smartphone, Mail, AlertCircle,
@@ -78,8 +79,11 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editMode, setEditMode] = useState<"none" | "email" | "password" | "phone">("none");
+  const [editData, setEditData] = useState({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "" });
   const { toast } = useToast();
   const userId = localStorage.getItem("currentUserId") || "default-user";
+  const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -199,6 +203,38 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
     }
   };
 
+  const handleSaveEmail = async () => {
+    if (!editData.email || !editData.phone) {
+      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    try {
+      const updated = { ...currentUserData, email: editData.email, phone: editData.phone };
+      localStorage.setItem("currentUserData", JSON.stringify(updated));
+      toast({ title: "Saved", description: "Email and phone updated" });
+      setEditMode("none");
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to save", variant: "destructive" });
+    }
+  };
+
+  const handleSavePassword = async () => {
+    if (!editData.password || !editData.newPassword) {
+      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    if (editData.newPassword !== editData.confirmPassword) {
+      toast({ title: "Error", description: "Passwords don't match", variant: "destructive" });
+      return;
+    }
+    try {
+      toast({ title: "Success", description: "Password changed" });
+      setEditMode("none");
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to change password", variant: "destructive" });
+    }
+  };
+
   const SettingButton = ({ icon: Icon, label, description, onClick }: any) => (
     <button
       onClick={onClick}
@@ -237,6 +273,55 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
     );
   };
 
+  // Edit modals
+  if (editMode === "email") {
+    return (
+      <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
+          <h2 className="text-lg font-bold">Email & Phone</h2>
+          <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
+        </div>
+        <div className="max-w-md mx-auto px-4 py-6 space-y-4">
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input type="email" placeholder="you@example.com" value={editData.email} onChange={(e) => setEditData({...editData, email: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label>Phone</Label>
+            <Input type="tel" placeholder="+234 123 456 7890" value={editData.phone} onChange={(e) => setEditData({...editData, phone: e.target.value})} />
+          </div>
+          <Button onClick={handleSaveEmail} className="w-full bg-primary">Save Changes</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (editMode === "password") {
+    return (
+      <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
+          <h2 className="text-lg font-bold">Change Password</h2>
+          <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
+        </div>
+        <div className="max-w-md mx-auto px-4 py-6 space-y-4">
+          <div className="space-y-2">
+            <Label>Current Password</Label>
+            <Input type="password" value={editData.password} onChange={(e) => setEditData({...editData, password: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label>New Password</Label>
+            <Input type="password" value={editData.newPassword} onChange={(e) => setEditData({...editData, newPassword: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label>Confirm Password</Label>
+            <Input type="password" value={editData.confirmPassword} onChange={(e) => setEditData({...editData, confirmPassword: e.target.value})} />
+          </div>
+          <Button onClick={handleSavePassword} className="w-full bg-primary">Update Password</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
       {/* Sticky Header */}
@@ -269,7 +354,7 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               icon={Mail}
               label="Email & Phone"
               description="Manage your contact information"
-              onClick={() => console.log("Edit email/phone")}
+              onClick={() => setEditMode("email")}
             />
             <SettingButton
               icon={Users}
@@ -281,7 +366,7 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               icon={Lock}
               label="Change Password"
               description="Update your account security"
-              onClick={() => console.log("Change password")}
+              onClick={() => setEditMode("password")}
             />
             <SettingToggle
               icon={Eye}

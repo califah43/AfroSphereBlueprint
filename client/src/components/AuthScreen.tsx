@@ -25,6 +25,20 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
+      const userData = {
+        id: userCredential.user.uid,
+        email: userCredential.user.email,
+        username: signupData.username,
+        displayName: signupData.username,
+        bio: "",
+        location: "",
+        avatar: "",
+        followerCount: 0,
+        followingCount: 0,
+        postCount: 0,
+      };
+      localStorage.setItem("currentUserId", userCredential.user.uid);
+      localStorage.setItem("currentUserData", JSON.stringify(userData));
       console.log("Signup:", userCredential.user);
       toast({ title: "Account created!", description: "Welcome to AfroSphere" });
       onAuthComplete();
@@ -40,6 +54,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     setIsLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
+      localStorage.setItem("currentUserId", userCredential.user.uid);
       console.log("Login:", userCredential.user);
       toast({ title: "Welcome back!", description: "Successfully signed in" });
       onAuthComplete();
