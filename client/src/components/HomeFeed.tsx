@@ -156,19 +156,19 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
             <Tabs value={activeCategory} onValueChange={setActiveCategory}>
               <TabsList className="w-full grid grid-cols-6 h-auto">
                 <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
-              <TabsTrigger value="fashion" className="text-xs" data-testid="tab-fashion">
-                Fashion
-              </TabsTrigger>
                   For You
                 </TabsTrigger>
-                <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
-                  Culture
+                <TabsTrigger value="fashion" className="text-xs" data-testid="tab-fashion">
+                  Fashion
                 </TabsTrigger>
                 <TabsTrigger value="music" className="text-xs" data-testid="tab-music">
                   Music
                 </TabsTrigger>
                 <TabsTrigger value="art" className="text-xs" data-testid="tab-art">
                   Art
+                </TabsTrigger>
+                <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
+                  Culture
                 </TabsTrigger>
                 <TabsTrigger value="lifestyle" className="text-xs" data-testid="tab-lifestyle">
                   Lifestyle
