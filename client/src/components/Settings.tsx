@@ -107,23 +107,26 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
     </button>
   );
 
-  const SettingToggle = ({ icon: Icon, label, description, section, key }: any) => (
-    <div className="flex items-start justify-between p-4 hover-elevate rounded-lg border border-border/50 bg-card/50 transition-all" data-testid={`setting-${label.toLowerCase().replace(/\s+/g, '-')}`}>
-      <div className="flex items-start gap-3">
-        <Icon className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-        <div>
-          <Label htmlFor={`${section}-${key}`} className="text-sm font-medium cursor-pointer">{label}</Label>
-          {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+  const SettingToggle = ({ icon: Icon, label, description, section, key }: any) => {
+    const currentValue = (settings[section as keyof SettingsSections] as any)[key];
+    return (
+      <div className="flex items-start justify-between p-4 hover-elevate rounded-lg border border-border/50 bg-card/50 transition-all" data-testid={`setting-${label.toLowerCase().replace(/\s+/g, '-')}`}>
+        <div className="flex items-start gap-3">
+          <Icon className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+          <div>
+            <Label htmlFor={`${section}-${key}`} className="text-sm font-medium cursor-pointer">{label}</Label>
+            {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+          </div>
         </div>
+        <Switch
+          id={`${section}-${key}`}
+          checked={currentValue}
+          onCheckedChange={(value) => handleToggle(section, key, value)}
+          data-testid={`switch-${label.toLowerCase().replace(/\s+/g, '-')}`}
+        />
       </div>
-      <Switch
-        id={`${section}-${key}`}
-        checked={settings[section][key as keyof typeof settings[typeof section]]}
-        onCheckedChange={(value) => handleToggle(section, key, value)}
-        data-testid={`switch-${label.toLowerCase().replace(/\s+/g, '-')}`}
-      />
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
