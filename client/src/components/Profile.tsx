@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, MessageCircle, X } from "lucide-react";
+import { Settings, Heart, Share2, X } from "lucide-react";
 import CreatorBadge from "./CreatorBadge";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";

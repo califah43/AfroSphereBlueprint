@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Copy, Share, Link2, MessageCircle, Mail } from "lucide-react";
+import { Copy, Share, Link2, Mail } from "lucide-react";
 import { SiWhatsapp, SiX, SiFacebook, SiInstagram } from "react-icons/si";
 
 interface ShareSheetProps {
@@ -26,7 +26,6 @@ export default function ShareSheet({ postUrl = "https://afrosphere.app/post/123"
     { id: "x", label: "X", icon: SiX, color: "text-foreground" },
     { id: "facebook", label: "Facebook", icon: SiFacebook, color: "text-blue-600" },
     { id: "instagram", label: "Instagram", icon: SiInstagram, color: "text-pink-500" },
-    { id: "messages", label: "Messages", icon: MessageCircle, color: "text-primary" },
     { id: "email", label: "Email", icon: Mail, color: "text-muted-foreground" },
   ];
 
