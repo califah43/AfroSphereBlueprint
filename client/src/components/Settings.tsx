@@ -127,17 +127,17 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
     loadSettings();
   }, [userId]);
 
-  const handleToggle = async (section: keyof SettingsSections, key: string, value: boolean) => {
+  const handleToggle = async (section: keyof SettingsSections, settingKey: string, value: boolean) => {
+    // Update UI immediately for instant feedback
     const newSettings = {
       ...settings,
       [section]: {
         ...settings[section],
-        [key]: value
+        [settingKey]: value
       }
     };
     setSettings(newSettings);
 
-    setSaving(true);
     try {
       const payload: any = {};
       if (section === "account") {
@@ -172,28 +172,30 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
 
       if (res.ok) {
         toast({
-          title: "Settings saved",
-          description: "Your preferences have been updated",
-          className: "border-primary/20 bg-card",
+          title: "Saved",
+          description: `${settingKey.replace(/([A-Z])/g, ' $1').trim()} updated`,
+          className: "border-primary/20 bg-card text-xs",
+          duration: 2000,
         });
       } else {
+        console.error("Failed to save settings");
+        setSettings(settings);
         toast({
           title: "Error",
           description: "Failed to save settings",
           variant: "destructive",
+          duration: 3000,
         });
-        setSettings(settings);
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
+      setSettings(settings);
       toast({
         title: "Connection Error",
         description: "Unable to save settings. Please try again.",
         variant: "destructive",
+        duration: 3000,
       });
-      setSettings(settings);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -214,21 +216,21 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
     </button>
   );
 
-  const SettingToggle = ({ icon: Icon, label, description, section, key }: any) => {
-    const currentValue = (settings[section as keyof SettingsSections] as any)[key];
+  const SettingToggle = ({ icon: Icon, label, description, section, settingKey }: any) => {
+    const currentValue = (settings[section as keyof SettingsSections] as any)[settingKey];
     return (
       <div className="flex items-start justify-between p-4 hover-elevate rounded-lg border border-border/50 bg-card/50 transition-all" data-testid={`setting-${label.toLowerCase().replace(/\s+/g, '-')}`}>
         <div className="flex items-start gap-3">
           <Icon className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
           <div>
-            <Label htmlFor={`${section}-${key}`} className="text-sm font-medium cursor-pointer">{label}</Label>
+            <Label htmlFor={`${section}-${settingKey}`} className="text-sm font-medium cursor-pointer">{label}</Label>
             {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
           </div>
         </div>
         <Switch
-          id={`${section}-${key}`}
+          id={`${section}-${settingKey}`}
           checked={currentValue}
-          onCheckedChange={(value) => handleToggle(section, key, value)}
+          onCheckedChange={(value) => handleToggle(section, settingKey, value)}
           data-testid={`switch-${label.toLowerCase().replace(/\s+/g, '-')}`}
         />
       </div>
@@ -286,21 +288,21 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               label="Private Account"
               description="Only followers can see your posts"
               section="account"
-              key="privateAccount"
+              settingKey="privateAccount"
             />
             <SettingToggle
               icon={Bell}
               label="Allow Comments"
               description="Anyone can comment on posts"
               section="account"
-              key="allowComments"
+              settingKey="allowComments"
             />
             <SettingToggle
               icon={Users}
               label="Allow Mentions"
               description="Allow others to mention you"
               section="account"
-              key="allowMentions"
+              settingKey="allowMentions"
             />
           </div>
         </div>
@@ -314,42 +316,42 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               label="Likes"
               description="Get notified when someone likes your post"
               section="notifications"
-              key="likes"
+              settingKey="likes"
             />
             <SettingToggle
               icon={Info}
               label="Comments"
               description="Get notified on new comments"
               section="notifications"
-              key="comments"
+              settingKey="comments"
             />
             <SettingToggle
               icon={Users}
               label="New Followers"
               description="Get notified when someone follows you"
               section="notifications"
-              key="follows"
+              settingKey="follows"
             />
             <SettingToggle
               icon={Share2}
               label="Trending Posts"
               description="Be notified of trending content"
               section="notifications"
-              key="trending"
+              settingKey="trending"
             />
             <SettingToggle
               icon={Bell}
               label="Push Notifications"
               description="Receive push notifications"
               section="notifications"
-              key="pushNotifications"
+              settingKey="pushNotifications"
             />
             <SettingToggle
               icon={Mail}
               label="Email Notifications"
               description="Receive email digests"
               section="notifications"
-              key="emailNotifications"
+              settingKey="emailNotifications"
             />
           </div>
         </div>
@@ -369,14 +371,14 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               label="Activity Status"
               description="Show when you're online"
               section="privacy"
-              key="activityStatus"
+              settingKey="activityStatus"
             />
             <SettingToggle
               icon={CheckCircle2}
               label="Read Receipts"
               description="Let people see when you read messages"
               section="privacy"
-              key="readReceipts"
+              settingKey="readReceipts"
             />
             <SettingButton
               icon={AlertCircle}
@@ -396,21 +398,21 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               label="Hide Explicit Content"
               description="Filter sensitive content"
               section="content"
-              key="hideExplicit"
+              settingKey="hideExplicit"
             />
             <SettingToggle
               icon={Volume2}
               label="Muted Words"
               description="Hide posts with certain words"
               section="content"
-              key="mutedWords"
+              settingKey="mutedWords"
             />
             <SettingToggle
               icon={Shield}
               label="Restricted Mode"
               description="Hide mature content"
               section="content"
-              key="restrictedMode"
+              settingKey="restrictedMode"
             />
           </div>
         </div>
@@ -424,7 +426,7 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               label="Dark Mode"
               description="Enable dark theme"
               section="display"
-              key="darkMode"
+              settingKey="darkMode"
             />
             <SettingButton
               icon={Globe}
