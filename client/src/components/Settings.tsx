@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 interface SettingsProps {
   onClose: () => void;
   onLogout?: () => void;
+  onEditProfile?: () => void;
 }
 
 interface SettingsSections {
@@ -46,7 +47,7 @@ interface SettingsSections {
   };
 }
 
-export default function Settings({ onClose, onLogout }: SettingsProps) {
+export default function Settings({ onClose, onLogout, onEditProfile }: SettingsProps) {
   const [settings, setSettings] = useState<SettingsSections>({
     account: {
       privateAccount: false,
@@ -141,6 +142,15 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
       }
     };
     setSettings(newSettings);
+
+    // Apply setting changes to app behavior
+    if (section === "display" && settingKey === "darkMode") {
+      if (value) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
 
     try {
       const payload: any = {};
@@ -360,7 +370,10 @@ export default function Settings({ onClose, onLogout }: SettingsProps) {
               icon={Users}
               label="Edit Profile"
               description="Update username, display name, bio"
-              onClick={() => console.log("Edit profile")}
+              onClick={() => {
+                onEditProfile?.();
+                onClose();
+              }}
             />
             <SettingButton
               icon={Lock}

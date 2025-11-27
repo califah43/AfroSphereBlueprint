@@ -13,14 +13,35 @@ interface EditProfileProps {
 }
 
 export default function EditProfile({ onClose, onSave }: EditProfileProps) {
-  const [formData, setFormData] = useState({
-    displayName: "Adike Wilson",
-    username: "adikeafrica",
-    bio: "Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design",
-    location: "Lagos, Nigeria",
-    website: "adikedesigns.com",
-    profession: "Fashion Designer",
-  });
+  // Load real user data from localStorage
+  const getInitialData = () => {
+    const stored = localStorage.getItem("currentUserData");
+    if (stored) {
+      try {
+        const userData = JSON.parse(stored);
+        return {
+          displayName: userData.displayName || userData.username || "Your Name",
+          username: userData.username || "username",
+          bio: userData.bio || "Creative on AfroSphere",
+          location: userData.location || "Your Location",
+          website: userData.website || "yourwebsite.com",
+          profession: userData.profession || "Creator",
+        };
+      } catch (e) {
+        console.log("Error loading user data");
+      }
+    }
+    return {
+      displayName: "Your Name",
+      username: "username",
+      bio: "Creative on AfroSphere",
+      location: "Your Location",
+      website: "yourwebsite.com",
+      profession: "Creator",
+    };
+  };
+
+  const [formData, setFormData] = useState(getInitialData());
 
   const [charCount, setCharCount] = useState(formData.bio.length);
 
@@ -33,6 +54,16 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   };
 
   const handleSave = () => {
+    const updated = {
+      ...JSON.parse(localStorage.getItem("currentUserData") || "{}"),
+      displayName: formData.displayName,
+      username: formData.username,
+      bio: formData.bio,
+      location: formData.location,
+      website: formData.website,
+      profession: formData.profession,
+    };
+    localStorage.setItem("currentUserData", JSON.stringify(updated));
     console.log("Saving profile:", formData);
     onSave?.(formData);
     onClose();

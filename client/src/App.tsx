@@ -273,6 +273,7 @@ export default function App() {
             <Settings
               onClose={() => setModalView("none")}
               onLogout={handleLogout}
+              onEditProfile={() => setModalView("edit-profile")}
             />
           )}
 
