@@ -93,7 +93,7 @@ interface NotificationsProps {
 }
 
 export default function Notifications({ onUserClick }: NotificationsProps) {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
