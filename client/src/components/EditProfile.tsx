@@ -118,81 +118,66 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           </div>
         </div>
 
-        {/* Avatar Section - Unique Design */}
-        <div className="flex flex-col items-center -mt-12 relative z-10">
-          <div className="relative mb-4">
-            <div className="absolute -inset-3 bg-gradient-to-br from-orange-500/30 to-pink-500/30 rounded-full blur-md" />
-            <Avatar className="w-28 h-28 ring-4 ring-background border-4 border-orange-500/50 shadow-2xl relative" data-testid="avatar-edit">
-              <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-orange-500 to-pink-500 text-white">AC</AvatarFallback>
-            </Avatar>
-            <Button
-              size="icon"
-              className="absolute -bottom-2 -right-2 rounded-full h-10 w-10 bg-gradient-to-br from-orange-500 to-pink-500 text-white border-4 border-background hover:shadow-lg transition-all hover-elevate shadow-lg"
-              data-testid="button-change-avatar"
-            >
-              <Camera className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground text-center">Tap camera to upload</p>
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center -mt-10 relative z-10">
+          <Avatar className="w-24 h-24 ring-2 ring-primary border border-border shadow-md" data-testid="avatar-edit">
+            <AvatarFallback className="text-xl font-bold bg-primary text-white">AC</AvatarFallback>
+          </Avatar>
+          <Button
+            size="icon"
+            className="absolute -bottom-1 -right-1 h-8 w-8 bg-primary text-white hover:bg-primary/90"
+            data-testid="button-change-avatar"
+          >
+            <Camera className="h-3.5 w-3.5" />
+          </Button>
         </div>
 
-        {/* Form Fields with Visual Grouping */}
-        <div className="space-y-5 pt-4">
+        {/* Form Fields - Clean and Simple */}
+        <div className="space-y-4 pt-2">
           {/* Display Name */}
-          <div className="space-y-2.5 bg-gradient-to-br from-primary/5 to-orange-500/5 p-4 rounded-xl border border-primary/10 hover-elevate transition-all">
-            <Label htmlFor="displayName" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              Display Name
-            </Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="displayName" className="font-semibold text-sm">Display Name</Label>
             <Input
               id="displayName"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               placeholder="Your display name"
-              className="bg-background/50 border-primary/30 focus:border-primary text-sm h-10 rounded-lg font-medium"
+              className="text-sm h-9"
               data-testid="input-displayname"
             />
-            <p className="text-xs text-muted-foreground leading-relaxed">How the world sees your name</p>
           </div>
 
-          {/* Username - Read Only Info */}
-          <div className="space-y-2.5 bg-gradient-to-br from-muted/30 to-muted/5 p-4 rounded-xl border border-border/50">
-            <Label htmlFor="username" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-muted-foreground" />
-              Username
-            </Label>
-            <div className="px-4 py-3 rounded-lg border border-border/50 bg-background text-sm font-bold text-primary">
+          {/* Username - Read Only */}
+          <div className="space-y-1.5">
+            <Label className="font-semibold text-sm">Username</Label>
+            <div className="px-3 py-2 rounded-md border border-border bg-muted text-sm font-medium text-muted-foreground">
               @{formData.username}
             </div>
-            <p className="text-xs text-muted-foreground">Unique & permanent</p>
           </div>
 
           {/* Bio */}
-          <div className="space-y-2.5 bg-gradient-to-br from-accent/5 to-purple-500/5 p-4 rounded-xl border border-accent/20 hover-elevate transition-all">
-            <Label htmlFor="bio" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-accent" />
-              Your Story
-            </Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="bio" className="font-semibold text-sm">Bio</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={handleBioChange}
-              placeholder="What makes you unique? Share your passion..."
-              className="min-h-24 resize-none bg-background/50 border-accent/30 focus:border-accent rounded-lg text-sm focus:ring-accent/30"
+              placeholder="Tell your story..."
+              className="min-h-20 resize-none text-sm"
               data-testid="input-bio"
             />
             <div className="flex justify-between items-center">
-              <p className="text-xs text-muted-foreground">Express yourself</p>
-              <p className={`text-xs font-bold ${charCount > 130 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+              <p className="text-xs text-muted-foreground"></p>
+              <p className={`text-xs font-medium ${charCount > 130 ? 'text-orange-500' : 'text-muted-foreground'}`}>
                 {charCount}/150
               </p>
             </div>
           </div>
 
           {/* Location */}
-          <div className="space-y-2.5 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 p-4 rounded-xl border border-blue-500/20 hover-elevate transition-all">
-            <Label htmlFor="location" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-blue-500" />
+          <div className="space-y-1.5">
+            <Label htmlFor="location" className="font-semibold text-sm flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 text-primary" />
               Location
             </Label>
             <Input
@@ -200,33 +185,31 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
-              className="bg-background/50 border-blue-500/30 focus:border-blue-500 text-sm h-10 rounded-lg font-medium"
+              className="text-sm h-9"
               data-testid="input-location"
             />
-            <p className="text-xs text-muted-foreground">Where you create from</p>
           </div>
 
           {/* Profession */}
-          <div className="space-y-2.5 bg-gradient-to-br from-green-500/5 to-emerald-500/5 p-4 rounded-xl border border-green-500/20 hover-elevate transition-all">
-            <Label htmlFor="profession" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-green-500" />
-              Craft
+          <div className="space-y-1.5">
+            <Label htmlFor="profession" className="font-semibold text-sm flex items-center gap-1.5">
+              <Briefcase className="h-3.5 w-3.5 text-primary" />
+              Profession
             </Label>
             <Input
               id="profession"
               value={formData.profession}
               onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-              placeholder="Creator, Designer, Artist..."
-              className="bg-background/50 border-green-500/30 focus:border-green-500 text-sm h-10 rounded-lg font-medium"
+              placeholder="What do you do?"
+              className="text-sm h-9"
               data-testid="input-profession"
             />
-            <p className="text-xs text-muted-foreground">Your specialty</p>
           </div>
 
           {/* Website */}
-          <div className="space-y-2.5 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 p-4 rounded-xl border border-violet-500/20 hover-elevate transition-all">
-            <Label htmlFor="website" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <LinkIcon className="h-4 w-4 text-violet-500" />
+          <div className="space-y-1.5">
+            <Label htmlFor="website" className="font-semibold text-sm flex items-center gap-1.5">
+              <LinkIcon className="h-3.5 w-3.5 text-primary" />
               Website
             </Label>
             <Input
@@ -234,30 +217,19 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
               placeholder="yoursite.com"
-              className="bg-background/50 border-violet-500/30 focus:border-violet-500 text-sm h-10 rounded-lg font-medium"
+              className="text-sm h-9"
               data-testid="input-website"
             />
-            <p className="text-xs text-muted-foreground">Your portfolio link</p>
           </div>
-        </div>
-
-        {/* Info Box - Unique Style */}
-        <div className="bg-gradient-to-br from-primary/20 via-orange-500/10 to-pink-500/10 border border-primary/30 rounded-xl p-4 shadow-lg">
-          <p className="text-sm font-bold text-primary flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            Pro Tip
-          </p>
-          <p className="text-xs text-foreground mt-2 leading-relaxed">A complete profile helps you stand out and attract followers in the AfroSphere community. Be authentic!</p>
         </div>
 
         {/* Save Button */}
         <Button
           onClick={handleSave}
-          className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:scale-105 text-white font-bold h-12 rounded-xl transition-all duration-300 shadow-lg"
+          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-10 mt-4"
           data-testid="button-save-full"
         >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Save Your Profile
+          Save Profile
         </Button>
       </div>
     </div>
