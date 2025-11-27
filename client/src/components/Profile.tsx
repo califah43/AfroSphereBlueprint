@@ -30,11 +30,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [userId, setUserId] = useState<string>("");
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const { toast } = useToast();
 
   // Fetch user data from API
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsLoadingProfile(true);
       try {
         let fetchUsername = username;
         let fetchUserId = "";
@@ -48,7 +50,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           }
         }
 
-        if (!fetchUsername) return;
+        if (!fetchUsername) {
+          setIsLoadingProfile(false);
+          return;
+        }
 
         const userRes = await fetch(`/api/users/username/${fetchUsername}`);
         if (userRes.ok) {
@@ -74,6 +79,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoadingProfile(false);
       }
     };
 
@@ -131,6 +138,51 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     }
   };
 
+  if (isLoadingProfile) {
+    return (
+      <div className="pb-20" data-testid="container-profile">
+        <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-20">
+          <div className="flex items-center gap-3 flex-1">
+            {!isOwnProfile && onClose && (
+              <Button variant="ghost" size="icon" onClick={onClose} className="hover-elevate">
+                <X className="h-5 w-5" />
+              </Button>
+            )}
+            <div className="h-5 w-24 bg-muted rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div className="h-32 bg-muted animate-pulse"></div>
+        <div className="max-w-md mx-auto px-4 -mt-14 relative z-10">
+          <div className="mb-4">
+            <div className="w-20 h-20 bg-muted rounded-full animate-pulse mb-4"></div>
+            <div className="h-6 w-40 bg-muted rounded animate-pulse mb-2"></div>
+            <div className="h-4 w-32 bg-muted rounded animate-pulse mb-4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="pb-20" data-testid="container-profile">
+        <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-20">
+          <div className="flex items-center gap-3 flex-1">
+            {!isOwnProfile && onClose && (
+              <Button variant="ghost" size="icon" onClick={onClose} className="hover-elevate">
+                <X className="h-5 w-5" />
+              </Button>
+            )}
+            <h2 className="text-lg font-semibold">@{username}</h2>
+          </div>
+        </div>
+        <div className="py-16 text-center">
+          <p className="text-muted-foreground">User not found</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-20" data-testid="container-profile">
       {/* Sticky Header */}
@@ -147,7 +199,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <X className="h-5 w-5" />
             </Button>
           )}
-          <h2 className="text-lg font-semibold">@{username}</h2>
+          <h2 className="text-lg font-semibold">@{userProfile.username}</h2>
         </div>
         {isOwnProfile && (
           <Button
@@ -165,9 +217,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       {/* Elegant Header with Banner - Compact */}
       <div className="relative h-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
-          {(userProfile.banner || bannerImage) && (
+          {(userProfile?.banner || bannerImage) && (
             <img
-              src={userProfile.banner || bannerImage}
+              src={userProfile?.banner || bannerImage}
               alt="Profile banner"
               className="w-full h-full object-cover opacity-90"
             />
@@ -182,15 +234,15 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="mb-4">
           <div className="flex items-end gap-3 mb-3">
             <button
-              onClick={() => userProfile.avatar && setShowPictureModal(true)}
-              className={`relative ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+              onClick={() => userProfile?.avatar && setShowPictureModal(true)}
+              className={`relative ${userProfile?.avatar ? 'hover-elevate cursor-pointer' : ''}`}
               data-testid="button-view-avatar"
             >
               <Avatar className="w-20 h-20 ring-4 ring-background border-3 border-primary/20 shadow-lg" data-testid="avatar-profile">
-                {userProfile.avatar && <AvatarImage src={userProfile.avatar} alt="Profile" />}
-                <AvatarFallback className="text-2xl font-bold">{userProfile.username[0].toUpperCase()}</AvatarFallback>
+                {userProfile?.avatar && <AvatarImage src={userProfile.avatar} alt="Profile" />}
+                <AvatarFallback className="text-2xl font-bold">{userProfile?.username?.[0]?.toUpperCase() || "?"}</AvatarFallback>
               </Avatar>
-              {userProfile.avatar && (
+              {userProfile?.avatar && (
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/20 rounded-full transition-colors duration-200 flex items-center justify-center">
                   <span className="text-white text-xs font-semibold opacity-0 hover:opacity-100">View</span>
                 </div>
@@ -204,13 +256,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
           {/* Name & Bio */}
           <h1 className="text-2xl font-bold mb-0.5" data-testid="text-profile-displayname">
-            {userProfile.displayName}
+            {userProfile?.displayName || "User"}
           </h1>
           <p className="text-sm text-primary font-semibold mb-2" data-testid="text-profile-username">
-            @{userProfile.username}
+            @{userProfile?.username || "user"}
           </p>
           <p className="text-sm text-muted-foreground mb-2" data-testid="text-profile-bio">
-            {userProfile.bio}
+            {userProfile?.bio || "Creative on AfroSphere"}
           </p>
 
           {/* Stats - Elegant Grid */}
@@ -221,7 +273,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               data-testid="button-view-followers"
             >
               <p className="text-lg font-bold text-primary" data-testid="text-followers-count">
-                {userProfile.followers}
+                {userProfile?.followers || "0"}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">Followers</p>
             </button>
@@ -234,7 +286,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               data-testid="button-view-following"
             >
               <p className="text-lg font-bold text-primary" data-testid="text-following-count">
-                {userProfile.following}
+                {userProfile?.following || "0"}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">Following</p>
             </button>
@@ -243,7 +295,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             
             <div className="text-center">
               <p className="text-lg font-bold text-primary" data-testid="text-posts-count">
-                {userProfile.posts}
+                {userProfile?.posts || "0"}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">Posts</p>
             </div>
@@ -302,7 +354,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <div className="mt-6">
             {activeTab === "posts" && (
               <>
-                {isOwnProfile && userProfile.posts === "0" ? (
+                {userPosts.length === 0 ? (
                   <div className="py-16 text-center">
                     <Share2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
                     <p className="text-muted-foreground font-medium">No posts yet</p>
@@ -310,7 +362,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-2">
-                    {/* Real posts would load from API here - currently empty for new profiles */}
+                    {userPosts.map((post) => (
+                      <div
+                        key={post.id}
+                        onClick={() => onPostClick?.(post.id)}
+                        className="aspect-square bg-muted rounded-md hover-elevate cursor-pointer overflow-hidden"
+                        data-testid={`button-post-${post.id}`}
+                      >
+                        {post.image && (
+                          <img src={post.image} alt={post.caption} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </>
