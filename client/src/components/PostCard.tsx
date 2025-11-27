@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ export interface Post {
 
 interface PostCardProps {
   post: Post;
+  isOwnPost?: boolean;
   onLike?: (postId: string) => void;
   onComment?: (postId: string) => void;
   onShare?: (postId: string) => void;
@@ -44,7 +46,7 @@ interface PostCardProps {
   onOpenShare?: (postId: string) => void;
 }
 
-export default function PostCard({ post, onLike, onComment, onShare, onBookmark, onOpenShare }: PostCardProps) {
+export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
@@ -113,36 +115,86 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" data-testid={`button-menu-${post.id}`}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hover-elevate"
+              data-testid={`button-menu-${post.id}`}
+            >
               <MoreVertical className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete post
+          <DropdownMenuContent align="end" className="w-56">
+            {isOwnPost && (
+              <>
+                <DropdownMenuItem 
+                  onClick={() => setShowDeleteDialog(true)} 
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                  data-testid={`button-delete-own-${post.id}`}
+                >
+                  <Trash2 className="mr-3 h-4 w-4" />
+                  <span className="font-medium">Delete post for me</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            {!isOwnPost && (
+              <>
+                <DropdownMenuItem 
+                  onClick={() => console.log("Not interested")}
+                  className="cursor-pointer"
+                  data-testid={`button-not-interested-${post.id}`}
+                >
+                  <Eye className="mr-3 h-4 w-4" />
+                  <span>Not interested</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setShowDeleteDialog(true)} 
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                  data-testid={`button-report-${post.id}`}
+                >
+                  <Flag className="mr-3 h-4 w-4" />
+                  <span className="font-medium">Report post</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            <DropdownMenuItem 
+              onClick={() => {
+                navigator.clipboard.writeText(`https://afrosphere.app/post/${post.id}`);
+                toast({
+                  title: "Link copied!",
+                  description: "Post link copied to clipboard",
+                });
+              }}
+              className="cursor-pointer"
+              data-testid={`button-copy-link-${post.id}`}
+            >
+              <Copy className="mr-3 h-4 w-4" />
+              <span>Copy link</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Flag className="mr-2 h-4 w-4" />
-              Report
-            </DropdownMenuItem>
-            <DropdownMenuItem>Not interested</DropdownMenuItem>
-            <DropdownMenuItem>Copy link</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-sm">
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete post?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. Your post will be permanently removed from AfroSphere.
+              <AlertDialogTitle className="text-lg">
+                {isOwnPost ? "Delete this post?" : "Report this post?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm">
+                {isOwnPost 
+                  ? "This action cannot be undone. The post will be removed only from your profile and view." 
+                  : "Help us understand the problem. We'll review your report and take action if needed."}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete
+            <AlertDialogFooter className="gap-3">
+              <AlertDialogCancel className="hover:bg-muted">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete} 
+                className={isOwnPost ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "bg-primary hover:bg-primary/90"}
+              >
+                {isOwnPost ? "Delete for me" : "Send Report"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

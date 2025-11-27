@@ -245,6 +245,7 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
                     <PostCard
                       key={post.id}
                       post={post}
+                      isOwnPost={post.author.username === "adikeafrica"}
                       onLike={(id) => console.log("Liked:", id)}
                       onComment={(id) => console.log("Comment:", id)}
                       onShare={(id) => onOpenShare?.()}
