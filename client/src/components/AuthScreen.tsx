@@ -33,10 +33,11 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         <div className="flex flex-col items-center mb-8">
           <button
             onClick={onLogoClick}
-            className="hover-elevate rounded-full p-2 transition-all mb-2"
+            className="bg-transparent border-0 p-0 cursor-default hover:bg-transparent active:bg-transparent mb-2"
             data-testid="button-auth-logo"
+            style={{ appearance: "none", WebkitAppearance: "none" }}
           >
-            <img src={splashLogo} alt="AfroSphere" className="w-20 h-20" data-testid="img-auth-logo" />
+            <img src={splashLogo} alt="AfroSphere" className="w-20 h-20 select-none" data-testid="img-auth-logo" draggable="false" />
           </button>
           <h1 className="text-3xl font-bold" data-testid="text-auth-title">AfroSphere</h1>
           <p className="text-muted-foreground mt-2">Africa's Creative Home</p>
