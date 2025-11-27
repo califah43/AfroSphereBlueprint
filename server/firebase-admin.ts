@@ -78,21 +78,31 @@ export const sendMulticastNotification = async (
       return { successCount: 0, failureCount: fcmTokens.length };
     }
 
-    const message: admin.messaging.MulticastMessage = {
-      notification: {
-        title,
-        body,
-      },
-      data,
-      tokens: fcmTokens,
-    };
+    const messaging = admin.messaging();
+    let successCount = 0;
+    let failureCount = 0;
 
-    const response = await admin.messaging().sendMulticast(message);
-    console.log(`Multicast notification: ${response.successCount} sent, ${response.failureCount} failed`);
-    return {
-      successCount: response.successCount,
-      failureCount: response.failureCount,
-    };
+    // Send notifications individually to track success/failure
+    for (const token of fcmTokens) {
+      try {
+        const message: admin.messaging.Message = {
+          notification: {
+            title,
+            body,
+          },
+          data,
+          token,
+        };
+        await messaging.send(message);
+        successCount++;
+      } catch (error) {
+        failureCount++;
+        console.error(`Failed to send to token ${token}:`, error);
+      }
+    }
+
+    console.log(`Multicast notification: ${successCount} sent, ${failureCount} failed`);
+    return { successCount, failureCount };
   } catch (error) {
     console.error("Failed to send multicast notification:", error);
     return { successCount: 0, failureCount: fcmTokens.length };

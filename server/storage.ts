@@ -55,6 +55,7 @@ export class MemStorage implements IStorage {
   private follows: Map<string, Follow> = new Map();
   private badges: Map<string, CreatorBadge> = new Map();
   private notifications: Map<string, Notification> = new Map();
+  private fcmTokens: Map<string, string> = new Map(); // userId -> fcmToken
 
   // ============ USERS ============
   async getUser(id: string): Promise<User | undefined> {
@@ -355,6 +356,19 @@ export class MemStorage implements IStorage {
       notification.read = true;
       this.notifications.set(id, notification);
     }
+  }
+
+  // ============ FCM TOKENS ============
+  async saveFCMToken(userId: string, token: string): Promise<void> {
+    this.fcmTokens.set(userId, token);
+  }
+
+  async getFCMToken(userId: string): Promise<string | null> {
+    return this.fcmTokens.get(userId) || null;
+  }
+
+  async getAllFCMTokens(): Promise<Map<string, string>> {
+    return this.fcmTokens;
   }
 }
 

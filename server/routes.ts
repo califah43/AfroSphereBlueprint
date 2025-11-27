@@ -238,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing token or userId" });
       }
 
-      // Store FCM token in memory (in production, store in database)
+      await storage.saveFCMToken(userId, token);
       console.log(`FCM token stored for user ${userId}`);
 
       res.json({ success: true, message: "FCM token saved" });
