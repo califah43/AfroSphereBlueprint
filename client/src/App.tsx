@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import SplashScreen from "./components/SplashScreen";
 import OnboardingSlides from "./components/OnboardingSlides";
 import AuthScreen from "./components/AuthScreen";
+import AdminLogin from "./components/AdminLogin";
 import HomeFeed from "./components/HomeFeed";
 import Explore from "./components/Explore";
 import Notifications from "./components/Notifications";
@@ -22,7 +23,7 @@ import ShareSheet from "./components/ShareSheet";
 import BottomNav from "./components/BottomNav";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
-type AppState = "splash" | "onboarding" | "auth" | "main";
+type AppState = "splash" | "onboarding" | "auth" | "main" | "admin";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
@@ -34,6 +35,8 @@ export default function App() {
   const [selectedHashtag, setSelectedHashtag] = useState<string>("");
   const [selectedPostId, setSelectedPostId] = useState<string>("");
   const [selectedUsername, setSelectedUsername] = useState<string>("");
+  const [logoClickCount, setLogoClickCount] = useState(0);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -86,8 +89,23 @@ export default function App() {
     setModalView("user-profile");
   };
 
+  const handleLogoClick = () => {
+    const newCount = logoClickCount + 1;
+    setLogoClickCount(newCount);
+    if (newCount === 18) {
+      setShowAdminLogin(true);
+      setLogoClickCount(0);
+    }
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setShowAdminLogin(false);
+    setAppState("admin");
+    setLogoClickCount(0);
+  };
+
   if (appState === "splash") {
-    return <SplashScreen onComplete={handleSplashComplete} />;
+    return <SplashScreen onComplete={handleSplashComplete} onLogoClick={handleLogoClick} />;
   }
 
   if (appState === "onboarding") {
@@ -100,7 +118,37 @@ export default function App() {
   }
 
   if (appState === "auth") {
-    return <AuthScreen onAuthComplete={handleAuthComplete} />;
+    return (
+      <>
+        <AuthScreen onAuthComplete={handleAuthComplete} onLogoClick={handleLogoClick} />
+        {showAdminLogin && (
+          <AdminLogin
+            onClose={() => setShowAdminLogin(false)}
+            onLoginSuccess={handleAdminLoginSuccess}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (appState === "admin") {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-primary mb-4">Admin Panel</h1>
+          <p className="text-muted-foreground mb-8">Coming soon... ready for your admin screen descriptions!</p>
+          <button
+            onClick={() => {
+              setAppState("auth");
+              setLogoClickCount(0);
+            }}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover-elevate"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

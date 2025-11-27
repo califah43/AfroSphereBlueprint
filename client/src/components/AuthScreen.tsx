@@ -8,9 +8,10 @@ import splashLogo from "@assets/generated_images/transparent_outlined_african_co
 
 interface AuthScreenProps {
   onAuthComplete: () => void;
+  onLogoClick?: () => void;
 }
 
-export default function AuthScreen({ onAuthComplete }: AuthScreenProps) {
+export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenProps) {
   const [signupData, setSignupData] = useState({ email: "", username: "", password: "" });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
 
@@ -30,7 +31,13 @@ export default function AuthScreen({ onAuthComplete }: AuthScreenProps) {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <img src={splashLogo} alt="AfroSphere" className="w-20 h-20 mb-4" data-testid="img-auth-logo" />
+          <button
+            onClick={onLogoClick}
+            className="hover-elevate rounded-full p-2 transition-all mb-2"
+            data-testid="button-auth-logo"
+          >
+            <img src={splashLogo} alt="AfroSphere" className="w-20 h-20" data-testid="img-auth-logo" />
+          </button>
           <h1 className="text-3xl font-bold" data-testid="text-auth-title">AfroSphere</h1>
           <p className="text-muted-foreground mt-2">Africa's Creative Home</p>
         </div>

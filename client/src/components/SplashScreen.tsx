@@ -3,9 +3,10 @@ import splashLogo from "@assets/generated_images/transparent_outlined_african_co
 
 interface SplashScreenProps {
   onComplete: () => void;
+  onLogoClick?: () => void;
 }
 
-export default function SplashScreen({ onComplete }: SplashScreenProps) {
+export default function SplashScreen({ onComplete, onLogoClick }: SplashScreenProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete();
@@ -15,14 +16,18 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-purple-950 via-purple-900 to-black flex flex-col items-center justify-center">
-      <div className="animate-pulse">
+      <button
+        onClick={onLogoClick}
+        className="animate-pulse hover-elevate rounded-full p-2 transition-all"
+        data-testid="button-splash-logo"
+      >
         <img
           src={splashLogo}
           alt="AfroSphere Logo"
           className="w-32 h-32 object-contain"
           data-testid="img-splash-logo"
         />
-      </div>
+      </button>
       <h1 className="text-2xl font-bold text-white mt-6" data-testid="text-splash-tagline">
         Africa's Creative Home
       </h1>
