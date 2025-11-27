@@ -332,14 +332,17 @@ export default function App() {
             />
           )}
 
-          {modalView === "followers" && (
-            <FollowersList
-              username="adikeafrica"
-              followerCount="1.2K"
-              followingCount="485"
-              onClose={() => setModalView("none")}
-            />
-          )}
+          {modalView === "followers" && (() => {
+            const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
+            return (
+              <FollowersList
+                username={currentUserData.username || "user"}
+                followerCount={currentUserData.followerCount?.toString() || "0"}
+                followingCount={currentUserData.followingCount?.toString() || "0"}
+                onClose={() => setModalView("none")}
+              />
+            );
+          })()}
 
           {modalView === "share" && (
             <ShareSheet
