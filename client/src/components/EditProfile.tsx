@@ -118,65 +118,73 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           </div>
         </div>
 
-        {/* Avatar Section */}
-        <div className="flex flex-col items-center -mt-10 relative z-10">
-          <Avatar className="w-24 h-24 ring-2 ring-primary border border-border shadow-md" data-testid="avatar-edit">
-            <AvatarFallback className="text-xl font-bold bg-primary text-white">AC</AvatarFallback>
-          </Avatar>
-          <Button
-            size="icon"
-            className="absolute -bottom-1 -right-1 h-8 w-8 bg-primary text-white hover:bg-primary/90"
-            data-testid="button-change-avatar"
-          >
-            <Camera className="h-3.5 w-3.5" />
-          </Button>
+        {/* Avatar Section - Elegant Design */}
+        <div className="flex flex-col items-center -mt-10 relative z-10 mb-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary to-orange-500 rounded-full blur-lg opacity-40 w-32 h-32" />
+            <Avatar className="w-32 h-32 ring-3 ring-background border-2 border-primary/20 shadow-xl relative" data-testid="avatar-edit">
+              <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-primary to-orange-500 text-white">AC</AvatarFallback>
+            </Avatar>
+            <Button
+              size="icon"
+              className="absolute -bottom-2 -right-2 h-10 w-10 bg-primary text-white hover:bg-primary/90 hover:shadow-lg transition-all shadow-lg"
+              data-testid="button-change-avatar"
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Form Fields - Clean and Simple */}
-        <div className="space-y-4 pt-2">
+        {/* Form Fields - Stylish Grid */}
+        <div className="space-y-5">
           {/* Display Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="displayName" className="font-semibold text-sm">Display Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="displayName" className="font-bold text-sm text-foreground flex items-center gap-2">
+              <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+              Display Name
+            </Label>
             <Input
               id="displayName"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               placeholder="Your display name"
-              className="text-sm h-9"
+              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
               data-testid="input-displayname"
             />
           </div>
 
           {/* Username - Read Only */}
-          <div className="space-y-1.5">
-            <Label className="font-semibold text-sm">Username</Label>
-            <div className="px-3 py-2 rounded-md border border-border bg-muted text-sm font-medium text-muted-foreground">
+          <div className="space-y-2">
+            <Label className="font-bold text-sm text-foreground">Username</Label>
+            <div className="px-4 py-3 rounded-lg border border-primary/20 bg-muted/50 text-sm font-bold text-primary">
               @{formData.username}
             </div>
           </div>
 
           {/* Bio */}
-          <div className="space-y-1.5">
-            <Label htmlFor="bio" className="font-semibold text-sm">Bio</Label>
+          <div className="space-y-2">
+            <Label htmlFor="bio" className="font-bold text-sm text-foreground flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Bio
+            </Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={handleBioChange}
               placeholder="Tell your story..."
-              className="min-h-20 resize-none text-sm"
+              className="min-h-24 resize-none text-sm bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
               data-testid="input-bio"
             />
-            <div className="flex justify-between items-center">
-              <p className="text-xs text-muted-foreground"></p>
-              <p className={`text-xs font-medium ${charCount > 130 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+            <div className="flex justify-end">
+              <p className={`text-xs font-bold ${charCount > 130 ? 'text-primary' : 'text-muted-foreground'}`}>
                 {charCount}/150
               </p>
             </div>
           </div>
 
           {/* Location */}
-          <div className="space-y-1.5">
-            <Label htmlFor="location" className="font-semibold text-sm flex items-center gap-1.5">
+          <div className="space-y-2">
+            <Label htmlFor="location" className="font-bold text-sm text-foreground flex items-center gap-2">
               <MapPin className="h-3.5 w-3.5 text-primary" />
               Location
             </Label>
@@ -185,14 +193,14 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
-              className="text-sm h-9"
+              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
               data-testid="input-location"
             />
           </div>
 
           {/* Profession */}
-          <div className="space-y-1.5">
-            <Label htmlFor="profession" className="font-semibold text-sm flex items-center gap-1.5">
+          <div className="space-y-2">
+            <Label htmlFor="profession" className="font-bold text-sm text-foreground flex items-center gap-2">
               <Briefcase className="h-3.5 w-3.5 text-primary" />
               Profession
             </Label>
@@ -200,15 +208,15 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               id="profession"
               value={formData.profession}
               onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-              placeholder="What do you do?"
-              className="text-sm h-9"
+              placeholder="Creator, Designer, Artist..."
+              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
               data-testid="input-profession"
             />
           </div>
 
           {/* Website */}
-          <div className="space-y-1.5">
-            <Label htmlFor="website" className="font-semibold text-sm flex items-center gap-1.5">
+          <div className="space-y-2">
+            <Label htmlFor="website" className="font-bold text-sm text-foreground flex items-center gap-2">
               <LinkIcon className="h-3.5 w-3.5 text-primary" />
               Website
             </Label>
@@ -217,18 +225,19 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
               placeholder="yoursite.com"
-              className="text-sm h-9"
+              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
               data-testid="input-website"
             />
           </div>
         </div>
 
-        {/* Save Button */}
+        {/* Save Button - Premium Style */}
         <Button
           onClick={handleSave}
-          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-10 mt-4"
+          className="w-full bg-gradient-to-r from-primary to-orange-500 hover:shadow-lg text-white font-bold h-11 mt-6 rounded-lg transition-all duration-300"
           data-testid="button-save-full"
         >
+          <Sparkles className="h-4 w-4 mr-2" />
           Save Profile
         </Button>
       </div>
