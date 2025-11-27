@@ -226,18 +226,24 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
             <>
               {filteredPosts.length > 0 ? (
                 <>
-                  {filteredPosts.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      isOwnPost={post.author.username === "adikeafrica"}
-                      onLike={(id) => console.log("Liked:", id)}
-                      onComment={(id) => console.log("Comment:", id)}
-                      onShare={(id) => onOpenShare?.()}
-                      onBookmark={(id) => console.log("Bookmark:", id)}
-                      onAuthorClick={(username) => onUserProfileClick?.(username)}
-                    />
-                  ))}
+                  {filteredPosts.map((post) => {
+                    const currentUserId = localStorage.getItem("currentUserId");
+                    const postUserId = (post as any).userId;
+                    const isOwnPost = currentUserId === postUserId;
+                    
+                    return (
+                      <PostCard
+                        key={post.id || (post as any).userId}
+                        post={post}
+                        isOwnPost={isOwnPost}
+                        onLike={(id) => console.log("Liked:", id)}
+                        onComment={(id) => console.log("Comment:", id)}
+                        onShare={(id) => onOpenShare?.()}
+                        onBookmark={(id) => console.log("Bookmark:", id)}
+                        onAuthorClick={(username) => onUserProfileClick?.(username)}
+                      />
+                    );
+                  })}
                   
                   {/* Loading More Indicator */}
                   {isLoadingMore && (
