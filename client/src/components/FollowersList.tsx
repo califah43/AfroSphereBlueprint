@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { X } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 interface User {
@@ -45,6 +46,7 @@ export default function FollowersList({
     )
   );
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   const toggleFollow = async (user: string) => {
     setLoading((prev) => ({ ...prev, [user]: true }));
@@ -56,9 +58,25 @@ export default function FollowersList({
       const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
       if (res.ok) {
         setFollowStates((prev) => ({ ...prev, [user]: !prev[user] }));
+        toast({
+          title: isFollowing ? "Unfollowed" : "Following",
+          description: isFollowing ? `You unfollowed @${user}` : `You're now following @${user}`,
+          className: "border-primary/20 bg-card",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${user}`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to process your request. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading((prev) => ({ ...prev, [user]: false }));
     }

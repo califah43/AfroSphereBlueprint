@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import CreatorBadge, { type BadgeType } from "./CreatorBadge";
 
 interface Creator {
@@ -40,6 +41,7 @@ const suggestedCreators: Creator[] = [
 export default function SuggestedCreators() {
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   const toggleFollow = async (username: string) => {
     setLoading((prev) => ({ ...prev, [username]: true }));
@@ -51,9 +53,25 @@ export default function SuggestedCreators() {
       const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
       if (res.ok) {
         setFollowStates((prev) => ({ ...prev, [username]: !prev[username] }));
+        toast({
+          title: isFollowing ? "Unfollowed" : "Following",
+          description: isFollowing ? `You unfollowed @${username}` : `You're now following @${username}`,
+          className: "border-primary/20 bg-card",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${username}`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to process your request. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading((prev) => ({ ...prev, [username]: false }));
     }

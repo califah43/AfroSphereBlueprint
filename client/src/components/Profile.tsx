@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Heart, Share2, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import CreatorBadge from "./CreatorBadge";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
@@ -68,6 +69,7 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const userProfile = userProfiles[username] || userProfiles.adikeafrica;
 
   const toggleFollow = async () => {
@@ -79,9 +81,25 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
       const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
       if (res.ok) {
         setIsFollowing(!isFollowing);
+        toast({
+          title: isFollowing ? "Unfollowed" : "Following",
+          description: isFollowing ? `You unfollowed @${username}` : `You're now following @${username}`,
+          className: "border-primary/20 bg-card",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${username}`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to process your request. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
