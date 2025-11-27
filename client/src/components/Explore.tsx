@@ -4,6 +4,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import { GridSkeleton } from "@/components/SkeletonLoader";
 import SuggestedCreators from "./SuggestedCreators";
+import FeaturedAfrican from "./FeaturedAfrican";
+import TrendingAfrican from "./TrendingAfrican";
 import fashionHero from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
 import musicHero from "@assets/generated_images/Music_category_hero_image_83aae00b.png";
 import artHero from "@assets/generated_images/Art_category_hero_image_74aa53e3.png";
