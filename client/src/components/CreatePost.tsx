@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { X, Upload, ImageIcon, Sparkles, Sun, Contrast } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import { GENRE_LIST } from "@shared/genres";
 
 interface CreatePostProps {
@@ -76,6 +77,9 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to create post");
       }
+
+      // Invalidate posts query to refresh the feed
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
 
       toast({
         title: "✨ Post created!",
