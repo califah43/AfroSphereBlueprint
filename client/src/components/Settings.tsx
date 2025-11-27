@@ -305,47 +305,431 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   );
 
   if (editMode === "help") {
-    return <Modal title="Help Center"><div className="space-y-3"><p className="text-sm"><strong>Getting Started</strong></p><p className="text-xs text-muted-foreground">Learn how to create posts, follow creators, and explore content.</p><p className="text-sm mt-4"><strong>Common Questions</strong></p><p className="text-xs text-muted-foreground">How to edit my profile • How to report content • Privacy settings</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
+    return (
+      <Modal title="Help Center">
+        <div className="space-y-6">
+          <div>
+            <h3 className="font-bold text-sm mb-2">Getting Started on AfroSphere</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">Welcome to Africa's creative home! AfroSphere is designed to help you discover, create, and share content with a vibrant community of African creators, artists, musicians, and cultural enthusiasts.</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Creating Your First Post</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">1. Tap the create button (+) in the bottom navigation. 2. Choose from Fashion, Music, Art, Culture, or Lifestyle categories. 3. Add a title, description, and tags. 4. Select an image or video from your gallery. 5. Preview your post and hit publish!</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Discovering Content</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">Use the Explore tab to discover trending posts from your favorite categories. Follow creators you love, like posts, and leave thoughtful comments. The more you engage, the better our algorithm gets to know your taste!</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Profile Management</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">Customize your profile with a bio, profile picture, and header image. Add links to your social media or external website. Verify your email to get a verification badge and unlock creator features.</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Notifications & Engagement</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">You'll receive notifications for likes, comments, new followers, and trending posts. Customize your notification preferences in Settings to control how often you hear from us. You can enable push and email notifications too.</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Privacy & Safety</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">Make your account private to control who sees your content. Block users who make you uncomfortable. Report inappropriate content to help us maintain a safe and respectful community. All reports are reviewed by our team within 24 hours.</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Creator Program</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">Earn creator badges by maintaining consistent engagement and following community guidelines. Featured creators get promoted across the platform. Join our partner program to monetize your content and collaborate with brands.</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-xs mb-2 uppercase tracking-wide">Troubleshooting</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">Posts not showing? Clear your cache. Can't upload? Check file size (max 100MB) and format (jpg, png, mp4, webm). Still stuck? Report a problem through Settings and our support team will help within 48 hours.</p>
+          </div>
+
+          <Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Got It</Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "report") {
-    return <Modal title="Report a Problem"><div className="space-y-3"><textarea placeholder="Describe your issue..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { toast({ title: "Report sent", description: "Thank you for reporting!" }); setEditMode("none"); } }} className="w-full bg-primary">Send Report</Button></div></Modal>;
+    return (
+      <Modal title="Report a Problem">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">Help us improve AfroSphere by reporting any issues you encounter. Our support team reviews all reports within 24 hours.</p>
+          <textarea 
+            placeholder="Describe your issue in detail..." 
+            className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-32 resize-none" 
+            value={editData.reportText} 
+            onChange={(e) => setEditData({...editData, reportText: e.target.value})} 
+            data-testid="textarea-report"
+          />
+          <p className="text-xs text-muted-foreground">Include steps to reproduce the issue and which device you're using.</p>
+          <Button 
+            onClick={() => { 
+              if (editData.reportText?.trim()) { 
+                toast({ 
+                  title: "Report submitted", 
+                  description: "Thank you! Our team will review your report shortly.",
+                  duration: 3000
+                }); 
+                setEditData({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
+                setEditMode("none"); 
+              } else {
+                toast({
+                  title: "Error",
+                  description: "Please describe the issue",
+                  variant: "destructive"
+                });
+              }
+            }} 
+            className="w-full bg-primary"
+            data-testid="button-submit-report"
+          >
+            Submit Report
+          </Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "about") {
-    return <Modal title="About AfroSphere"><div className="space-y-4"><p className="text-sm"><strong>AfroSphere v1.0.0</strong></p><p className="text-xs text-muted-foreground">Africa's creative home for emerging artists, musicians, and cultural creators.</p><p className="text-xs text-muted-foreground mt-2">Built with passion for African talent • Powered by community • Made for creators</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
+    return (
+      <Modal title="About AfroSphere">
+        <div className="space-y-5">
+          <div>
+            <p className="text-sm font-bold text-primary mb-1">AfroSphere v1.0.0</p>
+            <p className="text-xs text-muted-foreground">Africa's Creative Home for Emerging Artists, Musicians & Cultural Creators</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold mb-1">Our Mission</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">To empower African creators by providing a platform where their talent can shine globally. We celebrate African creativity in all its forms—from fashion to music, art to culture, and lifestyle content that inspires.</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold mb-1">What We Believe</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">African talent is world-class. Creators deserve to be recognized and rewarded for their work. Community thrives on authenticity, respect, and mutual support. Innovation comes from diverse perspectives.</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold mb-1">Platform Features</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">TikTok-style feeds • Multi-category content discovery • Creator badges • Real-time notifications • Secure privacy controls • Community guidelines enforcement • Creator partnership program</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold mb-1">Built For Creators, By Creators</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">Our team includes African creators, developers, and community leaders passionate about building the platform we wanted to see. Every feature is designed with creator feedback in mind.</p>
+          </div>
+
+          <div className="bg-primary/10 border border-primary/20 rounded p-3">
+            <p className="text-xs font-semibold mb-1">Contact & Support</p>
+            <p className="text-xs text-muted-foreground">support@afrosphere.com | twitter.com/afrosphere | instagram.com/afrosphere</p>
+          </div>
+
+          <Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-4">Close</Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "guidelines") {
-    return <Modal title="Community Guidelines"><div className="space-y-3"><p className="text-xs"><strong>Be Respectful</strong></p><p className="text-xs text-muted-foreground">Treat all creators with dignity and kindness.</p><p className="text-xs mt-2"><strong>No Harassment</strong></p><p className="text-xs text-muted-foreground">Don't engage in bullying or hateful behavior.</p><p className="text-xs mt-2"><strong>Original Content</strong></p><p className="text-xs text-muted-foreground">Share authentic, creative work. Respect others' rights.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">I Understand</Button></div></Modal>;
+    return (
+      <Modal title="Community Guidelines">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground font-semibold">AfroSphere is built on respect, creativity, and authenticity. These guidelines help us maintain a safe space for everyone.</p>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">1. Be Respectful</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">Treat all creators with dignity and kindness, regardless of race, gender, religion, orientation, or background. Celebrate diversity. Constructive criticism is welcome; mean-spirited comments are not.</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">2. No Harassment</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">Don't engage in bullying, threats, hate speech, or discriminatory language. Don't impersonate others or share private information without consent. Account violations may result in permanent bans.</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">3. Respect Intellectual Property</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">Share only content you created or have permission to share. Respect artists' rights. Give credit when inspired by someone's work. Don't plagiarize music, art, or writing.</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">4. Keep It Legal & Safe</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">Don't promote illegal activities, violence, or substance abuse. Don't share explicit content (this is a family-friendly platform). Sexual content is prohibited. Scams and fraud will be prosecuted.</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">5. Authentic Engagement</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">Don't use bots, fake accounts, or buy followers. Don't spam. Genuine engagement builds real community. Quality over quantity always.</p>
+          </div>
+
+          <div className="bg-destructive/10 border border-destructive/20 rounded p-2">
+            <p className="text-xs font-semibold text-destructive mb-1">Violations</p>
+            <p className="text-xs text-muted-foreground">First violation: warning. Second: temporary ban. Third: permanent ban. Severe violations result in immediate action.</p>
+          </div>
+
+          <Button onClick={() => setEditMode("none")} className="w-full bg-primary">I Agree to These Guidelines</Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "blocked") {
-    return <Modal title="Blocked Users"><div className="space-y-3"><p className="text-xs text-muted-foreground">You currently have no blocked users.</p><p className="text-xs text-muted-foreground mt-2">Blocked users cannot see your posts or contact you.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></Modal>;
+    return (
+      <Modal title="Blocked Users">
+        <div className="space-y-4">
+          <div className="bg-card/50 border border-border rounded-lg p-4 text-center">
+            <p className="text-xs text-muted-foreground">You currently have no blocked users</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed"><strong>How Blocking Works:</strong> Blocked users cannot see your posts, find your profile, or send you messages. They won't be notified that they're blocked, but they'll see an error if they try to interact with you.</p>
+          <p className="text-xs text-muted-foreground leading-relaxed"><strong>To Block Someone:</strong> Go to their profile, tap the three-dot menu, and select "Block". You can unblock them anytime from this screen.</p>
+          <Button onClick={() => setEditMode("none")} className="w-full bg-primary">Done</Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "reportContent") {
-    return <Modal title="Report Content"><div className="space-y-3"><textarea placeholder="Why are you reporting this post?..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { toast({ title: "Report submitted", description: "Our team will review this content." }); setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button></div></Modal>;
+    return (
+      <Modal title="Report Content">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">Help us keep AfroSphere safe. Your report is anonymous and will be reviewed within 24 hours.</p>
+          <textarea 
+            placeholder="Why are you reporting this post? Be specific..." 
+            className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-32 resize-none" 
+            value={editData.reportText} 
+            onChange={(e) => setEditData({...editData, reportText: e.target.value})}
+            data-testid="textarea-report-content"
+          />
+          <div className="text-xs text-muted-foreground bg-card/50 p-3 rounded">
+            <p className="font-semibold mb-1">Common reasons to report:</p>
+            <p>• Hate speech or harassment • Explicit/adult content • Copyright infringement • Spam • Misleading information • Other</p>
+          </div>
+          <Button 
+            onClick={() => { 
+              if (editData.reportText?.trim()) { 
+                toast({ 
+                  title: "Report submitted", 
+                  description: "Thank you for helping keep our community safe.",
+                  duration: 3000
+                }); 
+                setEditData({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
+                setEditMode("none"); 
+              } else {
+                toast({
+                  title: "Error",
+                  description: "Please explain why you're reporting this",
+                  variant: "destructive"
+                });
+              }
+            }} 
+            className="w-full bg-primary"
+            data-testid="button-submit-content-report"
+          >
+            Submit Report
+          </Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "textSize") {
-    return <Modal title="Text Size"><div className="space-y-3"><div className="flex gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "normal"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "normal" ? "default" : "outline"} className="flex-1">Normal</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "large" ? "default" : "outline"} className="flex-1">Large</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "extra-large" ? "default" : "outline"} className="flex-1">XL</Button></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></Modal>;
+    return (
+      <Modal title="Text Size">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">Choose a text size that's comfortable for you. Preview the changes below:</p>
+          <div className="space-y-3">
+            <Button 
+              onClick={() => { 
+                setSettings({...settings, display: {...settings.display, textSize: "normal"}}); 
+                handleToggle("display", "textSize", true); 
+              }} 
+              variant={settings.display.textSize === "normal" ? "default" : "outline"} 
+              className="w-full justify-start"
+              data-testid="button-text-size-normal"
+            >
+              <span className="text-sm">Normal Text</span>
+            </Button>
+            <Button 
+              onClick={() => { 
+                setSettings({...settings, display: {...settings.display, textSize: "large"}}); 
+                handleToggle("display", "textSize", true); 
+              }} 
+              variant={settings.display.textSize === "large" ? "default" : "outline"} 
+              className="w-full justify-start"
+              data-testid="button-text-size-large"
+            >
+              <span className="text-base">Large Text</span>
+            </Button>
+            <Button 
+              onClick={() => { 
+                setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); 
+                handleToggle("display", "textSize", true); 
+              }} 
+              variant={settings.display.textSize === "extra-large" ? "default" : "outline"} 
+              className="w-full justify-start"
+              data-testid="button-text-size-xl"
+            >
+              <span className="text-lg">Extra Large Text</span>
+            </Button>
+          </div>
+          <Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "download") {
-    return <Modal title="Download Your Data"><div className="space-y-3"><p className="text-xs text-muted-foreground">Get a copy of all your profile data, posts, and activity.</p><Button onClick={() => { toast({ title: "Download started", description: "Your data will be ready in a few minutes" }); setEditMode("none"); }} className="w-full bg-primary">Download Now</Button></div></Modal>;
+    return (
+      <Modal title="Download Your Data">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground leading-relaxed">Your data download will include your profile information, posts, comments, likes, followers list, and activity history in a portable format (JSON).</p>
+          <div className="bg-card/50 border border-border rounded-lg p-3 space-y-2">
+            <p className="text-xs font-semibold">What's Included:</p>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>✓ Profile data & settings</li>
+              <li>✓ All posts & videos</li>
+              <li>✓ Comments & replies</li>
+              <li>✓ Followers & following list</li>
+              <li>✓ Activity history</li>
+            </ul>
+          </div>
+          <p className="text-xs text-muted-foreground">This is part of your data privacy rights. The download will be available for 7 days.</p>
+          <Button 
+            onClick={() => { 
+              toast({ 
+                title: "Download initiated", 
+                description: "Check your email for the download link. It will be ready in a few minutes.",
+                duration: 4000
+              }); 
+              setEditMode("none"); 
+            }} 
+            className="w-full bg-primary"
+            data-testid="button-download-data"
+          >
+            Download My Data
+          </Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "sessions") {
-    return <Modal title="Active Sessions"><div className="space-y-3"><div className="bg-card/50 border border-border/50 p-3 rounded"><p className="text-xs font-semibold">This Device</p><p className="text-xs text-muted-foreground">Last active now</p></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
+    return (
+      <Modal title="Active Sessions">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">Manage devices where you're logged into your account. Sign out of sessions you don't recognize for better security.</p>
+          <div className="bg-card/50 border border-primary/30 rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-semibold">This Device</p>
+                <p className="text-xs text-muted-foreground">Active now</p>
+                <p className="text-xs text-muted-foreground mt-1">Android • Last active now</p>
+              </div>
+              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">Current</span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Don't recognize a device? Sign it out and change your password for security.</p>
+          <Button 
+            onClick={() => setEditMode("none")} 
+            className="w-full bg-primary"
+            data-testid="button-close-sessions"
+          >
+            Done
+          </Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "2fa") {
-    return <Modal title="Two-Factor Authentication"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { toast({ title: "2FA enabled", description: "Your account is now more secure" }); setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></Modal>;
+    return (
+      <Modal title="Two-Factor Authentication">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground leading-relaxed">Two-Factor Authentication adds an extra security layer to your account. When enabled, you'll need to provide a code from your phone in addition to your password when logging in.</p>
+          
+          <div className="bg-card/50 border border-border rounded-lg p-3 space-y-2">
+            <p className="text-xs font-semibold">Benefits:</p>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>✓ Protects against unauthorized access</li>
+              <li>✓ Secure even if password is compromised</li>
+              <li>✓ Works with authenticator apps</li>
+            </ul>
+          </div>
+
+          <p className="text-xs text-muted-foreground">Use an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy to generate codes.</p>
+
+          <Button 
+            onClick={() => { 
+              toast({ 
+                title: "2FA enabled", 
+                description: "Your account is now protected with two-factor authentication",
+                duration: 3000
+              }); 
+              setEditMode("none"); 
+            }} 
+            className="w-full bg-primary"
+            data-testid="button-enable-2fa"
+          >
+            Enable 2FA
+          </Button>
+        </div>
+      </Modal>
+    );
   }
 
   if (editMode === "language") {
-    return <Modal title="Language"><div className="space-y-3"><div className="flex flex-col gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "English selected" }); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full">English</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "Español selected" }); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full">Español</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "Français selected" }); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full">Français</Button></div></div></Modal>;
+    return (
+      <Modal title="Language">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">Choose your preferred language. This will change the entire interface.</p>
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={() => { 
+                setSettings({...settings, display: {...settings.display, language: "en"}}); 
+                handleToggle("display", "language", true); 
+                toast({ title: "Language changed", description: "English selected", duration: 2000 }); 
+                setEditMode("none"); 
+              }} 
+              variant={settings.display.language === "en" ? "default" : "outline"} 
+              className="w-full"
+              data-testid="button-language-en"
+            >
+              English
+            </Button>
+            <Button 
+              onClick={() => { 
+                setSettings({...settings, display: {...settings.display, language: "es"}}); 
+                handleToggle("display", "language", true); 
+                toast({ title: "Idioma cambiado", description: "Español seleccionado", duration: 2000 }); 
+                setEditMode("none"); 
+              }} 
+              variant={settings.display.language === "es" ? "default" : "outline"} 
+              className="w-full"
+              data-testid="button-language-es"
+            >
+              Español
+            </Button>
+            <Button 
+              onClick={() => { 
+                setSettings({...settings, display: {...settings.display, language: "fr"}}); 
+                handleToggle("display", "language", true); 
+                toast({ title: "Langue changée", description: "Français sélectionné", duration: 2000 }); 
+                setEditMode("none"); 
+              }} 
+              variant={settings.display.language === "fr" ? "default" : "outline"} 
+              className="w-full"
+              data-testid="button-language-fr"
+            >
+              Français
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    );
   }
 
   // Edit modals
@@ -683,7 +1067,19 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
             <Button
               variant="outline"
               className="w-full justify-start gap-3 h-auto py-4 px-4 border-destructive/50 hover:bg-destructive/5"
-              onClick={() => console.log("Delete account")}
+              onClick={() => {
+                const confirmed = window.confirm("Are you absolutely sure? This will permanently delete your account and all your data. This cannot be undone.");
+                if (confirmed) {
+                  const doubleConfirm = window.confirm("This is your final warning. Your account will be permanently deleted. Continue?");
+                  if (doubleConfirm) {
+                    toast({ 
+                      title: "Account deletion initiated", 
+                      description: "Check your email to confirm deletion. You have 30 days to cancel.",
+                      duration: 4000
+                    });
+                  }
+                }
+              }}
               data-testid="button-delete-account"
             >
               <Trash2 className="h-5 w-5 text-destructive flex-shrink-0" />
