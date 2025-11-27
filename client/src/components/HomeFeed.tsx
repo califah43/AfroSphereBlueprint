@@ -1,218 +1,218 @@
-import { useState, useRef, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PostCard, { type Post } from "./PostCard";
-import Stories from "./Stories";
-import StoryViewer from "./StoryViewer";
-import { Loader2 } from "lucide-react";
-import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
-import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
-import musicImage from "@assets/generated_images/African_music_creator_post_902db11f.png";
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-// Placeholder for FeedSkeleton component
-const FeedSkeleton = () => (
-  <div className="animate-pulse space-y-4">
-    <div className="h-48 bg-gray-300 rounded-lg"></div>
-    <div className="h-12 bg-gray-300 rounded-lg"></div>
-    <div className="h-12 bg-gray-300 rounded-lg"></div>
-    <div className="h-12 bg-gray-300 rounded-lg"></div>
-  </div>
-);
-
-interface HomeFeedProps {
-  onOpenShare?: () => void;
+interface StoryViewerProps {
+  stories: Array<{
+    id: string;
+    username: string;
+    avatar?: string;
+    media: string;
+    timestamp: string;
+  }>;
+  initialStoryIndex?: number;
+  onClose: () => void;
 }
 
-const mockPosts: Post[] = [
-  {
-    id: "1",
-    author: { username: "adikeafrica" },
-    imageUrl: fashionImage,
-    caption: "Celebrating our roots with modern style. Ankara fusion fashion dropping soon! 🔥 #AfricanFashion",
-    likes: 1247,
-    comments: 89,
-    timeAgo: "2h ago",
-  },
-  {
-    id: "2",
-    author: { username: "kojoart" },
-    imageUrl: artImage,
-    caption: "New piece inspired by Adinkra symbols. The journey continues. #AfricanArt #ContemporaryArt",
-    likes: 892,
-    comments: 54,
-    timeAgo: "5h ago",
-  },
-  {
-    id: "3",
-    author: { username: "amaarabeats" },
-    imageUrl: musicImage,
-    caption: "Late night sessions creating the future of Afrobeats. Studio vibes 🎵 #AfricanMusic #Producer",
-    likes: 2103,
-    comments: 156,
-    timeAgo: "1d ago",
-  },
-];
+export default function StoryViewer({
+  stories,
+  initialStoryIndex = 0,
+  onClose,
+}: StoryViewerProps) {
+  const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
+  const [progressBars, setProgressBars] = useState<number[]>(
+    stories.map((_, i) => (i < initialStoryIndex ? 100 : i === initialStoryIndex ? 0 : 0))
+  );
+  const [isPaused, setIsPaused] = useState(false);
+  const [message, setMessage] = useState("");
+  const [startX, setStartX] = useState(0);
 
-const mockStoryData = [
-  { id: "1", username: "zara_style", avatar: "", media: "image", timestamp: "2h" },
-  { id: "2", username: "kojoart", avatar: "", media: "image", timestamp: "4h" },
-  { id: "3", username: "amaarabeats", avatar: "", media: "video", timestamp: "1h" },
-  { id: "4", username: "adike", avatar: "", media: "image", timestamp: "3h" },
-];
+  const currentStory = stories[currentIndex];
+  const STORY_DURATION = 5000;
 
-export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
-  const [activeCategory, setActiveCategory] = useState("for-you");
-  const [pullDistance, setPullDistance] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showStoryViewer, setShowStoryViewer] = useState(false);
-  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  // Auto-advance story
+  useEffect(() => {
+    if (isPaused) return;
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
+    const interval = setInterval(() => {
+      setProgressBars((prev) => {
+        const updated = [...prev];
+        if (updated[currentIndex] >= 100) {
+          if (currentIndex < stories.length - 1) {
+            setCurrentIndex((c) => c + 1);
+            updated[currentIndex + 1] = 0;
+          } else {
+            onClose();
+          }
+        } else {
+          updated[currentIndex] = Math.min(100, updated[currentIndex] + (100 / STORY_DURATION) * 50);
+        }
+        return updated;
+      });
+    }, 50);
 
-  const filteredPosts = activeCategory === "for-you"
-    ? mockPosts
-    : mockPosts.filter(post =>
-        post.caption.toLowerCase().includes(activeCategory)
-      );
+    return () => clearInterval(interval);
+  }, [currentIndex, isPaused, stories.length, onClose]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (scrollContainerRef.current?.scrollTop === 0) {
-      touchStartY.current = e.touches[0].clientY;
+  const handleNext = () => {
+    if (currentIndex < stories.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      setProgressBars((prev) => {
+        const updated = [...prev];
+        updated[currentIndex + 1] = 0;
+        return updated;
+      });
+    } else {
+      onClose();
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (scrollContainerRef.current?.scrollTop === 0 && !isRefreshing) {
-      const currentY = e.touches[0].clientY;
-      const distance = currentY - touchStartY.current;
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+      setProgressBars((prev) => {
+        const updated = [...prev];
+        updated[currentIndex - 1] = 0;
+        return updated;
+      });
+    }
+  };
 
-      if (distance > 0 && distance < 150) {
-        setPullDistance(distance);
+  // Swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX);
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        handleNext();
+      } else {
+        handlePrevious();
       }
     }
+    setIsPaused(false);
   };
 
-  const handleTouchEnd = () => {
-    if (pullDistance > 80 && !isRefreshing) {
-      setIsRefreshing(true);
-      // Simulate refresh
-      setTimeout(() => {
-        setIsRefreshing(false);
-        setPullDistance(0);
-      }, 1500);
-    } else {
-      setPullDistance(0);
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      console.log("Send message to", currentStory.username, ":", message);
+      setMessage("");
     }
   };
-
-  const handleViewStory = (storyId: string) => {
-    const index = mockStoryData.findIndex(s => s.id === storyId);
-    if (index !== -1) {
-      setSelectedStoryIndex(index);
-      setShowStoryViewer(true);
-    }
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsRefreshing(false);
-  };
-
 
   return (
-    <>
+    <div
+      className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+      data-testid="story-viewer"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Progress bars - Snapchat style */}
+      <div className="absolute top-2 left-0 right-0 z-20 flex gap-1 px-2 max-w-[430px] mx-auto">
+        {stories.map((_, index) => (
+          <div
+            key={index}
+            className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden"
+          >
+            <div
+              className="h-full bg-white transition-all duration-100 ease-linear"
+              style={{ width: `${progressBars[index] || 0}%` }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Header */}
+      <div className="absolute top-6 left-0 right-0 z-20 px-4 flex items-center justify-between max-w-[430px] mx-auto">
+        <div className="flex items-center gap-2">
+          <Avatar className="w-9 h-9 ring-2 ring-white">
+            <AvatarFallback className="text-xs">{currentStory.username[0].toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-white text-sm font-bold">{currentStory.username}</p>
+            <p className="text-white/70 text-xs">{currentStory.timestamp}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="text-white hover:bg-white/20 rounded-full"
+          data-testid="button-close-story"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Story image - Full screen */}
       <div
-        className="pb-20"
-        data-testid="container-home-feed"
-        ref={scrollContainerRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ overflowY: "auto", height: "100vh" }} // Ensure scrollable
+        className="relative w-full h-full max-w-[430px] max-h-screen bg-black flex items-center justify-center cursor-pointer"
+        onMouseDown={() => setIsPaused(true)}
+        onMouseUp={() => setIsPaused(false)}
       >
-        {pullDistance > 0 && !isRefreshing && (
-          <div className="flex justify-center items-center py-4" style={{ height: `${pullDistance}px` }}>
-            <Loader2 className="text-primary" size={20} style={{ opacity: pullDistance / 80 }} />
-          </div>
-        )}
-        {isRefreshing && (
-          <div className="flex justify-center items-center h-20">
-            <Loader2 className="animate-spin text-primary" size={24} />
-          </div>
-        )}
+        <img
+          src={currentStory.media}
+          alt={`${currentStory.username}'s story`}
+          className="w-full h-full object-cover"
+        />
 
-        <div className="sticky top-0 bg-background z-10 border-b border-border">
-          <div className="max-w-md mx-auto px-4 py-3">
-            <h1 className="text-2xl font-bold mb-4" data-testid="text-feed-title">AfroSphere</h1>
-            <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-              <TabsList className="w-full grid grid-cols-6 h-auto">
-                <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
-                  For You
-                </TabsTrigger>
-                <TabsTrigger value="fashion" className="text-xs" data-testid="tab-fashion">
-                  Fashion
-                </TabsTrigger>
-                <TabsTrigger value="music" className="text-xs" data-testid="tab-music">
-                  Music
-                </TabsTrigger>
-                <TabsTrigger value="art" className="text-xs" data-testid="tab-art">
-                  Art
-                </TabsTrigger>
-                <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
-                  Culture
-                </TabsTrigger>
-                <TabsTrigger value="lifestyle" className="text-xs" data-testid="tab-lifestyle">
-                  Lifestyle
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-
-        <div className="max-w-md mx-auto pt-4 border-b border-border">
-          <Stories
-            stories={mockStoryData}
-            onAddStory={() => console.log("Add story")}
-            onViewStory={handleViewStory}
+        {/* Tap zones for navigation */}
+        <div className="absolute inset-0 flex pointer-events-none">
+          <button
+            onClick={handlePrevious}
+            className="flex-1 cursor-pointer pointer-events-auto"
+            disabled={currentIndex === 0}
+            data-testid="area-previous-story"
           />
-        </div>
-
-        <div className="max-w-md mx-auto px-4 pt-4">
-          {isInitialLoading ? (
-            <FeedSkeleton />
-          ) : (
-            <>
-              {filteredPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onLike={(id) => console.log("Liked:", id)}
-                  onComment={(id) => console.log("Comment:", id)}
-                  onShare={(id) => onOpenShare?.()}
-                  onBookmark={(id) => console.log("Bookmark:", id)}
-                />
-              ))}
-            </>
-          )}
+          <button
+            onClick={handleNext}
+            className="flex-1 cursor-pointer pointer-events-auto"
+            data-testid="area-next-story"
+          />
         </div>
       </div>
 
-      {showStoryViewer && (
-        <StoryViewer
-          stories={mockStoryData}
-          initialStoryIndex={selectedStoryIndex}
-          onClose={() => setShowStoryViewer(false)}
-        />
+      {/* Message input - Snapchat style */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 px-4 max-w-[430px] mx-auto">
+        <div className="flex gap-2 items-center">
+          <Input
+            placeholder={`Message @${currentStory.username}...`}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+            className="bg-white/20 border-white/30 text-white placeholder:text-white/50 rounded-full text-sm"
+            data-testid="input-story-message"
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={!message.trim()}
+            size="sm"
+            className="bg-primary hover:bg-primary/90 rounded-full px-4"
+            data-testid="button-send-message"
+          >
+            ↑
+          </Button>
+        </div>
+      </div>
+
+      {/* Tap indicator */}
+      {currentIndex > 0 && (
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 z-10 text-white/50 text-xs pointer-events-none">
+          ← Tap
+        </div>
       )}
-    </>
+      {currentIndex < stories.length - 1 && (
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10 text-white/50 text-xs pointer-events-none">
+          Tap →
+        </div>
+      )}
+    </div>
   );
 }
