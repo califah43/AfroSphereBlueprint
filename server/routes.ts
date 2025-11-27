@@ -5,6 +5,18 @@ import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSche
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // ============ AUTH ROUTES ============
+  app.get("/api/auth/check-username/:username", async (req, res) => {
+    try {
+      const existingUser = await storage.getUserByUsername(req.params.username);
+      if (existingUser) {
+        return res.status(409).json({ available: false, error: "Username already taken" });
+      }
+      res.json({ available: true });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   app.post("/api/auth/register", async (req, res) => {
     try {
       const parsed = insertUserSchema.parse(req.body);

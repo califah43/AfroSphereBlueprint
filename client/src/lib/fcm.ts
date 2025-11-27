@@ -2,63 +2,16 @@ import { getMessaging, getToken, onMessage, Messaging } from "firebase/messaging
 import { app } from "./firebase";
 
 let messaging: Messaging | null = null;
-let messagingInitialized = false;
-let messagingError: Error | null = null;
 
-// Check if browser supports Firebase messaging
-const checkMessagingSupport = (): boolean => {
-  try {
-    // Check for required APIs
-    if (typeof window === "undefined") return false;
-    if (!("serviceWorker" in navigator)) return false;
-    if (!("PushManager" in window)) return false;
-    if (!("Notification" in window)) return false;
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-const initializeMessaging = (): Messaging | null => {
-  // Return early if already attempted and failed
-  if (messagingError) {
-    return null;
-  }
-
-  // Return cached messaging if already initialized
-  if (messagingInitialized && messaging) {
-    return messaging;
-  }
-
-  // Check support before attempting to initialize
-  if (!checkMessagingSupport()) {
-    messagingError = new Error("Messaging not supported");
-    messagingInitialized = true;
-    return null;
-  }
-
+const initializeMessaging = (): Messaging => {
   if (!messaging) {
-    try {
-      messaging = getMessaging(app);
-      messagingInitialized = true;
-    } catch (error: any) {
-      messagingError = error;
-      messagingInitialized = true;
-      console.log("Firebase messaging initialization failed (this is normal for unsupported browsers)");
-      return null;
-    }
+    messaging = getMessaging(app);
   }
   return messaging;
 };
 
 export const requestNotificationPermission = async (): Promise<string | null> => {
   try {
-    // Check if messaging is supported first
-    if (!checkMessagingSupport()) {
-      console.log("This browser does not support Firebase messaging");
-      return null;
-    }
-
     // Check if notifications are supported
     if (!("Notification" in window)) {
       console.log("This browser does not support desktop notifications");
@@ -88,9 +41,6 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
 export const getFCMToken = async (): Promise<string | null> => {
   try {
     const msg = initializeMessaging();
-    if (!msg) {
-      return null;
-    }
     const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
     const token = await getToken(msg, { vapidKey });
@@ -111,9 +61,6 @@ export const setupMessageListener = (
 ) => {
   try {
     const msg = initializeMessaging();
-    if (!msg) {
-      return;
-    }
     
     // Listen for messages when app is in foreground
     onMessage(msg, (payload) => {

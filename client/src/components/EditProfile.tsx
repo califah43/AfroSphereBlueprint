@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { X, Camera, MapPin, Link as LinkIcon, Briefcase, Sparkles } from "lucide-react";
+import { X, Camera, MapPin, Link as LinkIcon, Briefcase } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 
 interface EditProfileProps {
@@ -14,6 +15,10 @@ interface EditProfileProps {
 
 export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   // Load real user data from localStorage
+  const { toast } = useToast();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   const getInitialData = () => {
     const stored = localStorage.getItem("currentUserData");
     if (stored) {
@@ -26,6 +31,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           location: userData.location || "Your Location",
           website: userData.website || "yourwebsite.com",
           profession: userData.profession || "Creator",
+          avatar: userData.avatar || "",
+          banner: userData.banner || "",
         };
       } catch (e) {
         console.log("Error loading user data");
@@ -38,11 +45,39 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       location: "Your Location",
       website: "yourwebsite.com",
       profession: "Creator",
+      avatar: "",
+      banner: "",
     };
   };
 
   const [formData, setFormData] = useState(getInitialData());
   const [charCount, setCharCount] = useState(formData.bio.length);
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFormData({ ...formData, avatar: base64 });
+        toast({ title: "Profile photo updated", description: "Your new profile photo is ready to save" });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFormData({ ...formData, banner: base64 });
+        toast({ title: "Banner updated", description: "Your new banner is ready to save" });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -61,8 +96,11 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       location: formData.location,
       website: formData.website,
       profession: formData.profession,
+      avatar: formData.avatar,
+      banner: formData.banner,
     };
     localStorage.setItem("currentUserData", JSON.stringify(updated));
+    toast({ title: "Profile saved!", description: "Your profile updates have been saved" });
     console.log("Saving profile:", formData);
     onSave?.(formData);
     onClose();
@@ -71,22 +109,20 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
       {/* Sticky Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 flex items-center justify-between z-20" style={{ height: "40px" }}>
-        <button 
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4 flex items-center justify-between z-20">
+        <Button 
+          variant="ghost" 
+          size="icon" 
           onClick={onClose} 
-          className="flex items-center justify-center"
+          className="hover-elevate"
           data-testid="button-close-edit"
         >
           <X className="h-5 w-5" />
-        </button>
-        <h2 className="text-sm font-bold flex items-center gap-1.5" data-testid="text-edit-title">
-          <Sparkles className="h-4 w-4 text-primary" />
-          Edit Profile
-        </h2>
+        </Button>
+        <h2 className="text-lg font-bold" data-testid="text-edit-title">Edit Profile</h2>
         <Button 
           onClick={handleSave} 
-          className="bg-primary hover:bg-primary/90 font-semibold text-xs"
-          size="sm"
+          className="bg-primary hover:bg-primary/90 font-semibold"
           data-testid="button-save-profile"
         >
           Save
@@ -95,76 +131,104 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
       <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-6">
         
-        {/* Banner Section with Overlay */}
+        {/* Banner Section */}
         <div>
-          <div className="relative h-48 rounded-xl overflow-hidden group shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <img
-              src={bannerImage}
-              alt="Banner"
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              data-testid="img-edit-banner"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 transition-all hover-elevate shadow-lg"
+          <div className="relative h-40 rounded-lg overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
+              <img
+                src={formData.banner || bannerImage}
+                alt="Banner"
+                className="w-full h-full object-cover opacity-90"
+                data-testid="img-edit-banner"
+              />
+            </div>
+            <div className="absolute inset-0 bg-black/20" />
+            <button
+              onClick={() => bannerInputRef.current?.click()}
+              className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm border border-white/20 hover:bg-background/90 rounded px-3 py-1.5 text-sm flex items-center gap-1 hover-elevate"
               data-testid="button-change-banner"
             >
-              <Camera className="h-4 w-4 mr-2" />
-              Change
-            </Button>
-          </div>
-        </div>
-
-        {/* Avatar Section - Elegant Design */}
-        <div className="flex flex-col items-center -mt-10 relative z-10 mb-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary to-orange-500 rounded-full blur-lg opacity-40 w-32 h-32" />
-            <Avatar className="w-32 h-32 ring-3 ring-background border-2 border-primary/20 shadow-xl relative" data-testid="avatar-edit">
-              <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-primary to-orange-500 text-white">AC</AvatarFallback>
-            </Avatar>
-            <Button
-              size="icon"
-              className="absolute -bottom-2 -right-2 h-10 w-10 bg-primary text-white hover:bg-primary/90 hover:shadow-lg transition-all shadow-lg"
-              data-testid="button-change-avatar"
-            >
               <Camera className="h-4 w-4" />
-            </Button>
+              Change Banner
+            </button>
+            <input
+              ref={bannerInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleBannerUpload}
+              className="hidden"
+              data-testid="input-banner-file"
+            />
           </div>
         </div>
 
-        {/* Form Fields - Stylish Grid */}
-        <div className="space-y-5">
+        {/* Avatar & Profile Photo Section */}
+        <div className="bg-card/50 border border-border/50 rounded-lg p-4 hover-elevate transition-all">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Avatar className="w-20 h-20 ring-4 ring-background border-2 border-primary/20" data-testid="avatar-edit">
+                {formData.avatar && <AvatarImage src={formData.avatar} alt="Profile" />}
+                <AvatarFallback className="text-xl font-bold">{formData.username[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-primary text-white border-2 border-background hover:bg-primary/90 flex items-center justify-center hover-elevate"
+                data-testid="button-change-avatar"
+              >
+                <Camera className="h-3.5 w-3.5" />
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                data-testid="input-avatar-file"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold">Profile Photo</p>
+              <p className="text-sm text-muted-foreground">Click the camera icon to upload</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Fields */}
+        <div className="space-y-4">
+          {/* Username - Read Only */}
+          <div className="space-y-2 opacity-75">
+            <Label htmlFor="username">Username (Cannot be changed)</Label>
+            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
+              <span className="text-primary font-semibold">@</span>
+              <Input 
+                id="username"
+                value={formData.username}
+                disabled={true}
+                className="border-0 bg-transparent px-0"
+                data-testid="input-username-readonly"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Your unique handle is permanent and used for tagging & mentions</p>
+          </div>
           {/* Display Name */}
           <div className="space-y-2">
-            <Label htmlFor="displayName" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-              Display Name
+            <Label htmlFor="displayName" className="font-semibold text-sm flex items-center gap-2">
+              Display Name (Customizable)
             </Label>
             <Input
               id="displayName"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               placeholder="Your display name"
-              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
+              className="border-border/50 bg-card/50 h-10 rounded-lg"
               data-testid="input-displayname"
             />
-          </div>
-
-          {/* Username - Read Only */}
-          <div className="space-y-2">
-            <Label className="font-bold text-sm text-foreground">Username</Label>
-            <div className="px-4 py-3 rounded-lg border border-primary/20 bg-muted/50 text-sm font-bold text-primary">
-              @{formData.username}
-            </div>
+            <p className="text-xs text-muted-foreground">This is how your name appears publicly - you can change this anytime</p>
           </div>
 
           {/* Bio */}
           <div className="space-y-2">
-            <Label htmlFor="bio" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <Label htmlFor="bio" className="font-semibold text-sm flex items-center gap-2">
               Bio
             </Label>
             <Textarea
@@ -172,11 +236,12 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.bio}
               onChange={handleBioChange}
               placeholder="Tell your story..."
-              className="min-h-24 resize-none text-sm bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
+              className="min-h-28 resize-none border-border/50 bg-card/50 rounded-lg focus:ring-primary/50"
               data-testid="input-bio"
             />
-            <div className="flex justify-end">
-              <p className={`text-xs font-bold ${charCount > 130 ? 'text-primary' : 'text-muted-foreground'}`}>
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-muted-foreground">Share what makes you unique</p>
+              <p className={`text-xs font-medium ${charCount > 130 ? 'text-orange-500' : 'text-muted-foreground'}`}>
                 {charCount}/150
               </p>
             </div>
@@ -184,8 +249,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
           {/* Location */}
           <div className="space-y-2">
-            <Label htmlFor="location" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <MapPin className="h-3.5 w-3.5 text-primary" />
+            <Label htmlFor="location" className="font-semibold text-sm flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" />
               Location
             </Label>
             <Input
@@ -193,31 +258,33 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
-              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
+              className="border-border/50 bg-card/50 h-10 rounded-lg"
               data-testid="input-location"
             />
+            <p className="text-xs text-muted-foreground">Let people know where you're from</p>
           </div>
 
           {/* Profession */}
           <div className="space-y-2">
-            <Label htmlFor="profession" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <Briefcase className="h-3.5 w-3.5 text-primary" />
+            <Label htmlFor="profession" className="font-semibold text-sm flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-primary" />
               Profession
             </Label>
             <Input
               id="profession"
               value={formData.profession}
               onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-              placeholder="Creator, Designer, Artist..."
-              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
+              placeholder="What do you do?"
+              className="border-border/50 bg-card/50 h-10 rounded-lg"
               data-testid="input-profession"
             />
+            <p className="text-xs text-muted-foreground">Your craft or specialty</p>
           </div>
 
           {/* Website */}
           <div className="space-y-2">
-            <Label htmlFor="website" className="font-bold text-sm text-foreground flex items-center gap-2">
-              <LinkIcon className="h-3.5 w-3.5 text-primary" />
+            <Label htmlFor="website" className="font-semibold text-sm flex items-center gap-2">
+              <LinkIcon className="h-4 w-4 text-primary" />
               Website
             </Label>
             <Input
@@ -225,20 +292,26 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
               placeholder="yoursite.com"
-              className="text-sm h-10 bg-muted/50 border-0 rounded-lg font-medium hover-elevate transition-all"
+              className="border-border/50 bg-card/50 h-10 rounded-lg"
               data-testid="input-website"
             />
+            <p className="text-xs text-muted-foreground">Link to your portfolio or website</p>
           </div>
         </div>
 
-        {/* Save Button - Premium Style */}
+        {/* Info Box */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+          <p className="text-sm text-foreground font-medium">Pro Tip</p>
+          <p className="text-xs text-muted-foreground mt-1">A complete profile helps you attract more followers and opportunities in the AfroSphere community.</p>
+        </div>
+
+        {/* Save Button */}
         <Button
           onClick={handleSave}
-          className="w-full bg-gradient-to-r from-primary to-orange-500 hover:shadow-lg text-white font-bold h-11 mt-6 rounded-lg transition-all duration-300"
+          className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-semibold h-11 rounded-lg"
           data-testid="button-save-full"
         >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Save Profile
+          Save Changes
         </Button>
       </div>
     </div>

@@ -193,23 +193,23 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
               {isRefreshing && <Loader2 className="animate-spin text-primary" size={18} />}
             </h1>
             <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-              <TabsList className="w-full grid grid-cols-6 gap-1 h-auto">
-                <TabsTrigger value="for-you" className="text-xs px-1" data-testid="tab-for-you">
+              <TabsList className="w-full grid grid-cols-6 h-auto">
+                <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
                   For You
                 </TabsTrigger>
-                <TabsTrigger value="fashion" className="text-xs px-1" data-testid="tab-fashion">
+                <TabsTrigger value="fashion" className="text-xs" data-testid="tab-fashion">
                   Fashion
                 </TabsTrigger>
-                <TabsTrigger value="music" className="text-xs px-1" data-testid="tab-music">
+                <TabsTrigger value="music" className="text-xs" data-testid="tab-music">
                   Music
                 </TabsTrigger>
-                <TabsTrigger value="art" className="text-xs px-1" data-testid="tab-art">
+                <TabsTrigger value="art" className="text-xs" data-testid="tab-art">
                   Art
                 </TabsTrigger>
-                <TabsTrigger value="culture" className="text-xs px-1" data-testid="tab-culture">
+                <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
                   Culture
                 </TabsTrigger>
-                <TabsTrigger value="lifestyle" className="text-xs px-1" data-testid="tab-lifestyle">
+                <TabsTrigger value="lifestyle" className="text-xs" data-testid="tab-lifestyle">
                   Lifestyle
                 </TabsTrigger>
               </TabsList>

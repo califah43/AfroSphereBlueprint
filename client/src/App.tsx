@@ -30,7 +30,6 @@ type MainView = "home" | "explore" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
 export default function App() {
-  // All users see splash screen first
   const [appState, setAppState] = useState<AppState>("splash");
   const [activeTab, setActiveTab] = useState<MainView>("home");
   const [modalView, setModalView] = useState<ModalView>("none");
@@ -51,11 +50,6 @@ export default function App() {
   useEffect(() => {
     const initFCM = async () => {
       try {
-        // Skip FCM if not in a browser context or notifications not supported
-        if (typeof window === "undefined" || !("Notification" in window)) {
-          return;
-        }
-
         // Register service worker for background messages
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(err => {
@@ -87,14 +81,11 @@ export default function App() {
           }
         });
       } catch (error) {
-        // Silently fail - FCM is not essential
-        console.log("FCM initialization skipped");
+        console.log("FCM initialization skipped:", error);
       }
     };
 
-    // Defer FCM init slightly to avoid blocking app startup
-    const timer = setTimeout(initFCM, 1000);
-    return () => clearTimeout(timer);
+    initFCM();
   }, []);
 
   // Reset click count after 3 seconds of inactivity
@@ -116,17 +107,7 @@ export default function App() {
   }, [logoClickCount]);
 
   const handleSplashComplete = () => {
-    // Check if user is already logged in
-    const userId = localStorage.getItem("currentUserId");
-    const userData = localStorage.getItem("currentUserData");
-    
-    // If returning user, go straight to main app
-    if (userId && userData) {
-      setAppState("main");
-    } else {
-      // New user, show onboarding
-      setAppState("onboarding");
-    }
+    setAppState("onboarding");
   };
 
   const handleOnboardingComplete = () => {
@@ -152,9 +133,6 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    // Clear all user data from localStorage on logout
-    localStorage.removeItem("currentUserId");
-    localStorage.removeItem("currentUserData");
     setAppState("auth");
     setActiveTab("home");
     setModalView("none");
@@ -354,14 +332,17 @@ export default function App() {
             />
           )}
 
-          {modalView === "followers" && (
-            <FollowersList
-              username="adikeafrica"
-              followerCount="1.2K"
-              followingCount="485"
-              onClose={() => setModalView("none")}
-            />
-          )}
+          {modalView === "followers" && (() => {
+            const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
+            return (
+              <FollowersList
+                username={currentUserData.username || "user"}
+                followerCount={currentUserData.followerCount?.toString() || "0"}
+                followingCount={currentUserData.followingCount?.toString() || "0"}
+                onClose={() => setModalView("none")}
+              />
+            );
+          })()}
 
           {modalView === "share" && (
             <ShareSheet
