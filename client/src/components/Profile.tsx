@@ -79,12 +79,12 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
         try {
           const userData = JSON.parse(storedData);
           return {
-            displayName: userData.displayName || userData.username || "No Name",
-            username: userData.username || "user",
+            displayName: userData.displayName || userData.username || userData.email?.split('@')[0] || "Your Profile",
+            username: userData.username || userData.email?.split('@')[0] || "user",
             bio: userData.bio || "Creative on AfroSphere",
-            followers: "0",
-            following: "0",
-            posts: "0",
+            followers: userData.followerCount?.toString() || "0",
+            following: userData.followingCount?.toString() || "0",
+            posts: userData.postCount?.toString() || "0",
           };
         } catch (e) {
           console.log("Error parsing user data");

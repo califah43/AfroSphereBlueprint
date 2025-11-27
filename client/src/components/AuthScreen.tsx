@@ -55,6 +55,46 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     try {
       const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
       localStorage.setItem("currentUserId", userCredential.user.uid);
+      
+      // Check if user data exists in localStorage from signup
+      let storedData = localStorage.getItem("currentUserData");
+      
+      // If not, try to fetch from backend
+      if (!storedData) {
+        try {
+          const res = await fetch(`/api/settings/${userCredential.user.uid}`);
+          if (res.ok) {
+            const backendData = await res.json();
+            storedData = JSON.stringify({
+              id: userCredential.user.uid,
+              email: userCredential.user.email,
+              username: backendData.username || userCredential.user.email?.split('@')[0] || "user",
+              displayName: backendData.displayName || userCredential.user.email?.split('@')[0] || "User",
+              bio: backendData.bio || "",
+              location: "",
+              avatar: "",
+            });
+          }
+        } catch (e) {
+          console.log("Could not fetch user data from backend");
+        }
+      }
+      
+      // If still no data, create minimal profile from email
+      if (!storedData) {
+        const username = loginData.email.split('@')[0];
+        storedData = JSON.stringify({
+          id: userCredential.user.uid,
+          email: userCredential.user.email,
+          username: username,
+          displayName: username,
+          bio: "",
+          location: "",
+          avatar: "",
+        });
+      }
+      
+      localStorage.setItem("currentUserData", storedData);
       console.log("Login:", userCredential.user);
       toast({ title: "Welcome back!", description: "Successfully signed in" });
       onAuthComplete();
