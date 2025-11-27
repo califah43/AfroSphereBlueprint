@@ -8,6 +8,7 @@ import BadgesManagement from "./BadgesManagement";
 import NotificationsCenter from "./NotificationsCenter";
 import ReportsCenter from "./ReportsCenter";
 import SystemSettings from "./SystemSettings";
+import SystemLogs from "./SystemLogs";
 import TeamManagement from "./TeamManagement";
 
 interface AdminDashboardProps {
@@ -60,7 +61,7 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
   }
 
   if (currentSection === "logs") {
-    return <ReportsCenter onBack={() => setCurrentSection("dashboard")} />;
+    return <SystemLogs onBack={() => setCurrentSection("dashboard")} />;
   }
 
   if (currentSection === "settings") {
@@ -69,6 +70,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "team") {
     return <TeamManagement onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "reports") {
+    return <ReportsCenter onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (
