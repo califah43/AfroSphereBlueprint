@@ -66,7 +66,27 @@ const userProfiles: Record<string, any> = {
 
 export default function Profile({ isOwnProfile = true, username = "adikeafrica", onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const userProfile = userProfiles[username] || userProfiles.adikeafrica;
+
+  const toggleFollow = async () => {
+    setIsLoading(true);
+    try {
+      const endpoint = isFollowing ? `/api/follows/unfollow/${username}` : `/api/follows/${username}`;
+      const method = isFollowing ? 'DELETE' : 'POST';
+      
+      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
+      if (res.ok) {
+        setIsFollowing(!isFollowing);
+      }
+    } catch (error) {
+      console.error('Failed to toggle follow:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="pb-20" data-testid="container-profile">
       {/* Sticky Header */}
@@ -181,10 +201,12 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
             </Button>
           ) : (
             <Button 
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg h-9 text-sm" 
+              className={`w-full font-semibold rounded-lg h-9 text-sm ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90' : 'bg-primary text-white hover:bg-primary/90'}`}
+              onClick={toggleFollow}
+              disabled={isLoading}
               data-testid="button-follow"
             >
-              Follow
+              {isLoading ? "..." : (isFollowing ? "Following" : "Follow")}
             </Button>
           )}
         </div>
