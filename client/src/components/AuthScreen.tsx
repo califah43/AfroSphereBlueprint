@@ -18,10 +18,13 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
   const [signupData, setSignupData] = useState({ email: "", username: "", password: "" });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [signupError, setSignupError] = useState("");
+  const [loginError, setLoginError] = useState("");
   const { toast } = useToast();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignupError("");
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
@@ -40,10 +43,13 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       localStorage.setItem("currentUserId", userCredential.user.uid);
       localStorage.setItem("currentUserData", JSON.stringify(userData));
       console.log("Signup:", userCredential.user);
-      toast({ title: "Account created!", description: "Welcome to AfroSphere" });
+      toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
       onAuthComplete();
     } catch (error: any) {
-      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+      const errorMsg = error.message || "Failed to create account";
+      setSignupError(errorMsg);
+      toast({ title: "Signup failed", description: errorMsg, variant: "destructive", duration: 4000 });
+      console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -51,6 +57,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError("");
     setIsLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
@@ -96,10 +103,13 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       
       localStorage.setItem("currentUserData", storedData);
       console.log("Login:", userCredential.user);
-      toast({ title: "Welcome back!", description: "Successfully signed in" });
+      toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
       onAuthComplete();
     } catch (error: any) {
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      const errorMsg = error.message || "Failed to sign in";
+      setLoginError(errorMsg);
+      toast({ title: "Login failed", description: errorMsg, variant: "destructive", duration: 4000 });
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -135,6 +145,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
+                  {loginError && <div className="bg-destructive/10 border border-destructive text-destructive rounded p-3 text-sm" data-testid="error-login">{loginError}</div>}
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
@@ -180,6 +191,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {signupError && <div className="bg-destructive/10 border border-destructive text-destructive rounded p-3 text-sm" data-testid="error-signup">{signupError}</div>}
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
