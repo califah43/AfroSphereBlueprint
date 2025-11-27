@@ -102,13 +102,13 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         const res = await fetch("/api/notifications/current-user");
         if (res.ok) {
           const data = await res.json();
-          setNotifications(data.length > 0 ? data : mockNotifications);
+          setNotifications(data);
         } else {
-          setNotifications(mockNotifications);
+          setNotifications([]);
         }
       } catch (error) {
-        console.log("Using mock notifications");
-        setNotifications(mockNotifications);
+        console.log("Error fetching notifications");
+        setNotifications([]);
       } finally {
         setIsLoading(false);
       }
@@ -129,120 +129,72 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
       </div>
 
       <div className="max-w-md mx-auto px-4">
-        {/* Today Section */}
-        <div className="py-4 mt-2">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Today</h2>
-        </div>
-
-        <div className="space-y-2">
-          {mockNotifications.slice(0, 2).map((notif) => (
-            <div
-              key={notif.id}
-              className={`group p-3 rounded-lg border-2 transition-all duration-300 hover-elevate ${
-                getNotificationColor(notif.type)
-              } ${notif.isUnread ? "ring-2 ring-primary/50" : ""}`}
-              data-testid={`notification-${notif.id}`}
-            >
-              <div className="flex items-start gap-3">
-                {/* Icon Badge */}
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-background border-2 border-border flex items-center justify-center mt-0.5">
-                  {getNotificationIcon(notif.type)}
-                </div>
-
-                {/* Content */}
-                <button 
-                  onClick={() => onUserClick?.(notif.user)}
-                  className="flex-1 min-w-0 text-left hover-elevate rounded px-1 py-0.5 transition-all group"
-                  data-testid={`button-notification-user-${notif.id}`}
-                >
-                  <p className="text-sm">
-                    <span className="font-bold text-foreground group-hover:text-primary transition-colors">{notif.user}</span>
-                    <span className="text-muted-foreground"> {notif.text}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">{notif.timeAgo}</p>
-                </button>
-
-                {/* Post Thumbnail or Follow Button */}
-                {notif.postThumbnail && (
-                  <img
-                    src={notif.postThumbnail}
-                    alt="Post"
-                    className="w-14 h-14 object-cover rounded-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
-                    data-testid={`img-notification-post-${notif.id}`}
-                  />
-                )}
-                {notif.type === "follow" && (
-                  <Button 
-                    size="sm" 
-                    className="bg-primary hover:bg-primary/90 text-white font-semibold h-8 text-xs flex-shrink-0" 
-                    data-testid={`button-follow-back-${notif.id}`}
-                  >
-                    Follow
-                  </Button>
-                )}
-              </div>
-
-              {/* Unread Indicator */}
-              {notif.isUnread && (
-                <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Earlier Section */}
-        <div className="py-4 mt-6">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Earlier</h2>
-        </div>
-
-        <div className="space-y-2">
-          {mockNotifications.slice(2).map((notif) => (
-            <div
-              key={notif.id}
-              className={`group p-3 rounded-lg border-2 transition-all duration-300 hover-elevate ${
-                getNotificationColor(notif.type)
-              }`}
-              data-testid={`notification-${notif.id}`}
-            >
-              <div className="flex items-start gap-3">
-                {/* Icon Badge */}
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-background border-2 border-border flex items-center justify-center mt-0.5">
-                  {getNotificationIcon(notif.type)}
-                </div>
-
-                {/* Content */}
-                <button 
-                  onClick={() => onUserClick?.(notif.user)}
-                  className="flex-1 min-w-0 text-left hover-elevate rounded px-1 py-0.5 transition-all group"
-                  data-testid={`button-notification-user-${notif.id}`}
-                >
-                  <p className="text-sm">
-                    <span className="font-bold text-foreground group-hover:text-primary transition-colors">{notif.user}</span>
-                    <span className="text-muted-foreground"> {notif.text}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">{notif.timeAgo}</p>
-                </button>
-
-                {/* Post Thumbnail */}
-                {notif.postThumbnail && (
-                  <img
-                    src={notif.postThumbnail}
-                    alt="Post"
-                    className="w-14 h-14 object-cover rounded-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {mockNotifications.length === 0 && (
+        {notifications.length === 0 ? (
+          /* Empty State */
           <div className="py-16 text-center">
             <Bell className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
             <p className="text-muted-foreground font-medium">No notifications yet</p>
-            <p className="text-xs text-muted-foreground mt-1">You'll see updates here</p>
+            <p className="text-xs text-muted-foreground mt-1">You'll see updates here when you get likes, follows, or comments</p>
           </div>
+        ) : (
+          <>
+            {/* All Notifications */}
+            <div className="space-y-2 py-4">
+              {notifications.map((notif) => (
+                <div
+                  key={notif.id}
+                  className={`group p-3 rounded-lg border-2 transition-all duration-300 hover-elevate ${
+                    getNotificationColor(notif.type)
+                  } ${notif.isUnread ? "ring-2 ring-primary/50" : ""}`}
+                  data-testid={`notification-${notif.id}`}
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Icon Badge */}
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-background border-2 border-border flex items-center justify-center mt-0.5">
+                      {getNotificationIcon(notif.type)}
+                    </div>
+
+                    {/* Content */}
+                    <button 
+                      onClick={() => onUserClick?.(notif.user)}
+                      className="flex-1 min-w-0 text-left hover-elevate rounded px-1 py-0.5 transition-all group"
+                      data-testid={`button-notification-user-${notif.id}`}
+                    >
+                      <p className="text-sm">
+                        <span className="font-bold text-foreground group-hover:text-primary transition-colors">{notif.user}</span>
+                        <span className="text-muted-foreground"> {notif.text}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{notif.timeAgo}</p>
+                    </button>
+
+                    {/* Post Thumbnail or Follow Button */}
+                    {notif.postThumbnail && (
+                      <img
+                        src={notif.postThumbnail}
+                        alt="Post"
+                        className="w-14 h-14 object-cover rounded-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
+                        data-testid={`img-notification-post-${notif.id}`}
+                      />
+                    )}
+                    {notif.type === "follow" && (
+                      <Button 
+                        size="sm" 
+                        className="bg-primary hover:bg-primary/90 text-white font-semibold h-8 text-xs flex-shrink-0" 
+                        data-testid={`button-follow-back-${notif.id}`}
+                      >
+                        Follow
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Unread Indicator */}
+                  {notif.isUnread && (
+                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
