@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Heart, Share2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CreatorBadge from "./CreatorBadge";
+import ProfilePictureModal from "./ProfilePictureModal";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
@@ -65,10 +66,11 @@ const userProfiles: Record<string, any> = {
   },
 };
 
-export default function Profile({ isOwnProfile = true, username = "adikeafrica", onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
+export default function Profile({ isOwnProfile = true, username, onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPictureModal, setShowPictureModal] = useState(false);
   const { toast } = useToast();
   
   // Get real user data from localStorage if own profile
@@ -120,10 +122,28 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
   
   const userProfile = getProfileData();
 
+  // Get the username for API calls (use stored for own profile, fallback for others)
+  const getApiUsername = () => {
+    if (isOwnProfile) {
+      const stored = localStorage.getItem("currentUserData");
+      if (stored) {
+        try {
+          const userData = JSON.parse(stored);
+          return userData.username || "user";
+        } catch (e) {
+          return "user";
+        }
+      }
+      return "user";
+    }
+    return username || "user";
+  };
+
   const toggleFollow = async () => {
     setIsLoading(true);
     try {
-      const endpoint = isFollowing ? `/api/follows/unfollow/${username}` : `/api/follows/${username}`;
+      const followUsername = getApiUsername();
+      const endpoint = isFollowing ? `/api/follows/unfollow/${followUsername}` : `/api/follows/${followUsername}`;
       const method = isFollowing ? 'DELETE' : 'POST';
       
       const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
@@ -131,13 +151,13 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
         setIsFollowing(!isFollowing);
         toast({
           title: isFollowing ? "Unfollowed" : "Following",
-          description: isFollowing ? `You unfollowed @${username}` : `You're now following @${username}`,
+          description: isFollowing ? `You unfollowed @${getApiUsername()}` : `You're now following @${getApiUsername()}`,
           className: "border-primary/20 bg-card",
         });
       } else {
         toast({
           title: "Error",
-          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${username}`,
+          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${getApiUsername()}`,
           variant: "destructive",
         });
       }
@@ -203,10 +223,21 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
         {/* Avatar & Name Section */}
         <div className="mb-4">
           <div className="flex items-end gap-3 mb-3">
-            <Avatar className="w-20 h-20 ring-4 ring-background border-3 border-primary/20 shadow-lg" data-testid="avatar-profile">
-              {userProfile.avatar && <AvatarImage src={userProfile.avatar} alt="Profile" />}
-              <AvatarFallback className="text-2xl font-bold">{userProfile.username[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <button
+              onClick={() => userProfile.avatar && setShowPictureModal(true)}
+              className={`relative ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+              data-testid="button-view-avatar"
+            >
+              <Avatar className="w-20 h-20 ring-4 ring-background border-3 border-primary/20 shadow-lg" data-testid="avatar-profile">
+                {userProfile.avatar && <AvatarImage src={userProfile.avatar} alt="Profile" />}
+                <AvatarFallback className="text-2xl font-bold">{userProfile.username[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              {userProfile.avatar && (
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 rounded-full transition-colors duration-200 flex items-center justify-center">
+                  <span className="text-white text-xs font-semibold opacity-0 hover:opacity-100">View</span>
+                </div>
+              )}
+            </button>
             
             <div className="mb-2">
               <CreatorBadge type="fashion-vanguard" size="sm" />
