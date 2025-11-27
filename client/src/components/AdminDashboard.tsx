@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, LogOut } from "lucide-react";
+import UserManagement from "./UserManagement";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -9,6 +10,7 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
+  const [currentSection, setCurrentSection] = useState<string>("dashboard");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = () => {
@@ -26,12 +28,16 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   const actions = [
     { label: "Refresh Stats", icon: RotateCw, onClick: handleRefresh, variant: "outline" as const },
-    { label: "User Management", icon: UserCog, onClick: () => onNavigate?.("users"), variant: "default" as const },
-    { label: "Post Management", icon: FileCog, onClick: () => onNavigate?.("posts"), variant: "default" as const },
-    { label: "Badges Manager", icon: Badge, onClick: () => onNavigate?.("badges"), variant: "default" as const },
-    { label: "Notifications Center", icon: Bell, onClick: () => onNavigate?.("notifications"), variant: "default" as const },
-    { label: "System Logs", icon: FileJson, onClick: () => onNavigate?.("logs"), variant: "default" as const },
+    { label: "User Management", icon: UserCog, onClick: () => setCurrentSection("users"), variant: "default" as const },
+    { label: "Post Management", icon: FileCog, onClick: () => setCurrentSection("posts"), variant: "default" as const },
+    { label: "Badges Manager", icon: Badge, onClick: () => setCurrentSection("badges"), variant: "default" as const },
+    { label: "Notifications Center", icon: Bell, onClick: () => setCurrentSection("notifications"), variant: "default" as const },
+    { label: "System Logs", icon: FileJson, onClick: () => setCurrentSection("logs"), variant: "default" as const },
   ];
+
+  if (currentSection === "users") {
+    return <UserManagement onBack={() => setCurrentSection("dashboard")} />;
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
