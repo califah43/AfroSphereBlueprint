@@ -286,3 +286,19 @@
     inset: -1px;
   }
 }
+
+/* Instagram-style double-tap heart animation */
+@keyframes instagramHeartBurst {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1) translateY(-15px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-40px);
+    opacity: 0;
+  }
+}

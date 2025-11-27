@@ -153,12 +153,15 @@ export default function PostCard({ post, onLike, onComment, onShare, onBookmark,
         <img
           src={post.imageUrl}
           alt="Post content"
-          className="w-full aspect-[3/4] object-cover"
+          className="w-full aspect-[3/4] object-cover cursor-pointer"
           data-testid={`img-post-${post.id}`}
         />
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart className="w-24 h-24 text-white fill-white animate-pulse transition-all duration-300" style={{ animation: 'pulse 0.6s ease-out' }} />
+            <Heart 
+              className="w-28 h-28 text-white fill-white drop-shadow-lg" 
+              style={{ animation: 'instagramHeartBurst 0.8s ease-out forwards' }} 
+            />
           </div>
         )}
       </div>
