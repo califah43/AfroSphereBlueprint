@@ -5,6 +5,7 @@ export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserSync?(id: string): User | undefined;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: any): Promise<User | undefined>;
   
@@ -66,6 +67,10 @@ export class MemStorage implements IStorage {
 
   // ============ USERS ============
   async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  getUserSync(id: string): User | undefined {
     return this.users.get(id);
   }
 

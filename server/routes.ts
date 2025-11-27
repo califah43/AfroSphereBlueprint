@@ -73,7 +73,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const offset = parseInt(req.query.offset as string) || 0;
     const posts = await storage.listPosts(limit, offset);
-    res.json(posts);
+    
+    // Enrich posts with author data
+    const enriched = posts.map(post => {
+      const user = storage.getUserSync?.(post.userId) || { username: post.userId, avatar: null };
+      return {
+        ...post,
+        author: {
+          username: user.username,
+          avatar: user.avatar || null
+        }
+      };
+    });
+    res.json(enriched);
   });
 
   app.get("/api/posts/category/:category", async (req, res) => {

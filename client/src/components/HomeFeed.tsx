@@ -54,52 +54,17 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
     },
   });
 
-  // Update displayed posts from API with user data enrichment
+  // Update displayed posts from API
   useEffect(() => {
-    const enrichPosts = async () => {
-      try {
-        const enriched = await Promise.all(
-          (apiPosts || []).map(async (post: any) => {
-            try {
-              const userRes = await fetch(`/api/users/${post.userId}`);
-              const user = await userRes.json();
-              
-              return {
-                ...post,
-                id: post.id || post.userId,
-                author: {
-                  username: user.username || post.userId,
-                  avatar: user.avatar || null
-                },
-                imageUrl: post.image,
-                likes: post.likes || 0,
-                comments: post.comments || 0,
-                timeAgo: post.timeAgo || "now"
-              };
-            } catch {
-              // Fallback if user fetch fails
-              return {
-                ...post,
-                id: post.id || post.userId,
-                author: {
-                  username: post.userId,
-                  avatar: null
-                },
-                imageUrl: post.image,
-                likes: post.likes || 0,
-                comments: post.comments || 0,
-                timeAgo: post.timeAgo || "now"
-              };
-            }
-          })
-        );
-        setDisplayedPosts(enriched);
-      } catch {
-        setDisplayedPosts(apiPosts as Post[]);
-      }
-    };
-    
-    enrichPosts();
+    const transformed = (apiPosts || []).map((post: any) => ({
+      ...post,
+      id: post.id || post.userId,
+      imageUrl: post.image,
+      likes: post.likes || 0,
+      commentCount: post.commentCount || post.comments || 0,
+      timeAgo: post.timeAgo || "now"
+    }));
+    setDisplayedPosts(transformed as Post[]);
   }, [apiPosts]);
 
   const filteredPosts = activeCategory === "for-you"
