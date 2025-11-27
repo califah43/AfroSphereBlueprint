@@ -22,14 +22,6 @@ interface ProfileProps {
   onFollowingClick?: () => void;
 }
 
-const mockPosts = [
-  { id: "1", image: fashionImage },
-  { id: "2", image: artImage },
-  { id: "3", image: musicImage },
-  { id: "4", image: fashionImage },
-  { id: "5", image: artImage },
-  { id: "6", image: musicImage },
-];
 
 const userProfiles: Record<string, any> = {
   adikeafrica: {
@@ -352,23 +344,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-2">
-                    {mockPosts.map((post) => (
-                      <button
-                        key={post.id}
-                        onClick={() => onPostClick?.(post.id)}
-                        className="aspect-square hover-elevate overflow-hidden rounded-lg group transition-all duration-300 ring-1 ring-border/50"
-                        data-testid={`post-grid-${post.id}`}
-                      >
-                        <img
-                          src={post.image}
-                          alt="Post"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Heart className="h-5 w-5 text-white" />
-                        </div>
-                      </button>
-                    ))}
+                    {/* Real posts would load from API here - currently empty for new profiles */}
                   </div>
                 )}
               </>

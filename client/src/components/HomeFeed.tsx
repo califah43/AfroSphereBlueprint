@@ -4,7 +4,6 @@ import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { mockPosts } from "@/data/mockData";
 
 const PostSkeleton = () => (
   <div className="mb-4 animate-pulse space-y-3 bg-muted/50 rounded-lg p-4 border border-border">
@@ -35,7 +34,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [displayedPosts, setDisplayedPosts] = useState<Post[]>(mockPosts);
+  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
   const [hasNewPosts, setHasNewPosts] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -50,16 +49,14 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
         const res = await fetch('/api/posts?limit=50');
         return res.json();
       } catch {
-        return mockPosts;
+        return [];
       }
     },
   });
 
-  // Fallback to mock data if API returns empty
+  // Update displayed posts from API
   useEffect(() => {
-    if (apiPosts && apiPosts.length > 0) {
-      setDisplayedPosts(apiPosts as Post[]);
-    }
+    setDisplayedPosts(apiPosts as Post[]);
   }, [apiPosts]);
 
   const filteredPosts = activeCategory === "for-you"
