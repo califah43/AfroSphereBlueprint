@@ -2,21 +2,17 @@ import { getMessaging, getToken, onMessage, Messaging } from "firebase/messaging
 import { app } from "./firebase";
 
 let messaging: Messaging | null = null;
-let messagingSupported = true;
+let messagingInitialized = false;
+let messagingError: Error | null = null;
 
 // Check if browser supports Firebase messaging
 const checkMessagingSupport = (): boolean => {
   try {
     // Check for required APIs
-    if (!("serviceWorker" in navigator)) {
-      return false;
-    }
-    if (!("PushManager" in window)) {
-      return false;
-    }
-    if (!("Notification" in window)) {
-      return false;
-    }
+    if (typeof window === "undefined") return false;
+    if (!("serviceWorker" in navigator)) return false;
+    if (!("PushManager" in window)) return false;
+    if (!("Notification" in window)) return false;
     return true;
   } catch (e) {
     return false;
@@ -24,15 +20,31 @@ const checkMessagingSupport = (): boolean => {
 };
 
 const initializeMessaging = (): Messaging | null => {
-  if (!messagingSupported) {
+  // Return early if already attempted and failed
+  if (messagingError) {
     return null;
   }
+
+  // Return cached messaging if already initialized
+  if (messagingInitialized && messaging) {
+    return messaging;
+  }
+
+  // Check support before attempting to initialize
+  if (!checkMessagingSupport()) {
+    messagingError = new Error("Messaging not supported");
+    messagingInitialized = true;
+    return null;
+  }
+
   if (!messaging) {
     try {
       messaging = getMessaging(app);
-    } catch (error) {
-      messagingSupported = false;
-      console.log("Firebase messaging not supported in this browser");
+      messagingInitialized = true;
+    } catch (error: any) {
+      messagingError = error;
+      messagingInitialized = true;
+      console.log("Firebase messaging initialization failed (this is normal for unsupported browsers)");
       return null;
     }
   }

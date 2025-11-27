@@ -64,6 +64,11 @@ export default function App() {
   useEffect(() => {
     const initFCM = async () => {
       try {
+        // Skip FCM if not in a browser context or notifications not supported
+        if (typeof window === "undefined" || !("Notification" in window)) {
+          return;
+        }
+
         // Register service worker for background messages
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(err => {
@@ -95,11 +100,14 @@ export default function App() {
           }
         });
       } catch (error) {
-        console.log("FCM initialization skipped:", error);
+        // Silently fail - FCM is not essential
+        console.log("FCM initialization skipped");
       }
     };
 
-    initFCM();
+    // Defer FCM init slightly to avoid blocking app startup
+    const timer = setTimeout(initFCM, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   // Reset click count after 3 seconds of inactivity
