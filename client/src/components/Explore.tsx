@@ -96,23 +96,24 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
         <SuggestedCreators />
 
         <div>
-          <h2 className="text-lg font-semibold mb-4" data-testid="text-categories">
-            Categories
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-categories">
+            <span>✨</span> Categories
           </h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {categories.map((category) => (
               <button
                 key={category.name}
-                className="relative h-36 rounded-xl overflow-hidden group hover-elevate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
+                className="relative h-40 rounded-lg overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
                 data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
               >
                 <img
                   src={category.image}
                   alt={category.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/90 flex items-end p-4 transition-colors duration-300">
-                  <p className="text-white font-semibold text-sm">{category.name}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent/0 flex flex-col items-start justify-end p-4 group-hover:from-black/95 transition-all duration-300">
+                  <p className="text-white font-bold text-base">{category.name}</p>
+                  <p className="text-white/70 text-xs mt-1">Browse</p>
                 </div>
               </button>
             ))}
@@ -120,21 +121,21 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-4" data-testid="text-popular-posts">
-            Popular Posts
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-popular-posts">
+            <span>🔥</span> Popular Posts
           </h2>
           <div className="grid grid-cols-3 gap-2">
             {popularPosts.map((post) => (
               <button
                 key={post.id}
                 onClick={() => onPostClick?.(post.id)}
-                className="aspect-square hover-elevate overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="aspect-square overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 group hover-elevate"
                 data-testid={`popular-post-${post.id}`}
               >
                 <img
                   src={post.image}
                   alt="Post"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
               </button>
             ))}
