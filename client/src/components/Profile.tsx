@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Heart, Share2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -85,6 +85,8 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
             followers: userData.followerCount?.toString() || "0",
             following: userData.followingCount?.toString() || "0",
             posts: userData.postCount?.toString() || "0",
+            avatar: userData.avatar || "",
+            banner: userData.banner || "",
           };
         } catch (e) {
           console.log("Error parsing user data");
@@ -163,9 +165,9 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
       {/* Elegant Header with Banner - Compact */}
       <div className="relative h-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
-          {bannerImage && (
+          {(userProfile.banner || bannerImage) && (
             <img
-              src={bannerImage}
+              src={userProfile.banner || bannerImage}
               alt="Profile banner"
               className="w-full h-full object-cover opacity-90"
             />
@@ -180,7 +182,8 @@ export default function Profile({ isOwnProfile = true, username = "adikeafrica",
         <div className="mb-4">
           <div className="flex items-end gap-3 mb-3">
             <Avatar className="w-20 h-20 ring-4 ring-background border-3 border-primary/20 shadow-lg" data-testid="avatar-profile">
-              <AvatarFallback className="text-2xl font-bold">AC</AvatarFallback>
+              {userProfile.avatar && <AvatarImage src={userProfile.avatar} alt="Profile" />}
+              <AvatarFallback className="text-2xl font-bold">{userProfile.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             
             <div className="mb-2">
