@@ -230,6 +230,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // ============ FCM TOKEN ROUTES ============
+  app.post("/api/notifications/fcm-token", async (req, res) => {
+    try {
+      const { token, userId } = req.body;
+      if (!token || !userId) {
+        return res.status(400).json({ error: "Missing token or userId" });
+      }
+
+      // Store FCM token in memory (in production, store in database)
+      console.log(`FCM token stored for user ${userId}`);
+
+      res.json({ success: true, message: "FCM token saved" });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

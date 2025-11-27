@@ -3,6 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
+import { requestNotificationPermission, setupMessageListener } from "./lib/fcm";
 import SplashScreen from "./components/SplashScreen";
 import OnboardingSlides from "./components/OnboardingSlides";
 import AuthScreen from "./components/AuthScreen";
@@ -43,6 +44,48 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
+  }, []);
+
+  // Initialize FCM and request notification permission
+  useEffect(() => {
+    const initFCM = async () => {
+      try {
+        // Register service worker for background messages
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(err => {
+            console.log("Service worker registration failed:", err);
+          });
+        }
+
+        // Request notification permission
+        const token = await requestNotificationPermission();
+        if (token) {
+          console.log("FCM token obtained, saving to backend");
+          // Save token to backend
+          await fetch("/api/notifications/fcm-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, userId: "current-user" }),
+          }).catch(err => console.log("Failed to save FCM token:", err));
+        }
+
+        // Setup listener for foreground messages
+        setupMessageListener((payload) => {
+          console.log("Message received:", payload);
+          // Show notification or update UI
+          if (payload.notification) {
+            new Notification(payload.notification.title || "AfroSphere", {
+              body: payload.notification.body,
+              icon: "/logo.png",
+            });
+          }
+        });
+      } catch (error) {
+        console.log("FCM initialization skipped:", error);
+      }
+    };
+
+    initFCM();
   }, []);
 
   // Reset click count after 3 seconds of inactivity
