@@ -10,6 +10,7 @@ import ReportsCenter from "./ReportsCenter";
 import SystemSettings from "./SystemSettings";
 import SystemLogs from "./SystemLogs";
 import TeamManagement from "./TeamManagement";
+import EmergencyControlPanel from "./EmergencyControlPanel";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -19,6 +20,7 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   const [currentSection, setCurrentSection] = useState<string>("dashboard");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isOwner] = useState(true);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -74,6 +76,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "reports") {
     return <ReportsCenter onBack={() => setCurrentSection("dashboard")} />;
+  }
+
+  if (currentSection === "emergency") {
+    return <EmergencyControlPanel onBack={() => setCurrentSection("dashboard")} isOwner={isOwner} />;
   }
 
   return (
@@ -155,10 +161,21 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
           <CardHeader>
             <CardTitle className="text-primary">Welcome to AfroSphere Admin</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <p className="text-muted-foreground">
               You have access to comprehensive admin tools to manage the platform, moderate content, and monitor system health. Use the quick actions above to navigate to specific management sections.
             </p>
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentSection("emergency")}
+                className="text-destructive hover:text-destructive"
+                data-testid="button-access-emergency-panel"
+              >
+                🔐 Emergency Control Panel
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>
