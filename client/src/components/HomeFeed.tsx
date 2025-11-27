@@ -154,8 +154,11 @@ export default function HomeFeed({ onOpenShare }: HomeFeedProps) {
           <div className="max-w-md mx-auto px-4 py-3">
             <h1 className="text-2xl font-bold mb-4" data-testid="text-feed-title">AfroSphere</h1>
             <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-              <TabsList className="w-full grid grid-cols-5 h-auto">
+              <TabsList className="w-full grid grid-cols-6 h-auto">
                 <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
+              <TabsTrigger value="fashion" className="text-xs" data-testid="tab-fashion">
+                Fashion
+              </TabsTrigger>
                   For You
                 </TabsTrigger>
                 <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
