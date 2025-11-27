@@ -1,124 +1,328 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
+import SplashScreen from "./components/SplashScreen";
+import OnboardingSlides from "./components/OnboardingSlides";
+import AuthScreen from "./components/AuthScreen";
+import AdminLogin from "./components/AdminLogin";
+import AdminDashboard from "./components/AdminDashboard";
+import HomeFeed from "./components/HomeFeed";
+import Explore from "./components/Explore";
+import Notifications from "./components/Notifications";
+import Profile from "./components/Profile";
+import CreatePost from "./components/CreatePost";
+import EditProfile from "./components/EditProfile";
+import Settings from "./components/Settings";
+import Comments from "./components/Comments";
+import SearchResults from "./components/SearchResults";
+import HashtagFeed from "./components/HashtagFeed";
+import PostDetail from "./components/PostDetail";
+import FollowersList from "./components/FollowersList";
+import ShareSheet from "./components/ShareSheet";
+import BottomNav from "./components/BottomNav";
+import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
-interface AdminDashboardProps {
-  onNavigate?: (section: string) => void;
-  onLogout?: () => void;
-}
+type AppState = "splash" | "onboarding" | "auth" | "main" | "admin";
+type MainView = "home" | "explore" | "create" | "notifications" | "profile";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
-export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
-  const [isRefreshing, setIsRefreshing] = useState(false);
+export default function App() {
+  const [appState, setAppState] = useState<AppState>("splash");
+  const [activeTab, setActiveTab] = useState<MainView>("home");
+  const [modalView, setModalView] = useState<ModalView>("none");
+  const [commentsPostData, setCommentsPostData] = useState<any>(null);
+  const [selectedHashtag, setSelectedHashtag] = useState<string>("");
+  const [selectedPostId, setSelectedPostId] = useState<string>("");
+  const [selectedUsername, setSelectedUsername] = useState<string>("");
+  const [logoClickCount, setLogoClickCount] = useState(0);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [clickResetTimer, setClickResetTimer] = useState<NodeJS.Timeout | null>(null);
+  const [adminSection, setAdminSection] = useState("dashboard");
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 1000);
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
+
+  // Reset click count after 3 seconds of inactivity
+  useEffect(() => {
+    if (logoClickCount > 0) {
+      if (clickResetTimer) {
+        clearTimeout(clickResetTimer);
+      }
+      const timer = setTimeout(() => {
+        setLogoClickCount(0);
+      }, 3000);
+      setClickResetTimer(timer);
+    }
+    return () => {
+      if (clickResetTimer) {
+        clearTimeout(clickResetTimer);
+      }
+    };
+  }, [logoClickCount]);
+
+  const handleSplashComplete = () => {
+    setAppState("onboarding");
   };
 
-  const metrics = [
-    { label: "Total Users", value: "12,847", icon: Users, color: "text-blue-500" },
-    { label: "Total Posts", value: "45,293", icon: FileText, color: "text-orange-500" },
-    { label: "Daily Active Users", value: "3,214", icon: TrendingUp, color: "text-green-500" },
-    { label: "Reports Today", value: "23", icon: AlertCircle, color: "text-red-500" },
-    { label: "New Sign-Ups Today", value: "157", icon: UserPlus, color: "text-purple-500" },
-  ];
+  const handleOnboardingComplete = () => {
+    setAppState("auth");
+  };
 
-  const actions = [
-    { label: "Refresh Stats", icon: RotateCw, onClick: handleRefresh, variant: "outline" as const },
-    { label: "User Management", icon: UserCog, onClick: () => onNavigate?.("users"), variant: "default" as const },
-    { label: "Post Management", icon: FileCog, onClick: () => onNavigate?.("posts"), variant: "default" as const },
-    { label: "Badges Manager", icon: Badge, onClick: () => onNavigate?.("badges"), variant: "default" as const },
-    { label: "Notifications Center", icon: Bell, onClick: () => onNavigate?.("notifications"), variant: "default" as const },
-    { label: "System Logs", icon: FileJson, onClick: () => onNavigate?.("logs"), variant: "default" as const },
-  ];
+  const handleAuthComplete = () => {
+    setAppState("main");
+  };
+
+  const handleTabChange = (tab: string) => {
+    if (tab === "create") {
+      setModalView("create");
+    } else {
+      setActiveTab(tab as MainView);
+      setModalView("none");
+    }
+  };
+
+  const handleOpenComments = (postId: string, image: string, caption: string) => {
+    setCommentsPostData({ postId, image, caption });
+    setModalView("comments");
+  };
+
+  const handleLogout = () => {
+    setAppState("auth");
+    setActiveTab("home");
+    setModalView("none");
+  };
+
+  const handleOpenPostDetail = (postId: string) => {
+    setSelectedPostId(postId);
+    setModalView("post-detail");
+  };
+
+  const handleOpenHashtagFeed = (hashtag: string) => {
+    setSelectedHashtag(hashtag);
+    setModalView("hashtag");
+  };
+
+  const handleOpenUserProfile = (username: string) => {
+    setSelectedUsername(username);
+    setModalView("user-profile");
+  };
+
+  const handleLogoClick = () => {
+    if (logoClickCount >= 17) {
+      setLogoClickCount(18);
+      setShowAdminLogin(true);
+    } else {
+      setLogoClickCount(logoClickCount + 1);
+    }
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setShowAdminLogin(false);
+    setAppState("admin");
+    setLogoClickCount(0);
+  };
+
+  if (appState === "splash") {
+    return <SplashScreen onComplete={handleSplashComplete} onLogoClick={handleLogoClick} />;
+  }
+
+  if (appState === "onboarding") {
+    return (
+      <OnboardingSlides
+        onComplete={handleOnboardingComplete}
+        onSkip={handleOnboardingComplete}
+      />
+    );
+  }
+
+  if (appState === "auth") {
+    return (
+      <>
+        <AuthScreen onAuthComplete={handleAuthComplete} onLogoClick={handleLogoClick} />
+        {showAdminLogin && (
+          <AdminLogin
+            onClose={() => setShowAdminLogin(false)}
+            onLoginSuccess={handleAdminLoginSuccess}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (appState === "admin") {
+    return (
+      <AdminDashboard 
+        onNavigate={(section) => setAdminSection(section)}
+        onLogout={() => {
+          setAppState("auth");
+          setLogoClickCount(0);
+          setAdminSection("dashboard");
+        }}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-20">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-primary" data-testid="text-admin-title">
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-2" data-testid="text-admin-role">
-              Super Admin • System Administrator
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onLogout}
-            className="gap-2"
-            data-testid="button-admin-logout"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
-        </div>
-
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {metrics.map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <Card key={metric.label} className="border-border/50" data-testid={`card-metric-${metric.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Icon className={`h-4 w-4 ${metric.color}`} />
-                    {metric.label}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold text-foreground" data-testid={`text-metric-${metric.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                    {metric.value}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Action Buttons */}
-        <Card className="border-border/50">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Manage platform content and users</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {actions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Button
-                    key={action.label}
-                    variant={action.variant}
-                    onClick={action.onClick}
-                    className="h-auto py-4 flex flex-col items-center gap-2 justify-center"
-                    data-testid={`button-admin-${action.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span className="text-sm">{action.label}</span>
-                  </Button>
-                );
-              })}
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <div className="flex items-center justify-center min-h-screen bg-black">
+          <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground flex flex-col">
+            {activeTab === "home" && (
+            <div className="flex-1 overflow-y-auto">
+              <HomeFeed 
+                onOpenShare={() => setModalView("share")}
+                onUserProfileClick={handleOpenUserProfile}
+              />
             </div>
-          </CardContent>
-        </Card>
+          )}
+          {activeTab === "explore" && (
+            <div className="flex-1 overflow-y-auto">
+              <Explore
+                onSearchClick={() => setModalView("search")}
+                onPostClick={handleOpenPostDetail}
+              />
+            </div>
+          )}
+          {activeTab === "notifications" && (
+            <div className="flex-1 overflow-y-auto">
+              <Notifications onUserClick={handleOpenUserProfile} />
+            </div>
+          )}
+          {activeTab === "profile" && (
+            <div className="flex-1 overflow-y-auto">
+              <Profile
+                isOwnProfile={true}
+                onEditProfile={() => setModalView("edit-profile")}
+                onSettings={() => setModalView("settings")}
+                onPostClick={handleOpenPostDetail}
+                onFollowersClick={() => setModalView("followers")}
+                onFollowingClick={() => setModalView("followers")}
+              />
+            </div>
+          )}
 
-        {/* Welcome Section */}
-        <Card className="border-primary/30 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="text-primary">Welcome to AfroSphere Admin</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              You have access to comprehensive admin tools to manage the platform, moderate content, and monitor system health. Use the quick actions above to navigate to specific management sections.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+          {modalView === "create" && (
+            <CreatePost
+              onClose={() => setModalView("none")}
+              onPost={(data) => {
+                console.log("Posted:", data);
+                setModalView("none");
+              }}
+            />
+          )}
+
+          {modalView === "edit-profile" && (
+            <EditProfile
+              onClose={() => setModalView("none")}
+              onSave={(data) => {
+                console.log("Profile updated:", data);
+                setModalView("none");
+              }}
+            />
+          )}
+
+          {modalView === "settings" && (
+            <Settings
+              onClose={() => setModalView("none")}
+              onLogout={handleLogout}
+            />
+          )}
+
+          {modalView === "comments" && commentsPostData && (
+            <Comments
+              postId={commentsPostData.postId}
+              postImage={commentsPostData.image}
+              postCaption={commentsPostData.caption}
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "search" && (
+            <SearchResults
+              onClose={() => setModalView("none")}
+              onHashtagClick={handleOpenHashtagFeed}
+              onUserClick={(username) => {
+                console.log("Navigate to user:", username);
+                setModalView("none");
+              }}
+            />
+          )}
+
+          {modalView === "hashtag" && selectedHashtag && (
+            <HashtagFeed
+              hashtag={selectedHashtag}
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "post-detail" && selectedPostId && (
+            <PostDetail
+              postId={selectedPostId}
+              author={{ username: "adikeafrica" }}
+              imageUrl={fashionImage}
+              caption="Celebrating our roots with modern style. Ankara fusion fashion dropping soon! 🔥 #AfricanFashion"
+              likes={1247}
+              timeAgo="2h ago"
+              comments={[
+                {
+                  id: "1",
+                  author: "zara_style",
+                  text: "This is absolutely stunning! 🔥",
+                  likes: 23,
+                  timeAgo: "1h ago",
+                },
+                {
+                  id: "2",
+                  author: "kwame_creative",
+                  text: "Love the fusion of traditional and modern!",
+                  likes: 15,
+                  timeAgo: "45m ago",
+                },
+              ]}
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "followers" && (
+            <FollowersList
+              username="adikeafrica"
+              followerCount="1.2K"
+              followingCount="485"
+              onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "share" && (
+            <ShareSheet
+              postUrl="https://afrosphere.app/post/123"
+              onClose={() => setModalView("none")}
+              onShare={(platform) => console.log("Shared to:", platform)}
+            />
+          )}
+
+          {modalView === "user-profile" && selectedUsername && (
+            <div className="flex-1 overflow-y-auto">
+              <Profile
+                isOwnProfile={selectedUsername === "adikeafrica"}
+                username={selectedUsername}
+                onClose={() => setModalView("none")}
+                onEditProfile={() => setModalView("edit-profile")}
+                onSettings={() => setModalView("settings")}
+                onPostClick={handleOpenPostDetail}
+                onFollowersClick={() => setModalView("followers")}
+                onFollowingClick={() => setModalView("followers")}
+              />
+            </div>
+          )}
+          </div>
+        </div>
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
