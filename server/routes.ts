@@ -5,12 +5,24 @@ import { db } from "./db";
 import { posts } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import multer from "multer";
+import WebSocket from "ws";
 
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+
+// WebSocket clients for real-time updates
+const wsClients = new Set<WebSocket>();
+const broadcastUpdate = (event: string, data: any) => {
+  const message = JSON.stringify({ event, data });
+  wsClients.forEach((client: WebSocket) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+};
 
 // Export storage for seeding
 export { storage };
@@ -451,6 +463,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         replies: [],
       };
       
+      // Broadcast real-time comment to all connected clients
+      broadcastUpdate('comment:created', enrichedComment);
+      
       res.status(201).json(enrichedComment);
     } catch (error) {
       console.error("Comment creation error:", error);
@@ -480,6 +495,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedPost = await storage.getPost(postId);
       newLikeCount = updatedPost?.likes || 0;
       
+      // Broadcast real-time update to all connected clients
+      broadcastUpdate('post:liked', { postId, userId, liked: !hasLiked, likes: newLikeCount });
+      
       res.json({ liked: !hasLiked, likes: newLikeCount });
     } catch (error) {
       res.status(400).json({ error: "Invalid request" });
@@ -501,6 +519,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch updated comment to get the new like count
       const updatedComment = await storage.getComment(commentId);
       const newLikeCount = updatedComment?.likes || 0;
+      
+      // Broadcast real-time update to all connected clients
+      broadcastUpdate('comment:liked', { commentId, userId, liked: !hasLiked, likes: newLikeCount });
       
       res.json({ liked: !hasLiked, likes: newLikeCount });
     } catch (error) {
@@ -784,5 +805,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // WebSocket server for real-time updates
+  const wss = new WebSocket.Server({ server: httpServer });
+  wss.on('connection', (ws: WebSocket) => {
+    wsClients.add(ws);
+    console.log(`WebSocket connected (${wsClients.size} clients)`);
+    
+    ws.on('close', () => {
+      wsClients.delete(ws);
+      console.log(`WebSocket disconnected (${wsClients.size} clients)`);
+    });
+    
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+  
   return httpServer;
 }
