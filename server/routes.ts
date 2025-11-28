@@ -5,23 +5,16 @@ import { db } from "./db";
 import { posts } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import multer from "multer";
-import WebSocket from "ws";
-
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
-// WebSocket clients for real-time updates
-const wsClients = new Set<WebSocket>();
+// Real-time updates via polling - clients refetch automatically
 const broadcastUpdate = (event: string, data: any) => {
-  const message = JSON.stringify({ event, data });
-  wsClients.forEach((client: WebSocket) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
+  // Broadcast logic - clients use React Query to refetch when needed
+  console.log(`Update: ${event}`, data);
 };
 
 // Export storage for seeding
@@ -805,22 +798,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
-  
-  // WebSocket server for real-time updates
-  const wss = new WebSocket.Server({ server: httpServer });
-  wss.on('connection', (ws: WebSocket) => {
-    wsClients.add(ws);
-    console.log(`WebSocket connected (${wsClients.size} clients)`);
-    
-    ws.on('close', () => {
-      wsClients.delete(ws);
-      console.log(`WebSocket disconnected (${wsClients.size} clients)`);
-    });
-    
-    ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
-    });
-  });
-  
   return httpServer;
 }
