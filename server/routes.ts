@@ -194,12 +194,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Enrich comments with username and replies
     const enrichedComments = await Promise.all(comments.map(async (comment) => {
-      const user = await storage.getUser(comment.userId);
+      let author = "creator";
+      
+      // Try to get user by ID first
+      try {
+        const user = await storage.getUser(comment.userId);
+        if (user?.username) {
+          author = user.username;
+        }
+      } catch (e) {
+        // If lookup fails, use fallback
+        console.error("Failed to lookup user for comment:", comment.userId, e);
+      }
+      
       const replies = await storage.getCommentReplies(comment.id);
       
       // Enrich replies with usernames and all fields
       const enrichedReplies = await Promise.all(replies.map(async (reply) => {
-        const replyUser = await storage.getUser(reply.userId);
+        let replyAuthor = "creator";
+        try {
+          const replyUser = await storage.getUser(reply.userId);
+          if (replyUser?.username) {
+            replyAuthor = replyUser.username;
+          }
+        } catch (e) {
+          console.error("Failed to lookup user for reply:", reply.userId, e);
+        }
+        
         return {
           id: reply.id,
           userId: reply.userId,
@@ -208,8 +229,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           likes: reply.likes || 0,
           createdAt: reply.createdAt,
           replyTo: reply.replyTo,
-          author: replyUser?.username || "creator",
+          author: replyAuthor,
           timeAgo: reply.createdAt ? `${Math.floor((Date.now() - new Date(reply.createdAt).getTime()) / 3600000)}h ago` : "now",
+          replies: [],
+          isLiked: false,
         };
       }));
       
@@ -221,9 +244,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         likes: comment.likes || 0,
         createdAt: comment.createdAt,
         replyTo: comment.replyTo,
-        author: user?.username || "creator",
+        author: author,
         timeAgo: comment.createdAt ? `${Math.floor((Date.now() - new Date(comment.createdAt).getTime()) / 3600000)}h ago` : "now",
         replies: enrichedReplies,
+        isLiked: false,
       };
     }));
     

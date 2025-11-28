@@ -46,7 +46,26 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
         const res = await fetch(`/api/comments/post/${postId}`);
         if (res.ok) {
           const data = await res.json();
-          setComments(data);
+          // Map response data to ensure all required fields are present
+          const mappedComments = data.map((c: any) => ({
+            id: c.id,
+            author: c.author || "creator",
+            text: c.text,
+            likes: c.likes || 0,
+            timeAgo: c.timeAgo || "now",
+            isLiked: c.isLiked || false,
+            replies: (c.replies || []).map((r: any) => ({
+              id: r.id,
+              author: r.author || "creator",
+              text: r.text,
+              likes: r.likes || 0,
+              timeAgo: r.timeAgo || "now",
+              isLiked: r.isLiked || false,
+              avatar: r.avatar,
+            })),
+            avatar: c.avatar,
+          }));
+          setComments(mappedComments);
         }
       } catch (error) {
         console.error("Failed to fetch comments", error);
@@ -75,7 +94,17 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
         });
         if (res.ok) {
           const newCommentObj = await res.json();
-          setComments([...comments, { ...newCommentObj, replies: [] }]);
+          const mappedComment: Comment = {
+            id: newCommentObj.id,
+            author: newCommentObj.author || "creator",
+            text: newCommentObj.text,
+            likes: newCommentObj.likes || 0,
+            timeAgo: newCommentObj.timeAgo || "now",
+            isLiked: false,
+            replies: [],
+            avatar: newCommentObj.avatar,
+          };
+          setComments([...comments, mappedComment]);
           setNewComment("");
         } else {
           console.error("Failed to post comment:", res.status);
@@ -108,10 +137,19 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
         });
         if (res.ok) {
           const reply = await res.json();
+          const mappedReply: Reply = {
+            id: reply.id,
+            author: reply.author || "creator",
+            text: reply.text,
+            likes: reply.likes || 0,
+            timeAgo: reply.timeAgo || "now",
+            isLiked: false,
+            avatar: reply.avatar,
+          };
           setComments(
             comments.map((c) =>
               c.id === commentId
-                ? { ...c, replies: [...c.replies, reply] }
+                ? { ...c, replies: [...c.replies, mappedReply] }
                 : c
             )
           );
