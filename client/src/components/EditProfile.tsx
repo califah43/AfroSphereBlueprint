@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Camera, MapPin, Link as LinkIcon, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import BannerCropper from "./BannerCropper";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 
 interface EditProfileProps {
@@ -52,6 +53,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
   const [formData, setFormData] = useState(getInitialData());
   const [charCount, setCharCount] = useState(formData.bio.length);
+  const [showBannerCropper, setShowBannerCropper] = useState(false);
+  const [bannerToEdit, setBannerToEdit] = useState("");
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -72,11 +75,17 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
-        setFormData({ ...formData, banner: base64 });
-        toast({ title: "Banner updated", description: "Your new banner is ready to save" });
+        setBannerToEdit(base64);
+        setShowBannerCropper(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleBannerCropApply = (croppedData: string) => {
+    setFormData({ ...formData, banner: croppedData });
+    setShowBannerCropper(false);
+    toast({ title: "Banner updated", description: "Your new banner is ready to save" });
   };
 
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -131,6 +140,16 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
     }
   };
+
+  if (showBannerCropper) {
+    return (
+      <BannerCropper
+        imageUrl={bannerToEdit}
+        onApply={handleBannerCropApply}
+        onCancel={() => setShowBannerCropper(false)}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
