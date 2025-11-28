@@ -101,6 +101,37 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Loading...",
     "common.error": "Error",
     "common.success": "Success",
+    
+    // Feed
+    "feed.noPost": "No posts yet",
+    "feed.beFirst": "Be the first to share something amazing!",
+    "feed.newPosts": "View new posts",
+    
+    // Explore
+    "explore.searchCreators": "Search creators",
+    "explore.trendingCreators": "Trending Creators",
+    "explore.featured": "Featured African Creators",
+    "explore.trending": "Trending",
+    "explore.popular": "Popular",
+    
+    // Profile
+    "profile.posts": "Posts",
+    "profile.followers": "Followers",
+    "profile.following": "Following",
+    "profile.editProfile": "Edit Profile",
+    "profile.follow": "Follow",
+    "profile.unfollow": "Unfollow",
+    
+    // Notifications
+    "notifications.title": "Notifications",
+    "notifications.noNotifications": "No notifications yet",
+    
+    // CreatePost
+    "create.title": "Create Post",
+    "create.caption": "What's on your mind?",
+    "create.category": "Select Category",
+    "create.post": "Post",
+    "create.cancel": "Cancel",
   },
   sw: {
     // Navigation
@@ -202,6 +233,37 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Inajibu...",
     "common.error": "Kosa",
     "common.success": "Mafaniko",
+    
+    // Feed
+    "feed.noPost": "Hakuna posts bado",
+    "feed.beFirst": "Kuwa wa kwanza kushiriki kitu kizuri!",
+    "feed.newPosts": "Angalia posts mpya",
+    
+    // Explore
+    "explore.searchCreators": "Tafuta wabunifu",
+    "explore.trendingCreators": "Wabunifu Wenye Mwendo",
+    "explore.featured": "Wabunifu Wenye Tawazo wa Kiafrika",
+    "explore.trending": "Inayoendelea",
+    "explore.popular": "Maadhimisho",
+    
+    // Profile
+    "profile.posts": "Chachu",
+    "profile.followers": "Wafuasi",
+    "profile.following": "Unfuatao",
+    "profile.editProfile": "Hariri Wasifu",
+    "profile.follow": "Fuata",
+    "profile.unfollow": "Acha Kufuata",
+    
+    // Notifications
+    "notifications.title": "Arifa",
+    "notifications.noNotifications": "Hakuna arifa",
+    
+    // CreatePost
+    "create.title": "Tengeneza Chachu",
+    "create.caption": "Nini kinatofautiana nacho?",
+    "create.category": "Chagua Jamii",
+    "create.post": "Chachu",
+    "create.cancel": "Ghairi",
   },
   yo: {
     // Navigation

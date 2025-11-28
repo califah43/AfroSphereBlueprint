@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
 import CollapsibleHeader from "./CollapsibleHeader";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const PostSkeleton = () => (
   <div className="mb-4 animate-pulse space-y-3 bg-muted/30 rounded-lg p-4 border border-border/50 opacity-60">
@@ -34,6 +35,7 @@ interface HomeFeedProps {
 }
 
 export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagClick, onCommentClick }: HomeFeedProps) {
+  const { t } = useTranslation();
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -265,7 +267,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             data-testid="button-new-posts"
           >
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            View new posts
+            {t("feed.newPosts")}
           </button>
         </div>
       )}
@@ -307,8 +309,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
                 </>
               ) : (
                 <div className="py-16 text-center">
-                  <p className="text-muted-foreground font-medium">No posts yet</p>
-                  <p className="text-xs text-muted-foreground mt-1">Be the first to share something amazing!</p>
+                  <p className="text-muted-foreground font-medium">{t("feed.noPost")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("feed.beFirst")}</p>
                 </div>
               )}
             </>

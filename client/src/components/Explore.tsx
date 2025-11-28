@@ -6,6 +6,7 @@ import { GridSkeleton } from "@/components/SkeletonLoader";
 import SuggestedCreators from "./SuggestedCreators";
 import FeaturedAfrican from "./FeaturedAfrican";
 import TrendingAfrican from "./TrendingAfrican";
+import { useTranslation } from "@/hooks/useTranslation";
 import GenreCard from "./GenreCard";
 import { GENRE_LIST } from "@shared/genres";
 import fashionHero from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
@@ -55,6 +56,7 @@ interface TrendingHashtag { tag: string; count: number; posts: number; }
 interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
 
 export default function Explore({ onSearchClick, onPostClick, onHashtagClick }: ExploreProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
   const [trendingPosts, setTrendingPosts] = useState<TrendingPostData[]>([]);
