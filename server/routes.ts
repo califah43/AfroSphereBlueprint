@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { DbStorage } from "./storage-db";
+import { db } from "./db";
+import { posts } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
@@ -54,16 +57,18 @@ async function seedDatabase() {
     }
   }
 
-  // Create mock posts with stable image URLs
+  // Create mock posts with stable image URLs and likes
   for (const postData of mockPostsData) {
     const user = await storage.getUserByUsername(postData.username);
     if (user) {
-      await storage.createPost({
+      const post = await storage.createPost({
         userId: user.id,
         image: postData.image,
         caption: postData.caption,
         category: postData.category,
       });
+      // Update post with seed likes
+      await db.update(posts).set({ likes: postData.likes }).where(eq(posts.id, post.id));
     }
   }
 
