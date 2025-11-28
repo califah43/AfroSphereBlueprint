@@ -11,6 +11,7 @@ import SystemSettings from "./SystemSettings";
 import SystemLogs from "./SystemLogs";
 import TeamManagement from "./TeamManagement";
 import EmergencyControlPanel from "./EmergencyControlPanel";
+import UserSettingsManagement from "./UserSettingsManagement";
 
 interface AdminDashboardProps {
   onNavigate?: (section: string) => void;
@@ -39,6 +40,7 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
     { label: "Refresh Stats", icon: RotateCw, onClick: handleRefresh, variant: "outline" as const },
     { label: "User Management", icon: UserCog, onClick: () => setCurrentSection("users"), variant: "default" as const },
     { label: "Post Management", icon: FileCog, onClick: () => setCurrentSection("posts"), variant: "default" as const },
+    { label: "User Settings Manager", icon: Settings, onClick: () => setCurrentSection("user-settings"), variant: "default" as const },
     { label: "Badges Manager", icon: Badge, onClick: () => setCurrentSection("badges"), variant: "default" as const },
     { label: "Notifications Center", icon: Bell, onClick: () => setCurrentSection("notifications"), variant: "default" as const },
     { label: "System Logs", icon: FileJson, onClick: () => setCurrentSection("logs"), variant: "default" as const },
@@ -80,6 +82,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
 
   if (currentSection === "emergency") {
     return <EmergencyControlPanel onBack={() => setCurrentSection("dashboard")} isOwner={isOwner} />;
+  }
+
+  if (currentSection === "user-settings") {
+    return <UserSettingsManagement onBack={() => setCurrentSection("dashboard")} />;
   }
 
   return (

@@ -14,6 +14,7 @@ interface SettingsProps {
   onClose: () => void;
   onLogout?: () => void;
   onEditProfile?: () => void;
+  userId?: string;
 }
 
 interface SettingsSections {
@@ -47,7 +48,7 @@ interface SettingsSections {
   };
 }
 
-export default function Settings({ onClose, onLogout, onEditProfile }: SettingsProps) {
+export default function Settings({ onClose, onLogout, onEditProfile, userId }: SettingsProps) {
   const [settings, setSettings] = useState<SettingsSections>({
     account: {
       privateAccount: false,
@@ -90,14 +91,55 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (userId) {
+      setIsLoading(true);
+      fetch(`/api/settings/${userId}`)
+        .then(r => r.json())
+        .then(data => {
+          setSettings({
+            account: { privateAccount: data.privateAccount, allowComments: data.allowComments, allowMentions: data.allowMentions },
+            notifications: { likes: data.notificationsLikes, comments: data.notificationsComments, follows: data.notificationsFollows, trending: data.notificationsTrending, pushNotifications: data.notificationsPush, emailNotifications: data.notificationsEmail },
+            privacy: { downloadData: false, activityStatus: data.privacyActivityStatus, readReceipts: data.privacyReadReceipts },
+            display: { darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: data.displayLanguage },
+            content: { hideExplicit: data.contentHideExplicit, mutedWords: data.contentMutedWords, restrictedMode: data.contentRestrictedMode },
+          });
+        })
+        .finally(() => setIsLoading(false));
+    }
+  }, [userId]);
+
   const handleToggle = (section: string, key: string, value: boolean) => {
-    setSettings({
+    const newSettings = {
       ...settings,
       [section]: {
         ...(settings[section as keyof SettingsSections] as any),
         [key]: value,
       },
-    });
+    };
+    setSettings(newSettings);
+    if (userId) {
+      const mapped: any = {
+        privateAccount: newSettings.account.privateAccount,
+        allowComments: newSettings.account.allowComments,
+        allowMentions: newSettings.account.allowMentions,
+        notificationsLikes: newSettings.notifications.likes,
+        notificationsComments: newSettings.notifications.comments,
+        notificationsFollows: newSettings.notifications.follows,
+        notificationsTrending: newSettings.notifications.trending,
+        notificationsPush: newSettings.notifications.pushNotifications,
+        notificationsEmail: newSettings.notifications.emailNotifications,
+        privacyActivityStatus: newSettings.privacy.activityStatus,
+        privacyReadReceipts: newSettings.privacy.readReceipts,
+        contentHideExplicit: newSettings.content.hideExplicit,
+        contentMutedWords: newSettings.content.mutedWords,
+        contentRestrictedMode: newSettings.content.restrictedMode,
+        displayDarkMode: newSettings.display.darkMode,
+        displayTextSize: newSettings.display.textSize,
+        displayLanguage: newSettings.display.language,
+      };
+      fetch(`/api/settings/${userId}`, { method: 'POST', body: JSON.stringify(mapped), headers: { 'Content-Type': 'application/json' } }).catch(e => console.error('Settings save failed:', e));
+    }
   };
 
   const handleSaveEmail = () => {
