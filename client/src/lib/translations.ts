@@ -9,11 +9,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.notifications": "Notifications",
     "nav.profile": "Profile",
     
-    // HomeFeed
-    "feed.noPosts": "No posts yet",
-    "feed.beFirst": "Be the first to share something amazing!",
-    "feed.newPosts": "View new posts",
-    
     // Settings
     "settings.title": "Settings",
     "settings.account": "Account",
