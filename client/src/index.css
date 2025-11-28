@@ -313,34 +313,42 @@
   }
 }
 
-/* AFROSPHERE FONT SIZE SYSTEM - Clean and Scalable */
+/* AFROSPHERE FONT SIZE SYSTEM - Mobile-Optimized */
 :root {
   --font-small: 13px;
-  --font-big: 17px;
-  --font-large: 22px;
+  --font-big: 16px;
+  --font-large: 20px;
 }
 
-/* Text Size Presets */
+/* Text Size Presets - Only affects readable text, NOT buttons/icons */
 .text-size-normal {
   /* Default sizes - no change needed */
 }
 
 .text-size-large {
-  /* Large preset: increase all text by one tier */
+  /* Large: only scale body text, not UI controls */
 }
-.text-size-large * {
+.text-size-large p,
+.text-size-large span:not([role="button"]),
+.text-size-large li,
+.text-size-large td,
+.text-size-large label {
   font-size: var(--font-big) !important;
 }
-.text-size-large h1, .text-size-large h2, .text-size-large h3, .text-size-large h4, .text-size-large h5, .text-size-large h6 {
+.text-size-large h1, .text-size-large h2, .text-size-large h3 {
   font-size: var(--font-large) !important;
 }
 
 .text-size-extra-large {
-  /* Extra-large preset: maximize readability */
+  /* Extra-large: maximize readability while respecting mobile */
 }
-.text-size-extra-large * {
+.text-size-extra-large p,
+.text-size-extra-large span:not([role="button"]),
+.text-size-extra-large li,
+.text-size-extra-large td,
+.text-size-extra-large label {
   font-size: var(--font-large) !important;
 }
-.text-size-extra-large h1, .text-size-extra-large h2, .text-size-extra-large h3, .text-size-extra-large h4, .text-size-extra-large h5, .text-size-extra-large h6 {
-  font-size: calc(var(--font-large) * 1.3) !important;
+.text-size-extra-large h1, .text-size-extra-large h2, .text-size-extra-large h3 {
+  font-size: calc(var(--font-large) * 1.15) !important;
 }
