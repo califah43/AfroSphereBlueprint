@@ -5,7 +5,69 @@ import { MemStorage } from "./storage";
 const storage = new MemStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
 
+// Export storage for seeding
+export { storage };
+
+// Seed data function
+async function seedDatabase() {
+  const mockPostsData = [
+    // Fashion
+    { userId: "user-adikeafrica", username: "adikeafrica", caption: "Celebrating our roots with modern style. Ankara fusion fashion dropping soon! 🔥 #AfricanFashion #AfoStyle", category: "fashion", likes: 1247 },
+    { userId: "user-zara_style", username: "zara_style", caption: "New collection: Bold patterns, sustainable fabrics. Shop local, think global 🌍 #EthicalFashion #AfricanDesign", category: "fashion", likes: 892 },
+    { userId: "user-kente_vibes", username: "kente_vibes", caption: "Traditional kente meets contemporary cuts. The future of African fashion is here 👑 #KenteKing #TraditionalStyle", category: "fashion", likes: 1523 },
+    
+    // Music
+    { userId: "user-amaarabeats", username: "amaarabeats", caption: "Late night sessions creating the future of Afrobeats. Studio vibes 🎵 #AfricanMusic #Producer #Afrobeats", category: "music", likes: 2103 },
+    { userId: "user-beat_masta", username: "beat_masta", caption: "New track dropping Friday! Afrobeats meets amapiano. Your ears are ready 🎧 #NewMusic #Amapiano", category: "music", likes: 1678 },
+    { userId: "user-dj_cairo", username: "dj_cairo", caption: "Spinning vibes from Cairo to Nairobi. AfroBeats, Amapiano, House - it's all love 🎵🌍 #DJLife #AfricanMusician", category: "music", likes: 1245 },
+    
+    // Art
+    { userId: "user-kojoart", username: "kojoart", caption: "New piece inspired by Adinkra symbols. The journey continues. #AfricanArt #ContemporaryArt #Adinkra", category: "art", likes: 892 },
+    { userId: "user-paint_mastery", username: "paint_mastery", caption: "Oil on canvas: A tribute to our ancestors. Art is resistance, art is love 🎨 #Painting #ArtistLife", category: "art", likes: 1123 },
+    { userId: "user-street_artist", username: "street_artist", caption: "Murals transforming our communities. Art that speaks truth to power 🖌️ #StreetArt #Activism", category: "art", likes: 1734 },
+    
+    // Culture
+    { userId: "user-culture_keeper", username: "culture_keeper", caption: "Ancient traditions in modern times. Keep your culture alive, pass it on 🌍 #CulturalHeritage #Tradition", category: "culture", likes: 1234 },
+    { userId: "user-griot_stories", username: "griot_stories", caption: "Storytelling night: Tales passed down for generations 📖✨ #OralTradition #StorytellingCircle", category: "culture", likes: 876 },
+    { userId: "user-festival_vibe", username: "festival_vibe", caption: "Annual cultural festival in full swing! Unity, music, joy 🎉🌍 #CulturalFestival #Community", category: "culture", likes: 1678 },
+    
+    // Lifestyle
+    { userId: "user-wellness_guru", username: "wellness_guru", caption: "Morning meditation overlooking the continent. Inner peace = outer glow ✨🧘 #MindfulLiving #Wellness", category: "lifestyle", likes: 987 },
+    { userId: "user-kitchen_diaries", username: "kitchen_diaries", caption: "Traditional recipes with a modern twist. Food is culture on a plate 🍲❤️ #AfricanCuisine #FoodBlogger", category: "lifestyle", likes: 1456 },
+    { userId: "user-travel_nomad", username: "travel_nomad", caption: "Backpacking through 5 African countries. The continent is calling 🗺️✈️ #AfricaTravel #Adventure", category: "lifestyle", likes: 1834 },
+  ];
+
+  // Create mock users first
+  const usernames = new Set(mockPostsData.map(p => p.username));
+  for (const username of usernames) {
+    try {
+      await storage.createUser({
+        username,
+        password: "password123",
+      });
+    } catch (e) {
+      // User may already exist
+    }
+  }
+
+  // Create mock posts
+  for (const postData of mockPostsData) {
+    const user = await storage.getUserByUsername(postData.username);
+    if (user) {
+      await storage.createPost({
+        userId: user.id,
+        image: "https://via.placeholder.com/400x500?text=" + postData.username,
+        caption: postData.caption,
+        category: postData.category,
+      });
+    }
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Seed database on startup
+  await seedDatabase();
+
   // ============ AUTH ROUTES ============
   app.get("/api/auth/check-username/:username", async (req, res) => {
     try {
