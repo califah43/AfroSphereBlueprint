@@ -182,35 +182,26 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
   return (
     <div className="pb-20" data-testid="container-profile">
-      {/* Sticky Header */}
-      <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-20">
-        {!isOwnProfile && onClose && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="hover-elevate"
-            data-testid="button-close-profile"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        )}
-        <div className="flex-1" />
-        {isOwnProfile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onSettings}
-            data-testid="button-settings"
-            className="hover-elevate"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
+      {/* Sticky Header - Only show for other profiles */}
+      {!isOwnProfile && (
+        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center justify-between z-20">
+          {onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="hover-elevate"
+              data-testid="button-close-profile"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
+          <div className="flex-1" />
+        </div>
+      )}
 
-      {/* Elegant Banner */}
-      <div className="relative h-32 overflow-hidden">
+      {/* Elegant Banner - Extends to Top */}
+      <div className="relative h-32 overflow-hidden -mt-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
           {(userProfile.banner || bannerImage) && (
             <img
@@ -224,7 +215,23 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
-      <div className="max-w-md mx-auto px-4 -mt-8 relative z-10 pb-6">
+      <div className="max-w-md mx-auto px-4 -mt-10 relative z-10 pb-6">
+        {/* Header for Own Profile (Settings) */}
+        {isOwnProfile && (
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onSettings}
+              data-testid="button-settings"
+              className="hover-elevate"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
         {/* Avatar - Overlaps Banner */}
         <div className="flex mb-4">
           <button
