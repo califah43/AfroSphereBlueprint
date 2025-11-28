@@ -224,12 +224,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
-      <div className="max-w-md mx-auto px-4 -mt-12 relative z-10 pb-6">
-        {/* Avatar & Header Info */}
-        <div className="flex gap-3 mb-4 items-start">
+      <div className="max-w-md mx-auto px-4 pt-4 relative z-10 pb-6">
+        {/* Avatar */}
+        <div className="flex justify-center mb-4">
           <button
             onClick={() => userProfile.avatar && setShowPictureModal(true)}
-            className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+            className={`relative ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
             data-testid="button-view-avatar"
           >
             <div className="w-16 h-16 rounded-lg ring-3 ring-background overflow-hidden bg-muted shadow-sm">
@@ -242,24 +242,25 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               )}
             </div>
           </button>
+        </div>
 
-          <div className="flex-1 min-w-0">
-            {/* Name & Badge */}
-            <div className="flex items-center gap-2 mb-0.5">
-              <h1 className="text-lg font-black tracking-tight truncate" data-testid="text-profile-displayname">
-                {userProfile.displayName}
-              </h1>
-              <CreatorBadge type="fashion-vanguard" size="sm" />
-            </div>
-            
-            {/* Username */}
-            <p className="text-xs text-muted-foreground font-medium mb-1" data-testid="text-profile-username">@{userProfile.username}</p>
-
-            {/* Bio - Compact elegance */}
-            <p className="text-xs text-foreground leading-tight line-clamp-2" data-testid="text-profile-bio">
-              {userProfile.bio}
-            </p>
+        {/* Name, Badge & Username - Centered */}
+        <div className="text-center mb-4">
+          {/* Name & Badge */}
+          <div className="flex items-center justify-center gap-2 mb-0.5">
+            <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
+              {userProfile.displayName}
+            </h1>
+            <CreatorBadge type="fashion-vanguard" size="sm" />
           </div>
+          
+          {/* Username */}
+          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
+
+          {/* Bio - Compact elegance */}
+          <p className="text-xs text-foreground leading-tight" data-testid="text-profile-bio">
+            {userProfile.bio}
+          </p>
         </div>
 
         {/* Professional Info - Compact & Refined */}
