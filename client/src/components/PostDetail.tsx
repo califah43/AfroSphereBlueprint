@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -55,15 +55,22 @@ export default function PostDetail({
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
 
-  // Get current user ID
-  const getUserId = () => {
-    let userId = localStorage.getItem("currentUserId");
-    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-    if (userData && userData.id && userData.id !== userId) {
-      userId = userData.id;
-    }
-    return userId;
-  };
+  // Fetch comments when modal opens
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(`/api/comments/post/${postId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch comments:", error);
+      }
+    };
+    
+    fetchComments();
+  }, [postId]);
 
   const handleLike = async () => {
     const userId = getUserId();
@@ -74,9 +81,12 @@ export default function PostDetail({
     }
 
     // Optimistic update - update UI immediately
+    const previousLiked = isLiked;
     const previousLikes = likes;
-    const newLikes = isLiked ? likes - 1 : likes + 1;
+    const newLiked = !isLiked;
+    const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
     
+    setIsLiked(newLiked);
     setLikes(newLikes);
 
     try {
@@ -91,6 +101,7 @@ export default function PostDetail({
         if (data.likes !== undefined) {
           setLikes(data.likes);
         }
+        setIsLiked(data.liked);
         
         if (data.liked) {
           toast({ title: "Post liked!", description: "Added to your liked posts" });
@@ -99,31 +110,74 @@ export default function PostDetail({
         }
       } else {
         // Rollback on error
+        setIsLiked(previousLiked);
         setLikes(previousLikes);
         toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
       }
     } catch (error) {
       // Rollback on error
+      setIsLiked(previousLiked);
       setLikes(previousLikes);
       toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }
   };
 
-  const handleComment = (e: React.FormEvent) => {
+  const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      setComments([
-        ...comments,
-        {
-          id: Date.now().toString(),
-          author: "you",
-          text: newComment,
-          likes: 0,
-          timeAgo: "Just now",
-        },
-      ]);
-      setNewComment("");
+    if (!newComment.trim()) return;
+
+    const userId = getUserId();
+    if (!userId) {
+      toast({ title: "Please sign in to comment", variant: "destructive" });
+      return;
     }
+
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    const username = userData?.username || "you";
+
+    // Optimistic update
+    const optimisticComment = {
+      id: Date.now().toString(),
+      author: username,
+      text: newComment,
+      likes: 0,
+      timeAgo: "Just now",
+    };
+
+    setComments([...comments, optimisticComment]);
+    setNewComment("");
+
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId,
+          userId,
+          text: newComment,
+        }),
+      });
+
+      if (!res.ok) {
+        // Remove optimistic comment on error
+        setComments(prev => prev.filter(c => c.id !== optimisticComment.id));
+        toast({ title: "Error", description: "Failed to post comment", variant: "destructive" });
+      }
+    } catch (error) {
+      // Remove optimistic comment on error
+      setComments(prev => prev.filter(c => c.id !== optimisticComment.id));
+      toast({ title: "Error", description: "Failed to post comment", variant: "destructive" });
+    }
+  };
+
+  // Get current user ID
+  const getUserId = () => {
+    let userId = localStorage.getItem("currentUserId");
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    if (userData && userData.id && userData.id !== userId) {
+      userId = userData.id;
+    }
+    return userId;
   };
 
   return (
