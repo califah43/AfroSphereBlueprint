@@ -313,25 +313,29 @@
   }
 }
 
-/* TEXT SIZE SCALING - APPLIES GLOBALLY TO ALL ELEMENTS */
+/* TEXT SIZE SCALING - MINIMAL SCALING WITHOUT LAYOUT ISSUES */
 :root {
   --text-scale: 1;
 }
 
 .text-size-large {
-  --text-scale: 1.05;
-  font-size: calc(1rem * var(--text-scale)) !important;
+  --text-scale: 1.02;
 }
 
-.text-size-large * {
-  font-size: calc(1em * var(--text-scale)) !important;
+.text-size-large body,
+.text-size-large p,
+.text-size-large span,
+.text-size-large div {
+  font-size: calc(1em * var(--text-scale));
 }
 
 .text-size-extra-large {
-  --text-scale: 1.10;
-  font-size: calc(1rem * var(--text-scale)) !important;
+  --text-scale: 1.04;
 }
 
-.text-size-extra-large * {
-  font-size: calc(1em * var(--text-scale)) !important;
+.text-size-extra-large body,
+.text-size-extra-large p,
+.text-size-extra-large span,
+.text-size-extra-large div {
+  font-size: calc(1em * var(--text-scale));
 }
