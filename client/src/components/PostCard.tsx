@@ -258,6 +258,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 <DropdownMenuSeparator />
               </>
             )}
+            <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={() => {
                 navigator.clipboard.writeText(`https://afrosphere.app/post/${post.id}`);
@@ -271,6 +272,21 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             >
               <Copy className="mr-3 h-4 w-4" />
               <span>Copy link</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleBookmark}
+              className="cursor-pointer"
+              data-testid={`button-bookmark-menu-${post.id}`}
+            >
+              <Bookmark className={`mr-3 h-4 w-4 ${isBookmarked ? "fill-current text-primary" : ""}`} />
+              <span>{isBookmarked ? "Unsave" : "Save"}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              data-testid={`button-share-menu-${post.id}`}
+            >
+              <Share2 className="mr-3 h-4 w-4" />
+              <span>Share</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -338,15 +354,11 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         )}
       </div>
 
-      {/* Engagement Stats - Twitter X Style Bottom */}
-      <div className="px-4 py-3 flex justify-between text-xs text-muted-foreground border-t border-border/10">
+      {/* Engagement Stats - AfroSphere Unique */}
+      <div className="px-4 py-3 flex justify-start gap-6 text-xs text-muted-foreground border-t border-border/10">
         <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={() => onComment?.(post.id)} data-testid={`button-comments-stat-${post.id}`}>
           <MessageCircle className="h-4 w-4" />
           <span>{post.comments}</span>
-        </button>
-        <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-shares-stat-${post.id}`}>
-          <Share2 className="h-4 w-4" />
-          <span>{Math.floor(post.likes * 0.3)}</span>
         </button>
         <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
           <Heart className={`h-4 w-4 ${isLiked ? "fill-primary text-primary" : ""}`} />
@@ -355,9 +367,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-views-stat-${post.id}`}>
           <Eye className="h-4 w-4" />
           <span>{Math.floor(post.likes * 0.5)}</span>
-        </button>
-        <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={handleBookmark} data-testid={`button-bookmark-${post.id}`}>
-          <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current text-primary" : ""}`} />
         </button>
       </div>
 
