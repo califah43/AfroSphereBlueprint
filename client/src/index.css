@@ -319,7 +319,7 @@
 }
 
 .text-size-large {
-  --text-scale: 1.08;
+  --text-scale: 1.05;
   font-size: calc(1rem * var(--text-scale)) !important;
 }
 
@@ -328,7 +328,7 @@
 }
 
 .text-size-extra-large {
-  --text-scale: 1.15;
+  --text-scale: 1.10;
   font-size: calc(1rem * var(--text-scale)) !important;
 }
 
