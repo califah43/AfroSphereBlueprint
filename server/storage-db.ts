@@ -55,7 +55,9 @@ export class DbStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
     const [user] = await db.insert(users).values({
-      ...insertUser,
+      username: insertUser.username,
+      password: insertUser.password,
+      firebaseUid: insertUser.firebaseUid || null,
       id,
       displayName: '',
       bio: '',
@@ -64,7 +66,6 @@ export class DbStorage implements IStorage {
       banner: '',
       website: '',
       profession: '',
-      firebaseUid: insertUser.firebaseUid || null,
     }).returning();
     return user;
   }

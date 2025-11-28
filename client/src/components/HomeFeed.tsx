@@ -80,10 +80,11 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         // Transform posts using pre-fetched user data
         return posts.map((p: any) => {
           const user = userMap.get(p.userId);
+          const username = user?.username || (user?.displayName ? user.displayName.split(' ')[0] : "creator");
           return {
             id: p.id,
             author: { 
-              username: user?.username || "creator", 
+              username: username, 
               avatar: user?.avatar || "" 
             },
             imageUrl: p.image,

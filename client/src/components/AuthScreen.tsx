@@ -163,27 +163,15 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       }
       
       // Store the REAL database user
-      if (dbUser) {
+      if (dbUser && dbUser.id) {
         localStorage.setItem("currentUserId", dbUser.id);
         localStorage.setItem("currentUserData", JSON.stringify({
           ...dbUser,
           firebaseUid: userCredential.user.uid,
         }));
       } else {
-        // Only fallback if absolutely necessary
-        const email = userCredential.user.email || "user";
-        const username = email.split('@')[0];
-        localStorage.setItem("currentUserId", userCredential.user.uid);
-        localStorage.setItem("currentUserData", JSON.stringify({
-          id: userCredential.user.uid,
-          email: email,
-          username: username,
-          displayName: username,
-          bio: "",
-          location: "",
-          avatar: "",
-          firebaseUid: userCredential.user.uid,
-        }));
+        // User not found - this shouldn't happen for existing users
+        throw new Error("User account not found. Please sign up instead.");
       }
       
       toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
