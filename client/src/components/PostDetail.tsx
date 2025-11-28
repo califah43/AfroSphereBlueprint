@@ -63,12 +63,17 @@ export default function PostDetail({
       if (userData && userData.id && userData.id !== userId) {
         userId = userData.id;
       }
-      if (userId) {
+      if (userId && postId) {
         try {
-          const res = await fetch(`/api/likes/posts/check/${userId}/${postId}`);
+          const url = `/api/likes/posts/check/${userId}/${postId}`;
+          const res = await fetch(url);
           if (res.ok) {
             const data = await res.json();
-            setIsLiked(data.liked);
+            if (data && typeof data.liked === 'boolean') {
+              setIsLiked(data.liked);
+            }
+          } else {
+            console.warn(`Like check failed with status ${res.status}`);
           }
         } catch (error) {
           console.error("Error checking like status:", error);
