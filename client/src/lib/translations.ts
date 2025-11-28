@@ -233,37 +233,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Inajibu...",
     "common.error": "Kosa",
     "common.success": "Mafaniko",
-    
-    // Feed
-    "feed.noPost": "Hakuna posts bado",
-    "feed.beFirst": "Kuwa wa kwanza kushiriki kitu kizuri!",
-    "feed.newPosts": "Angalia posts mpya",
-    
-    // Explore
-    "explore.searchCreators": "Tafuta wabunifu",
-    "explore.trendingCreators": "Wabunifu Wenye Mwendo",
-    "explore.featured": "Wabunifu Wenye Tawazo wa Kiafrika",
-    "explore.trending": "Inayoendelea",
-    "explore.popular": "Maadhimisho",
-    
-    // Profile
-    "profile.posts": "Chachu",
-    "profile.followers": "Wafuasi",
-    "profile.following": "Unfuatao",
-    "profile.editProfile": "Hariri Wasifu",
-    "profile.follow": "Fuata",
-    "profile.unfollow": "Acha Kufuata",
-    
-    // Notifications
-    "notifications.title": "Arifa",
-    "notifications.noNotifications": "Hakuna arifa",
-    
-    // CreatePost
-    "create.title": "Tengeneza Chachu",
-    "create.caption": "Nini kinatofautiana nacho?",
-    "create.category": "Chagua Jamii",
-    "create.post": "Chachu",
-    "create.cancel": "Ghairi",
   },
   yo: {
     // Navigation
