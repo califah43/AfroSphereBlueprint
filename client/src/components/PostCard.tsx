@@ -169,9 +169,9 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   return (
-    <div className="bg-gradient-to-b from-background/70 to-background/40 backdrop-blur-md border border-border/30 rounded-2xl overflow-hidden mb-6 shadow-sm hover-elevate transition-all duration-300" data-testid={`card-post-${post.id}`}>
+    <div className="bg-background overflow-hidden mb-0 border-b border-border/20 hover-elevate transition-all duration-300" data-testid={`card-post-${post.id}`}>
       {/* Header - Full Width Edge-to-Edge */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border/10">
         <button 
           onClick={() => onAuthorClick?.(post.author.username)}
           className="flex items-center gap-3 hover-elevate flex-1 rounded-lg px-0 py-0 transition-all group"
@@ -317,7 +317,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
       </div>
 
       {/* Content Section - Premium Spacing */}
-      <div className="px-5 py-4 space-y-4">
+      <div className="px-4 py-4 space-y-4">
         {/* Engagement Bar - Refined */}
         <div className="flex items-center justify-between -mx-2">
           <div className="flex items-center gap-2">
