@@ -41,6 +41,12 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    // Clear comments immediately when postId changes to prevent stale data
+    setComments([]);
+    setReplyingTo(null);
+    setReplyText("");
+    setExpandedReplies(new Set());
+    
     const fetchComments = async () => {
       try {
         const res = await fetch(`/api/comments/post/${postId}`);

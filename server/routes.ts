@@ -71,6 +71,24 @@ async function seedDatabase() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Helper function to format time ago
+  const formatTimeAgo = (createdAt: string | Date | null): string => {
+    if (!createdAt) return "now";
+    const created = new Date(createdAt);
+    const now = Date.now();
+    const diff = now - created.getTime();
+    
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (seconds < 60) return "now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
+  };
+
   // Seed database on startup - runs only once
   await seedDatabase();
 
@@ -230,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: reply.createdAt,
           replyTo: reply.replyTo,
           author: replyAuthor,
-          timeAgo: reply.createdAt ? `${Math.floor((Date.now() - new Date(reply.createdAt).getTime()) / 3600000)}h ago` : "now",
+          timeAgo: formatTimeAgo(reply.createdAt),
           replies: [],
           isLiked: false,
         };
@@ -245,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: comment.createdAt,
         replyTo: comment.replyTo,
         author: author,
-        timeAgo: comment.createdAt ? `${Math.floor((Date.now() - new Date(comment.createdAt).getTime()) / 3600000)}h ago` : "now",
+        timeAgo: formatTimeAgo(comment.createdAt),
         replies: enrichedReplies,
         isLiked: false,
       };
