@@ -279,52 +279,23 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             )}
           </div>
 
-          {/* Stats - Premium Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-5 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-orange-500/5 border border-primary/10">
+          {/* Stats - Sleek & Minimal */}
+          <div className="flex gap-6 mb-6 text-sm">
             <button
               onClick={onFollowersClick}
-              className="flex flex-col items-center gap-1.5 hover-elevate transition-all group py-1"
+              className="hover:opacity-70 transition-opacity group"
               data-testid="button-view-followers"
             >
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
-                <p className="text-base font-bold text-foreground" data-testid="text-followers-count">
-                  {userProfile.followers}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground font-medium">Followers</p>
+              <p className="font-bold text-foreground" data-testid="text-followers-count">{userProfile.followers}</p>
+              <p className="text-muted-foreground">Followers</p>
             </button>
-            
-            <div className="w-px bg-border/30" />
-            
             <button
               onClick={onFollowingClick}
-              className="flex flex-col items-center gap-1.5 hover-elevate transition-all group py-1"
+              className="hover:opacity-70 transition-opacity group"
               data-testid="button-view-following"
             >
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
-                <p className="text-base font-bold text-foreground" data-testid="text-following-count">
-                  {userProfile.following}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground font-medium">Following</p>
-            </button>
-
-            <div className="w-px bg-border/30" />
-            
-            <button
-              onClick={() => onPostClick?.("1")}
-              className="flex flex-col items-center gap-1.5 hover-elevate transition-all group py-1"
-              data-testid="button-view-posts-count"
-            >
-              <div className="flex items-center gap-1">
-                <Grid3X3 className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
-                <p className="text-base font-bold text-foreground" data-testid="text-posts-count">
-                  {userProfile.posts}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground font-medium">Posts</p>
+              <p className="font-bold text-foreground" data-testid="text-following-count">{userProfile.following}</p>
+              <p className="text-muted-foreground">Following</p>
             </button>
           </div>
 
@@ -351,64 +322,60 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         </div>
 
-        {/* Posts Tabs - Premium & Smooth */}
-        <div className="mt-6 border-t border-border pt-4">
+        {/* Posts Tabs - Clean & Minimal */}
+        <div className="mt-8 border-t border-border/50 pt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b-2 border-border rounded-none p-0 h-auto gap-0">
+            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-border/50 rounded-none p-0 h-auto gap-0">
               <TabsTrigger 
                 value="posts" 
                 data-testid="tab-posts"
-                className="border-b-3 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-bold text-sm data-[state=active]:text-primary hover:text-primary transition-colors"
+                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-xs uppercase tracking-wider data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Grid3X3 className="h-4 w-4 mr-2" />
                 Posts
               </TabsTrigger>
               <TabsTrigger 
                 value="liked" 
                 data-testid="tab-liked"
-                className="border-b-3 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-bold text-sm data-[state=active]:text-primary hover:text-primary transition-colors"
+                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-xs uppercase tracking-wider data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Heart className="h-4 w-4 mr-2" />
-                Liked
+                Likes
               </TabsTrigger>
               <TabsTrigger 
                 value="saved" 
                 data-testid="tab-saved"
-                className="border-b-3 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-bold text-sm data-[state=active]:text-primary hover:text-primary transition-colors"
+                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-xs uppercase tracking-wider data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Share2 className="h-4 w-4 mr-2" />
                 Saved
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          {/* Post Grid - Sophisticated */}
+          {/* Post Grid - Elegant */}
           <div className="mt-6">
             {activeTab === "posts" && (
               <>
                 {isOwnProfile && userProfile.posts === "0" ? (
-                  <div className="py-16 text-center">
-                    <Share2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                    <p className="text-muted-foreground font-medium">No posts yet</p>
+                  <div className="py-20 text-center">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <Share2 className="h-6 w-6 text-primary/50" />
+                    </div>
+                    <p className="text-foreground font-semibold">No posts yet</p>
                     <p className="text-xs text-muted-foreground mt-1">Share your first post to get started</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1 mt-4">
                     {mockPosts.map((post) => (
                       <button
                         key={post.id}
                         onClick={() => onPostClick?.(post.id)}
-                        className="aspect-square hover-elevate overflow-hidden rounded-lg group transition-all duration-300 ring-1 ring-border/50"
+                        className="aspect-square overflow-hidden rounded group transition-all duration-200"
                         data-testid={`post-grid-${post.id}`}
                       >
                         <img
                           src={post.image}
                           alt="Post"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:opacity-80 transition-opacity duration-200"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Heart className="h-5 w-5 text-white" />
-                        </div>
                       </button>
                     ))}
                   </div>
