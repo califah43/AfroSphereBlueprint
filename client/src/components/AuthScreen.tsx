@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import splashLogo from "@assets/generated_images/transparent_outlined_african_continent_logo.png";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 interface AuthScreenProps {
@@ -31,11 +31,67 @@ const getErrorMessage = (error: any): string => {
 };
 
 export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenProps) {
+  const [signupData, setSignupData] = useState({ email: "", username: "", password: "" });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [signupError, setSignupError] = useState("");
   const [loginError, setLoginError] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupError("");
+    setIsLoading(true);
+    try {
+      const usernameCheckRes = await fetch(`/api/auth/check-username/${signupData.username}`);
+      const usernameCheckData = await usernameCheckRes.json();
+      
+      if (!usernameCheckData.available) {
+        const errorMsg = "Username already taken. Choose a different one.";
+        setSignupError(errorMsg);
+        toast({ title: "Username unavailable", description: errorMsg, variant: "destructive", duration: 4000 });
+        setIsLoading(false);
+        return;
+      }
+
+      const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
+      
+      try {
+        await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            username: signupData.username, 
+            password: signupData.password,
+            firebaseUid: userCredential.user.uid,
+          }),
+        });
+      } catch (e) {
+        console.log("Backend sync note:", e);
+      }
+      
+      const userRes = await fetch(`/api/users/username/${signupData.username}`);
+      if (userRes.ok) {
+        const dbUser = await userRes.json();
+        localStorage.setItem("currentUserId", dbUser.id);
+        localStorage.setItem("currentUserData", JSON.stringify({
+          ...dbUser,
+          firebaseUid: userCredential.user.uid,
+        }));
+      }
+      
+      toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
+      onAuthComplete(true);
+    } catch (error: any) {
+      const errorMsg = getErrorMessage(error);
+      setSignupError(errorMsg);
+      toast({ title: "Signup failed", description: errorMsg, variant: "destructive", duration: 4000 });
+      console.error("Signup error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const generateUsernameFromEmail = (email: string) => {
     const base = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
@@ -241,6 +297,11 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         </div>
 
         <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login" data-testid="tab-login">Login</TabsTrigger>
+            <TabsTrigger value="signup" data-testid="tab-signup">Sign Up</TabsTrigger>
+          </TabsList>
+
           <TabsContent value="login">
             <Card>
               <CardHeader>
@@ -282,6 +343,34 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
                   <Button type="button" variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={googleLoading || isLoading} data-testid="button-google-login">
                     {googleLoading ? "Connecting..." : "Continue with Google"}
                   </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="signup">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create an account</CardTitle>
+                <CardDescription>Join the creative movement</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignup} className="space-y-4">
+                  {signupError && <div className="bg-destructive/10 border border-destructive/50 text-destructive rounded-lg p-4 text-sm font-medium" data-testid="error-signup">{signupError}</div>}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input id="signup-email" type="email" placeholder="you@example.com" value={signupData.email} onChange={(e) => setSignupData({ ...signupData, email: e.target.value })} data-testid="input-signup-email" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-username">Username</Label>
+                    <Input id="signup-username" type="text" placeholder="@yourcreativename" value={signupData.username} onChange={(e) => setSignupData({ ...signupData, username: e.target.value })} data-testid="input-signup-username" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input id="signup-password" type="password" value={signupData.password} onChange={(e) => setSignupData({ ...signupData, password: e.target.value })} data-testid="input-signup-password" required />
+                  </div>
+                  <Button type="submit" disabled={isLoading || googleLoading} className="w-full" data-testid="button-signup-submit">{isLoading ? "Creating..." : "Create Account"}</Button>
+                  <Button type="button" variant="outline" className="w-full" onClick={() => { setGoogleLoading(true); handleGoogleLogin().finally(() => setGoogleLoading(false)); }} disabled={googleLoading || isLoading} data-testid="button-google-signup">{googleLoading ? "Connecting..." : "Sign up with Google"}</Button>
                 </form>
               </CardContent>
             </Card>
