@@ -82,7 +82,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
     display: {
       darkMode: true,
       textSize: "normal",
-      language: "en",
+      language: language,
     },
     content: {
       hideExplicit: false,
@@ -108,22 +108,23 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
       fetch(`/api/settings/${userId}`)
         .then(r => r.json())
         .then(data => {
-          const loadedLanguage = (data.displayLanguage as "en" | "sw" | "yo" | "ha" | "am" | "xh") || "en";
-          setSettings({
+          const loadedLanguage = (data.displayLanguage as "en" | "sw" | "yo" | "ha" | "am" | "xh") || language;
+          setSettings(prev => ({
+            ...prev,
             account: { privateAccount: data.privateAccount, allowComments: data.allowComments, allowMentions: data.allowMentions },
             notifications: { likes: data.notificationsLikes, comments: data.notificationsComments, follows: data.notificationsFollows, trending: data.notificationsTrending, pushNotifications: data.notificationsPush, emailNotifications: data.notificationsEmail },
             privacy: { downloadData: false, activityStatus: data.privacyActivityStatus },
-            display: { darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: loadedLanguage },
+            display: { ...prev.display, darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: loadedLanguage },
             content: { hideExplicit: data.contentHideExplicit, mutedWords: data.contentMutedWords, restrictedMode: data.contentRestrictedMode },
-          });
-          // Sync the loaded language with the context
-          if (loadedLanguage !== language) {
-            setLanguage(loadedLanguage);
-          }
+          }));
         })
         .finally(() => setIsLoading(false));
     }
   }, [userId]);
+
+  useEffect(() => {
+    setSettings(prev => ({...prev, display: {...prev.display, language}}));
+  }, [language]);
 
   const handleToggle = (section: string, key: string, value: any) => {
     const newSettings = {
@@ -562,12 +563,12 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
           <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-4">
             <p className="text-sm text-foreground">Choose your preferred language for AfroSphere. Your selection will be saved and applied across the app.</p>
             <div className="space-y-2 mt-4">
-              <Button onClick={() => { handleToggle("display", "language", "en"); setLanguage("en"); toast({ title: "Language Updated", description: "Your language preference has been changed to English" }); setTimeout(() => setEditMode("none"), 100); }} variant={language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "sw"); setLanguage("sw"); toast({ title: "Language Updated", description: "Your language preference has been changed to Kiswahili" }); setTimeout(() => setEditMode("none"), 100); }} variant={language === "sw" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Kiswahili (East Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "yo"); setLanguage("yo"); toast({ title: "Language Updated", description: "Your language preference has been changed to Yoruba" }); setTimeout(() => setEditMode("none"), 100); }} variant={language === "yo" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Yoruba (West Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "ha"); setLanguage("ha"); toast({ title: "Language Updated", description: "Your language preference has been changed to Hausa" }); setTimeout(() => setEditMode("none"), 100); }} variant={language === "ha" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Hausa (West Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "am"); setLanguage("am"); toast({ title: "Language Updated", description: "Your language preference has been changed to Amharic" }); setTimeout(() => setEditMode("none"), 100); }} variant={language === "am" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Amharic (Ethiopia)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "xh"); setLanguage("xh"); toast({ title: "Language Updated", description: "Your language preference has been changed to Xhosa" }); setTimeout(() => setEditMode("none"), 100); }} variant={language === "xh" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Xhosa (South Africa)</span></Button>
+              <Button onClick={() => { setLanguage("en"); handleToggle("display", "language", "en"); toast({ title: "Language Updated", description: "Your language preference has been changed to English" }); setTimeout(() => setEditMode("none"), 200); }} variant={language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English</span></Button>
+              <Button onClick={() => { setLanguage("sw"); handleToggle("display", "language", "sw"); toast({ title: "Language Updated", description: "Your language preference has been changed to Kiswahili" }); setTimeout(() => setEditMode("none"), 200); }} variant={language === "sw" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Kiswahili (East Africa)</span></Button>
+              <Button onClick={() => { setLanguage("yo"); handleToggle("display", "language", "yo"); toast({ title: "Language Updated", description: "Your language preference has been changed to Yoruba" }); setTimeout(() => setEditMode("none"), 200); }} variant={language === "yo" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Yoruba (West Africa)</span></Button>
+              <Button onClick={() => { setLanguage("ha"); handleToggle("display", "language", "ha"); toast({ title: "Language Updated", description: "Your language preference has been changed to Hausa" }); setTimeout(() => setEditMode("none"), 200); }} variant={language === "ha" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Hausa (West Africa)</span></Button>
+              <Button onClick={() => { setLanguage("am"); handleToggle("display", "language", "am"); toast({ title: "Language Updated", description: "Your language preference has been changed to Amharic" }); setTimeout(() => setEditMode("none"), 200); }} variant={language === "am" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Amharic (Ethiopia)</span></Button>
+              <Button onClick={() => { setLanguage("xh"); handleToggle("display", "language", "xh"); toast({ title: "Language Updated", description: "Your language preference has been changed to Xhosa" }); setTimeout(() => setEditMode("none"), 200); }} variant={language === "xh" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Xhosa (South Africa)</span></Button>
             </div>
             <p className="text-xs text-muted-foreground mt-6">AfroSphere is proud to support languages spoken across the African continent. Coming soon: more languages including Igbo, Zulu, Somali, and Oromo.</p>
           </div>
