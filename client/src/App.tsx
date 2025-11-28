@@ -414,33 +414,50 @@ export default function App() {
             />
           )}
 
-          {modalView === "post-detail" && selectedPostId && (
-            <PostDetail
-              postId={selectedPostId}
-              author={{ username: "adikeafrica" }}
-              imageUrl={fashionImage}
-              caption="Celebrating our roots with modern style. Ankara fusion fashion dropping soon! #AfricanFashion"
-              likes={1247}
-              timeAgo="2h ago"
-              comments={[
-                {
-                  id: "1",
-                  author: "zara_style",
-                  text: "This is absolutely stunning!",
-                  likes: 23,
-                  timeAgo: "1h ago",
-                },
-                {
-                  id: "2",
-                  author: "kwame_creative",
-                  text: "Love the fusion of traditional and modern!",
-                  likes: 15,
-                  timeAgo: "45m ago",
-                },
-              ]}
-              onClose={() => setModalView("none")}
-            />
-          )}
+          {modalView === "post-detail" && selectedPostId && (() => {
+            const [postData, setPostData] = useState<any>(null);
+            const [postAuthor, setPostAuthor] = useState<any>(null);
+            
+            useEffect(() => {
+              const fetchPostData = async () => {
+                try {
+                  const res = await fetch(`/api/posts/${selectedPostId}`);
+                  if (res.ok) {
+                    const post = await res.json();
+                    setPostData(post);
+                    
+                    // Fetch author data
+                    const authorRes = await fetch(`/api/users/${post.userId}`);
+                    if (authorRes.ok) {
+                      const author = await authorRes.json();
+                      setPostAuthor(author);
+                    }
+                  }
+                } catch (error) {
+                  console.error("Failed to fetch post:", error);
+                }
+              };
+              
+              fetchPostData();
+            }, [selectedPostId]);
+            
+            return postData ? (
+              <PostDetail
+                postId={selectedPostId}
+                author={{ username: postAuthor?.username || "creator" }}
+                imageUrl={postData.image}
+                caption={postData.caption}
+                likes={postData.likes}
+                timeAgo={postData.createdAt ? new Date(postData.createdAt).toLocaleString() : "now"}
+                comments={[]}
+                onClose={() => setModalView("none")}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-screen">
+                <p className="text-muted-foreground">Loading post...</p>
+              </div>
+            );
+          })()}
 
           {modalView === "followers" && (() => {
             const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
