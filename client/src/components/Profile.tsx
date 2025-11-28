@@ -194,7 +194,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       <div className="max-w-md mx-auto px-4 relative z-10 pb-6">
         {/* Header for Own Profile (Settings) */}
         {isOwnProfile && (
-          <div className="flex items-center justify-between mb-4 -mt-20">
+          <div className="flex items-center justify-between mb-4 -mt-14">
             <div className="flex-1" />
             <Button
               variant="ghost"
@@ -209,7 +209,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         )}
 
         {/* Avatar - Overlaps Banner */}
-        <div className="flex mb-4 -mt-20">
+        <div className="flex mb-4 -mt-14">
           <button
             onClick={() => userProfile?.avatar && setShowPictureModal(true)}
             className={`relative ${userProfile?.avatar ? 'hover-elevate cursor-pointer' : ''}`}
