@@ -108,8 +108,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             },
             imageUrl: p.image,
             caption: p.caption,
-            likes: p.likes || 0,
-            comments: p.commentCount || 0,
+            likes: p.likes !== undefined ? p.likes : 0,
+            comments: p.commentCount !== undefined ? p.commentCount : 0,
             timeAgo: formatTimeAgo(p.createdAt),
             category: p.category,
           };
