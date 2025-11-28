@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 
 interface BannerCropperProps {
   imageUrl: string;
@@ -12,23 +11,18 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   const [offsetY, setOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [displayHeight, setDisplayHeight] = useState(0);
+  const cropperRef = useRef<HTMLDivElement>(null);
 
-  const BANNER_HEIGHT = 96; // h-24 = 96px
-  const BANNER_WIDTH = 430; // mobile width
+  const BANNER_HEIGHT = 96;
+  const BANNER_WIDTH = 430;
 
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
-      const naturalWidth = img.naturalWidth;
-      const naturalHeight = img.naturalHeight;
-      setImageDimensions({ width: naturalWidth, height: naturalHeight });
-      
-      // Calculate the display height based on aspect ratio
-      const aspectRatio = naturalHeight / naturalWidth;
+      setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+      const aspectRatio = img.naturalHeight / img.naturalWidth;
       const displayH = BANNER_WIDTH * aspectRatio;
       setDisplayHeight(displayH);
     };
@@ -40,60 +34,64 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
     setStartY(e.clientY);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || displayHeight === 0) return;
+  useEffect(() => {
+    if (!isDragging) return;
 
-    const delta = e.clientY - startY;
-    const maxOffset = Math.max(0, displayHeight - BANNER_HEIGHT);
-    let newOffset = offsetY - delta;
-    newOffset = Math.max(0, Math.min(newOffset, maxOffset));
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || displayHeight === 0) return;
 
-    setOffsetY(newOffset);
-    setStartY(e.clientY);
-  };
+      const delta = e.clientY - startY;
+      const maxOffset = Math.max(0, displayHeight - BANNER_HEIGHT);
+      let newOffset = offsetY - delta;
+      newOffset = Math.max(0, Math.min(newOffset, maxOffset));
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+      setOffsetY(newOffset);
+      setStartY(e.clientY);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, offsetY, startY, displayHeight]);
 
   const handleApply = () => {
-    if (!imageRef.current) return;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = BANNER_WIDTH;
+      canvas.height = BANNER_HEIGHT;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = imageDimensions.width;
-    canvas.height = imageDimensions.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const scale = imageDimensions.width / BANNER_WIDTH;
+      const sourceY = Math.round(offsetY * scale);
+      const sourceHeight = Math.round(BANNER_HEIGHT * scale);
 
-    ctx.drawImage(imageRef.current, 0, 0);
+      ctx.drawImage(
+        img,
+        0,
+        sourceY,
+        imageDimensions.width,
+        sourceHeight,
+        0,
+        0,
+        BANNER_WIDTH,
+        BANNER_HEIGHT
+      );
 
-    // Calculate the crop rectangle based on displayed offset
-    const scale = imageDimensions.width / BANNER_WIDTH;
-    const sourceY = Math.round(offsetY * scale);
-    const sourceHeight = Math.round(BANNER_HEIGHT * scale);
-
-    const croppedCanvas = document.createElement("canvas");
-    croppedCanvas.width = BANNER_WIDTH;
-    croppedCanvas.height = BANNER_HEIGHT;
-
-    const croppedCtx = croppedCanvas.getContext("2d");
-    if (!croppedCtx) return;
-
-    croppedCtx.drawImage(
-      canvas,
-      0,
-      sourceY,
-      imageDimensions.width,
-      sourceHeight,
-      0,
-      0,
-      BANNER_WIDTH,
-      BANNER_HEIGHT
-    );
-
-    const croppedData = croppedCanvas.toDataURL("image/jpeg", 0.9);
-    onApply(croppedData, { x: 0, y: offsetY });
+      const croppedData = canvas.toDataURL("image/jpeg", 0.9);
+      onApply(croppedData, { x: 0, y: offsetY });
+    };
+    img.src = imageUrl;
   };
 
   return (
@@ -107,6 +105,7 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
         <Button
           onClick={handleApply}
           className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold text-xs h-8 px-4 rounded-lg"
+          data-testid="button-apply-banner"
         >
           Apply
         </Button>
@@ -114,54 +113,55 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
 
       {/* Cropper Area */}
       <div
-        ref={containerRef}
-        className="flex-1 overflow-hidden bg-black flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        ref={cropperRef}
+        className="flex-1 overflow-hidden bg-black flex items-center justify-center"
+        style={{ cursor: isDragging ? "grabbing" : "grab" }}
       >
-        <div 
-          className="relative" 
-          style={{ 
+        <div
+          className="relative select-none"
+          style={{
             width: BANNER_WIDTH,
             height: displayHeight,
+            onMouseDown: handleMouseDown,
           }}
+          onMouseDown={handleMouseDown}
+          data-testid="banner-cropper-container"
         >
-          {/* Full Image */}
+          {/* Image with offset */}
           <img
-            ref={imageRef}
             src={imageUrl}
-            alt="Banner to crop"
-            className="w-full h-full object-cover absolute top-0 left-0"
+            alt="Banner"
+            className="absolute top-0 left-0 w-full object-cover"
             style={{
+              height: displayHeight,
               transform: `translateY(-${offsetY}px)`,
               userSelect: "none",
-              pointerEvents: "none",
             }}
+            data-testid="img-banner-preview"
           />
 
-          {/* Banner Selection Frame - Fixed Position */}
+          {/* Selection Frame Overlay */}
           <div
-            className="absolute left-0 right-0 border-4 border-white pointer-events-none z-10"
+            className="absolute left-0 right-0 border-4 border-white pointer-events-none"
             style={{
               top: offsetY,
               height: BANNER_HEIGHT,
               boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.5)",
             }}
+            data-testid="banner-selection-frame"
           >
-            {/* Grid Lines */}
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 opacity-30 pointer-events-none"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(90deg, transparent 32%, rgba(255,255,255,0.3) 32%, rgba(255,255,255,0.3) 33%, transparent 33%, transparent 66%, rgba(255,255,255,0.3) 66%, rgba(255,255,255,0.3) 67%, transparent 67%),
-                    linear-gradient(0deg, transparent 32%, rgba(255,255,255,0.3) 32%, rgba(255,255,255,0.3) 33%, transparent 33%, transparent 66%, rgba(255,255,255,0.3) 66%, rgba(255,255,255,0.3) 67%, transparent 67%)
-                  `,
-                  backgroundSize: "100% 100%",
-                }}
-              />
-            </div>
+            {/* Grid lines */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `
+                  linear-gradient(90deg, transparent 32%, rgba(255,255,255,0.3) 32%, rgba(255,255,255,0.3) 33%, transparent 33%, transparent 66%, rgba(255,255,255,0.3) 66%, rgba(255,255,255,0.3) 67%, transparent 67%),
+                  linear-gradient(0deg, transparent 32%, rgba(255,255,255,0.3) 32%, rgba(255,255,255,0.3) 33%, transparent 33%, transparent 66%, rgba(255,255,255,0.3) 66%, rgba(255,255,255,0.3) 67%, transparent 67%)
+                `,
+                backgroundSize: "100% 100%",
+                opacity: 0.3,
+              }}
+            />
           </div>
         </div>
       </div>
