@@ -167,12 +167,14 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         }));
       } else {
         // Only fallback if absolutely necessary
+        const email = userCredential.user.email || "user";
+        const username = email.split('@')[0];
         localStorage.setItem("currentUserId", userCredential.user.uid);
         localStorage.setItem("currentUserData", JSON.stringify({
           id: userCredential.user.uid,
-          email: userCredential.user.email,
-          username: userCredential.user.email.split('@')[0],
-          displayName: userCredential.user.email.split('@')[0],
+          email: email,
+          username: username,
+          displayName: username,
           bio: "",
           location: "",
           avatar: "",

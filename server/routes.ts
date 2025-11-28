@@ -181,6 +181,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============ USER ROUTES ============
+  app.get("/api/users/all", async (req, res) => {
+    try {
+      const allUsers = await db.query.users.findMany();
+      res.json(allUsers);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch users" });
+    }
+  });
+
   app.get("/api/users/:id", async (req, res) => {
     const user = await storage.getUser(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
