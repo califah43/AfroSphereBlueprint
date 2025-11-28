@@ -396,6 +396,7 @@ export default function App() {
               postImage={commentsPostData.image}
               postCaption={commentsPostData.caption}
               onClose={() => setModalView("none")}
+              onCommentAdded={handleCommentAdded}
             />
           )}
 

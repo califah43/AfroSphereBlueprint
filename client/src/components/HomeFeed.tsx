@@ -42,13 +42,24 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollTop, setLastScrollTop] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
 
+  // Listen for post refresh events (triggered when comments are added)
+  useEffect(() => {
+    const handleRefresh = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+    
+    window.addEventListener('refreshPosts', handleRefresh);
+    return () => window.removeEventListener('refreshPosts', handleRefresh);
+  }, []);
+
   // Fetch posts from API
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
-    queryKey: ['/api/posts'],
+    queryKey: ['/api/posts', refreshKey],
     queryFn: async () => {
       try {
         const res = await fetch('/api/posts?limit=50');
