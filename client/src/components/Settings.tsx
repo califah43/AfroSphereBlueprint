@@ -112,13 +112,13 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
             account: { privateAccount: data.privateAccount, allowComments: data.allowComments, allowMentions: data.allowMentions },
             notifications: { likes: data.notificationsLikes, comments: data.notificationsComments, follows: data.notificationsFollows, trending: data.notificationsTrending, pushNotifications: data.notificationsPush, emailNotifications: data.notificationsEmail },
             privacy: { downloadData: false, activityStatus: data.privacyActivityStatus },
-            display: { darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: data.displayLanguage },
+            display: { darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: language },
             content: { hideExplicit: data.contentHideExplicit, mutedWords: data.contentMutedWords, restrictedMode: data.contentRestrictedMode },
           });
         })
         .finally(() => setIsLoading(false));
     }
-  }, [userId]);
+  }, [userId, language]);
 
   const handleToggle = (section: string, key: string, value: any) => {
     const newSettings = {

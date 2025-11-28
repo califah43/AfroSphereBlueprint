@@ -63,11 +63,22 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Remove any existing text size classes
+    document.documentElement.classList.remove("text-size-large", "text-size-extra-large");
+    // Add the new text size class if not normal
     const textSizeClass = textSize === "normal" ? "" : `text-size-${textSize}`;
     if (textSizeClass) {
       document.documentElement.classList.add(textSizeClass);
     }
   }, [textSize]);
+
+  // Apply text size immediately on app startup
+  useEffect(() => {
+    const saved = localStorage.getItem("textSize") as "normal" | "large" | "extra-large" | null;
+    if (saved && saved !== "normal") {
+      document.documentElement.classList.add(`text-size-${saved}`);
+    }
+  }, []);
 
   // Check if user is already logged in (session persistence)
   useEffect(() => {
