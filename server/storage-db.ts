@@ -120,6 +120,15 @@ export class DbStorage implements IStorage {
 
   async createComment(comment: InsertComment): Promise<Comment> {
     const [newComment] = await db.insert(comments).values(comment).returning();
+    
+    // Only increment post commentCount if this is a top-level comment (not a reply)
+    if (!comment.replyTo) {
+      const post = await db.query.posts.findFirst({ where: eq(posts.id, comment.postId) });
+      if (post) {
+        await db.update(posts).set({ commentCount: (post.commentCount || 0) + 1 }).where(eq(posts.id, comment.postId));
+      }
+    }
+    
     return newComment;
   }
 
