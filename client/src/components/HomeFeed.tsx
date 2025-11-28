@@ -302,7 +302,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       )}
 
       {/* Feed Content */}
-      <div className="max-w-md mx-auto px-3 pt-2">
+      <div className="max-w-md mx-auto px-3 pt-4 space-y-0.5">
           {isInitialLoading ? (
             <div className="animate-in fade-in duration-500">
               <PostSkeleton />
