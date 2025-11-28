@@ -189,7 +189,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <X className="h-5 w-5" />
             </Button>
           )}
-          <h2 className="text-lg font-semibold">@{username}</h2>
+          <h2 className="text-lg font-semibold">@{userProfile.username}</h2>
         </div>
         {isOwnProfile && (
           <Button
@@ -225,13 +225,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <div className="flex items-end gap-3 mb-3">
             <button
               onClick={() => userProfile.avatar && setShowPictureModal(true)}
-              className={`relative ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+              className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
               data-testid="button-view-avatar"
             >
-              <Avatar className="w-20 h-20 ring-4 ring-background border-3 border-primary/20 shadow-lg" data-testid="avatar-profile">
-                {userProfile.avatar && <AvatarImage src={userProfile.avatar} alt="Profile" />}
-                <AvatarFallback className="text-2xl font-bold">{userProfile.username[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
+              <div className="w-20 h-20 rounded-full ring-4 ring-background border-3 border-primary/20 shadow-lg overflow-hidden bg-muted flex-shrink-0">
+                {userProfile.avatar ? (
+                  <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
+                    <span className="text-2xl font-bold text-foreground">{userProfile.username[0].toUpperCase()}</span>
+                  </div>
+                )}
+              </div>
               {userProfile.avatar && (
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/20 rounded-full transition-colors duration-200 flex items-center justify-center">
                   <span className="text-white text-xs font-semibold opacity-0 hover:opacity-100">View</span>
