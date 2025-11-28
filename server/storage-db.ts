@@ -122,25 +122,45 @@ export class DbStorage implements IStorage {
 
   async likePost(userId: string, postId: string): Promise<Like> {
     const [like] = await db.insert(likes).values({ userId, postId }).returning();
+    // Update post like count
+    const post = await db.query.posts.findFirst({ where: eq(posts.id, postId) });
+    if (post) {
+      await db.update(posts).set({ likes: (post.likes || 0) + 1 }).where(eq(posts.id, postId));
+    }
     return like;
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
     await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
+    // Update post like count
+    const post = await db.query.posts.findFirst({ where: eq(posts.id, postId) });
+    if (post) {
+      await db.update(posts).set({ likes: Math.max(0, (post.likes || 0) - 1) }).where(eq(posts.id, postId));
+    }
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
-    const like = await db.query.likes.findFirst({ where: eq(likes.userId, userId) });
+    const like = await db.query.likes.findFirst({ where: and(eq(likes.userId, userId), eq(likes.postId, postId)) });
     return !!like;
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
     const [like] = await db.insert(likes).values({ userId, commentId }).returning();
+    // Update comment like count
+    const comment = await db.query.comments.findFirst({ where: eq(comments.id, commentId) });
+    if (comment) {
+      await db.update(comments).set({ likes: (comment.likes || 0) + 1 }).where(eq(comments.id, commentId));
+    }
     return like;
   }
 
   async unlikeComment(userId: string, commentId: string): Promise<void> {
     await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
+    // Update comment like count
+    const comment = await db.query.comments.findFirst({ where: eq(comments.id, commentId) });
+    if (comment) {
+      await db.update(comments).set({ likes: Math.max(0, (comment.likes || 0) - 1) }).where(eq(comments.id, commentId));
+    }
   }
 
   async followUser(followerId: string, followingId: string): Promise<Follow> {
@@ -153,7 +173,7 @@ export class DbStorage implements IStorage {
   }
 
   async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    const follow = await db.query.follows.findFirst({ where: eq(follows.followerId, followerId) });
+    const follow = await db.query.follows.findFirst({ where: and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)) });
     return !!follow;
   }
 
