@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search } from "lucide-react";
+import { Search, Sparkles, Flame } from "lucide-react";
 import { GridSkeleton } from "@/components/SkeletonLoader";
 import SuggestedCreators from "./SuggestedCreators";
 import FeaturedAfrican from "./FeaturedAfrican";
@@ -19,6 +19,7 @@ import { useState, useEffect } from "react";
 interface ExploreProps {
   onSearchClick?: () => void;
   onPostClick?: (postId: string) => void;
+  onHashtagClick?: (tag: string) => void;
 }
 
 const trendingCreators = [
@@ -53,7 +54,7 @@ const mockAllPosts = Array.from({ length: 18 }, (_, i) => ({
 interface TrendingHashtag { tag: string; count: number; posts: number; }
 interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
 
-export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
+export default function Explore({ onSearchClick, onPostClick, onHashtagClick }: ExploreProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
   const [trendingPosts, setTrendingPosts] = useState<TrendingPostData[]>([]);
@@ -114,7 +115,7 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
               {trendingHashtags.slice(0, 5).map((tag) => (
                 <button
                   key={tag.tag}
-                  onClick={() => onSearchClick?.()}
+                  onClick={() => onHashtagClick?.(tag.tag)}
                   className="w-full text-left px-3 py-2 rounded-lg bg-card hover:bg-card/80 transition-colors border border-border/50"
                   data-testid={`trending-hashtag-${tag.tag}`}
                 >
@@ -142,7 +143,8 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
 
         <div>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-categories">
-            <span>✨</span> Categories
+            <Sparkles className="h-5 w-5 text-primary" />
+            Categories
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {categories.map((category) => (
@@ -167,7 +169,8 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
 
         <div>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-popular-posts">
-            <span>🔥</span> Popular Posts
+            <Flame className="h-5 w-5 text-primary" />
+            Popular Posts
           </h2>
           <div className="grid grid-cols-3 gap-2">
             {displayPosts.map((post) => (
