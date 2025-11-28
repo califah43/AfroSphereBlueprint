@@ -168,52 +168,43 @@ export default function App() {
   };
 
   const handlePreferencesComplete = async (interests: string[]) => {
-    // Save signup data to localStorage
+    const userId = localStorage.getItem("currentUserId");
     const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    
+    // Build complete profile data
+    const profileData = {
+      displayName: signupUsername,
+      bio: signupProfileData.bio || "",
+      profession: signupProfileData.profession || "",
+      avatar: signupProfileData.avatar || "",
+      banner: signupProfileData.banner || "",
+    };
+    
+    // Always save to localStorage first
     const updated = {
       ...currentUserData,
+      ...profileData,
       username: signupUsername,
-      displayName: signupUsername,
-      avatar: signupProfileData.avatar,
-      banner: signupProfileData.banner,
-      bio: signupProfileData.bio,
-      profession: signupProfileData.profession,
       interests: interests,
     };
     localStorage.setItem("currentUserData", JSON.stringify(updated));
 
-    // Save to backend with all profile data
-    try {
-      const userId = localStorage.getItem("currentUserId");
-      console.log("Saving profile for userId:", userId);
-      if (userId) {
-        const payload = {
-          displayName: signupUsername,
-          bio: signupProfileData.bio,
-          profession: signupProfileData.profession,
-          avatar: signupProfileData.avatar || "",
-          banner: signupProfileData.banner || "",
-        };
-        console.log("Sending payload to backend:", { userId, fields: Object.keys(payload) });
-        
+    // Save to backend
+    if (userId) {
+      try {
         const response = await fetch(`/api/users/${userId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(profileData),
         });
         
-        console.log("Save response status:", response.status);
         if (response.ok) {
           const savedUser = await response.json();
-          console.log("Profile saved successfully:", savedUser);
           localStorage.setItem("currentUserData", JSON.stringify(savedUser));
-        } else {
-          const errorText = await response.text();
-          console.error("Save failed:", response.status, errorText);
         }
+      } catch (e) {
+        // Continue even if save fails - user data is in localStorage
       }
-    } catch (e) {
-      console.error("Error saving profile:", e);
     }
 
     setAppState("main");

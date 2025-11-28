@@ -83,22 +83,26 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       }
       
       // Fetch the actual database user to get their real UUID
+      let dbUserId = userCredential.user.uid;
       try {
+        // Wait a moment for the register endpoint to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const userRes = await fetch(`/api/users/username/${signupData.username}`);
         if (userRes.ok) {
           const dbUser = await userRes.json();
+          dbUserId = dbUser.id;
           localStorage.setItem("currentUserId", dbUser.id);
           localStorage.setItem("currentUserData", JSON.stringify({
             ...dbUser,
             firebaseUid: userCredential.user.uid,
           }));
         } else {
-          // Fallback if fetch fails
+          // Fallback - store Firebase UID but try to use database ID
           localStorage.setItem("currentUserId", userCredential.user.uid);
           localStorage.setItem("currentUserData", JSON.stringify(userData));
         }
       } catch (e) {
-        console.log("Could not fetch database user:", e);
         localStorage.setItem("currentUserId", userCredential.user.uid);
         localStorage.setItem("currentUserData", JSON.stringify(userData));
       }
