@@ -232,7 +232,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             className={`relative ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
             data-testid="button-view-avatar"
           >
-            <div className="w-16 h-16 rounded-lg ring-3 ring-background overflow-hidden bg-muted shadow-sm">
+            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted shadow-sm">
               {userProfile.avatar ? (
                 <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
               ) : (
