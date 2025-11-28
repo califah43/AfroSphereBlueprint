@@ -96,6 +96,11 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
           userMap.set(u.id, u);
         });
         
+        // If no posts, return mock posts as fallback
+        if (!posts || posts.length === 0) {
+          return mockPosts;
+        }
+        
         // Transform posts using pre-fetched user data
         return posts.map((p: any) => {
           const user = userMap.get(p.userId);
@@ -111,7 +116,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             likes: p.likes !== undefined ? p.likes : 0,
             comments: p.commentCount !== undefined ? p.commentCount : 0,
             timeAgo: formatTimeAgo(p.createdAt),
-            category: p.category,
+            category: p.category || "for-you",
           };
         });
       } catch {
@@ -120,10 +125,13 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     },
   });
 
-  // Fallback to mock data if API returns empty
+  // Update displayed posts from API, always use provided data (mock data is already included in apiPosts)
   useEffect(() => {
     if (apiPosts && apiPosts.length > 0) {
       setDisplayedPosts(apiPosts as Post[]);
+    } else if (!apiPosts || apiPosts.length === 0) {
+      // Ensure mock posts are shown when API is empty
+      setDisplayedPosts(mockPosts);
     }
   }, [apiPosts]);
 
