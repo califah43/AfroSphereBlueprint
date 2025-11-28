@@ -124,6 +124,15 @@ export class DbStorage implements IStorage {
   }
 
   async deleteComment(id: string): Promise<void> {
+    // Get the comment to find which post it belongs to
+    const comment = await db.query.comments.findFirst({ where: eq(comments.id, id) });
+    if (comment) {
+      // Decrement post comment count
+      const post = await db.query.posts.findFirst({ where: eq(posts.id, comment.postId) });
+      if (post) {
+        await db.update(posts).set({ commentCount: Math.max(0, (post.commentCount || 0) - 1) }).where(eq(posts.id, comment.postId));
+      }
+    }
     await db.delete(comments).where(eq(comments.id, id));
   }
 
