@@ -253,9 +253,6 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <h1 className="text-3xl font-black mb-1" data-testid="text-profile-displayname">
             {userProfile.displayName}
           </h1>
-          <p className="text-sm text-primary font-semibold mb-3" data-testid="text-profile-username">
-            @{userProfile.username}
-          </p>
           <p className="text-sm text-foreground leading-relaxed mb-3" data-testid="text-profile-bio">
             {userProfile.bio}
           </p>
