@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
+import CollapsibleHeader from "./CollapsibleHeader";
 
 const PostSkeleton = () => (
   <div className="mb-4 animate-pulse space-y-3 bg-muted/50 rounded-lg p-4 border border-border">
@@ -126,99 +126,73 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
   }, [displayedPosts]);
 
   return (
-    <>
-      <div
-        className="pb-20"
-        data-testid="container-home-feed"
-        ref={scrollContainerRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ overflowY: "auto", height: "100vh" }}
-      >
-        {/* Pull-to-Refresh Indicator */}
-        {pullDistance > 0 && !isRefreshing && (
-          <div 
-            className="flex justify-center items-center transition-all"
-            style={{ 
-              height: `${pullDistance}px`,
-              opacity: Math.min(pullDistance / 80, 1)
-            }}
-          >
-            <div className="flex flex-col items-center gap-1">
-              <RefreshCw 
-                className="text-primary transition-transform" 
-                size={18} 
-                style={{ 
-                  transform: `rotate(${(pullDistance / 80) * 180}deg)`,
-                  opacity: pullDistance / 80 
-                }} 
-              />
-              <span className="text-xs text-muted-foreground font-medium">
-                {pullDistance > 80 ? "Release to refresh" : "Pull to refresh"}
-              </span>
-            </div>
-          </div>
-        )}
+    <div
+      className="pb-20 h-screen"
+      data-testid="container-home-feed"
+      ref={scrollContainerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ overflowY: "auto" }}
+    >
+      {/* Collapsible Header */}
+      <CollapsibleHeader 
+        isRefreshing={isRefreshing}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+      />
 
-        {/* Refresh Progress Bar */}
-        {isRefreshing && (
-          <div className="h-1 bg-primary/20 relative overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-primary via-primary to-primary/50 animate-pulse" />
-          </div>
-        )}
-
-        {/* New Posts Indicator */}
-        {hasNewPosts && !isRefreshing && (
-          <div className="flex justify-center py-2 sticky top-0 z-20 bg-background/95 backdrop-blur-sm">
-            <button 
-              onClick={() => {
-                scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-                setHasNewPosts(false);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-full text-xs font-semibold text-primary transition-all hover-elevate"
-              data-testid="button-new-posts"
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              View new posts
-            </button>
-          </div>
-        )}
-
-        {/* Header with Tabs */}
-        <div className="sticky top-0 bg-background z-10 border-b border-border">
-          <div className="max-w-md mx-auto px-4 py-3">
-            <h1 className="text-2xl font-bold mb-4 flex items-center gap-2" data-testid="text-feed-title">
-              AfroSphere
-              {isRefreshing && <Loader2 className="animate-spin text-primary" size={18} />}
-            </h1>
-            <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-              <TabsList className="w-full grid grid-cols-6 h-auto">
-                <TabsTrigger value="for-you" className="text-xs" data-testid="tab-for-you">
-                  For You
-                </TabsTrigger>
-                <TabsTrigger value="fashion" className="text-xs" data-testid="tab-fashion">
-                  Fashion
-                </TabsTrigger>
-                <TabsTrigger value="music" className="text-xs" data-testid="tab-music">
-                  Music
-                </TabsTrigger>
-                <TabsTrigger value="art" className="text-xs" data-testid="tab-art">
-                  Art
-                </TabsTrigger>
-                <TabsTrigger value="culture" className="text-xs" data-testid="tab-culture">
-                  Culture
-                </TabsTrigger>
-                <TabsTrigger value="lifestyle" className="text-xs" data-testid="tab-lifestyle">
-                  Lifestyle
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+      {/* Pull-to-Refresh Indicator */}
+      {pullDistance > 0 && !isRefreshing && (
+        <div 
+          className="flex justify-center items-center transition-all"
+          style={{ 
+            height: `${pullDistance}px`,
+            opacity: Math.min(pullDistance / 80, 1)
+          }}
+        >
+          <div className="flex flex-col items-center gap-1">
+            <RefreshCw 
+              className="text-primary transition-transform" 
+              size={18} 
+              style={{ 
+                transform: `rotate(${(pullDistance / 80) * 180}deg)`,
+                opacity: pullDistance / 80 
+              }} 
+            />
+            <span className="text-xs text-muted-foreground font-medium">
+              {pullDistance > 80 ? "Release to refresh" : "Pull to refresh"}
+            </span>
           </div>
         </div>
+      )}
 
-        {/* Feed Content */}
-        <div className="max-w-md mx-auto px-4 pt-4">
+      {/* Refresh Progress Bar */}
+      {isRefreshing && (
+        <div className="h-1 bg-primary/20 relative overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-primary via-primary to-primary/50 animate-pulse" />
+        </div>
+      )}
+
+      {/* New Posts Indicator */}
+      {hasNewPosts && !isRefreshing && (
+        <div className="flex justify-center py-2 sticky top-12 z-40 bg-background/95 backdrop-blur-sm">
+          <button 
+            onClick={() => {
+              scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+              setHasNewPosts(false);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-full text-xs font-semibold text-primary transition-all hover-elevate"
+            data-testid="button-new-posts"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            View new posts
+          </button>
+        </div>
+      )}
+
+      {/* Feed Content */}
+      <div className="max-w-md mx-auto px-4 pt-4">
           {isInitialLoading ? (
             <>
               <PostSkeleton />
@@ -258,8 +232,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
               )}
             </>
           )}
-        </div>
       </div>
-    </>
+    </div>
   );
 }
