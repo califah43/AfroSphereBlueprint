@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   displayName: text("display_name").notNull().default(""),
+  email: text("email").default(""),
+  phone: text("phone").default(""),
   password: text("password").notNull(),
   bio: text("bio").default(""),
   location: text("location").default(""),
@@ -35,6 +37,9 @@ export const updateUserSchema = createInsertSchema(users).pick({
   banner: true,
   website: true,
   profession: true,
+  email: true,
+  phone: true,
+  password: true,
 }).partial(); // Make all fields optional for profile updates
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

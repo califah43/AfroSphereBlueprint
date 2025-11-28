@@ -696,7 +696,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!email || !email.includes("@")) {
         return res.status(400).json({ error: "Invalid email" });
       }
-      res.json({ success: true, email });
+      const user = await storage.updateUser(req.params.id, { email });
+      res.json({ success: true, email: user.email });
     } catch (error) {
       res.status(400).json({ error: "Failed to update email" });
     }
@@ -711,6 +712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (newPassword !== confirmPassword) {
         return res.status(400).json({ error: "Passwords do not match" });
       }
+      await storage.updateUser(req.params.id, { password: newPassword });
       res.json({ success: true });
     } catch (error) {
       res.status(400).json({ error: "Failed to update password" });
