@@ -34,7 +34,7 @@ export const updateUserSchema = createInsertSchema(users).pick({
   banner: true,
   website: true,
   profession: true,
-});
+}).partial(); // Make all fields optional for profile updates
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
