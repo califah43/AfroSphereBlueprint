@@ -315,6 +315,7 @@ export default function App() {
               <HomeFeed 
                 onOpenShare={() => setModalView("share")}
                 onUserProfileClick={handleOpenUserProfile}
+                onHashtagClick={handleOpenHashtagFeed}
               />
             </div>
           )}

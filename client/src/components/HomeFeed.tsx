@@ -29,9 +29,10 @@ const PostSkeleton = () => (
 interface HomeFeedProps {
   onOpenShare?: () => void;
   onUserProfileClick?: (username: string) => void;
+  onHashtagClick?: (hashtag: string) => void;
 }
 
-export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedProps) {
+export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagClick }: HomeFeedProps) {
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -225,6 +226,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
                       onShare={(id) => onOpenShare?.()}
                       onBookmark={(id) => console.log("Bookmark:", id)}
                       onAuthorClick={(username) => onUserProfileClick?.(username)}
+                      onHashtagClick={(tag) => onHashtagClick?.(tag)}
                     />
                   ))}
                   

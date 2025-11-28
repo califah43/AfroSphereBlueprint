@@ -50,17 +50,43 @@ const mockAllPosts = Array.from({ length: 18 }, (_, i) => ({
 }));
 
 
+interface TrendingHashtag { tag: string; count: number; posts: number; }
+interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
+
 export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
+  const [trendingPosts, setTrendingPosts] = useState<TrendingPostData[]>([]);
 
   useEffect(() => {
-    // Simulate fetching data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // Adjust delay as needed
+    const fetchTrending = async () => {
+      try {
+        const [hashtagRes, postsRes] = await Promise.all([
+          fetch('/api/trending/hashtags'),
+          fetch('/api/trending/posts')
+        ]);
+        
+        const hashtags = await hashtagRes.json();
+        const posts = await postsRes.json();
+        
+        setTrendingHashtags(hashtags.slice(0, 10));
+        setTrendingPosts(posts.slice(0, 6).map((p: any) => ({ 
+          id: p.id, 
+          image: p.image, 
+          likes: p.likes || 0, 
+          caption: p.caption 
+        })));
+      } catch (e) {
+        console.log('Failed to fetch trending data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchTrending();
   }, []);
+
+  const displayPosts = trendingPosts.length > 0 ? trendingPosts : popularPosts;
 
   return (
     <div className="pb-20" data-testid="container-explore">
@@ -81,6 +107,25 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-8">
+        {trendingHashtags.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Trending Hashtags</h2>
+            <div className="space-y-2">
+              {trendingHashtags.slice(0, 5).map((tag) => (
+                <button
+                  key={tag.tag}
+                  onClick={() => onSearchClick?.()}
+                  className="w-full text-left px-3 py-2 rounded-lg bg-card hover:bg-card/80 transition-colors border border-border/50"
+                  data-testid={`trending-hashtag-${tag.tag}`}
+                >
+                  <p className="font-semibold text-sm text-primary">#{tag.tag}</p>
+                  <p className="text-xs text-muted-foreground">{tag.posts.toLocaleString()} posts</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <FeaturedAfrican />
         <TrendingAfrican />
         
@@ -125,7 +170,7 @@ export default function Explore({ onSearchClick, onPostClick }: ExploreProps) {
             <span>🔥</span> Popular Posts
           </h2>
           <div className="grid grid-cols-3 gap-2">
-            {popularPosts.map((post) => (
+            {displayPosts.map((post) => (
               <button
                 key={post.id}
                 onClick={() => onPostClick?.(post.id)}

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { X, Hash } from "lucide-react";
+import { useState, useEffect } from "react";
 import PostCard, { type Post } from "./PostCard";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
@@ -41,7 +42,38 @@ const mockPosts: Post[] = [
 ];
 
 export default function HashtagFeed({ hashtag, onClose }: HashtagFeedProps) {
-  const postCount = "12.5K";
+  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHashtagPosts = async () => {
+      try {
+        const res = await fetch(`/api/search/hashtag/${hashtag}`);
+        const data = await res.json();
+        
+        if (data && data.length > 0) {
+          const formattedPosts: Post[] = data.map((p: any) => ({
+            id: p.id,
+            author: { username: p.userId || "creator" },
+            imageUrl: p.image,
+            caption: p.caption,
+            likes: p.likes || 0,
+            comments: p.commentCount || 0,
+            timeAgo: p.createdAt ? `${Math.floor((Date.now() - new Date(p.createdAt).getTime()) / 3600000)}h ago` : "now",
+          }));
+          setPosts(formattedPosts);
+        }
+      } catch (e) {
+        console.log("Failed to fetch hashtag posts");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHashtagPosts();
+  }, [hashtag]);
+
+  const postCount = posts.length.toLocaleString();
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
@@ -68,16 +100,22 @@ export default function HashtagFeed({ hashtag, onClose }: HashtagFeedProps) {
       </div>
 
       <div className="max-w-md mx-auto px-4 pt-4 pb-20">
-        {mockPosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            onLike={(id) => console.log("Liked:", id)}
-            onComment={(id) => console.log("Comment:", id)}
-            onShare={(id) => console.log("Share:", id)}
-            onBookmark={(id) => console.log("Bookmark:", id)}
-          />
-        ))}
+        {isLoading ? (
+          <div className="py-8 text-center text-muted-foreground">Loading posts...</div>
+        ) : posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onLike={(id) => console.log("Liked:", id)}
+              onComment={(id) => console.log("Comment:", id)}
+              onShare={(id) => console.log("Share:", id)}
+              onBookmark={(id) => console.log("Bookmark:", id)}
+            />
+          ))
+        ) : (
+          <div className="py-8 text-center text-muted-foreground">No posts found for #{hashtag}</div>
+        )}
       </div>
     </div>
   );

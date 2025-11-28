@@ -45,9 +45,10 @@ interface PostCardProps {
   onBookmark?: (postId: string) => void;
   onOpenShare?: (postId: string) => void;
   onAuthorClick?: (username: string) => void;
+  onHashtagClick?: (hashtag: string) => void;
 }
 
-export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick }: PostCardProps) {
+export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick, onHashtagClick }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
@@ -293,7 +294,22 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           </p>
           <p className="text-sm">
             <span className="font-semibold">{post.author.username}</span>{" "}
-            <span data-testid={`text-caption-${post.id}`}>{post.caption}</span>
+            <span data-testid={`text-caption-${post.id}`}>
+              {post.caption?.split(/(\#\w+)/g).map((part, i) => 
+                part.startsWith('#') ? (
+                  <button
+                    key={i}
+                    onClick={() => onHashtagClick?.(part.substring(1))}
+                    className="text-primary hover:text-primary/80 font-semibold transition-colors"
+                    data-testid={`button-hashtag-${part.substring(1)}`}
+                  >
+                    {part}
+                  </button>
+                ) : (
+                  part
+                )
+              )}
+            </span>
           </p>
           {post.comments > 0 && (
             <button
