@@ -211,8 +211,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         )}
       </div>
 
-      {/* Elegant Header with Banner - Compact */}
-      <div className="relative h-32 overflow-hidden">
+      {/* Compact Banner */}
+      <div className="relative h-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
           {(userProfile.banner || bannerImage) && (
             <img
@@ -225,108 +225,103 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
       </div>
 
-      {/* Profile Content - Elegant Layout */}
-      <div className="max-w-md mx-auto px-4 -mt-14 relative z-10">
-        {/* Avatar & Name Section */}
-        <div className="mb-4">
-          <div className="flex items-end gap-3 mb-3">
-            <button
-              onClick={() => userProfile.avatar && setShowPictureModal(true)}
-              className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
-              data-testid="button-view-avatar"
-            >
-              <div className="w-20 h-20 rounded-full ring-4 ring-background border-3 border-primary/20 shadow-lg overflow-hidden bg-muted flex-shrink-0">
-                {userProfile.avatar ? (
-                  <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
-                    <span className="text-2xl font-bold text-foreground">{userProfile.username[0].toUpperCase()}</span>
-                  </div>
-                )}
-              </div>
-              {userProfile.avatar && (
-                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 rounded-full transition-colors duration-200 flex items-center justify-center">
-                  <span className="text-white text-xs font-semibold opacity-0 hover:opacity-100">View</span>
+      {/* Profile Content - Ultra Compact */}
+      <div className="max-w-md mx-auto px-4 -mt-10 relative z-10 pb-4">
+        {/* Avatar & Header */}
+        <div className="flex gap-3 mb-3 items-start">
+          <button
+            onClick={() => userProfile.avatar && setShowPictureModal(true)}
+            className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+            data-testid="button-view-avatar"
+          >
+            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted flex-shrink-0">
+              {userProfile.avatar ? (
+                <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <span className="text-lg font-bold text-foreground">{userProfile.username[0].toUpperCase()}</span>
                 </div>
               )}
-            </button>
-            
-            <div className="mb-2">
+            </div>
+          </button>
+          
+          <div className="flex-1 pt-1">
+            {/* Name & Badge */}
+            <div className="flex items-center gap-2 mb-0.5">
+              <h1 className="text-lg font-black" data-testid="text-profile-displayname">
+                {userProfile.displayName}
+              </h1>
               <CreatorBadge type="fashion-vanguard" size="sm" />
             </div>
+            
+            {/* Username */}
+            <p className="text-xs text-muted-foreground mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
+            
+            {/* Bio */}
+            <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
+              {userProfile.bio}
+            </p>
           </div>
+        </div>
 
-          {/* Name & Bio */}
-          <h1 className="text-3xl font-black mb-1" data-testid="text-profile-displayname">
-            {userProfile.displayName}
-          </h1>
-          <p className="text-sm text-foreground leading-relaxed mb-3" data-testid="text-profile-bio">
-            {userProfile.bio}
-          </p>
-
-          {/* Professional Info */}
-          <div className="flex flex-col gap-2 mb-4 text-sm">
+        {/* Professional Info - Inline Compact */}
+        {(userProfile.profession || userProfile.location) && (
+          <div className="flex flex-wrap items-center gap-2 text-xs mb-2 px-0">
+            {userProfile.profession && (
+              <span className="text-muted-foreground">{userProfile.profession}</span>
+            )}
+            {userProfile.profession && userProfile.location && (
+              <span className="text-muted-foreground">·</span>
+            )}
             {userProfile.location && (
-              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                <MapPin className="h-4 w-4 text-primary" />
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MapPin className="h-3 w-3" />
                 <span>{userProfile.location}</span>
               </div>
             )}
-            {userProfile.profession && (
-              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <span>{userProfile.profession}</span>
-              </div>
-            )}
-            {userProfile.website && (
-              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
-                <Link className="h-4 w-4" />
-                <span className="truncate">{userProfile.website}</span>
-              </a>
-            )}
           </div>
+        )}
 
-          {/* Stats - Sleek & Minimal */}
-          <div className="flex gap-6 mb-6 text-sm">
-            <button
-              onClick={onFollowersClick}
-              className="hover:opacity-70 transition-opacity group"
-              data-testid="button-view-followers"
-            >
-              <p className="font-bold text-foreground" data-testid="text-followers-count">{userProfile.followers}</p>
-              <p className="text-muted-foreground">Followers</p>
-            </button>
-            <button
-              onClick={onFollowingClick}
-              className="hover:opacity-70 transition-opacity group"
-              data-testid="button-view-following"
-            >
-              <p className="font-bold text-foreground" data-testid="text-following-count">{userProfile.following}</p>
-              <p className="text-muted-foreground">Following</p>
-            </button>
-          </div>
+        {/* Stats - Minimal */}
+        <div className="flex gap-4 mb-3 text-xs">
+          <button
+            onClick={onFollowersClick}
+            className="hover:opacity-70 transition-opacity"
+            data-testid="button-view-followers"
+          >
+            <span className="font-bold text-foreground" data-testid="text-followers-count">{userProfile.followers}</span>
+            <span className="text-muted-foreground"> Following</span>
+          </button>
+          <button
+            onClick={onFollowingClick}
+            className="hover:opacity-70 transition-opacity"
+            data-testid="button-view-following"
+          >
+            <span className="font-bold text-foreground" data-testid="text-following-count">{userProfile.following}</span>
+            <span className="text-muted-foreground"> Followers</span>
+          </button>
+        </div>
 
-          {/* Action Buttons - Premium */}
-          <div className="flex gap-2 mb-6">
-            {isOwnProfile ? (
-              <Button
-                className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-10 rounded-lg text-sm shadow-lg shadow-primary/20"
-                onClick={onEditProfile}
-                data-testid="button-edit-profile"
-              >
-                Edit Profile
-              </Button>
-            ) : (
-              <Button 
-                className={`flex-1 font-bold h-10 rounded-lg text-sm shadow-lg ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-secondary/20' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 shadow-primary/20'}`}
-                onClick={toggleFollow}
-                disabled={isLoading}
-                data-testid="button-follow"
-              >
-                {isLoading ? "..." : (isFollowing ? "Following" : "Follow")}
-              </Button>
-            )}
-          </div>
+        {/* Action Buttons - Compact */}
+        <div className="flex gap-2">
+          {isOwnProfile ? (
+            <Button
+              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-8 rounded-full text-xs"
+              onClick={onEditProfile}
+              data-testid="button-edit-profile"
+            >
+              Edit Profile
+            </Button>
+          ) : (
+            <Button 
+              className={`flex-1 font-bold h-8 rounded-full text-xs ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
+              onClick={toggleFollow}
+              disabled={isLoading}
+              data-testid="button-follow"
+            >
+              {isLoading ? "..." : (isFollowing ? "Following" : "Follow")}
+            </Button>
+          )}
         </div>
 
         {/* Posts Tabs - Clean & Minimal */}
