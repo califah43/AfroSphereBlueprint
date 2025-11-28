@@ -697,6 +697,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid email" });
       }
       const user = await storage.updateUser(req.params.id, { email });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
       res.json({ success: true, email: user.email });
     } catch (error) {
       res.status(400).json({ error: "Failed to update email" });
