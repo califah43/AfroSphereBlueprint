@@ -65,6 +65,12 @@ export default function App() {
           if (response.ok) {
             const freshData = await response.json();
             localStorage.setItem("currentUserData", JSON.stringify(freshData));
+          } else {
+            // If user ID not found, clear session and go to auth
+            localStorage.removeItem("currentUserId");
+            localStorage.removeItem("currentUserData");
+            setAppState("auth");
+            return;
           }
         } catch (error) {
           // Silently handle fetch errors during session check

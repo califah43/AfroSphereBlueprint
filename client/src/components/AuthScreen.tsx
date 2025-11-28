@@ -137,14 +137,24 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         const usersRes = await fetch('/api/users/all');
         if (usersRes.ok) {
           const allUsers = await usersRes.json();
-          // Find user by Firebase UID
+          // Find user by Firebase UID (new users)
           dbUser = allUsers.find((u: any) => u.firebaseUid === userCredential.user.uid);
+          
+          // If not found, try by email (existing users without firebaseUid)
+          if (!dbUser && userCredential.user.email) {
+            // For existing users, we need to match by email domain
+            const emailDomain = userCredential.user.email.split('@')[0];
+            dbUser = allUsers.find((u: any) => {
+              // Check if username matches email prefix (common case for old users)
+              return u.username === emailDomain || u.username === userCredential.user.email;
+            });
+          }
         }
       } catch (e) {
         console.log("Could not fetch all users");
       }
       
-      // If still not found, try by stored username
+      // If still not found, try by stored username (fallback)
       if (!dbUser) {
         try {
           const storedData = localStorage.getItem("currentUserData");
@@ -165,6 +175,18 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       // Store the REAL database user
       if (dbUser && dbUser.id) {
         localStorage.setItem("currentUserId", dbUser.id);
+        // Update user's firebaseUid in database if not already set
+        if (!dbUser.firebaseUid) {
+          try {
+            await fetch(`/api/users/${dbUser.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ firebaseUid: userCredential.user.uid }),
+            });
+          } catch (e) {
+            console.log("Could not update firebaseUid");
+          }
+        }
         localStorage.setItem("currentUserData", JSON.stringify({
           ...dbUser,
           firebaseUid: userCredential.user.uid,

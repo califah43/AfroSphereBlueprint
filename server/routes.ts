@@ -204,7 +204,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/users/:id", async (req, res) => {
     try {
-      const updates = updateUserSchema.parse(req.body);
+      // Allow firebaseUid to be updated even if not in updateUserSchema
+      const updates = req.body;
       const user = await storage.updateUser(req.params.id, updates);
       
       if (!user) {
