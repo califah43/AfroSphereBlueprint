@@ -244,23 +244,25 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </button>
         </div>
 
-        {/* Name, Badge & Username - Left Aligned */}
+        {/* Name & Username - Left Aligned */}
         <div className="mb-4">
-          {/* Name & Badge */}
-          <div className="flex items-center gap-2 mb-0.5">
-            <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
-              {userProfile.displayName}
-            </h1>
-            <CreatorBadge type="fashion-vanguard" size="sm" />
-          </div>
+          {/* Name Only */}
+          <h1 className="text-lg font-black tracking-tight mb-0.5" data-testid="text-profile-displayname">
+            {userProfile.displayName}
+          </h1>
           
           {/* Username */}
           <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
 
           {/* Bio - Compact elegance */}
-          <p className="text-xs text-foreground leading-tight" data-testid="text-profile-bio">
+          <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
             {userProfile.bio}
           </p>
+
+          {/* Creator Badge */}
+          <div className="flex items-center">
+            <CreatorBadge type="fashion-vanguard" size="sm" />
+          </div>
         </div>
 
         {/* Professional Info - Compact & Refined */}
