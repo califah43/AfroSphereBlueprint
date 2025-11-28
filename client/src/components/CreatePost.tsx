@@ -146,10 +146,10 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
                     {mediaPreviews.length < 10 && (
                       <label
                         htmlFor="image-upload"
-                        className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover-elevate transition-colors"
+                        className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-primary to-orange-500 cursor-pointer hover-elevate transition-all shadow-lg hover:shadow-xl hover:scale-110 mx-auto"
+                        data-testid="button-add-image"
                       >
-                        <Upload className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground mt-1">Add</p>
+                        <Upload className="h-5 w-5 text-white" />
                       </label>
                     )}
                   </div>
