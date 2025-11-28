@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GENRES } from "@shared/genres";
+import { useToast } from "@/hooks/use-toast";
 
 interface Comment {
   id: string;
