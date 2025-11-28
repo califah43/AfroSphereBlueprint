@@ -106,8 +106,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return `${days}d ago`;
   };
 
-  // Seed database on startup - runs only once
-  await seedDatabase();
+  // Seed database on startup - only seeds users, not posts
+  // Posts should be created by users manually, not auto-recreated on every reload
+  const usernames = ["adikeafrica", "zara_style", "kente_vibes", "amaarabeats", "beat_masta", "dj_cairo", 
+                     "kojoart", "paint_mastery", "street_artist", "culture_keeper", "griot_stories", 
+                     "festival_vibe", "wellness_guru", "kitchen_diaries", "travel_nomad"];
+  for (const username of usernames) {
+    try {
+      await storage.createUser({
+        username,
+        password: "password123",
+        displayName: username.replace(/_/g, " "),
+      });
+    } catch (e) {
+      // User may already exist
+    }
+  }
 
   // ============ AUTH ROUTES ============
   // Map Firebase UID to database user ID
