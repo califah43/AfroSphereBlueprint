@@ -7,21 +7,21 @@ import { mockPosts } from "@/data/mockData";
 import CollapsibleHeader from "./CollapsibleHeader";
 
 const PostSkeleton = () => (
-  <div className="mb-4 animate-pulse space-y-3 bg-muted/50 rounded-lg p-4 border border-border">
+  <div className="mb-4 animate-pulse space-y-3 bg-muted/30 rounded-lg p-4 border border-border/50 opacity-60">
     <div className="flex items-center gap-2 mb-2">
-      <div className="w-10 h-10 bg-muted rounded-full"></div>
+      <div className="w-10 h-10 bg-muted/50 rounded-full"></div>
       <div className="flex-1">
-        <div className="h-3 bg-muted rounded w-24 mb-1"></div>
-        <div className="h-2 bg-muted rounded w-16"></div>
+        <div className="h-3 bg-muted/50 rounded w-24 mb-1"></div>
+        <div className="h-2 bg-muted/50 rounded w-16"></div>
       </div>
     </div>
-    <div className="h-40 bg-muted rounded-lg mb-2"></div>
-    <div className="h-3 bg-muted rounded w-full mb-1"></div>
-    <div className="h-3 bg-muted rounded w-5/6"></div>
+    <div className="h-40 bg-muted/50 rounded-lg mb-2"></div>
+    <div className="h-3 bg-muted/50 rounded w-full mb-1"></div>
+    <div className="h-3 bg-muted/50 rounded w-5/6"></div>
     <div className="flex gap-2 mt-2">
-      <div className="h-6 bg-muted rounded w-12"></div>
-      <div className="h-6 bg-muted rounded w-12"></div>
-      <div className="h-6 bg-muted rounded w-12"></div>
+      <div className="h-6 bg-muted/50 rounded w-12"></div>
+      <div className="h-6 bg-muted/50 rounded w-12"></div>
+      <div className="h-6 bg-muted/50 rounded w-12"></div>
     </div>
   </div>
 );
@@ -217,35 +217,31 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         isVisible={isHeaderVisible}
       />
 
-      {/* Pull-to-Refresh Indicator */}
+      {/* Pull-to-Refresh Indicator - Subtle */}
       {pullDistance > 0 && !isRefreshing && (
         <div 
-          className="flex justify-center items-center transition-all"
+          className="flex justify-center items-center transition-all duration-300"
           style={{ 
             height: `${pullDistance}px`,
-            opacity: Math.min(pullDistance / 80, 1)
+            opacity: Math.min(pullDistance / 80, 0.6)
           }}
         >
-          <div className="flex flex-col items-center gap-1">
-            <RefreshCw 
-              className="text-primary transition-transform" 
-              size={18} 
-              style={{ 
-                transform: `rotate(${(pullDistance / 80) * 180}deg)`,
-                opacity: pullDistance / 80 
-              }} 
-            />
-            <span className="text-xs text-muted-foreground font-medium">
-              {pullDistance > 80 ? "Release to refresh" : "Pull to refresh"}
-            </span>
-          </div>
+          <RefreshCw 
+            className="text-primary/40" 
+            size={16} 
+            style={{ 
+              transform: `rotate(${(pullDistance / 80) * 180}deg)`,
+              opacity: pullDistance / 80 * 0.6,
+              transition: 'transform 0.1s linear'
+            }} 
+          />
         </div>
       )}
 
-      {/* Refresh Progress Bar */}
+      {/* Refresh Progress Bar - Very Subtle */}
       {isRefreshing && (
-        <div className="h-1 bg-primary/20 relative overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-primary via-primary to-primary/50 animate-pulse" />
+        <div className="h-0.5 bg-primary/10 relative overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" style={{ animation: 'shimmer 2s infinite' }} />
         </div>
       )}
 
@@ -269,27 +265,28 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       {/* Feed Content */}
       <div className="max-w-md mx-auto px-4 pt-4">
           {isInitialLoading ? (
-            <>
+            <div className="animate-in fade-in duration-500">
               <PostSkeleton />
               <PostSkeleton />
               <PostSkeleton />
-            </>
+            </div>
           ) : (
             <>
               {filteredPosts.length > 0 ? (
                 <>
                   {filteredPosts.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      isOwnPost={post.author.username === "adikeafrica"}
-                      onLike={(id) => console.log("Liked:", id)}
-                      onComment={(id) => onCommentClick?.(id, post.imageUrl, post.caption)}
-                      onShare={(id) => onOpenShare?.()}
-                      onBookmark={(id) => console.log("Bookmark:", id)}
-                      onAuthorClick={(username) => onUserProfileClick?.(username)}
-                      onHashtagClick={(tag) => onHashtagClick?.(tag)}
-                    />
+                    <div key={post.id} className="animate-in fade-in duration-500">
+                      <PostCard
+                        post={post}
+                        isOwnPost={post.author.username === "adikeafrica"}
+                        onLike={(id) => console.log("Liked:", id)}
+                        onComment={(id) => onCommentClick?.(id, post.imageUrl, post.caption)}
+                        onShare={(id) => onOpenShare?.()}
+                        onBookmark={(id) => console.log("Bookmark:", id)}
+                        onAuthorClick={(username) => onUserProfileClick?.(username)}
+                        onHashtagClick={(tag) => onHashtagClick?.(tag)}
+                      />
+                    </div>
                   ))}
                   
                   {/* Loading More Indicator */}
