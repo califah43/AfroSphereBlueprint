@@ -56,7 +56,7 @@ async function seedDatabase() {
     if (user) {
       await storage.createPost({
         userId: user.id,
-        image: "https://via.placeholder.com/400x500?text=" + postData.username,
+        image: `https://picsum.photos/400/500?random=${postData.username}&t=${Date.now()}`,
         caption: postData.caption,
         category: postData.category,
       });
