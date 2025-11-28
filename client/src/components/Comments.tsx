@@ -211,21 +211,70 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
     }
   };
 
-  const toggleCommentLike = (commentId: string) => {
+  const toggleCommentLike = async (commentId: string) => {
+    let userId = localStorage.getItem("currentUserId");
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    
+    if (userData && userData.id && userData.id !== userId) {
+      userId = userData.id;
+    }
+    
+    if (!userId) return;
+
+    const comment = comments.find(c => c.id === commentId);
+    const isCurrentlyLiked = comment?.isLiked || false;
+
+    // Update UI optimistically
     setComments(
       comments.map((c) =>
         c.id === commentId
           ? {
               ...c,
               isLiked: !c.isLiked,
-              likes: c.isLiked ? c.likes - 1 : c.likes + 1,
+              likes: c.isLiked ? Math.max(0, c.likes - 1) : c.likes + 1,
             }
           : c
       )
     );
+
+    // Persist to server
+    try {
+      await fetch('/api/likes/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, commentId }),
+      });
+    } catch (error) {
+      // Revert on error
+      setComments(
+        comments.map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                isLiked: isCurrentlyLiked,
+                likes: isCurrentlyLiked ? c.likes + 1 : Math.max(0, c.likes - 1),
+              }
+            : c
+        )
+      );
+    }
   };
 
-  const toggleReplyLike = (commentId: string, replyId: string) => {
+  const toggleReplyLike = async (commentId: string, replyId: string) => {
+    let userId = localStorage.getItem("currentUserId");
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    
+    if (userData && userData.id && userData.id !== userId) {
+      userId = userData.id;
+    }
+    
+    if (!userId) return;
+
+    const comment = comments.find(c => c.id === commentId);
+    const reply = comment?.replies.find(r => r.id === replyId);
+    const isCurrentlyLiked = reply?.isLiked || false;
+
+    // Update UI optimistically
     setComments(
       comments.map((c) =>
         c.id === commentId
@@ -236,7 +285,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                   ? {
                       ...r,
                       isLiked: !r.isLiked,
-                      likes: r.isLiked ? r.likes - 1 : r.likes + 1,
+                      likes: r.isLiked ? Math.max(0, r.likes - 1) : r.likes + 1,
                     }
                   : r
               ),
@@ -244,6 +293,35 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
           : c
       )
     );
+
+    // Persist to server
+    try {
+      await fetch('/api/likes/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, commentId: replyId }),
+      });
+    } catch (error) {
+      // Revert on error
+      setComments(
+        comments.map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                replies: c.replies.map((r) =>
+                  r.id === replyId
+                    ? {
+                        ...r,
+                        isLiked: isCurrentlyLiked,
+                        likes: isCurrentlyLiked ? r.likes + 1 : Math.max(0, r.likes - 1),
+                      }
+                    : r
+                ),
+              }
+            : c
+        )
+      );
+    }
   };
 
   const toggleRepliesExpanded = (commentId: string) => {
