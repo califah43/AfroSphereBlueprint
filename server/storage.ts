@@ -372,33 +372,34 @@ export class MemStorage implements IStorage {
 
   async saveUserSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
     let settings = Array.from(this.settings.values()).find(s => s.userId === userId);
+    const defaults = {
+      userId,
+      privateAccount: false,
+      allowComments: true,
+      allowMentions: true,
+      notificationsLikes: true,
+      notificationsComments: true,
+      notificationsFollows: true,
+      notificationsTrending: true,
+      notificationsPush: true,
+      notificationsEmail: true,
+      privacyActivityStatus: true,
+      privacyReadReceipts: true,
+      contentHideExplicit: false,
+      contentMutedWords: false,
+      contentRestrictedMode: false,
+      displayDarkMode: true,
+      displayTextSize: "normal",
+      displayLanguage: "en",
+      updatedAt: new Date(),
+    } as UserSettings;
+    
     if (!settings) {
-      settings = {
-        userId,
-        privateAccount: false,
-        allowComments: true,
-        allowMentions: true,
-        notificationsLikes: true,
-        notificationsComments: true,
-        notificationsFollows: true,
-        notificationsTrending: true,
-        notificationsPush: true,
-        notificationsEmail: true,
-        privacyActivityStatus: true,
-        privacyReadReceipts: true,
-        contentHideExplicit: false,
-        contentMutedWords: false,
-        contentRestrictedMode: false,
-        displayDarkMode: true,
-        displayTextSize: "normal",
-        displayLanguage: "en",
-        updatedAt: new Date(),
-      } as UserSettings;
-      this.settings.set(userId, settings);
+      settings = { ...defaults, ...updates, userId } as UserSettings;
     } else {
       settings = { ...settings, ...updates, updatedAt: new Date(), userId };
-      this.settings.set(userId, settings);
     }
+    this.settings.set(userId, settings);
     return settings;
   }
 
