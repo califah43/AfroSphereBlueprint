@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Send, Heart, ChevronDown } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Reply {
   id: string;
@@ -40,6 +41,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
   const [replyText, setReplyText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Clear comments immediately when postId changes to prevent stale data
@@ -428,7 +430,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                       className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
                       data-testid={`button-reply-comment-${comment.id}`}
                     >
-                      Reply
+                      {t("comments.reply")}
                     </button>
                   </div>
                 </div>
@@ -439,7 +441,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                 <form onSubmit={(e) => handleAddReply(comment.id, e)} className="ml-12 space-y-2 animate-in slide-in-from-top-2 duration-200">
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Write a reply..."
+                      placeholder={t("comments.writeReply")}
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       className="bg-card border border-border/50 rounded-full text-sm px-4 focus:border-primary/50"
@@ -539,7 +541,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
           </Avatar>
           <div className="flex-1 flex gap-2 min-w-0">
             <Input
-              placeholder="Add a comment..."
+              placeholder={t("comments.addComment")}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="bg-card border border-border/50 rounded-full text-sm px-4 focus:border-primary/50 placeholder:text-muted-foreground/60"

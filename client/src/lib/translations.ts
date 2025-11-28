@@ -127,6 +127,42 @@ export const translations: Record<Language, Record<string, string>> = {
     "create.category": "Select Category",
     "create.post": "Post",
     "create.cancel": "Cancel",
+    "create.addPhoto": "Add your first photo",
+    "create.maxFiles": "Max 10 files, 10MB each",
+    "create.shareCaption": "Share your culture...",
+    "create.selectCategory": "Pick one",
+    "create.hashtags": "Hashtags",
+    "create.hashtagPlaceholder": "#fashion #art",
+    "create.brightness": "Brightness",
+    "create.contrast": "Contrast",
+    "create.saturation": "Saturation",
+    "create.proTipLabel": "Pro tip:",
+    "create.proTip": "Posts celebrating African creativity perform best!",
+    "create.missingFields": "Missing fields",
+    "create.missingFieldsDesc": "Please add a caption and at least one image",
+    "create.notAuthenticated": "User not authenticated. Please sign in again.",
+    
+    // Comments
+    "comments.title": "Comments",
+    "comments.addComment": "Add a comment...",
+    "comments.writeReply": "Write a reply...",
+    "comments.reply": "Reply",
+    "comments.viewReplies": "View {count} replies",
+    "comments.noComments": "No comments yet",
+    
+    // EditProfile
+    "profile.displayName": "Display Name",
+    "profile.bio": "Bio",
+    "profile.location": "Location",
+    "profile.profession": "Profession",
+    "profile.saveChanges": "Save Changes",
+    "profile.nameRequired": "Display name is required",
+    
+    // Explore
+    "explore.title": "Explore",
+    "explore.searchPlaceholder": "Search creators, hashtags...",
+    "explore.trendingHashtags": "Trending Hashtags",
+    "explore.popularPosts": "Popular Posts",
   },
   sw: {
     // Navigation
@@ -228,6 +264,34 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Inajibu...",
     "common.error": "Kosa",
     "common.success": "Mafaniko",
+    
+    // CreatePost
+    "create.addPhoto": "Ongeza picha yako ya kwanza",
+    "create.maxFiles": "Max 10 faili, 10MB kila mmoja",
+    "create.shareCaption": "Shiriki utamaduni wako...",
+    "create.selectCategory": "Chagua moja",
+    "create.hashtags": "Lebo za Hashtag",
+    "create.hashtagPlaceholder": "#mitindo #sanaa",
+    "create.brightness": "Mwangaza",
+    "create.contrast": "Akilinganisha",
+    "create.saturation": "Imara ya Rangi",
+    "create.proTipLabel": "Kidogo cha ushauri:",
+    "create.proTip": "Jumbe zinazoingilia utamaduni wa Kiafrika hufanya kazi vizuri!",
+    "create.missingFields": "Sehemu zinazokosekana",
+    "create.missingFieldsDesc": "Tafadhali ongeza jumbe na angalau picha moja",
+    
+    // Comments
+    "comments.addComment": "Ongeza maoni...",
+    "comments.writeReply": "Andika jibu...",
+    "comments.reply": "Jibu",
+    "comments.viewReplies": "Tazama {count} majibu",
+    "comments.noComments": "Hakuna maoni bado",
+    
+    // EditProfile
+    "profile.displayName": "Jina Linaloonekana",
+    "profile.bio": "Wasifu",
+    "profile.location": "Mahali",
+    "profile.profession": "Kazi",
   },
   yo: {
     // Navigation
@@ -329,6 +393,34 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Ń ílódìpò...",
     "common.error": "Àṣìṣe",
     "common.success": "Àjálọ pẹ̀lú",
+    
+    // CreatePost
+    "create.addPhoto": "Fikún àwọn àkọsílẹ̀ rẹ kẹ́kọ̀ọ́",
+    "create.maxFiles": "Max 10 faili, 10MB kọ̀ọ̀kan",
+    "create.shareCaption": "Píngàn àwọn ìṣàlẹ̀ rẹ...",
+    "create.selectCategory": "Yàn ọ̀kan",
+    "create.hashtags": "Àwọn Hashtag",
+    "create.hashtagPlaceholder": "#àṣo #iṣẹ̀",
+    "create.brightness": "Ìmọ́lẹ̀",
+    "create.contrast": "Ìyáwóran",
+    "create.saturation": "Agbára Àwọ̀",
+    "create.proTipLabel": "Ìrò ẹ̀kọ̀:",
+    "create.proTip": "Àwọn àkọsílẹ̀ tí ó ṣíṣẹ́ àwọn ìṣàlẹ̀ Afíríkà n ṣiṣẹ́ dáadáa!",
+    "create.missingFields": "Àwọn ìsè tí ó kọ̀",
+    "create.missingFieldsDesc": "Jọ̀wọ́ fikún àwọn àkọsílẹ̀ ati àkọsílẹ̀ kan",
+    
+    // Comments
+    "comments.addComment": "Kó àwọn ìbápadà...",
+    "comments.writeReply": "Kọ̀ lóhùn...",
+    "comments.reply": "Lóhùn",
+    "comments.viewReplies": "Wo {count} àwọn lóhùn",
+    "comments.noComments": "Kooo àwọn ìbápadà ṣaáji",
+    
+    // EditProfile
+    "profile.displayName": "Ọ̀rúkọ Ifihàn",
+    "profile.bio": "Ìtàn-àrùn",
+    "profile.location": "Ibílẹ̀",
+    "profile.profession": "Iṣẹ́",
   },
   ha: {
     // Navigation - using romanized Hausa

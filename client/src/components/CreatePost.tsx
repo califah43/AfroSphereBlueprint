@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { X, Upload, ImageIcon, Sparkles, Sun, Contrast } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 import { GENRE_LIST } from "@shared/genres";
 
 interface CreatePostProps {
@@ -25,6 +26,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -50,8 +52,8 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
   const handlePost = async () => {
     if (!caption || mediaPreviews.length === 0) {
       toast({
-        title: "Missing fields",
-        description: "Please add a caption and at least one image",
+        title: t("create.missingFields"),
+        description: t("create.missingFieldsDesc"),
         variant: "destructive",
       });
       return;
@@ -272,8 +274,8 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
                     <ImageIcon className="h-6 w-6 text-white" />
                   </label>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">Add your first photo</p>
-                    <p className="text-xs text-muted-foreground mt-1">Max 10 files, 10MB each</p>
+                    <p className="text-sm font-semibold text-foreground">{t("create.addPhoto")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("create.maxFiles")}</p>
                   </div>
                 </div>
               )}
@@ -290,10 +292,10 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
 
             {/* Caption */}
             <div className="space-y-1">
-              <Label htmlFor="caption" className="text-xs font-semibold">Caption</Label>
+              <Label htmlFor="caption" className="text-xs font-semibold">{t("create.caption")}</Label>
               <Textarea
                 id="caption"
-                placeholder="Share your culture..."
+                placeholder={t("create.shareCaption")}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 className="min-h-16 resize-none text-sm"
@@ -305,26 +307,26 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
             {/* Category & Hashtags */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="category" className="text-xs font-semibold">Category</Label>
+                <Label htmlFor="category" className="text-xs font-semibold">{t("create.category")}</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger data-testid="select-category" className="text-sm">
-                    <SelectValue placeholder="Pick one" />
+                    <SelectValue placeholder={t("create.selectCategory")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fashion">👗 Fashion</SelectItem>
-                    <SelectItem value="music">🎵 Music</SelectItem>
-                    <SelectItem value="art">🎨 Art</SelectItem>
-                    <SelectItem value="culture">🌍 Culture</SelectItem>
-                    <SelectItem value="lifestyle">✨ Lifestyle</SelectItem>
+                    <SelectItem value="fashion">Fashion</SelectItem>
+                    <SelectItem value="music">Music</SelectItem>
+                    <SelectItem value="art">Art</SelectItem>
+                    <SelectItem value="culture">Culture</SelectItem>
+                    <SelectItem value="lifestyle">Lifestyle</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="hashtags" className="text-xs font-semibold">Hashtags</Label>
+                <Label htmlFor="hashtags" className="text-xs font-semibold">{t("create.hashtags")}</Label>
                 <Input
                   id="hashtags"
-                  placeholder="#fashion #art"
+                  placeholder={t("create.hashtagPlaceholder")}
                   value={hashtags}
                   onChange={(e) => setHashtags(e.target.value)}
                   className="text-sm"
@@ -336,7 +338,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
             {/* Tip */}
             <div className="bg-gradient-to-r from-primary/10 to-orange-500/10 border border-primary/20 rounded-lg p-3">
               <p className="text-xs text-muted-foreground">
-                ✨ <span className="font-semibold text-foreground">Pro tip:</span> Posts celebrating African creativity perform best!
+                <span className="font-semibold text-foreground">{t("create.proTipLabel")}</span> {t("create.proTip")}
               </p>
             </div>
           </div>
