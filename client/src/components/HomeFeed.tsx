@@ -51,12 +51,45 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     queryFn: async () => {
       try {
         const res = await fetch('/api/posts?limit=50');
-        return res.json();
+        const posts = await res.json();
+        
+        // Transform backend posts to match frontend structure
+        return Promise.all(posts.map(async (p: any) => {
+          try {
+            const userRes = await fetch(`/api/users/${p.userId}`);
+            const user = await userRes.json();
+            return {
+              id: p.id,
+              author: { username: user.username || "creator", avatar: user.avatar },
+              imageUrl: p.image,
+              caption: p.caption,
+              likes: p.likes || 0,
+              comments: p.commentCount || 0,
+              timeAgo: p.createdAt ? formatTimeAgo(new Date(p.createdAt)) : "now",
+              category: p.category,
+            };
+          } catch (e) {
+            return null;
+          }
+        })).then(posts => posts.filter(Boolean));
       } catch {
         return mockPosts;
       }
     },
   });
+
+  // Helper to format time
+  const formatTimeAgo = (date: Date) => {
+    const now = Date.now();
+    const diff = now - date.getTime();
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (hours === 0) return "now";
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return "1d ago";
+    return `${days}d ago`;
+  };
 
   // Fallback to mock data if API returns empty
   useEffect(() => {
