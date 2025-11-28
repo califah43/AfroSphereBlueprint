@@ -55,16 +55,32 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes(isLiked ? likes - 1 : likes + 1);
-    onLike?.(post.id);
+  const handleLike = async () => {
+    const userId = localStorage.getItem("currentUserId");
+    if (!userId) {
+      toast({ title: "Please sign in to like posts", variant: "destructive" });
+      return;
+    }
 
-    if (!isLiked) {
-      toast({
-        title: "Post liked! ❤️",
-        description: "Added to your liked posts",
+    try {
+      const res = await fetch('/api/likes/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, postId: post.id }),
       });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsLiked(data.liked);
+        setLikes(data.liked ? likes + 1 : likes - 1);
+        
+        if (data.liked) {
+          toast({ title: "Post liked! ❤️", description: "Added to your liked posts" });
+        }
+      }
+      onLike?.(post.id);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }
   };
 

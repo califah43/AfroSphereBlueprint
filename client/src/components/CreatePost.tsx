@@ -57,8 +57,9 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
     }
 
     try {
+      const userId = localStorage.getItem("currentUserId") || "current-user";
       const postData = {
-        userId: "current-user",
+        userId,
         caption,
         category: category || "lifestyle",
         image: mediaPreviews[0],
@@ -72,13 +73,14 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
 
       if (!res.ok) throw new Error("Failed to create post");
 
+      const createdPost = await res.json();
       toast({
         title: "✨ Post created!",
         description: "Your post has been shared with the community.",
         className: "border-primary/20 bg-card",
       });
 
-      onPost?.(postData);
+      onPost?.(createdPost);
       onClose();
     } catch (error: any) {
       toast({

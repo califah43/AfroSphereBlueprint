@@ -254,6 +254,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // ============ HASHTAG/TRENDING ROUTES ============
+  app.get("/api/trending/hashtags", async (req, res) => {
+    try {
+      const posts = await storage.listPosts(1000, 0);
+      const hashtagMap = new Map<string, number>();
+      
+      posts.forEach(post => {
+        const hashtags = post.caption?.match(/#[\w]+/g) || [];
+        hashtags.forEach(tag => {
+          const cleanTag = tag.substring(1).toLowerCase();
+          hashtagMap.set(cleanTag, (hashtagMap.get(cleanTag) || 0) + 1);
+        });
+      });
+
+      const trending = Array.from(hashtagMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20)
+        .map(([tag, count]) => ({ tag, count, posts: count }));
+      
+      res.json(trending);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch trending hashtags" });
+    }
+  });
+
+  app.get("/api/trending/posts", async (req, res) => {
+    try {
+      const posts = await storage.listPosts(100, 0);
+      const trending = posts
+        .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+        .slice(0, 20);
+      
+      res.json(trending);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch trending posts" });
+    }
+  });
+
+  app.get("/api/search/hashtag/:tag", async (req, res) => {
+    try {
+      const tag = req.params.tag.toLowerCase();
+      const posts = await storage.listPosts(1000, 0);
+      const filtered = posts.filter(p => p.caption?.toLowerCase().includes(`#${tag}`));
+      
+      res.json(filtered);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to search hashtag" });
+    }
+  });
+
   // ============ SETTINGS ROUTES ============
   app.get("/api/settings/:userId", async (req, res) => {
     try {
