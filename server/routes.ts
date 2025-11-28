@@ -166,6 +166,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/users", async (req, res) => {
+    try {
+      const parsed = insertUserSchema.parse(req.body);
+      const existingUser = await storage.getUserByUsername(parsed.username);
+      if (existingUser) {
+        return res.status(409).json({ error: "Username already exists" });
+      }
+      const user = await storage.createUser(parsed);
+      res.json(user);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   // ============ USER ROUTES ============
   app.get("/api/users/all", async (req, res) => {
     try {

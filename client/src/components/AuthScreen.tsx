@@ -37,6 +37,11 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
   const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
 
+  const generateUsernameFromEmail = (email: string) => {
+    const base = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    return base || `user${Math.random().toString(36).substr(2, 9)}`;
+  };
+
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     setLoginError("");
@@ -61,7 +66,49 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         console.log("Could not fetch all users");
       }
       
-      if (dbUser && dbUser.id) {
+      // If user not found, create new account
+      if (!dbUser) {
+        try {
+          let username = generateUsernameFromEmail(userCredential.user.email || "user");
+          
+          // Check if username is available
+          let usernameCheckRes = await fetch(`/api/auth/check-username/${username}`);
+          let usernameCheckData = await usernameCheckRes.json();
+          
+          // If taken, add random suffix
+          if (!usernameCheckData.available) {
+            username = `${username}${Math.floor(Math.random() * 10000)}`;
+          }
+          
+          // Create new user
+          const createRes = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username,
+              password: userCredential.user.uid,
+              firebaseUid: userCredential.user.uid,
+            }),
+          });
+          
+          if (createRes.ok) {
+            dbUser = await createRes.json();
+            localStorage.setItem("currentUserId", dbUser.id);
+            localStorage.setItem("currentUserData", JSON.stringify({
+              ...dbUser,
+              firebaseUid: userCredential.user.uid,
+            }));
+            toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
+            onAuthComplete(true);
+          } else {
+            throw new Error("Could not create account");
+          }
+        } catch (signupError) {
+          console.error("Google signup error:", signupError);
+          throw new Error("Failed to create account with Google");
+        }
+      } else {
+        // Existing user - log them in
         localStorage.setItem("currentUserId", dbUser.id);
         // Update firebaseUid if not set
         if (!dbUser.firebaseUid) {
@@ -81,8 +128,6 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         }));
         toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
         onAuthComplete(false);
-      } else {
-        throw new Error("User account not found. Please sign up instead.");
       }
     } catch (error: any) {
       const errorMsg = getErrorMessage(error);
