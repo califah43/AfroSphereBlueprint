@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -154,7 +154,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     onBookmark?.(post.id);
 
     toast({
-      title: isBookmarked ? "Removed from saved" : "Post saved! 📌",
+      title: isBookmarked ? "Removed from saved" : "Post saved!",
       description: isBookmarked ? "Removed from your collection" : "Added to your saved collection",
     });
   };
@@ -169,22 +169,23 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   return (
-    <div className="bg-card rounded-lg overflow-hidden mb-4" data-testid={`card-post-${post.id}`}>
-      <div className="flex items-center justify-between p-4">
+    <div className="bg-gradient-to-b from-background/70 to-background/40 backdrop-blur-md border border-border/30 rounded-2xl overflow-hidden mb-6 shadow-sm hover-elevate transition-all duration-300" data-testid={`card-post-${post.id}`}>
+      {/* Header - Elegant Design */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/20">
         <button 
           onClick={() => onAuthorClick?.(post.author.username)}
-          className="flex items-center gap-3 hover-elevate flex-1 rounded px-2 py-1 transition-all group"
+          className="flex items-center gap-3 hover-elevate flex-1 rounded-lg px-2 py-1 transition-all group"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-10 h-10">
+          <Avatar className="w-12 h-12 ring-2 ring-primary/20 shadow-md">
             <AvatarImage src={post.author.avatar} />
-            <AvatarFallback>{post.author.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{post.author.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="text-left">
-            <p className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`text-username-${post.id}`}>
+            <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors" data-testid={`text-username-${post.id}`}>
               {post.author.username}
             </p>
-            <p className="text-xs text-muted-foreground" data-testid={`text-time-${post.id}`}>
+            <p className="text-xs text-muted-foreground/70 font-medium" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
@@ -194,7 +195,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             <Button 
               variant="ghost" 
               size="icon" 
-              className="hover-elevate"
+              className="hover-elevate active-elevate-2"
               data-testid={`button-menu-${post.id}`}
             >
               <MoreVertical className="h-5 w-5" />
@@ -277,8 +278,9 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         </AlertDialog>
       </div>
 
+      {/* Image Section - Enhanced */}
       <div 
-        className="relative" 
+        className="relative bg-gradient-to-br from-muted/40 to-muted/20" 
         onDoubleClick={handleDoubleClick}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -291,13 +293,13 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           draggable={false}
         />
         
-        {/* Image carousel indicators */}
+        {/* Image carousel indicators - Elegant */}
         {allImages.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full">
             {allImages.map((_, idx) => (
               <div
                 key={idx}
-                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-2 bg-white' : 'w-1.5 bg-white/50'}`}
+                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-2.5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/60'}`}
                 data-testid={`indicator-image-${idx}`}
               />
             ))}
@@ -314,17 +316,19 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         )}
       </div>
 
-      <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      {/* Content Section - Premium Spacing */}
+      <div className="px-5 py-4 space-y-4">
+        {/* Engagement Bar - Refined */}
+        <div className="flex items-center justify-between -mx-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleLike}
-              className="hover-elevate active-elevate-2"
+              className="hover-elevate active-elevate-2 transition-all"
               data-testid={`button-like-${post.id}`}
             >
-              <Heart className={`h-6 w-6 ${isLiked ? "fill-primary text-primary" : ""}`} />
+              <Heart className={`h-6 w-6 transition-all ${isLiked ? "fill-primary text-primary scale-110" : "text-foreground"}`} />
             </Button>
             <Button
               variant="ghost"
@@ -358,42 +362,49 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             className="hover-elevate active-elevate-2"
             data-testid={`button-bookmark-${post.id}`}
           >
-            <Bookmark className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`} />
+            <Bookmark className={`h-6 w-6 transition-all ${isBookmarked ? "fill-current text-primary" : "text-foreground"}`} />
           </Button>
         </div>
 
-        <div>
-          <p className="text-sm font-medium transition-all duration-300" data-testid={`text-likes-${post.id}`}>
-            {likes.toLocaleString()} likes
+        {/* Likes Count - Elegant Typography */}
+        <div className="space-y-2.5">
+          <p className="text-sm font-bold text-foreground transition-all duration-300" data-testid={`text-likes-${post.id}`}>
+            {likes.toLocaleString()} {likes === 1 ? "like" : "likes"}
           </p>
-          <p className="text-sm">
-            <span className="font-semibold">{post.author.username}</span>{" "}
-            <span data-testid={`text-caption-${post.id}`}>
-              {post.caption?.split(/(\#\w+)/g).map((part, i) => 
-                part.startsWith('#') ? (
-                  <button
-                    key={i}
-                    onClick={() => onHashtagClick?.(part.substring(1))}
-                    className="text-primary hover:text-primary/80 font-semibold transition-colors"
-                    data-testid={`button-hashtag-${part.substring(1)}`}
-                  >
-                    {part}
-                  </button>
-                ) : (
-                  part
-                )
-              )}
-            </span>
-          </p>
-          {post.comments > 0 && (
-            <button
-              onClick={() => onComment?.(post.id)}
-              className="text-sm text-muted-foreground mt-1 hover:text-foreground"
-              data-testid={`button-view-comments-${post.id}`}
-            >
-              View all {post.comments} comments
-            </button>
-          )}
+
+          {/* Caption Section */}
+          <div className="space-y-2">
+            <p className="text-sm leading-relaxed">
+              <span className="font-bold text-foreground">{post.author.username}</span>{" "}
+              <span className="text-foreground/90" data-testid={`text-caption-${post.id}`}>
+                {post.caption?.split(/(\#\w+)/g).map((part, i) => 
+                  part.startsWith('#') ? (
+                    <button
+                      key={i}
+                      onClick={() => onHashtagClick?.(part.substring(1))}
+                      className="text-primary hover:text-primary/80 font-semibold transition-colors"
+                      data-testid={`button-hashtag-${part.substring(1)}`}
+                    >
+                      {part}
+                    </button>
+                  ) : (
+                    part
+                  )
+                )}
+              </span>
+            </p>
+
+            {/* Comments Link */}
+            {post.comments > 0 && (
+              <button
+                onClick={() => onComment?.(post.id)}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                data-testid={`button-view-comments-${post.id}`}
+              >
+                View all {post.comments} {post.comments === 1 ? "comment" : "comments"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

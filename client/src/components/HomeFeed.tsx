@@ -8,21 +8,22 @@ import CollapsibleHeader from "./CollapsibleHeader";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const PostSkeleton = () => (
-  <div className="mb-4 animate-pulse space-y-3 bg-muted/30 rounded-lg p-4 border border-border/50 opacity-60">
-    <div className="flex items-center gap-2 mb-2">
-      <div className="w-10 h-10 bg-muted/50 rounded-full"></div>
+  <div className="mb-6 animate-pulse space-y-3 bg-gradient-to-b from-muted/20 to-muted/10 rounded-2xl p-5 border border-border/20 opacity-50">
+    <div className="flex items-center gap-3 mb-3">
+      <div className="w-12 h-12 bg-muted/40 rounded-full"></div>
       <div className="flex-1">
-        <div className="h-3 bg-muted/50 rounded w-24 mb-1"></div>
-        <div className="h-2 bg-muted/50 rounded w-16"></div>
+        <div className="h-3.5 bg-muted/40 rounded w-28 mb-2"></div>
+        <div className="h-2.5 bg-muted/30 rounded w-20"></div>
       </div>
     </div>
-    <div className="h-40 bg-muted/50 rounded-lg mb-2"></div>
-    <div className="h-3 bg-muted/50 rounded w-full mb-1"></div>
-    <div className="h-3 bg-muted/50 rounded w-5/6"></div>
-    <div className="flex gap-2 mt-2">
-      <div className="h-6 bg-muted/50 rounded w-12"></div>
-      <div className="h-6 bg-muted/50 rounded w-12"></div>
-      <div className="h-6 bg-muted/50 rounded w-12"></div>
+    <div className="h-48 bg-muted/30 rounded-xl mb-2"></div>
+    <div className="h-3 bg-muted/30 rounded w-32 mb-3"></div>
+    <div className="h-3.5 bg-muted/30 rounded w-full mb-2"></div>
+    <div className="h-3 bg-muted/30 rounded w-5/6"></div>
+    <div className="flex gap-3 mt-4">
+      <div className="h-6 bg-muted/30 rounded w-10"></div>
+      <div className="h-6 bg-muted/30 rounded w-10"></div>
+      <div className="h-6 bg-muted/30 rounded w-10"></div>
     </div>
   </div>
 );
@@ -300,7 +301,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       )}
 
       {/* Feed Content */}
-      <div className="max-w-md mx-auto px-4 pt-4">
+      <div className="max-w-md mx-auto px-3 pt-2">
           {isInitialLoading ? (
             <div className="animate-in fade-in duration-500">
               <PostSkeleton />
