@@ -56,11 +56,34 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
   const { toast } = useToast();
   
   // Get all images for carousel
   const allImages = post.images && post.images.length > 0 ? post.images : [post.imageUrl];
   const currentImage = allImages[currentImageIndex] || post.imageUrl;
+  
+  // Handle swipe for carousel
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    const threshold = 50; // Minimum swipe distance
+    
+    if (allImages.length <= 1) return;
+    
+    // Swipe left - go to next image
+    if (diff > threshold && currentImageIndex < allImages.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+    // Swipe right - go to previous image
+    else if (diff < -threshold && currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
 
   // Get current user ID
   const getUserId = () => {
@@ -254,12 +277,18 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         </AlertDialog>
       </div>
 
-      <div className="relative" onDoubleClick={handleDoubleClick}>
+      <div 
+        className="relative" 
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <img
           src={currentImage}
           alt="Post content"
-          className="w-full aspect-[3/4] object-cover cursor-pointer"
+          className="w-full aspect-[3/4] object-cover cursor-pointer select-none"
           data-testid={`img-post-${post.id}`}
+          draggable={false}
         />
         
         {/* Image carousel indicators */}
@@ -273,28 +302,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               />
             ))}
           </div>
-        )}
-        
-        {/* Carousel navigation */}
-        {allImages.length > 1 && (
-          <>
-            <button
-              onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
-              disabled={currentImageIndex === 0}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
-              data-testid={`button-prev-image-${post.id}`}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setCurrentImageIndex(Math.min(allImages.length - 1, currentImageIndex + 1))}
-              disabled={currentImageIndex === allImages.length - 1}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
-              data-testid={`button-next-image-${post.id}`}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </>
         )}
         
         {showHeart && (

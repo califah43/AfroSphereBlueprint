@@ -55,10 +55,33 @@ export default function PostDetail({
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
   
-  // Get all images for carousel - imageUrl is the main image, but check if there are more
-  const allImages = [imageUrl]; // Start with main image
+  // Get all images for carousel - imageUrl is the main image
+  const allImages = [imageUrl];
   const currentImage = allImages[currentImageIndex] || imageUrl;
+  
+  // Handle swipe for carousel
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    const threshold = 50; // Minimum swipe distance
+    
+    if (allImages.length <= 1) return;
+    
+    // Swipe left - go to next image
+    if (diff > threshold && currentImageIndex < allImages.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+    // Swipe right - go to previous image
+    else if (diff < -threshold && currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
 
   // Fetch comments when modal opens
   useEffect(() => {
@@ -224,12 +247,17 @@ export default function PostDetail({
             </DropdownMenu>
           </div>
 
-          <div className="relative">
+          <div 
+            className="relative"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={currentImage}
               alt="Post"
-              className="w-full aspect-[3/4] object-cover"
+              className="w-full aspect-[3/4] object-cover select-none"
               data-testid="img-detail-post"
+              draggable={false}
             />
             
             {/* Image carousel indicators */}
@@ -242,26 +270,6 @@ export default function PostDetail({
                   />
                 ))}
               </div>
-            )}
-            
-            {/* Carousel navigation */}
-            {allImages.length > 1 && (
-              <>
-                <button
-                  onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
-                  disabled={currentImageIndex === 0}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentImageIndex(Math.min(allImages.length - 1, currentImageIndex + 1))}
-                  disabled={currentImageIndex === allImages.length - 1}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </>
             )}
           </div>
 

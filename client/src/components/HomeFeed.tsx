@@ -139,6 +139,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
               avatar: user?.avatar || "" 
             },
             imageUrl: p.image,
+            images: p.images && p.images.length > 0 ? p.images : [p.image],
             caption: p.caption,
             likes: p.likes !== undefined ? p.likes : 0,
             comments: p.commentCount !== undefined ? p.commentCount : 0,
