@@ -197,18 +197,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(comment.userId);
       const replies = await storage.getCommentReplies(comment.id);
       
-      // Enrich replies with usernames
+      // Enrich replies with usernames and all fields
       const enrichedReplies = await Promise.all(replies.map(async (reply) => {
         const replyUser = await storage.getUser(reply.userId);
         return {
-          ...reply,
+          id: reply.id,
+          userId: reply.userId,
+          postId: reply.postId,
+          text: reply.text,
+          likes: reply.likes || 0,
+          createdAt: reply.createdAt,
+          replyTo: reply.replyTo,
           author: replyUser?.username || "creator",
           timeAgo: reply.createdAt ? `${Math.floor((Date.now() - new Date(reply.createdAt).getTime()) / 3600000)}h ago` : "now",
         };
       }));
       
       return {
-        ...comment,
+        id: comment.id,
+        userId: comment.userId,
+        postId: comment.postId,
+        text: comment.text,
+        likes: comment.likes || 0,
+        createdAt: comment.createdAt,
+        replyTo: comment.replyTo,
         author: user?.username || "creator",
         timeAgo: comment.createdAt ? `${Math.floor((Date.now() - new Date(comment.createdAt).getTime()) / 3600000)}h ago` : "now",
         replies: enrichedReplies,
