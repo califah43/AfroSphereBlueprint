@@ -247,15 +247,15 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         {/* Name & Username - Left Aligned */}
         <div className="mb-4">
           {/* Name Only */}
-          <h1 className="text-2xl font-black tracking-tight mb-1" data-testid="text-profile-displayname">
+          <h1 className="text-lg font-black tracking-tight mb-0.5" data-testid="text-profile-displayname">
             {userProfile.displayName}
           </h1>
           
           {/* Username */}
-          <p className="text-sm text-muted-foreground font-medium mb-3" data-testid="text-profile-username">@{userProfile.username}</p>
+          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
 
           {/* Bio - Compact elegance */}
-          <p className="text-base text-foreground leading-relaxed mb-3" data-testid="text-profile-bio">
+          <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
             {userProfile.bio}
           </p>
 
@@ -267,23 +267,23 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Professional Info - Compact & Refined */}
         {(userProfile.profession || userProfile.location || userProfile.website) && (
-          <div className="flex flex-col gap-2 mb-4 text-sm">
+          <div className="flex flex-col gap-1 mb-4 text-xs">
             {userProfile.profession && (
               <div className="flex items-center gap-2 text-foreground">
-                <Briefcase className="h-4 w-4 text-primary/60 flex-shrink-0" />
+                <Briefcase className="h-3 w-3 text-primary/60 flex-shrink-0" />
                 <span className="font-medium truncate">{userProfile.profession}</span>
               </div>
             )}
             {userProfile.location && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 text-primary/60 flex-shrink-0" />
+                <MapPin className="h-3 w-3 text-primary/60 flex-shrink-0" />
                 <span className="truncate">{userProfile.location}</span>
               </div>
             )}
             {userProfile.website && (
               <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors truncate">
-                <Link className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate text-sm">{userProfile.website}</span>
+                <Link className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate text-xs">{userProfile.website}</span>
               </a>
             )}
           </div>
@@ -293,19 +293,19 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="grid grid-cols-2 gap-2 mb-4 p-2 bg-card rounded-md border border-border/50">
           <button
             onClick={onFollowersClick}
-            className="text-center py-2 hover-elevate transition-all rounded"
+            className="text-center py-1.5 hover-elevate transition-all rounded"
             data-testid="button-view-followers"
           >
-            <p className="text-2xl font-black text-foreground" data-testid="text-followers-count">{userProfile.following}</p>
-            <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium mt-1">Following</p>
+            <p className="text-lg font-black text-foreground" data-testid="text-followers-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Following</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-2 hover-elevate transition-all rounded border-l border-border/50"
+            className="text-center py-1.5 hover-elevate transition-all rounded border-l border-border/50"
             data-testid="button-view-following"
           >
-            <p className="text-2xl font-black text-foreground" data-testid="text-following-count">{userProfile.followers}</p>
-            <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium mt-1">Followers</p>
+            <p className="text-lg font-black text-foreground" data-testid="text-following-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Followers</p>
           </button>
         </div>
 
