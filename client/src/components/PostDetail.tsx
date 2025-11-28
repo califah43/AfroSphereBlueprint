@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,29 @@ export default function PostDetail({
   const [likes, setLikes] = useState(initialLikes);
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
+
+  // Check if current user has liked this post on component mount
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      let userId = localStorage.getItem("currentUserId");
+      const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      if (userData && userData.id && userData.id !== userId) {
+        userId = userData.id;
+      }
+      if (userId) {
+        try {
+          const res = await fetch(`/api/likes/posts/check/${userId}/${postId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setIsLiked(data.liked);
+          }
+        } catch (error) {
+          console.error("Error checking like status:", error);
+        }
+      }
+    };
+    checkLikeStatus();
+  }, [postId]);
 
   const handleLike = async () => {
     // Get the REAL database UUID, not Firebase UID

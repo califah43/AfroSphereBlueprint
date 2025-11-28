@@ -472,6 +472,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============ LIKE ROUTES ============
+  app.get("/api/likes/posts/check/:userId/:postId", async (req, res) => {
+    try {
+      const { userId, postId } = req.params;
+      const hasLiked = await storage.hasUserLikedPost(userId, postId);
+      res.json({ liked: hasLiked });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   app.post("/api/likes/posts", async (req, res) => {
     try {
       const { userId, postId } = req.body;

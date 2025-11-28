@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,29 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
+
+  // Check if current user has liked this post on component mount
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      let userId = localStorage.getItem("currentUserId");
+      const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      if (userData && userData.id && userData.id !== userId) {
+        userId = userData.id;
+      }
+      if (userId) {
+        try {
+          const res = await fetch(`/api/likes/posts/check/${userId}/${post.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setIsLiked(data.liked);
+          }
+        } catch (error) {
+          console.error("Error checking like status:", error);
+        }
+      }
+    };
+    checkLikeStatus();
+  }, [post.id]);
 
   const handleLike = async () => {
     // Get the REAL database UUID, not Firebase UID
