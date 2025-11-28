@@ -214,6 +214,37 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
     );
   };
 
+  const BlockedUsersList = ({ userId }: any) => {
+    const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+    useEffect(() => {
+      if (userId) {
+        fetch(`/api/blocked-users/${userId}`)
+          .then(r => r.json())
+          .then(data => setBlockedUsers(data || []))
+          .catch(() => {});
+      }
+    }, [userId]);
+    
+    if (blockedUsers.length === 0) {
+      return <p className="text-sm text-foreground">You have not blocked anyone yet. When you block a user, they will not be able to see your profile, posts, or stories.</p>;
+    }
+    
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-semibold">Blocked Users ({blockedUsers.length})</p>
+        {blockedUsers.map((user: any) => (
+          <div key={user.id} className="flex items-center justify-between p-2 border border-border/50 rounded-lg bg-card/30">
+            <p className="text-sm font-medium">{user.displayName || user.username}</p>
+            <Button size="sm" variant="outline" onClick={async () => {
+              await fetch(`/api/blocked-users/${userId}/${user.id}`, { method: "DELETE" });
+              setBlockedUsers(blockedUsers.filter((u: any) => u.id !== user.id));
+            }}>Unblock</Button>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const renderModal = () => {
     if (editMode === "help") {
       return (
@@ -348,14 +379,10 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
           </div>
           <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-4">
-            <p className="text-sm text-foreground">You have not blocked anyone yet. When you block a user, they will not be able to see your profile, posts, or stories. Blocked users cannot send you direct messages or find you through search.</p>
+            <BlockedUsersList userId={userId} />
             <div>
               <p className="text-sm font-semibold">How to Block Someone</p>
               <p className="text-xs text-muted-foreground mt-2">Visit their profile and tap the three dots menu, then select Block User. They will not be notified, but they may notice they cannot find your profile anymore.</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold">Unblocking Users</p>
-              <p className="text-xs text-muted-foreground mt-2">Go to Settings, Blocked Users, find the person you want to unblock, and tap Unblock. They will be able to see your profile again, but they still will not have access to your chat history.</p>
             </div>
             <Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-8">Done</Button>
           </div>
@@ -836,7 +863,11 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
             <Button
               variant="outline"
               className="w-full justify-start gap-3 h-auto py-4 px-4 border-destructive/50 hover:bg-destructive/5"
-              onClick={onLogout}
+              onClick={() => {
+                localStorage.removeItem("currentUserId");
+                localStorage.removeItem("currentUserData");
+                window.location.href = "/";
+              }}
               data-testid="button-logout"
             >
               <LogOut className="h-5 w-5 text-destructive flex-shrink-0" />
@@ -850,7 +881,20 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
             <Button
               variant="outline"
               className="w-full justify-start gap-3 h-auto py-4 px-4 border-destructive/50 hover:bg-destructive/5"
-              onClick={() => console.log("Delete account")}
+              onClick={async () => {
+                if (window.confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+                  try {
+                    const response = await fetch(`/api/users/${userId}/delete`, { method: "POST" });
+                    if (response.ok) {
+                      localStorage.removeItem("currentUserId");
+                      localStorage.removeItem("currentUserData");
+                      window.location.href = "/";
+                    }
+                  } catch (e) {
+                    console.error("Failed to delete account:", e);
+                  }
+                }
+              }}
               data-testid="button-delete-account"
             >
               <Trash2 className="h-5 w-5 text-destructive flex-shrink-0" />

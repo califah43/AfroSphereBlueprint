@@ -1,6 +1,6 @@
 import { db } from './db';
 import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports } from '@shared/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
@@ -265,7 +265,7 @@ export class DbStorage implements IStorage {
     const blocked = await db.query.blockedUsers.findMany({ where: eq(blockedUsers.userId, userId) });
     const blockedUserIds = blocked.map(b => b.blockedUserId);
     if (blockedUserIds.length === 0) return [];
-    return db.query.users.findMany({ where: (u) => blockedUserIds.includes(u.id) });
+    return db.query.users.findMany({ where: inArray(users.id, blockedUserIds) });
   }
 
   async submitReport(userId: string, reportType: string, description: string, postId?: string, reportedUserId?: string): Promise<UserReport> {
