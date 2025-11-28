@@ -10,6 +10,15 @@ import {
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: "English",
+  sw: "Kiswahili",
+  yo: "Yoruba",
+  ha: "Hausa",
+  am: "Amharic",
+  xh: "Xhosa",
+};
+
 interface SettingsProps {
   onClose: () => void;
   onLogout?: () => void;
@@ -48,6 +57,7 @@ interface SettingsSections {
 }
 
 export default function Settings({ onClose, onLogout, onEditProfile, userId }: SettingsProps) {
+  const { toast } = useToast();
   const [settings, setSettings] = useState<SettingsSections>({
     account: {
       privateAccount: false,
@@ -538,12 +548,12 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
           <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-4">
             <p className="text-sm text-foreground">Choose your preferred language for AfroSphere. Your selection will be saved and applied across the app.</p>
             <div className="space-y-2 mt-4">
-              <Button onClick={() => { handleToggle("display", "language", "en"); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "sw"); setEditMode("none"); }} variant={settings.display.language === "sw" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Kiswahili (East Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "yo"); setEditMode("none"); }} variant={settings.display.language === "yo" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Yoruba (West Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "ha"); setEditMode("none"); }} variant={settings.display.language === "ha" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Hausa (West Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "am"); setEditMode("none"); }} variant={settings.display.language === "am" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Amharic (Ethiopia)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "xh"); setEditMode("none"); }} variant={settings.display.language === "xh" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Xhosa (South Africa)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "en"); toast({ title: "Language Updated", description: "Your language preference has been changed to English" }); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "sw"); toast({ title: "Language Updated", description: "Your language preference has been changed to Kiswahili" }); setEditMode("none"); }} variant={settings.display.language === "sw" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Kiswahili (East Africa)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "yo"); toast({ title: "Language Updated", description: "Your language preference has been changed to Yoruba" }); setEditMode("none"); }} variant={settings.display.language === "yo" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Yoruba (West Africa)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "ha"); toast({ title: "Language Updated", description: "Your language preference has been changed to Hausa" }); setEditMode("none"); }} variant={settings.display.language === "ha" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Hausa (West Africa)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "am"); toast({ title: "Language Updated", description: "Your language preference has been changed to Amharic" }); setEditMode("none"); }} variant={settings.display.language === "am" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Amharic (Ethiopia)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "xh"); toast({ title: "Language Updated", description: "Your language preference has been changed to Xhosa" }); setEditMode("none"); }} variant={settings.display.language === "xh" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Xhosa (South Africa)</span></Button>
             </div>
             <p className="text-xs text-muted-foreground mt-6">AfroSphere is proud to support languages spoken across the African continent. Coming soon: more languages including Igbo, Zulu, Somali, and Oromo.</p>
           </div>
