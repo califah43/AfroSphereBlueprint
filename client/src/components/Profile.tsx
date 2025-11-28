@@ -223,96 +223,94 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
-      {/* Profile Content - Mature & Refined */}
-      <div className="max-w-md mx-auto px-6 -mt-14 relative z-10 pb-6">
+      {/* Profile Content - Compact & Refined for Mobile */}
+      <div className="max-w-md mx-auto px-4 -mt-12 relative z-10 pb-6">
         {/* Avatar & Header Info */}
-        <div className="flex gap-4 mb-6 items-start">
+        <div className="flex gap-3 mb-4 items-start">
           <button
             onClick={() => userProfile.avatar && setShowPictureModal(true)}
             className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
             data-testid="button-view-avatar"
           >
-            <div className="w-20 h-20 rounded-lg ring-4 ring-background overflow-hidden bg-muted shadow-md">
+            <div className="w-16 h-16 rounded-lg ring-3 ring-background overflow-hidden bg-muted shadow-sm">
               {userProfile.avatar ? (
                 <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
-                  <span className="text-2xl font-black text-foreground">{userProfile.username[0].toUpperCase()}</span>
+                  <span className="text-lg font-black text-foreground">{userProfile.username[0].toUpperCase()}</span>
                 </div>
               )}
             </div>
           </button>
 
-          <div className="flex-1 min-w-0 pt-0.5">
+          <div className="flex-1 min-w-0">
             {/* Name & Badge */}
             <div className="flex items-center gap-2 mb-0.5">
-              <h1 className="text-2xl font-black tracking-tight" data-testid="text-profile-displayname">
+              <h1 className="text-lg font-black tracking-tight truncate" data-testid="text-profile-displayname">
                 {userProfile.displayName}
               </h1>
-              <div className="mt-1">
-                <CreatorBadge type="fashion-vanguard" size="sm" />
-              </div>
+              <CreatorBadge type="fashion-vanguard" size="sm" />
             </div>
             
             {/* Username */}
-            <p className="text-sm text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
+            <p className="text-xs text-muted-foreground font-medium mb-1" data-testid="text-profile-username">@{userProfile.username}</p>
 
-            {/* Bio - Subtle elegance */}
-            <p className="text-sm text-foreground leading-relaxed" data-testid="text-profile-bio">
+            {/* Bio - Compact elegance */}
+            <p className="text-xs text-foreground leading-tight line-clamp-2" data-testid="text-profile-bio">
               {userProfile.bio}
             </p>
           </div>
         </div>
 
-        {/* Professional Info - Refined */}
+        {/* Professional Info - Compact & Refined */}
         {(userProfile.profession || userProfile.location || userProfile.website) && (
-          <div className="flex flex-col gap-2 mb-6 text-sm">
+          <div className="flex flex-col gap-1 mb-4 text-xs">
             {userProfile.profession && (
               <div className="flex items-center gap-2 text-foreground">
-                <Briefcase className="h-4 w-4 text-primary/60" />
-                <span className="font-medium">{userProfile.profession}</span>
+                <Briefcase className="h-3 w-3 text-primary/60 flex-shrink-0" />
+                <span className="font-medium truncate">{userProfile.profession}</span>
               </div>
             )}
             {userProfile.location && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 text-primary/60" />
-                <span>{userProfile.location}</span>
+                <MapPin className="h-3 w-3 text-primary/60 flex-shrink-0" />
+                <span className="truncate">{userProfile.location}</span>
               </div>
             )}
             {userProfile.website && (
-              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
-                <Link className="h-4 w-4" />
-                <span className="truncate">{userProfile.website}</span>
+              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors truncate">
+                <Link className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate text-xs">{userProfile.website}</span>
               </a>
             )}
           </div>
         )}
 
-        {/* Stats - Elegant Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-6 p-3 bg-card rounded-lg border border-border/50">
+        {/* Stats - Elegant Compact Cards */}
+        <div className="grid grid-cols-2 gap-2 mb-4 p-2 bg-card rounded-md border border-border/50">
           <button
             onClick={onFollowersClick}
-            className="text-center py-2 hover-elevate transition-all rounded"
+            className="text-center py-1.5 hover-elevate transition-all rounded"
             data-testid="button-view-followers"
           >
-            <p className="text-xl font-black text-foreground" data-testid="text-followers-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mt-1">Following</p>
+            <p className="text-lg font-black text-foreground" data-testid="text-followers-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Following</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-2 hover-elevate transition-all rounded border-l border-border/50"
+            className="text-center py-1.5 hover-elevate transition-all rounded border-l border-border/50"
             data-testid="button-view-following"
           >
-            <p className="text-xl font-black text-foreground" data-testid="text-following-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mt-1">Followers</p>
+            <p className="text-lg font-black text-foreground" data-testid="text-following-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Followers</p>
           </button>
         </div>
 
-        {/* Action Buttons - Sophisticated */}
-        <div className="flex gap-3 mb-8">
+        {/* Action Buttons - Refined */}
+        <div className="flex gap-2 mb-6">
           {isOwnProfile ? (
             <Button
-              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-sm h-10 shadow-sm"
+              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-9 shadow-sm"
               onClick={onEditProfile}
               data-testid="button-edit-profile"
             >
@@ -320,7 +318,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             </Button>
           ) : (
             <Button 
-              className={`flex-1 font-bold rounded-lg text-sm h-10 shadow-sm ${isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
+              className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm ${isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
               onClick={toggleFollow}
               disabled={isLoading}
               data-testid="button-follow"
