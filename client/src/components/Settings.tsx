@@ -887,7 +887,12 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
               onClick={() => {
                 localStorage.removeItem("currentUserId");
                 localStorage.removeItem("currentUserData");
-                window.location.href = "/";
+                localStorage.removeItem("selectedLanguage");
+                if (onLogout) {
+                  onLogout();
+                } else {
+                  window.location.href = "/";
+                }
               }}
               data-testid="button-logout"
             >
@@ -909,10 +914,19 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
                     if (response.ok) {
                       localStorage.removeItem("currentUserId");
                       localStorage.removeItem("currentUserData");
-                      window.location.href = "/";
+                      localStorage.removeItem("selectedLanguage");
+                      toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
+                      if (onLogout) {
+                        onLogout();
+                      } else {
+                        window.location.href = "/";
+                      }
+                    } else {
+                      toast({ title: "Error", description: "Failed to delete account. Please try again." });
                     }
                   } catch (e) {
                     console.error("Failed to delete account:", e);
+                    toast({ title: "Error", description: "Failed to delete account. Please try again." });
                   }
                 }
               }}
