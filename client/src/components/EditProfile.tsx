@@ -104,7 +104,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         return;
       }
 
-      // Save to backend (only text fields, store images in localStorage)
+      // Save to backend (text fields + images as base64)
       const response = await fetch(`/api/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -114,22 +114,27 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           location: formData.location,
           website: formData.website,
           profession: formData.profession,
+          avatar: formData.avatar,
+          banner: formData.banner,
         }),
       });
 
       if (!response.ok) throw new Error("Failed to save");
 
-      // Update localStorage with complete data
+      // Get updated user from response
+      const updatedUser = await response.json();
+
+      // Update localStorage with complete data including images from server
       const updated = {
         ...JSON.parse(localStorage.getItem("currentUserData") || "{}"),
-        displayName: formData.displayName,
+        displayName: updatedUser.displayName || formData.displayName,
         username: formData.username,
-        bio: formData.bio,
-        location: formData.location,
-        website: formData.website,
-        profession: formData.profession,
-        avatar: formData.avatar,
-        banner: formData.banner,
+        bio: updatedUser.bio || formData.bio,
+        location: updatedUser.location || formData.location,
+        website: updatedUser.website || formData.website,
+        profession: updatedUser.profession || formData.profession,
+        avatar: updatedUser.avatar || formData.avatar,
+        banner: updatedUser.banner || formData.banner,
       };
       localStorage.setItem("currentUserData", JSON.stringify(updated));
       
@@ -137,6 +142,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       onSave?.(formData);
       onClose();
     } catch (error) {
+      console.error("Save error:", error);
       toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
     }
   };
