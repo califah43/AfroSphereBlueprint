@@ -134,8 +134,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
-      {/* Sticky Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4 flex items-center justify-between z-20">
+      {/* Refined Header */}
+      <div className="sticky top-0 bg-background/98 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center justify-between z-20">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -145,37 +145,36 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         >
           <X className="h-5 w-5" />
         </Button>
-        <h2 className="text-lg font-bold" data-testid="text-edit-title">Edit Profile</h2>
+        <h2 className="text-base font-black tracking-tight" data-testid="text-edit-title">Edit Profile</h2>
         <Button 
           onClick={handleSave} 
-          className="bg-primary hover:bg-primary/90 font-semibold"
+          className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-8 px-3"
           data-testid="button-save-profile"
         >
           Save
         </Button>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-6">
+      <div className="max-w-md mx-auto px-4 py-4 pb-20 space-y-4">
         
-        {/* Banner Section */}
+        {/* Banner Section - Refined */}
         <div>
-          <div className="relative h-40 rounded-lg overflow-hidden group">
+          <div className="relative h-24 rounded-lg overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
               <img
                 src={formData.banner || bannerImage}
                 alt="Banner"
-                className="w-full h-full object-cover opacity-90"
+                className="w-full h-full object-cover opacity-85"
                 data-testid="img-edit-banner"
               />
             </div>
-            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
             <button
               onClick={() => bannerInputRef.current?.click()}
-              className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm border border-white/20 hover:bg-background/90 rounded px-3 py-1.5 text-sm flex items-center gap-1 hover-elevate"
+              className="absolute bottom-2 right-2 bg-background/70 backdrop-blur-sm border border-border/30 hover:bg-background/80 rounded-lg p-2 text-xs flex items-center gap-1 hover-elevate"
               data-testid="button-change-banner"
             >
-              <Camera className="h-4 w-4" />
-              Change Banner
+              <Camera className="h-3.5 w-3.5" />
             </button>
             <input
               ref={bannerInputRef}
@@ -188,81 +187,76 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           </div>
         </div>
 
-        {/* Avatar & Profile Photo Section */}
-        <div className="bg-card/50 border border-border/50 rounded-lg p-4 hover-elevate transition-all">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Avatar className="w-20 h-20 ring-4 ring-background border-2 border-primary/20" data-testid="avatar-edit">
-                {formData.avatar && <AvatarImage src={formData.avatar} alt="Profile" />}
-                <AvatarFallback className="text-xl font-bold">{formData.username[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <button
-                onClick={() => avatarInputRef.current?.click()}
-                className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-primary text-white border-2 border-background hover:bg-primary/90 flex items-center justify-center hover-elevate"
-                data-testid="button-change-avatar"
-              >
-                <Camera className="h-3.5 w-3.5" />
-              </button>
-              <input
-                ref={avatarInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="hidden"
-                data-testid="input-avatar-file"
-              />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold">Profile Photo</p>
-              <p className="text-sm text-muted-foreground">Click the camera icon to upload</p>
-            </div>
+        {/* Avatar Section - Elegant */}
+        <div className="flex gap-3 items-start">
+          <div className="relative flex-shrink-0">
+            <Avatar className="w-16 h-16 ring-3 ring-background rounded-lg" data-testid="avatar-edit">
+              {formData.avatar && <AvatarImage src={formData.avatar} alt="Profile" />}
+              <AvatarFallback className="text-lg font-black rounded-lg">{formData.username[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <button
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute -bottom-1 -right-1 rounded-full h-6 w-6 bg-primary text-white border-2 border-background hover:bg-primary/90 flex items-center justify-center hover-elevate"
+              data-testid="button-change-avatar"
+            >
+              <Camera className="h-3 w-3" />
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+              data-testid="input-avatar-file"
+            />
+          </div>
+          <div className="flex-1 pt-1">
+            <p className="text-sm font-semibold text-foreground">Profile Photo</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Tap camera icon to upload</p>
           </div>
         </div>
 
-        {/* Form Fields */}
-        <div className="space-y-4">
+        {/* Form Fields - Refined & Compact */}
+        <div className="space-y-3 mt-4 pt-2 border-t border-border/50">
           {/* Username - Read Only */}
-          <div className="space-y-2 opacity-75">
-            <Label htmlFor="username">Username (Cannot be changed)</Label>
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
-              <span className="text-primary font-semibold">@</span>
+          <div className="space-y-1.5 opacity-70">
+            <Label htmlFor="username" className="text-xs font-semibold uppercase tracking-wider">Username</Label>
+            <div className="flex items-center gap-2 p-2.5 bg-muted/40 rounded-lg border border-border/30">
+              <span className="text-primary font-bold text-sm">@</span>
               <Input 
                 id="username"
                 value={formData.username}
                 disabled={true}
-                className="border-0 bg-transparent px-0"
+                className="border-0 bg-transparent px-0 text-sm"
                 data-testid="input-username-readonly"
               />
             </div>
-            <p className="text-xs text-muted-foreground">Your unique handle is permanent and used for tagging & mentions</p>
+            <p className="text-xs text-muted-foreground">Permanent & used for mentions</p>
           </div>
+
           {/* Display Name */}
-          <div className="space-y-2">
-            <Label htmlFor="displayName" className="font-semibold text-sm flex items-center gap-2">
-              Display Name (Customizable)
-            </Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="displayName" className="text-xs font-semibold uppercase tracking-wider">Display Name</Label>
             <Input
               id="displayName"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               placeholder="Your display name"
-              className="border-border/50 bg-card/50 h-10 rounded-lg"
+              className="border-border/30 bg-card/40 h-9 rounded-lg text-sm"
               data-testid="input-displayname"
             />
-            <p className="text-xs text-muted-foreground">This is how your name appears publicly - you can change this anytime</p>
+            <p className="text-xs text-muted-foreground">How your name appears publicly</p>
           </div>
 
           {/* Bio */}
-          <div className="space-y-2">
-            <Label htmlFor="bio" className="font-semibold text-sm flex items-center gap-2">
-              Bio
-            </Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="bio" className="text-xs font-semibold uppercase tracking-wider">Bio</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={handleBioChange}
               placeholder="Tell your story..."
-              className="min-h-28 resize-none border-border/50 bg-card/50 rounded-lg focus:ring-primary/50"
+              className="min-h-24 resize-none border-border/30 bg-card/40 rounded-lg text-sm"
               data-testid="input-bio"
             />
             <div className="flex justify-between items-center">
@@ -274,9 +268,9 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
-            <Label htmlFor="location" className="font-semibold text-sm flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" />
+          <div className="space-y-1.5">
+            <Label htmlFor="location" className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 text-primary/60" />
               Location
             </Label>
             <Input
@@ -284,16 +278,15 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
-              className="border-border/50 bg-card/50 h-10 rounded-lg"
+              className="border-border/30 bg-card/40 h-9 rounded-lg text-sm"
               data-testid="input-location"
             />
-            <p className="text-xs text-muted-foreground">Let people know where you're from</p>
           </div>
 
           {/* Profession */}
-          <div className="space-y-2">
-            <Label htmlFor="profession" className="font-semibold text-sm flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-primary" />
+          <div className="space-y-1.5">
+            <Label htmlFor="profession" className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+              <Briefcase className="h-3.5 w-3.5 text-primary/60" />
               Profession
             </Label>
             <Input
@@ -301,16 +294,15 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.profession}
               onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
               placeholder="What do you do?"
-              className="border-border/50 bg-card/50 h-10 rounded-lg"
+              className="border-border/30 bg-card/40 h-9 rounded-lg text-sm"
               data-testid="input-profession"
             />
-            <p className="text-xs text-muted-foreground">Your craft or specialty</p>
           </div>
 
           {/* Website */}
-          <div className="space-y-2">
-            <Label htmlFor="website" className="font-semibold text-sm flex items-center gap-2">
-              <LinkIcon className="h-4 w-4 text-primary" />
+          <div className="space-y-1.5">
+            <Label htmlFor="website" className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+              <LinkIcon className="h-3.5 w-3.5 text-primary/60" />
               Website
             </Label>
             <Input
@@ -318,23 +310,16 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
               placeholder="yoursite.com"
-              className="border-border/50 bg-card/50 h-10 rounded-lg"
+              className="border-border/30 bg-card/40 h-9 rounded-lg text-sm"
               data-testid="input-website"
             />
-            <p className="text-xs text-muted-foreground">Link to your portfolio or website</p>
           </div>
         </div>
 
-        {/* Info Box */}
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <p className="text-sm text-foreground font-medium">Pro Tip</p>
-          <p className="text-xs text-muted-foreground mt-1">A complete profile helps you attract more followers and opportunities in the AfroSphere community.</p>
-        </div>
-
-        {/* Save Button */}
+        {/* Save Button - Prominent */}
         <Button
           onClick={handleSave}
-          className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-semibold h-11 rounded-lg"
+          className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-10 rounded-lg text-sm mt-6"
           data-testid="button-save-full"
         >
           Save Changes
