@@ -229,12 +229,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsed = insertCommentSchema.parse(req.body);
       const comment = await storage.createComment(parsed);
       
-      // Enrich response with username
+      // Enrich response with username and all required fields
       const user = await storage.getUser(comment.userId);
       const enrichedComment = {
-        ...comment,
+        id: comment.id,
+        userId: comment.userId,
+        postId: comment.postId,
+        text: comment.text,
+        likes: comment.likes || 0,
+        createdAt: comment.createdAt,
+        replyTo: comment.replyTo,
         author: user?.username || "creator",
         timeAgo: "now",
+        replies: [],
       };
       
       res.status(201).json(enrichedComment);
