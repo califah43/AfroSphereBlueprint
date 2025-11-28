@@ -109,7 +109,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
     }
   }, [userId]);
 
-  const handleToggle = (section: string, key: string, value: boolean) => {
+  const handleToggle = (section: string, key: string, value: any) => {
     const newSettings = {
       ...settings,
       [section]: {
@@ -422,9 +422,9 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
             <p className="text-sm text-foreground">Adjust the text size to improve readability on AfroSphere. Your preference will be saved and applied across all pages and posts.</p>
             <p className="text-sm font-semibold">Preview:</p>
             <div className="space-y-2">
-              <Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "normal"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "normal" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span className="text-sm">Normal - Standard comfortable reading size</span></Button>
-              <Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "large" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span className="text-base">Large - Better for longer reading sessions</span></Button>
-              <Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "extra-large" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span className="text-lg">Extra Large - Maximum readability</span></Button>
+              <Button onClick={() => handleToggle("display", "textSize", "normal")} variant={settings.display.textSize === "normal" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span className="text-sm">Normal - Standard comfortable reading size</span></Button>
+              <Button onClick={() => handleToggle("display", "textSize", "large")} variant={settings.display.textSize === "large" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span className="text-base">Large - Better for longer reading sessions</span></Button>
+              <Button onClick={() => handleToggle("display", "textSize", "extra-large")} variant={settings.display.textSize === "extra-large" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span className="text-lg">Extra Large - Maximum readability</span></Button>
             </div>
             <p className="text-xs text-muted-foreground mt-4">You can change this anytime in Settings under Display preferences. Your choice helps create a better viewing experience tailored to you.</p>
             <Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button>
@@ -541,9 +541,9 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
           <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-4">
             <p className="text-sm text-foreground">Choose your preferred language for AfroSphere. Your selection will be saved and applied across the app.</p>
             <div className="space-y-2 mt-4">
-              <Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English (Global)</span></Button>
-              <Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Espanol (Spanish)</span></Button>
-              <Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Francais (French)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "en"); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English (Global)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "es"); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Espanol (Spanish)</span></Button>
+              <Button onClick={() => { handleToggle("display", "language", "fr"); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Francais (French)</span></Button>
             </div>
             <p className="text-xs text-muted-foreground mt-6">More languages coming soon! We are working on Swahili, Yoruba, Hausa, and other African languages to better serve our community.</p>
           </div>
