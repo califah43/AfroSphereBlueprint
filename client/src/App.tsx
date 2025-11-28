@@ -3,6 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { requestNotificationPermission, setupMessageListener } from "./lib/fcm";
 import SplashScreen from "./components/SplashScreen";
 import OnboardingSlides from "./components/OnboardingSlides";
@@ -340,10 +341,11 @@ export default function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="flex items-center justify-center min-h-screen bg-black">
-          <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground flex flex-col">
+    <LanguageProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <div className="flex items-center justify-center min-h-screen bg-black">
+            <div className="w-full max-w-[430px] h-screen max-h-screen bg-background text-foreground flex flex-col">
             {activeTab === "home" && (
             <div className="flex-1 overflow-y-auto">
               <HomeFeed 
@@ -484,10 +486,11 @@ export default function App() {
               </div>
             );
           })()}
+            </div>
           </div>
-        </div>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 }

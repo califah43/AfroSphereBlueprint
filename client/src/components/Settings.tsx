@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
@@ -58,6 +59,7 @@ interface SettingsSections {
 
 export default function Settings({ onClose, onLogout, onEditProfile, userId }: SettingsProps) {
   const { toast } = useToast();
+  const { t, language, setLanguage } = useTranslation();
   const [settings, setSettings] = useState<SettingsSections>({
     account: {
       privateAccount: false,
@@ -542,18 +544,18 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
       return (
         <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
-            <h2 className="text-lg font-bold">Language</h2>
+            <h2 className="text-lg font-bold">{t("settings.language")}</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
           </div>
           <div className="max-w-md mx-auto px-4 py-6 pb-20 space-y-4">
             <p className="text-sm text-foreground">Choose your preferred language for AfroSphere. Your selection will be saved and applied across the app.</p>
             <div className="space-y-2 mt-4">
-              <Button onClick={() => { handleToggle("display", "language", "en"); toast({ title: "Language Updated", description: "Your language preference has been changed to English" }); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "sw"); toast({ title: "Language Updated", description: "Your language preference has been changed to Kiswahili" }); setEditMode("none"); }} variant={settings.display.language === "sw" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Kiswahili (East Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "yo"); toast({ title: "Language Updated", description: "Your language preference has been changed to Yoruba" }); setEditMode("none"); }} variant={settings.display.language === "yo" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Yoruba (West Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "ha"); toast({ title: "Language Updated", description: "Your language preference has been changed to Hausa" }); setEditMode("none"); }} variant={settings.display.language === "ha" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Hausa (West Africa)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "am"); toast({ title: "Language Updated", description: "Your language preference has been changed to Amharic" }); setEditMode("none"); }} variant={settings.display.language === "am" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Amharic (Ethiopia)</span></Button>
-              <Button onClick={() => { handleToggle("display", "language", "xh"); toast({ title: "Language Updated", description: "Your language preference has been changed to Xhosa" }); setEditMode("none"); }} variant={settings.display.language === "xh" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Xhosa (South Africa)</span></Button>
+              <Button onClick={() => { setLanguage("en"); handleToggle("display", "language", "en"); toast({ title: "Language Updated", description: "Your language preference has been changed to English" }); setEditMode("none"); }} variant={language === "en" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>English</span></Button>
+              <Button onClick={() => { setLanguage("sw"); handleToggle("display", "language", "sw"); toast({ title: "Language Updated", description: "Your language preference has been changed to Kiswahili" }); setEditMode("none"); }} variant={language === "sw" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Kiswahili (East Africa)</span></Button>
+              <Button onClick={() => { setLanguage("yo"); handleToggle("display", "language", "yo"); toast({ title: "Language Updated", description: "Your language preference has been changed to Yoruba" }); setEditMode("none"); }} variant={language === "yo" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Yoruba (West Africa)</span></Button>
+              <Button onClick={() => { setLanguage("ha"); handleToggle("display", "language", "ha"); toast({ title: "Language Updated", description: "Your language preference has been changed to Hausa" }); setEditMode("none"); }} variant={language === "ha" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Hausa (West Africa)</span></Button>
+              <Button onClick={() => { setLanguage("am"); handleToggle("display", "language", "am"); toast({ title: "Language Updated", description: "Your language preference has been changed to Amharic" }); setEditMode("none"); }} variant={language === "am" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Amharic (Ethiopia)</span></Button>
+              <Button onClick={() => { setLanguage("xh"); handleToggle("display", "language", "xh"); toast({ title: "Language Updated", description: "Your language preference has been changed to Xhosa" }); setEditMode("none"); }} variant={language === "xh" ? "default" : "outline"} className="w-full justify-start h-auto py-3"><span>Xhosa (South Africa)</span></Button>
             </div>
             <p className="text-xs text-muted-foreground mt-6">AfroSphere is proud to support languages spoken across the African continent. Coming soon: more languages including Igbo, Zulu, Somali, and Oromo.</p>
           </div>

@@ -1,5 +1,6 @@
 import { Home, Compass, PlusCircle, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface BottomNavProps {
   activeTab: string;
@@ -7,12 +8,13 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const { t } = useTranslation();
   const navItems = [
-    { id: "home", icon: Home, label: "Home" },
-    { id: "explore", icon: Compass, label: "Explore" },
-    { id: "create", icon: PlusCircle, label: "Create" },
-    { id: "notifications", icon: Bell, label: "Notifications" },
-    { id: "profile", icon: User, label: "Profile" },
+    { id: "home", icon: Home, label: t("nav.home") },
+    { id: "explore", icon: Compass, label: t("nav.explore") },
+    { id: "create", icon: PlusCircle, label: t("nav.create") },
+    { id: "notifications", icon: Bell, label: t("nav.notifications") },
+    { id: "profile", icon: User, label: t("nav.profile") },
   ];
 
   return (
