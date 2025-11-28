@@ -81,7 +81,11 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
       if (res.ok) {
         const data = await res.json();
         setIsLiked(data.liked);
-        setLikes(data.likes !== undefined ? data.likes : (data.liked ? likes + 1 : likes - 1));
+        if (data.likes !== undefined) {
+          setLikes(data.likes);
+        } else {
+          setLikes(data.liked ? likes + 1 : Math.max(0, likes - 1));
+        }
         
         if (data.liked) {
           toast({ title: "Post liked!", description: "Added to your liked posts" });

@@ -53,25 +53,28 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
         const res = await fetch(`/api/comments/post/${postId}`);
         if (res.ok) {
           const data = await res.json();
-          // Map response data to ensure all required fields are present
-          const mappedComments = data.map((c: any) => ({
-            id: c.id,
-            author: c.author || "creator",
-            text: c.text,
-            likes: c.likes || 0,
-            timeAgo: c.timeAgo || "now",
-            isLiked: c.isLiked || false,
-            replies: (c.replies || []).map((r: any) => ({
-              id: r.id,
-              author: r.author || "creator",
-              text: r.text,
-              likes: r.likes || 0,
-              timeAgo: r.timeAgo || "now",
-              isLiked: r.isLiked || false,
-              avatar: r.avatar,
-            })),
-            avatar: c.avatar,
-          }));
+          // Filter to only top-level comments (replyTo is null)
+          // Replies are already nested in the replies array
+          const mappedComments = data
+            .filter((c: any) => !c.replyTo)
+            .map((c: any) => ({
+              id: c.id,
+              author: c.author || "creator",
+              text: c.text,
+              likes: c.likes || 0,
+              timeAgo: c.timeAgo || "now",
+              isLiked: c.isLiked || false,
+              replies: (c.replies || []).map((r: any) => ({
+                id: r.id,
+                author: r.author || "creator",
+                text: r.text,
+                likes: r.likes || 0,
+                timeAgo: r.timeAgo || "now",
+                isLiked: r.isLiked || false,
+                avatar: r.avatar,
+              })),
+              avatar: c.avatar,
+            }));
           setComments(mappedComments);
         }
       } catch (error) {
