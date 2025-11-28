@@ -34,7 +34,6 @@ interface SettingsSections {
   privacy: {
     downloadData: boolean;
     activityStatus: boolean;
-    readReceipts: boolean;
   };
   display: {
     darkMode: boolean;
@@ -66,7 +65,6 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
     privacy: {
       downloadData: false,
       activityStatus: true,
-      readReceipts: true,
     },
     display: {
       darkMode: true,
@@ -100,7 +98,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
           setSettings({
             account: { privateAccount: data.privateAccount, allowComments: data.allowComments, allowMentions: data.allowMentions },
             notifications: { likes: data.notificationsLikes, comments: data.notificationsComments, follows: data.notificationsFollows, trending: data.notificationsTrending, pushNotifications: data.notificationsPush, emailNotifications: data.notificationsEmail },
-            privacy: { downloadData: false, activityStatus: data.privacyActivityStatus, readReceipts: data.privacyReadReceipts },
+            privacy: { downloadData: false, activityStatus: data.privacyActivityStatus },
             display: { darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: data.displayLanguage },
             content: { hideExplicit: data.contentHideExplicit, mutedWords: data.contentMutedWords, restrictedMode: data.contentRestrictedMode },
           });
@@ -130,7 +128,6 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
         notificationsPush: newSettings.notifications.pushNotifications,
         notificationsEmail: newSettings.notifications.emailNotifications,
         privacyActivityStatus: newSettings.privacy.activityStatus,
-        privacyReadReceipts: newSettings.privacy.readReceipts,
         contentHideExplicit: newSettings.content.hideExplicit,
         contentMutedWords: newSettings.content.mutedWords,
         contentRestrictedMode: newSettings.content.restrictedMode,
@@ -730,13 +727,6 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
               section="privacy"
               settingKey="activityStatus"
             />
-            <SettingToggle
-              icon={CheckCircle2}
-              label="Read Receipts"
-              description="Show when you have read messages"
-              section="privacy"
-              settingKey="readReceipts"
-            />
           </div>
         </div>
 
@@ -744,13 +734,28 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
         <div>
           <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Display</h3>
           <div className="space-y-2">
-            <SettingToggle
-              icon={Moon}
-              label="Dark Mode"
-              description="Use dark theme for the app"
-              section="display"
-              settingKey="darkMode"
-            />
+            <div className="flex items-start justify-between p-4 hover-elevate rounded-lg border border-border/50 bg-card/50 transition-all" data-testid="setting-dark-mode">
+              <div className="flex items-start gap-3">
+                <Moon className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <div>
+                  <Label htmlFor="display-darkMode" className="text-sm font-medium cursor-pointer">Dark Mode</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Use dark theme for the app</p>
+                </div>
+              </div>
+              <Switch
+                id="display-darkMode"
+                checked={settings.display.darkMode}
+                onCheckedChange={(value) => {
+                  handleToggle("display", "darkMode", value);
+                  if (value) {
+                    document.documentElement.classList.add("dark");
+                  } else {
+                    document.documentElement.classList.remove("dark");
+                  }
+                }}
+                data-testid="switch-dark-mode"
+              />
+            </div>
             <SettingButton
               icon={Volume2}
               label="Text Size"

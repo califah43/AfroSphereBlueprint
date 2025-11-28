@@ -142,7 +142,6 @@ export const userSettings = pgTable("user_settings", {
   notificationsPush: boolean("notifications_push").default(true),
   notificationsEmail: boolean("notifications_email").default(true),
   privacyActivityStatus: boolean("privacy_activity_status").default(true),
-  privacyReadReceipts: boolean("privacy_read_receipts").default(true),
   contentHideExplicit: boolean("content_hide_explicit").default(false),
   contentMutedWords: boolean("content_muted_words").default(false),
   contentRestrictedMode: boolean("content_restricted_mode").default(false),
