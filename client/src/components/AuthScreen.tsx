@@ -10,7 +10,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { auth } from "@/lib/firebase";
 
 interface AuthScreenProps {
-  onAuthComplete: () => void;
+  onAuthComplete: (isNewSignup: boolean) => void;
   onLogoClick?: () => void;
 }
 
@@ -70,7 +70,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       localStorage.setItem("currentUserData", JSON.stringify(userData));
       console.log("Signup:", userCredential.user);
       toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
-      onAuthComplete();
+      onAuthComplete(true);
     } catch (error: any) {
       const errorMsg = error.message || "Failed to create account";
       setSignupError(errorMsg);
@@ -130,7 +130,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       localStorage.setItem("currentUserData", storedData);
       console.log("Login:", userCredential.user);
       toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
-      onAuthComplete();
+      onAuthComplete(false);
     } catch (error: any) {
       const errorMsg = error.message || "Failed to sign in";
       setLoginError(errorMsg);

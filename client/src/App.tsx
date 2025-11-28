@@ -148,8 +148,12 @@ export default function App() {
     setAppState("auth");
   };
 
-  const handleAuthComplete = () => {
-    setAppState("post-signup-username");
+  const handleAuthComplete = (isNewSignup: boolean) => {
+    if (isNewSignup) {
+      setAppState("post-signup-username");
+    } else {
+      setAppState("main");
+    }
   };
 
   const handleUsernameComplete = (username: string) => {
