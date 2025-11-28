@@ -54,6 +54,7 @@ export const posts = pgTable("posts", {
   images: text("images").array().default(sql`'{}'`), // Multiple images support
   caption: text("caption").default(""),
   category: text("category").notNull(), // "Fashion", "Music", "Art", "Culture", "Lifestyle"
+  hashtags: text("hashtags").default(""), // Hashtags as comma-separated string
   likes: integer("likes").default(0),
   commentCount: integer("comment_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),

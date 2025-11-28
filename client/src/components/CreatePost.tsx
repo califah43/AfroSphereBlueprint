@@ -80,6 +80,7 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
         userId,
         caption,
         category: category || "lifestyle",
+        hashtags: hashtags || "",
         image: mediaPreviews[0], // Primary image (first one)
         images: mediaPreviews, // All images for carousel
       };
