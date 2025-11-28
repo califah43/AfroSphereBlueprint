@@ -48,6 +48,10 @@ export default function App() {
   const [adminSection, setAdminSection] = useState("dashboard");
   const [signupUsername, setSignupUsername] = useState("");
   const [signupProfileData, setSignupProfileData] = useState({ avatar: "", banner: "", bio: "", profession: "" });
+  const [textSize, setTextSize] = useState<"normal" | "large" | "extra-large">(() => {
+    const saved = localStorage.getItem("textSize") as "normal" | "large" | "extra-large" | null;
+    return saved || "normal";
+  });
 
   useEffect(() => {
     const darkMode = localStorage.getItem("darkMode");
@@ -57,6 +61,13 @@ export default function App() {
       document.documentElement.classList.add("dark");
     }
   }, []);
+
+  useEffect(() => {
+    const textSizeClass = textSize === "normal" ? "" : `text-size-${textSize}`;
+    if (textSizeClass) {
+      document.documentElement.classList.add(textSizeClass);
+    }
+  }, [textSize]);
 
   // Check if user is already logged in (session persistence)
   useEffect(() => {
@@ -411,6 +422,10 @@ export default function App() {
                 onClose={() => setModalView("none")}
                 onLogout={handleLogout}
                 onEditProfile={() => setModalView("edit-profile")}
+                onTextSizeChange={(size) => {
+                  setTextSize(size);
+                  localStorage.setItem("textSize", size);
+                }}
               />
             );
           })()}

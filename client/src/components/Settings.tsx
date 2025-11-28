@@ -25,6 +25,7 @@ interface SettingsProps {
   onLogout?: () => void;
   onEditProfile?: () => void;
   userId?: string;
+  onTextSizeChange?: (size: "normal" | "large" | "extra-large") => void;
 }
 
 interface SettingsSections {
@@ -57,7 +58,7 @@ interface SettingsSections {
   };
 }
 
-export default function Settings({ onClose, onLogout, onEditProfile, userId }: SettingsProps) {
+export default function Settings({ onClose, onLogout, onEditProfile, userId, onTextSizeChange }: SettingsProps) {
   const { toast } = useToast();
   const { t, language, setLanguage } = useTranslation();
   const [settings, setSettings] = useState<SettingsSections>({
@@ -128,6 +129,12 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
       },
     };
     setSettings(newSettings);
+    
+    // If text size changed, call the callback to update App state
+    if (section === "display" && key === "textSize" && onTextSizeChange) {
+      onTextSizeChange(value);
+    }
+    
     if (userId) {
       const mapped: any = {
         privateAccount: newSettings.account.privateAccount,
