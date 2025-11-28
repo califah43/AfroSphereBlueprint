@@ -228,15 +228,19 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
                   )}
                 </div>
               ) : (
-                <label
-                  htmlFor="image-upload"
-                  className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover-elevate transition-all"
-                  data-testid="label-upload-zone"
-                >
-                  <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="text-xs text-muted-foreground">Add photos or videos</p>
-                  <p className="text-xs text-muted-foreground/70 mt-0.5">Max 10 files, 10MB each</p>
-                </label>
+                <div className="flex flex-col items-center justify-center gap-4 py-8">
+                  <label
+                    htmlFor="image-upload"
+                    className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-orange-500 cursor-pointer hover-elevate transition-all shadow-lg hover:shadow-xl hover:scale-110"
+                    data-testid="label-upload-zone"
+                  >
+                    <ImageIcon className="h-6 w-6 text-white" />
+                  </label>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-foreground">Add your first photo</p>
+                    <p className="text-xs text-muted-foreground mt-1">Max 10 files, 10MB each</p>
+                  </div>
+                </div>
               )}
               <Input
                 id="image-upload"
