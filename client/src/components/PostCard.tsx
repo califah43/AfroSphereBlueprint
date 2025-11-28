@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ export interface Post {
     avatar?: string;
   };
   imageUrl: string;
+  images?: string[]; // Multiple images support
   caption: string;
   likes: number;
   comments: number;
@@ -54,7 +55,12 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const [likes, setLikes] = useState(post.likes);
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { toast } = useToast();
+  
+  // Get all images for carousel
+  const allImages = post.images && post.images.length > 0 ? post.images : [post.imageUrl];
+  const currentImage = allImages[currentImageIndex] || post.imageUrl;
 
   // Get current user ID
   const getUserId = () => {
@@ -96,12 +102,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           setLikes(data.likes);
         }
         setIsLiked(data.liked);
-        
-        if (data.liked) {
-          toast({ title: "Post liked!", description: "Added to your liked posts" });
-        } else {
-          toast({ title: "Post unliked", description: "Removed from your liked posts" });
-        }
       } else {
         // Rollback on error
         setIsLiked(previousLiked);
@@ -256,11 +256,47 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
       <div className="relative" onDoubleClick={handleDoubleClick}>
         <img
-          src={post.imageUrl}
+          src={currentImage}
           alt="Post content"
           className="w-full aspect-[3/4] object-cover cursor-pointer"
           data-testid={`img-post-${post.id}`}
         />
+        
+        {/* Image carousel indicators */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
+            {allImages.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-2 bg-white' : 'w-1.5 bg-white/50'}`}
+                data-testid={`indicator-image-${idx}`}
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Carousel navigation */}
+        {allImages.length > 1 && (
+          <>
+            <button
+              onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
+              disabled={currentImageIndex === 0}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
+              data-testid={`button-prev-image-${post.id}`}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setCurrentImageIndex(Math.min(allImages.length - 1, currentImageIndex + 1))}
+              disabled={currentImageIndex === allImages.length - 1}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
+              data-testid={`button-next-image-${post.id}`}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
+        
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <Heart 

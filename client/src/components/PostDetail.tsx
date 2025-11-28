@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, X, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, X, Send, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +54,11 @@ export default function PostDetail({
   const [likes, setLikes] = useState(initialLikes);
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Get all images for carousel - imageUrl is the main image, but check if there are more
+  const allImages = [imageUrl]; // Start with main image
+  const currentImage = allImages[currentImageIndex] || imageUrl;
 
   // Fetch comments when modal opens
   useEffect(() => {
@@ -102,12 +107,6 @@ export default function PostDetail({
           setLikes(data.likes);
         }
         setIsLiked(data.liked);
-        
-        if (data.liked) {
-          toast({ title: "Post liked!", description: "Added to your liked posts" });
-        } else {
-          toast({ title: "Post unliked", description: "Removed from your liked posts" });
-        }
       } else {
         // Rollback on error
         setIsLiked(previousLiked);
@@ -225,12 +224,46 @@ export default function PostDetail({
             </DropdownMenu>
           </div>
 
-          <img
-            src={imageUrl}
-            alt="Post"
-            className="w-full aspect-[3/4] object-cover"
-            data-testid="img-detail-post"
-          />
+          <div className="relative">
+            <img
+              src={currentImage}
+              alt="Post"
+              className="w-full aspect-[3/4] object-cover"
+              data-testid="img-detail-post"
+            />
+            
+            {/* Image carousel indicators */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
+                {allImages.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-2 bg-white' : 'w-1.5 bg-white/50'}`}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Carousel navigation */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
+                  disabled={currentImageIndex === 0}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => setCurrentImageIndex(Math.min(allImages.length - 1, currentImageIndex + 1))}
+                  disabled={currentImageIndex === allImages.length - 1}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 disabled:opacity-30 text-white p-2 rounded-full transition-all"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
 
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
