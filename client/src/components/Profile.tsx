@@ -209,102 +209,110 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         )}
       </div>
 
-      {/* Compact Banner */}
-      <div className="relative h-24 overflow-hidden">
+      {/* Elegant Banner */}
+      <div className="relative h-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
           {(userProfile.banner || bannerImage) && (
             <img
               src={userProfile.banner || bannerImage}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-90"
+              className="w-full h-full object-cover opacity-85"
             />
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
-      {/* Profile Content - Ultra Compact */}
-      <div className="max-w-md mx-auto px-4 -mt-12 relative z-10 pb-4">
-        {/* Avatar & Info Side View */}
-        <div className="flex gap-3 mb-4 items-start">
+      {/* Profile Content - Mature & Refined */}
+      <div className="max-w-md mx-auto px-6 -mt-14 relative z-10 pb-6">
+        {/* Avatar & Header Info */}
+        <div className="flex gap-4 mb-6 items-start">
           <button
             onClick={() => userProfile.avatar && setShowPictureModal(true)}
             className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
             data-testid="button-view-avatar"
           >
-            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted flex-shrink-0">
+            <div className="w-20 h-20 rounded-lg ring-4 ring-background overflow-hidden bg-muted shadow-md">
               {userProfile.avatar ? (
                 <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
-                  <span className="text-lg font-bold text-foreground">{userProfile.username[0].toUpperCase()}</span>
+                  <span className="text-2xl font-black text-foreground">{userProfile.username[0].toUpperCase()}</span>
                 </div>
               )}
             </div>
           </button>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pt-0.5">
             {/* Name & Badge */}
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-lg font-black" data-testid="text-profile-displayname">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h1 className="text-2xl font-black tracking-tight" data-testid="text-profile-displayname">
                 {userProfile.displayName}
               </h1>
-              <CreatorBadge type="fashion-vanguard" size="sm" />
+              <div className="mt-1">
+                <CreatorBadge type="fashion-vanguard" size="sm" />
+              </div>
             </div>
             
             {/* Username */}
-            <p className="text-xs text-muted-foreground mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
+            <p className="text-sm text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
 
-            {/* Bio */}
-            <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
+            {/* Bio - Subtle elegance */}
+            <p className="text-sm text-foreground leading-relaxed" data-testid="text-profile-bio">
               {userProfile.bio}
             </p>
-
-            {/* Professional Info - Inline Compact */}
-            {(userProfile.profession || userProfile.location) && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                {userProfile.profession && (
-                  <span>{userProfile.profession}</span>
-                )}
-                {userProfile.profession && userProfile.location && (
-                  <span>·</span>
-                )}
-                {userProfile.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>{userProfile.location}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Stats - Minimal */}
-            <div className="flex gap-4 text-xs">
-              <button
-                onClick={onFollowersClick}
-                className="hover:opacity-70 transition-opacity"
-                data-testid="button-view-followers"
-              >
-                <span className="font-bold text-foreground" data-testid="text-followers-count">{userProfile.followers}</span>
-                <span className="text-muted-foreground"> Following</span>
-              </button>
-              <button
-                onClick={onFollowingClick}
-                className="hover:opacity-70 transition-opacity"
-                data-testid="button-view-following"
-              >
-                <span className="font-bold text-foreground" data-testid="text-following-count">{userProfile.following}</span>
-                <span className="text-muted-foreground"> Followers</span>
-              </button>
-            </div>
           </div>
         </div>
 
-        {/* Action Buttons - Compact */}
-        <div className="flex gap-2 mb-6">
+        {/* Professional Info - Refined */}
+        {(userProfile.profession || userProfile.location || userProfile.website) && (
+          <div className="flex flex-col gap-2 mb-6 text-sm">
+            {userProfile.profession && (
+              <div className="flex items-center gap-2 text-foreground">
+                <Briefcase className="h-4 w-4 text-primary/60" />
+                <span className="font-medium">{userProfile.profession}</span>
+              </div>
+            )}
+            {userProfile.location && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-4 w-4 text-primary/60" />
+                <span>{userProfile.location}</span>
+              </div>
+            )}
+            {userProfile.website && (
+              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+                <Link className="h-4 w-4" />
+                <span className="truncate">{userProfile.website}</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Stats - Elegant Cards */}
+        <div className="grid grid-cols-2 gap-3 mb-6 p-3 bg-card rounded-lg border border-border/50">
+          <button
+            onClick={onFollowersClick}
+            className="text-center py-2 hover-elevate transition-all rounded"
+            data-testid="button-view-followers"
+          >
+            <p className="text-xl font-black text-foreground" data-testid="text-followers-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mt-1">Following</p>
+          </button>
+          <button
+            onClick={onFollowingClick}
+            className="text-center py-2 hover-elevate transition-all rounded border-l border-border/50"
+            data-testid="button-view-following"
+          >
+            <p className="text-xl font-black text-foreground" data-testid="text-following-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mt-1">Followers</p>
+          </button>
+        </div>
+
+        {/* Action Buttons - Sophisticated */}
+        <div className="flex gap-3 mb-8">
           {isOwnProfile ? (
             <Button
-              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-9 rounded-full text-sm"
+              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-sm h-10 shadow-sm"
               onClick={onEditProfile}
               data-testid="button-edit-profile"
             >
@@ -312,7 +320,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             </Button>
           ) : (
             <Button 
-              className={`flex-1 font-bold h-9 rounded-full text-sm ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
+              className={`flex-1 font-bold rounded-lg text-sm h-10 shadow-sm ${isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
               onClick={toggleFollow}
               disabled={isLoading}
               data-testid="button-follow"
@@ -322,45 +330,45 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           )}
         </div>
 
-        {/* Posts Tabs - Clean & Minimal */}
-        <div className="mt-8 border-t border-border/50 pt-0">
+        {/* Posts Tabs - Refined & Modern */}
+        <div className="border-t border-border/50">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-border/50 rounded-none p-0 h-auto gap-0">
+            <TabsList className="w-full grid grid-cols-3 bg-transparent rounded-none p-0 h-auto gap-0">
               <TabsTrigger 
                 value="posts" 
                 data-testid="tab-posts"
-                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-xs uppercase tracking-wider data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-4 font-semibold text-sm uppercase tracking-wider data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors"
               >
                 Posts
               </TabsTrigger>
               <TabsTrigger 
                 value="liked" 
                 data-testid="tab-liked"
-                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-xs uppercase tracking-wider data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-4 font-semibold text-sm uppercase tracking-wider data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors"
               >
                 Likes
               </TabsTrigger>
               <TabsTrigger 
                 value="saved" 
                 data-testid="tab-saved"
-                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-xs uppercase tracking-wider data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-4 font-semibold text-sm uppercase tracking-wider data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors"
               >
                 Saved
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          {/* Post Grid - Elegant */}
+          {/* Post Grid - Beautiful & Spacious */}
           <div className="mt-6">
             {activeTab === "posts" && (
               <>
                 {isOwnProfile && userProfile.posts === "0" ? (
                   <div className="py-20 text-center">
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                      <Share2 className="h-6 w-6 text-primary/50" />
+                    <div className="w-16 h-16 rounded-full bg-primary/8 flex items-center justify-center mx-auto mb-4">
+                      <Share2 className="h-7 w-7 text-primary/40" />
                     </div>
-                    <p className="text-foreground font-semibold">No posts yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Share your first post to get started</p>
+                    <p className="text-foreground font-semibold text-lg">No posts yet</p>
+                    <p className="text-sm text-muted-foreground mt-2">Share your first post to get started</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-1 mt-4">
@@ -368,13 +376,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                       <button
                         key={post.id}
                         onClick={() => onPostClick?.(post.id)}
-                        className="aspect-square overflow-hidden rounded group transition-all duration-200"
+                        className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate"
                         data-testid={`post-grid-${post.id}`}
                       >
                         <img
                           src={post.image}
                           alt="Post"
-                          className="w-full h-full object-cover group-hover:opacity-80 transition-opacity duration-200"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </button>
                     ))}
@@ -385,17 +393,17 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             
             {activeTab === "liked" && (
               <div className="py-16 text-center">
-                <Heart className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                <Heart className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                 <p className="text-muted-foreground font-medium">No liked posts yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Posts you like will appear here</p>
+                <p className="text-sm text-muted-foreground mt-1">Posts you like will appear here</p>
               </div>
             )}
             
             {activeTab === "saved" && (
               <div className="py-16 text-center">
-                <Share2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                <Share2 className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                 <p className="text-muted-foreground font-medium">No saved posts yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Save posts to view them later</p>
+                <p className="text-sm text-muted-foreground mt-1">Save posts to view them later</p>
               </div>
             )}
           </div>
