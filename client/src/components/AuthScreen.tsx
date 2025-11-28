@@ -241,61 +241,6 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create an account</CardTitle>
-                <CardDescription>Join the creative movement</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignup} className="space-y-4">
-                  {signupError && <div className="bg-destructive/10 border border-destructive/50 text-destructive rounded-lg p-4 text-sm font-medium" data-testid="error-signup">⚠️ {signupError}</div>}
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={signupData.email}
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                      data-testid="input-signup-email"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-username">Username</Label>
-                    <Input
-                      id="signup-username"
-                      type="text"
-                      placeholder="@yourcreativename"
-                      value={signupData.username}
-                      onChange={(e) => setSignupData({ ...signupData, username: e.target.value })}
-                      data-testid="input-signup-username"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupData.password}
-                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                      data-testid="input-signup-password"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" disabled={isLoading} className="w-full" data-testid="button-signup-submit">
-                    {isLoading ? "Creating..." : "Create Account"}
-                  </Button>
-                  <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignUp} disabled={googleLoading || isLoading} data-testid="button-google-signup">
-                    {googleLoading ? "Connecting..." : "Sign up with Google"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
