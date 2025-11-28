@@ -405,20 +405,28 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-1 mt-4">
-                      {userPosts.map((post) => (
-                        <button
-                          key={post.id}
-                          onClick={() => onPostClick?.(post.id)}
-                          className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate"
-                          data-testid={`post-grid-${post.id}`}
-                        >
-                          <img
-                            src={post.image}
-                            alt="Post"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </button>
-                      ))}
+                      {userPosts.map((post) => {
+                        const imageUrl = post.images && post.images.length > 0 ? post.images[0] : (post.imageUrl || post.image);
+                        return (
+                          <button
+                            key={post.id}
+                            onClick={() => onPostClick?.(post.id)}
+                            className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate relative"
+                            data-testid={`post-grid-${post.id}`}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt="Post"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            {post.images && post.images.length > 1 && (
+                              <div className="absolute top-1 right-1 bg-black/60 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-semibold">
+                                {post.images.length}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </>
