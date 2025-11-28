@@ -184,14 +184,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        toast({
-          title: "Saved",
-          description: `${settingKey.replace(/([A-Z])/g, ' $1').trim()} updated`,
-          className: "border-primary/20 bg-card text-xs",
-          duration: 2000,
-        });
-      } else {
+      if (!res.ok) {
         console.error("Failed to save settings");
         setSettings(settings);
         toast({
@@ -205,8 +198,8 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
       console.error("Failed to save settings:", error);
       setSettings(settings);
       toast({
-        title: "Connection Error",
-        description: "Unable to save settings. Please try again.",
+        title: "Error",
+        description: "Unable to save settings",
         variant: "destructive",
         duration: 3000,
       });
@@ -221,7 +214,6 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
     try {
       const updated = { ...currentUserData, email: editData.email, phone: editData.phone };
       localStorage.setItem("currentUserData", JSON.stringify(updated));
-      toast({ title: "Saved", description: "Email and phone updated" });
       setEditMode("none");
     } catch (error) {
       toast({ title: "Error", description: "Failed to save", variant: "destructive" });
@@ -244,7 +236,6 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
         body: JSON.stringify({ password: editData.newPassword }),
       });
       if (response.ok) {
-        toast({ title: "Success", description: "Password changed successfully" });
         setEditData({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
         setEditMode("none");
       } else {
@@ -309,7 +300,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   }
 
   if (editMode === "report") {
-    return <Modal title="Report a Problem"><div className="space-y-3"><textarea placeholder="Describe your issue..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { toast({ title: "Report sent", description: "Thank you for reporting!" }); setEditMode("none"); } }} className="w-full bg-primary">Send Report</Button></div></Modal>;
+    return <Modal title="Report a Problem"><div className="space-y-3"><textarea placeholder="Describe your issue..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { setEditMode("none"); } }} className="w-full bg-primary">Send Report</Button></div></Modal>;
   }
 
   if (editMode === "about") {
@@ -325,7 +316,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   }
 
   if (editMode === "reportContent") {
-    return <Modal title="Report Content"><div className="space-y-3"><textarea placeholder="Why are you reporting this post?..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { toast({ title: "Report submitted", description: "Our team will review this content." }); setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button></div></Modal>;
+    return <Modal title="Report Content"><div className="space-y-3"><textarea placeholder="Why are you reporting this post?..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button></div></Modal>;
   }
 
   if (editMode === "textSize") {
@@ -333,7 +324,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   }
 
   if (editMode === "download") {
-    return <Modal title="Download Your Data"><div className="space-y-3"><p className="text-xs text-muted-foreground">Get a copy of all your profile data, posts, and activity.</p><Button onClick={() => { toast({ title: "Download started", description: "Your data will be ready in a few minutes" }); setEditMode("none"); }} className="w-full bg-primary">Download Now</Button></div></Modal>;
+    return <Modal title="Download Your Data"><div className="space-y-3"><p className="text-xs text-muted-foreground">Get a copy of all your profile data, posts, and activity.</p><Button onClick={() => { setEditMode("none"); }} className="w-full bg-primary">Download Now</Button></div></Modal>;
   }
 
   if (editMode === "sessions") {
@@ -341,11 +332,11 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   }
 
   if (editMode === "2fa") {
-    return <Modal title="Two-Factor Authentication"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { toast({ title: "2FA enabled", description: "Your account is now more secure" }); setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></Modal>;
+    return <Modal title="Two-Factor Authentication"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></Modal>;
   }
 
   if (editMode === "language") {
-    return <Modal title="Language"><div className="space-y-3"><div className="flex flex-col gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "English selected" }); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full">English</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "Español selected" }); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full">Español</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); toast({ title: "Language changed", description: "Français selected" }); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full">Français</Button></div></div></Modal>;
+    return <Modal title="Language"><div className="space-y-3"><div className="flex flex-col gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full">English</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full">Español</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full">Français</Button></div></div></Modal>;
   }
 
   // Edit modals
