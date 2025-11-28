@@ -46,6 +46,25 @@ export default function App() {
     document.documentElement.classList.add("dark");
   }, []);
 
+  // Check if user is already logged in (session persistence)
+  useEffect(() => {
+    const checkExistingSession = () => {
+      const userId = localStorage.getItem("currentUserId");
+      const userData = localStorage.getItem("currentUserData");
+      
+      // If user was previously logged in, go straight to main app
+      if (userId && userData) {
+        // Show splash screen briefly then go to main
+        const timer = setTimeout(() => {
+          setAppState("main");
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    };
+    
+    checkExistingSession();
+  }, []);
+
   // Initialize FCM and request notification permission
   useEffect(() => {
     const initFCM = async () => {
@@ -133,6 +152,8 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("currentUserId");
+    localStorage.removeItem("currentUserData");
     setAppState("auth");
     setActiveTab("home");
     setModalView("none");
