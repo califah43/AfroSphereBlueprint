@@ -223,10 +223,10 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
               <div className="flex gap-3 group">
                 <Avatar className="w-9 h-9 border border-border flex-shrink-0 mt-0.5">
                   {comment.avatar ? (
-                    <AvatarImage src={comment.avatar} alt={comment.author} />
+                    <AvatarImage src={comment.avatar} alt={comment.author || "User"} />
                   ) : null}
                   <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-400/30 text-primary text-xs font-bold">
-                    {comment.author[0].toUpperCase()}
+                    {(comment.author || "U")[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
@@ -235,7 +235,7 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                   <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 group-hover:border-primary/30 transition-all duration-200">
                     <div className="flex items-baseline gap-2 mb-1">
                       <p className="font-semibold text-sm text-foreground" data-testid={`text-comment-author-${comment.id}`}>
-                        {comment.author}
+                        {comment.author || "Anonymous"}
                       </p>
                       <span className="text-xs text-muted-foreground font-medium" data-testid={`text-comment-time-${comment.id}`}>
                         {comment.timeAgo}
@@ -316,10 +316,10 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                         <div key={reply.id} className="flex gap-2 animate-in fade-in slide-in-from-bottom-1 duration-200" data-testid={`reply-${reply.id}`}>
                           <Avatar className="w-8 h-8 border border-border/50 flex-shrink-0 mt-0.5">
                             {reply.avatar ? (
-                              <AvatarImage src={reply.avatar} alt={reply.author} />
+                              <AvatarImage src={reply.avatar} alt={reply.author || "User"} />
                             ) : null}
                             <AvatarFallback className="bg-primary/10 text-primary/70 text-xs font-bold">
-                              {reply.author[0].toUpperCase()}
+                              {(reply.author || "U")[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
 
@@ -328,7 +328,7 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
                             <div className="bg-background border border-border/30 rounded-xl px-3 py-2">
                               <div className="flex items-baseline gap-2 mb-0.5">
                                 <p className="font-semibold text-xs text-foreground/90" data-testid={`text-reply-author-${reply.id}`}>
-                                  {reply.author}
+                                  {reply.author || "Anonymous"}
                                 </p>
                                 <span className="text-xs text-muted-foreground/70" data-testid={`text-reply-time-${reply.id}`}>
                                   {reply.timeAgo}
