@@ -236,40 +236,40 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         </div>
 
         {/* Form Fields - Refined & Compact */}
-        <div className="space-y-3 mt-4 pt-2 border-t border-border/50">
+        <div className="space-y-4 mt-4 pt-3 border-t border-border/50">
           {/* Username - Read Only */}
-          <div className="space-y-1.5 opacity-70">
-            <Label htmlFor="username" className="text-xs font-semibold uppercase tracking-wider">Username</Label>
-            <div className="flex items-center gap-2 p-2.5 bg-muted/40 rounded-lg border border-border/30">
-              <span className="text-primary font-bold text-sm">@</span>
+          <div className="space-y-2 opacity-70">
+            <Label htmlFor="username" className="text-sm font-semibold uppercase tracking-wider">Username</Label>
+            <div className="flex items-center gap-2 p-3 bg-muted/40 rounded-lg border border-border/30">
+              <span className="text-primary font-bold text-base">@</span>
               <Input 
                 id="username"
                 value={formData.username}
                 disabled={true}
-                className="border-0 bg-transparent px-0 text-sm"
+                className="border-0 bg-transparent px-0 text-base"
                 data-testid="input-username-readonly"
               />
             </div>
-            <p className="text-xs text-muted-foreground">Permanent & used for mentions</p>
+            <p className="text-sm text-muted-foreground">Permanent & used for mentions</p>
           </div>
 
           {/* Display Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="displayName" className="text-xs font-semibold uppercase tracking-wider">Display Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="displayName" className="text-sm font-semibold uppercase tracking-wider">Display Name</Label>
             <Input
               id="displayName"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               placeholder="Your display name"
-              className="border-border/30 bg-card/40 h-9 rounded-lg text-sm"
+              className="border-border/30 bg-card/40 h-10 rounded-lg text-base"
               data-testid="input-displayname"
             />
-            <p className="text-xs text-muted-foreground">How your name appears publicly</p>
+            <p className="text-sm text-muted-foreground">How your name appears publicly</p>
           </div>
 
           {/* Bio */}
-          <div className="space-y-1.5">
-            <Label htmlFor="bio" className="text-xs font-semibold uppercase tracking-wider">Bio</Label>
+          <div className="space-y-2">
+            <Label htmlFor="bio" className="text-sm font-semibold uppercase tracking-wider">Bio</Label>
             <Textarea
               id="bio"
               value={formData.bio}
