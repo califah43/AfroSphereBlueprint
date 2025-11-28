@@ -191,7 +191,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
-      <div className="max-w-md mx-auto px-4 -mt-10 relative z-10 pb-6">
+      <div className="max-w-md mx-auto px-4 -mt-16 relative z-10 pb-6">
         {/* Header for Own Profile (Settings) */}
         {isOwnProfile && (
           <div className="flex items-center justify-between mb-4">
