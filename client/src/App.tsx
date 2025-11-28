@@ -185,22 +185,31 @@ export default function App() {
     // Save to backend with all profile data
     try {
       const userId = localStorage.getItem("currentUserId");
+      console.log("Saving profile for userId:", userId);
       if (userId) {
+        const payload = {
+          displayName: signupUsername,
+          bio: signupProfileData.bio,
+          profession: signupProfileData.profession,
+          avatar: signupProfileData.avatar || "",
+          banner: signupProfileData.banner || "",
+        };
+        console.log("Sending payload to backend:", { userId, fields: Object.keys(payload) });
+        
         const response = await fetch(`/api/users/${userId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            displayName: signupUsername,
-            bio: signupProfileData.bio,
-            profession: signupProfileData.profession,
-            avatar: signupProfileData.avatar,
-            banner: signupProfileData.banner,
-          }),
+          body: JSON.stringify(payload),
         });
         
+        console.log("Save response status:", response.status);
         if (response.ok) {
           const savedUser = await response.json();
+          console.log("Profile saved successfully:", savedUser);
           localStorage.setItem("currentUserData", JSON.stringify(savedUser));
+        } else {
+          const errorText = await response.text();
+          console.error("Save failed:", response.status, errorText);
         }
       }
     } catch (e) {
