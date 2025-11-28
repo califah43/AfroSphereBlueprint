@@ -60,12 +60,13 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
     if (newComment.trim()) {
       setIsLoading(true);
       try {
+        const currentUserId = localStorage.getItem("currentUserId");
         const res = await fetch('/api/comments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             postId,
-            userId: "current-user",
+            userId: currentUserId,
             text: newComment,
             replyTo: null,
           }),
@@ -74,6 +75,8 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
           const newCommentObj = await res.json();
           setComments([...comments, { ...newCommentObj, replies: [] }]);
           setNewComment("");
+        } else {
+          console.error("Failed to post comment:", res.status);
         }
       } catch (error) {
         console.error("Failed to add comment", error);
@@ -88,12 +91,13 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
     if (replyText.trim()) {
       setIsLoading(true);
       try {
+        const currentUserId = localStorage.getItem("currentUserId");
         const res = await fetch('/api/comments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             postId,
-            userId: "current-user",
+            userId: currentUserId,
             text: replyText,
             replyTo: commentId,
           }),
@@ -109,6 +113,8 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
           );
           setReplyText("");
           setReplyingTo(null);
+        } else {
+          console.error("Failed to post reply:", res.status);
         }
       } catch (error) {
         console.error("Failed to add reply", error);

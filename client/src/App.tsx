@@ -394,10 +394,7 @@ export default function App() {
             <SearchResults
               onClose={() => setModalView("none")}
               onHashtagClick={handleOpenHashtagFeed}
-              onUserClick={(username) => {
-                console.log("Navigate to user:", username);
-                setModalView("none");
-              }}
+              onUserClick={handleOpenUserProfile}
             />
           )}
 
@@ -413,14 +410,14 @@ export default function App() {
               postId={selectedPostId}
               author={{ username: "adikeafrica" }}
               imageUrl={fashionImage}
-              caption="Celebrating our roots with modern style. Ankara fusion fashion dropping soon! 🔥 #AfricanFashion"
+              caption="Celebrating our roots with modern style. Ankara fusion fashion dropping soon! #AfricanFashion"
               likes={1247}
               timeAgo="2h ago"
               comments={[
                 {
                   id: "1",
                   author: "zara_style",
-                  text: "This is absolutely stunning! 🔥",
+                  text: "This is absolutely stunning!",
                   likes: 23,
                   timeAgo: "1h ago",
                 },
