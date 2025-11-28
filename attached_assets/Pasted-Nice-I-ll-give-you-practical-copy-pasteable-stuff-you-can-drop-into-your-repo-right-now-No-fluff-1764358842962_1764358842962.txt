@@ -1,0 +1,472 @@
+Nice — I’ll give you practical, copy-pasteable stuff you can drop into your repo right now. No fluff. This reply contains four sections you asked for:
+	1.	Font-size code (Flutter, React Native, and Web/CSS)
+	2.	Firestore + Cloud Function + client patterns to fix likes/comments counts reliably (atomic, real-time)
+	3.	Language / locale switch code so the entire app uses the selected language
+	4.	The app “rules & laws” (community guidelines + enforcement policy) — the text you can paste into the app and admin panel
+
+I’ll sign each block so you know where to paste it. Let’s go.
+
+⸻
+
+1) FONT SIZE SAMPLES (Small / Big / Large)
+
+Flutter — text_styles.dart
+
+// lib/utils/text_styles.dart
+import 'package:flutter/widgets.dart';
+
+class AppFontSizes {
+  static const double small = 12.0;
+  static const double normal = 14.0; // base
+  static const double big = 18.0;
+  static const double large = 22.0;
+}
+
+class AppTextStyles {
+  static const TextStyle small = TextStyle(fontSize: AppFontSizes.small, height: 1.3);
+  static const TextStyle normal = TextStyle(fontSize: AppFontSizes.normal, height: 1.35);
+  static const TextStyle big = TextStyle(fontSize: AppFontSizes.big, height: 1.3, fontWeight: FontWeight.w600);
+  static const TextStyle large = TextStyle(fontSize: AppFontSizes.large, height: 1.25, fontWeight: FontWeight.w700);
+}
+
+Usage:
+
+Text('Caption', style: AppTextStyles.small);
+Text('Headline', style: AppTextStyles.large);
+
+
+⸻
+
+React Native — theme.js
+
+// src/theme.js
+export const FontSizes = {
+  SMALL: 12,
+  NORMAL: 14,
+  BIG: 18,
+  LARGE: 22,
+};
+
+export const TextStyles = {
+  small: { fontSize: FontSizes.SMALL, lineHeight: 16 },
+  normal: { fontSize: FontSizes.NORMAL, lineHeight: 18 },
+  big: { fontSize: FontSizes.BIG, lineHeight: 22, fontWeight: '600' },
+  large: { fontSize: FontSizes.LARGE, lineHeight: 26, fontWeight: '700' },
+};
+
+Usage:
+
+<Text style={TextStyles.large}>Profile name</Text>
+
+
+⸻
+
+Web / CSS variables (for PWA/web)
+
+:root{
+  --font-small: 12px;
+  --font-normal: 14px;
+  --font-big: 18px;
+  --font-large: 22px;
+}
+
+/* usage */
+.small { font-size: var(--font-small); }
+.normal { font-size: var(--font-normal); }
+.big { font-size: var(--font-big); font-weight: 600; }
+.large { font-size: var(--font-large); font-weight: 700; }
+
+
+⸻
+
+2) RELIABLE LIKES / COMMENTS COUNTS (Firestore + Cloud Functions + Client)
+
+Goal: counts never go wrong, no lost updates, consistent counts for posts, comments, and reactions.
+
+Data model (Firestore)
+
+Collections:
+
+/users/{uid}
+ /posts/{postId}         // doc contains likesCount, commentsCount
+ /posts/{postId}/likes/{likeId}    // each like doc { uid, createdAt }
+ /posts/{postId}/comments/{commentId} // each comment doc { uid, text, createdAt, likesCount }
+ /posts/{postId}/comments/{commentId}/likes/{likeId}
+
+Why this model
+	•	likes and comments are subcollections for easy listing.
+	•	likesCount and commentsCount are materialized counters on the post doc updated atomically via Cloud Function transaction so clients can render counts fast.
+	•	For per-comment likes we do the same (a likesCount field on the comment doc).
+
+⸻
+
+Cloud Function (Node.js) — increment/decrement counters atomically
+
+Place in functions/index.js (Firebase Cloud Functions):
+
+// functions/index.js
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+const db = admin.firestore();
+
+// When a like doc is created under posts/{postId}/likes/{likeId}
+exports.onPostLikeCreate = functions.firestore
+  .document('posts/{postId}/likes/{likeId}')
+  .onCreate(async (snap, context) => {
+    const { postId } = context.params;
+    const postRef = db.collection('posts').doc(postId);
+
+    await db.runTransaction(async t => {
+      const postDoc = await t.get(postRef);
+      const prev = postDoc.exists && postDoc.data().likesCount ? postDoc.data().likesCount : 0;
+      t.update(postRef, { likesCount: prev + 1 });
+    });
+  });
+
+// When a like doc deleted
+exports.onPostLikeDelete = functions.firestore
+  .document('posts/{postId}/likes/{likeId}')
+  .onDelete(async (snap, context) => {
+    const { postId } = context.params;
+    const postRef = db.collection('posts').doc(postId);
+
+    await db.runTransaction(async t => {
+      const postDoc = await t.get(postRef);
+      const prev = postDoc.exists && postDoc.data().likesCount ? postDoc.data().likesCount : 0;
+      const next = Math.max(0, prev - 1);
+      t.update(postRef, { likesCount: next });
+    });
+  });
+
+// Comment created: increment commentsCount on post
+exports.onCommentCreate = functions.firestore
+  .document('posts/{postId}/comments/{commentId}')
+  .onCreate(async (snap, context) => {
+    const { postId } = context.params;
+    const postRef = db.collection('posts').doc(postId);
+    await db.runTransaction(async t => {
+      const postDoc = await t.get(postRef);
+      const prev = postDoc.exists && postDoc.data().commentsCount ? postDoc.data().commentsCount : 0;
+      t.update(postRef, { commentsCount: prev + 1 });
+    });
+  });
+
+exports.onCommentDelete = functions.firestore
+  .document('posts/{postId}/comments/{commentId}')
+  .onDelete(async (snap, context) => {
+    const { postId } = context.params;
+    const postRef = db.collection('posts').doc(postId);
+    await db.runTransaction(async t => {
+      const postDoc = await t.get(postRef);
+      const prev = postDoc.exists && postDoc.data().commentsCount ? postDoc.data().commentsCount : 0;
+      t.update(postRef, { commentsCount: Math.max(0, prev - 1) });
+    });
+  });
+
+// Similarly for comment likes:
+exports.onCommentLikeCreate = functions.firestore
+  .document('posts/{postId}/comments/{commentId}/likes/{likeId}')
+  .onCreate(async (snap, context) => {
+    const { postId, commentId } = context.params;
+    const commentRef = db.collection('posts').doc(postId).collection('comments').doc(commentId);
+    await db.runTransaction(async t => {
+      const c = await t.get(commentRef);
+      const prev = c.exists && c.data().likesCount ? c.data().likesCount : 0;
+      t.update(commentRef, { likesCount: prev + 1 });
+    });
+  });
+
+exports.onCommentLikeDelete = functions.firestore
+  .document('posts/{postId}/comments/{commentId}/likes/{likeId}')
+  .onDelete(async (snap, context) => {
+    const { postId, commentId } = context.params;
+    const commentRef = db.collection('posts').doc(postId).collection('comments').doc(commentId);
+    await db.runTransaction(async t => {
+      const c = await t.get(commentRef);
+      const prev = c.exists && c.data().likesCount ? c.data().likesCount : 0;
+      t.update(commentRef, { likesCount: Math.max(0, prev - 1) });
+    });
+  });
+
+Notes:
+	•	Transactions ensure counters do not get out of sync under concurrent writes.
+	•	Deploy functions with firebase deploy --only functions.
+
+⸻
+
+Client-side examples
+
+React Native (Firestore)
+
+Add like:
+
+// addLikeToPost.js
+import firestore from '@react-native-firebase/firestore';
+
+export async function toggleLikePost(postId, uid) {
+  const likesRef = firestore().collection('posts').doc(postId).collection('likes');
+  const likeDoc = likesRef.doc(uid); // use uid as likeId so user can only like once
+  const doc = await likeDoc.get();
+  if (doc.exists) {
+    // unlike
+    await likeDoc.delete();
+  } else {
+    await likeDoc.set({ uid, createdAt: firestore.FieldValue.serverTimestamp() });
+  }
+}
+
+Listen to post counts in real-time:
+
+useEffect(() => {
+  const unsubscribe = firestore()
+    .collection('posts')
+    .doc(postId)
+    .onSnapshot(doc => {
+      setPost(doc.data());
+    });
+  return unsubscribe;
+}, [postId]);
+
+Flutter (cloud_firestore)
+
+Add like/unlike:
+
+Future<void> toggleLike(String postId, String uid) async {
+  final likeRef = FirebaseFirestore.instance
+      .collection('posts')
+      .doc(postId)
+      .collection('likes')
+      .doc(uid);
+
+  final snap = await likeRef.get();
+  if (snap.exists) {
+    await likeRef.delete();
+  } else {
+    await likeRef.set({'uid': uid, 'createdAt': FieldValue.serverTimestamp()});
+  }
+}
+
+Listen to post counts:
+
+Stream<DocumentSnapshot> postStream(String postId) {
+  return FirebaseFirestore.instance.collection('posts').doc(postId).snapshots();
+}
+
+
+⸻
+
+Common pitfalls & fixes
+	•	Don’t store likes as an array on the post doc. Arrays cause concurrency problems and doc size limits.
+	•	Use user UID as likeId so a user can only create one like doc per post — easy toggle.
+	•	Always rely on Cloud Functions to update materialized counters (so clients only read likesCount and commentsCount).
+	•	Rate limits: Cloud Functions can get many triggers — keep functions small and idempotent.
+
+⸻
+
+3) APP-WIDE LANGUAGE / LOCALE (so the entire app changes immediately)
+
+You must centralize strings (no raw strings in widgets/components). Provide an approach for Flutter, React Native, and Web.
+
+⸻
+
+Flutter (use flutter_localizations + intl or easy_localization)
+
+1. Add package: easy_localization
+
+2. Example setup:
+
+// main.dart
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'app.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  runApp(
+    EasyLocalization(
+      supportedLocales: [Locale('en'), Locale('yo'), Locale('fr')],
+      path: 'assets/translations',
+      fallbackLocale: Locale('en'),
+      child: MyApp(),
+    ),
+  );
+}
+
+3. Use localized strings:
+Create JSON files: assets/translations/en.json, yo.json etc.
+
+en.json
+
+{
+  "home": {
+    "welcome": "Welcome to AfroSphere",
+    "comments": "Comments"
+  }
+}
+
+In widget:
+
+Text('home.welcome'.tr());
+
+4. Change language globally (persist):
+
+context.setLocale(Locale('yo')); // switch to Yoruba
+// store in SharedPreferences so next start remembers selection
+
+This ensures every .tr() text updates instantly.
+
+⸻
+
+React Native (i18n-js or react-i18next)
+
+Using react-i18next:
+
+// i18n.js
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import en from './locales/en.json';
+import yo from './locales/yo.json';
+
+i18n.use(initReactI18next).init({
+  resources: { en: { translation: en }, yo: { translation: yo } },
+  lng: 'en',
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+});
+
+export default i18n;
+
+In app root:
+
+import './i18n';
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t, i18n } = useTranslation();
+  return <Text>{t('home.welcome')}</Text>;
+}
+
+Change globally:
+
+i18n.changeLanguage('yo');
+
+Persist language (AsyncStorage) and apply on app start.
+
+⸻
+
+Web / PWA (i18next or i18n)
+
+Same idea — centralize strings, change language using i18next.changeLanguage('yo'), re-render.
+
+⸻
+
+Important rules so it’s complete:
+	•	No hard-coded strings anywhere. Always call the translation function.
+	•	Load all translations at startup and fallback to en.
+	•	Persist user choice to local storage / Firestore user doc so the language sticks across devices.
+	•	Support RTL if you ever add languages that need it (adjust layout direction).
+
+⸻
+
+4) APP RULES & LAWS — Community Guidelines + Enforcement (copy/pasteable)
+
+Use this text as your “Community Guidelines” and admin enforcement rules. Put into the app onboarding and admin panel.
+
+⸻
+
+AfroSphere — Community Guidelines (short & sharp)
+	1.	Be Respectful. No hate speech, targeted harassment, or abuse. Respect people’s identity, religion, ethnicity, and culture.
+	2.	No Violence or Harm. Content that celebrates, threatens, or instructs violence is forbidden.
+	3.	No Illegal Activity. No promotion of illegal drugs, weapons, or criminal activity.
+	4.	No Sexual Exploitation. No pornographic or sexually explicit content. Sexual content involving minors is strictly banned and will be reported.
+	5.	No Hate or Extremism. We do not allow extremist rhetoric, terrorist propaganda, or praise of violent extremist groups.
+	6.	No Misinformation. Do not intentionally spread false information about public safety, elections, or health.
+	7.	Respect Privacy. Do not post private personal data (ID numbers, bank details, private addresses) without consent.
+	8.	No Spam or Mass Solicitation. Repeated unsolicited promotion or scams are not allowed.
+	9.	Intellectual Property Respect. Only post content you own or have permission to share.
+	10.	Cultural Respect. Respect sacred traditions, rites, and leaders. Avoid mocking or demeaning cultural practices.
+	11.	Moderation of Traditional/Religious Content. Content from traditional rulers, Ifa practitioners, and clergy is allowed, but must not promote harm or illegal rituals. Respectful debate allowed.
+	12.	Age-restricted material. Must be labeled and comply with age restrictions (no minors in sexual content).
+	13.	Report harmful content using the report button — we review within 24–72 hours on priority items.
+
+⸻
+
+Enforcement & Penalty Policy (Admin rules)
+
+Step 0 — Auto-scan: Content that triggers auto-moderation (porn, explicit violence, CSAM) is auto-removed and flagged for immediate review.
+
+Soft enforcement (first offense):
+	•	Warning message to user
+	•	24-hour content posting restriction
+
+Medium enforcement (repeat or harmful):
+	•	Temporary suspension (3–14 days)
+	•	All new posts hidden
+	•	Must complete community conduct course (optional admin action)
+
+Severe enforcement (illegal content, CSAM, threats):
+	•	Permanent ban
+	•	Content archived for evidence and reported to authorities if required
+
+Appeal process:
+	•	Banned users can file an appeal within admin panel; appeals are reviewed within 7 business days.
+
+Team roles:
+	•	Admin (super): full control — ban users, delete content, alter badges, manage team.
+	•	Moderator: review reports, mute users, remove posts, escalate to Admin.
+	•	Community Manager: outreach, handle appeals, partner on creators.
+
+Logging:
+	•	All enforcement actions create an audit log (who, why, timestamp, evidence).
+
+⸻
+
+Content takedown checklist for moderators
+	1.	Screenshot or archive link
+	2.	Reason & guideline clause violated
+	3.	Takedown action (remove/hide)
+	4.	User notification (automated) explaining reason & next steps
+	5.	If severe — escalate to Admin and preserve evidence
+
+⸻
+
+Legal / Privacy short rules to show publicly
+	•	We keep minimal user data: email, username, profile image, and posted content.
+	•	Personal data stored securely and not sold.
+	•	We comply with takedown requests and local laws.
+	•	For full legal terms, see Terms of Service & Privacy Policy (task you asked earlier — I can paste full templates if you want).
+
+⸻
+
+EXTRA: Admin Panel Enforcement Buttons (for UI designers)
+	•	Remove Post (with reason dropdown)
+	•	Warn User (auto DMs)
+	•	Suspend User (days) + send remediation steps
+	•	Permanent ban (requires admin 2FA)
+	•	View Audit Log (search by user/post/date)
+	•	Appeal Review queue
+	•	Auto-moderation settings (thresholds, banned words, file types)
+	•	Badge management (assign/remove badges)
+
+⸻
+
+QUICK CHECKLIST FOR YOU TO IMPLEMENT IMMEDIATELY
+	•	Add the Cloud Functions counters and deploy them.
+	•	Update client like/comment flows to create/delete documents (likes subdoc) not update a number directly.
+	•	Use onSnapshot listeners for the main post doc for counts, and list likes/comments from subcollections when needed.
+	•	Centralize all strings for translations and use .tr() / t() calls.
+	•	Add Community Guidelines into onboarding and Profile > Settings > Community Guidelines.
+	•	In Admin -> make moderation actions log to admin_audit_logs collection.
+
+⸻
+
+If you want right now I can:
+	•	paste a full Firestore Security Rules file (recommended) to protect writes and only allow authenticated users to write to allowed paths.
+	•	paste a Privacy Policy + Terms of Service templates (you asked earlier).
+	•	give the exact Replit environment secret names and how to store your Firebase Admin JSON securely.
+	•	provide the admin UI layout and a sample JSON schema for roles and permissions.
+
+Tell me which of those you want next and I’ll produce it immediately — no questions.
