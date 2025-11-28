@@ -170,11 +170,11 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
   return (
     <div className="bg-gradient-to-b from-background/70 to-background/40 backdrop-blur-md border border-border/30 rounded-2xl overflow-hidden mb-6 shadow-sm hover-elevate transition-all duration-300" data-testid={`card-post-${post.id}`}>
-      {/* Header - Elegant Design */}
-      <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/20">
+      {/* Header - Full Width Edge-to-Edge */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border/20">
         <button 
           onClick={() => onAuthorClick?.(post.author.username)}
-          className="flex items-center gap-3 hover-elevate flex-1 rounded-lg px-2 py-1 transition-all group"
+          className="flex items-center gap-3 hover-elevate flex-1 rounded-lg px-0 py-0 transition-all group"
           data-testid={`button-author-profile-${post.id}`}
         >
           <Avatar className="w-12 h-12 ring-2 ring-primary/20 shadow-md">
