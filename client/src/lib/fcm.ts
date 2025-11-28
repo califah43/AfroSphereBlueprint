@@ -68,7 +68,7 @@ export const setupMessageListener = (
       onMessageReceived(payload);
     });
   } catch (error) {
-    console.error("Error setting up message listener:", error);
+    // Silently handle error - browser may not support messaging
   }
 };
 
