@@ -23,6 +23,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
   const [contrast, setContrast] = useState([100]);
   const [saturation, setSaturation] = useState([100]);
   const [showFilters, setShowFilters] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,6 +57,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const userId = localStorage.getItem("currentUserId") || "current-user";
       const postData = {
@@ -65,17 +67,23 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
         image: mediaPreviews[0],
       };
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!res.ok) throw new Error("Failed to create post");
 
       const createdPost = await res.json();
       toast({
-        title: "✨ Post created!",
+        title: "Post created!",
         description: "Your post has been shared with the community.",
         className: "border-primary/20 bg-card",
       });
@@ -83,11 +91,21 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       onPost?.(createdPost);
       onClose();
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error.name === 'AbortError') {
+        toast({
+          title: "Request timeout",
+          description: "The upload took too long. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error creating post",
+          description: error.message || "Please try again",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -108,12 +126,12 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
           </h2>
           <Button
             onClick={handlePost}
-            disabled={!caption || mediaPreviews.length === 0}
+            disabled={!caption || mediaPreviews.length === 0 || isSubmitting}
             className="bg-gradient-to-r from-primary to-orange-500 text-white font-semibold text-sm"
             size="sm"
             data-testid="button-submit-post"
           >
-            Share
+            {isSubmitting ? "Sharing..." : "Share"}
           </Button>
         </div>
 
