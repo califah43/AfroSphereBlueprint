@@ -171,25 +171,25 @@ export default function App() {
     const userId = localStorage.getItem("currentUserId");
     const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
     
-    // Build complete profile data
+    // Only send text fields to backend (avatar/banner can be added later via edit profile)
     const profileData = {
       displayName: signupUsername,
       bio: signupProfileData.bio || "",
       profession: signupProfileData.profession || "",
-      avatar: signupProfileData.avatar || "",
-      banner: signupProfileData.banner || "",
     };
     
-    // Always save to localStorage first
+    // Save to localStorage with all data including images
     const updated = {
       ...currentUserData,
       ...profileData,
+      avatar: signupProfileData.avatar || "",
+      banner: signupProfileData.banner || "",
       username: signupUsername,
       interests: interests,
     };
     localStorage.setItem("currentUserData", JSON.stringify(updated));
 
-    // Save to backend
+    // Save to backend (without large image data to avoid quota issues)
     if (userId) {
       try {
         const response = await fetch(`/api/users/${userId}`, {
@@ -200,7 +200,12 @@ export default function App() {
         
         if (response.ok) {
           const savedUser = await response.json();
-          localStorage.setItem("currentUserData", JSON.stringify(savedUser));
+          // Preserve locally-stored images
+          localStorage.setItem("currentUserData", JSON.stringify({
+            ...savedUser,
+            avatar: signupProfileData.avatar || "",
+            banner: signupProfileData.banner || "",
+          }));
         }
       } catch (e) {
         // Continue even if save fails - user data is in localStorage
