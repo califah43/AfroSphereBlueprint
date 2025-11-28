@@ -225,14 +225,14 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
       {/* Profile Content - Ultra Compact */}
       <div className="max-w-md mx-auto px-4 -mt-12 relative z-10 pb-4">
-        {/* Avatar Section - Centered */}
-        <div className="text-center mb-4">
+        {/* Avatar & Info Side View */}
+        <div className="flex gap-3 mb-4 items-start">
           <button
             onClick={() => userProfile.avatar && setShowPictureModal(true)}
-            className={`relative inline-block mb-2 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+            className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
             data-testid="button-view-avatar"
           >
-            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted">
+            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted flex-shrink-0">
               {userProfile.avatar ? (
                 <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
               ) : (
@@ -243,56 +243,60 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             </div>
           </button>
 
-          {/* Name, Badge & Username */}
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <h1 className="text-lg font-black" data-testid="text-profile-displayname">
-              {userProfile.displayName}
-            </h1>
-            <CreatorBadge type="fashion-vanguard" size="sm" />
-          </div>
-          <p className="text-xs text-muted-foreground mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
-
-          {/* Bio */}
-          <p className="text-sm text-foreground leading-tight mb-2" data-testid="text-profile-bio">
-            {userProfile.bio}
-          </p>
-
-          {/* Professional Info - Inline Compact */}
-          {(userProfile.profession || userProfile.location) && (
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-3">
-              {userProfile.profession && (
-                <span>{userProfile.profession}</span>
-              )}
-              {userProfile.profession && userProfile.location && (
-                <span>·</span>
-              )}
-              {userProfile.location && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{userProfile.location}</span>
-                </div>
-              )}
+          <div className="flex-1 min-w-0">
+            {/* Name & Badge */}
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-lg font-black" data-testid="text-profile-displayname">
+                {userProfile.displayName}
+              </h1>
+              <CreatorBadge type="fashion-vanguard" size="sm" />
             </div>
-          )}
+            
+            {/* Username */}
+            <p className="text-xs text-muted-foreground mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
 
-          {/* Stats - Minimal */}
-          <div className="flex gap-6 justify-center mb-4 text-sm">
-            <button
-              onClick={onFollowersClick}
-              className="hover:opacity-70 transition-opacity"
-              data-testid="button-view-followers"
-            >
-              <span className="font-bold text-foreground" data-testid="text-followers-count">{userProfile.followers}</span>
-              <span className="text-muted-foreground"> Following</span>
-            </button>
-            <button
-              onClick={onFollowingClick}
-              className="hover:opacity-70 transition-opacity"
-              data-testid="button-view-following"
-            >
-              <span className="font-bold text-foreground" data-testid="text-following-count">{userProfile.following}</span>
-              <span className="text-muted-foreground"> Followers</span>
-            </button>
+            {/* Bio */}
+            <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
+              {userProfile.bio}
+            </p>
+
+            {/* Professional Info - Inline Compact */}
+            {(userProfile.profession || userProfile.location) && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                {userProfile.profession && (
+                  <span>{userProfile.profession}</span>
+                )}
+                {userProfile.profession && userProfile.location && (
+                  <span>·</span>
+                )}
+                {userProfile.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{userProfile.location}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Stats - Minimal */}
+            <div className="flex gap-4 text-xs">
+              <button
+                onClick={onFollowersClick}
+                className="hover:opacity-70 transition-opacity"
+                data-testid="button-view-followers"
+              >
+                <span className="font-bold text-foreground" data-testid="text-followers-count">{userProfile.followers}</span>
+                <span className="text-muted-foreground"> Following</span>
+              </button>
+              <button
+                onClick={onFollowingClick}
+                className="hover:opacity-70 transition-opacity"
+                data-testid="button-view-following"
+              >
+                <span className="font-bold text-foreground" data-testid="text-following-count">{userProfile.following}</span>
+                <span className="text-muted-foreground"> Followers</span>
+              </button>
+            </div>
           </div>
         </div>
 
