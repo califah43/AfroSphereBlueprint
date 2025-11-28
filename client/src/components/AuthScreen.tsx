@@ -71,12 +71,16 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         postCount: 0,
       };
       
-      // Register user to backend
+      // Register user to backend with Firebase UID
       try {
         await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: signupData.username, password: signupData.password }),
+          body: JSON.stringify({ 
+            username: signupData.username, 
+            password: signupData.password,
+            firebaseUid: userCredential.user.uid,
+          }),
         });
       } catch (e) {
         console.log("Backend sync note:", e);

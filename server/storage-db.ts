@@ -64,6 +64,7 @@ export class DbStorage implements IStorage {
       banner: '',
       website: '',
       profession: '',
+      firebaseUid: insertUser.firebaseUid || null,
     }).returning();
     return user;
   }
