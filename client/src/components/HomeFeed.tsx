@@ -78,11 +78,18 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     return () => window.removeEventListener('refreshPosts', handleRefresh);
   }, []);
 
-  // Fetch posts from API
+  // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
     queryKey: ['/api/posts', refreshKey],
     queryFn: async () => {
       try {
+        // Get current user ID
+        let userId = localStorage.getItem("currentUserId");
+        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        if (userData && userData.id && userData.id !== userId) {
+          userId = userData.id;
+        }
+
         // Fetch posts and all users in parallel
         const [postsRes, usersRes] = await Promise.all([
           fetch('/api/posts?limit=50'),
@@ -102,8 +109,26 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         if (!posts || posts.length === 0) {
           return mockPosts;
         }
+
+        // Batch check likes for all posts
+        let likedPostIds: string[] = [];
+        if (userId && posts.length > 0) {
+          try {
+            const likeRes = await fetch('/api/likes/posts/batch-check', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, postIds: posts.map((p: any) => p.id) }),
+            });
+            if (likeRes.ok) {
+              const likeData = await likeRes.json();
+              likedPostIds = likeData.likedPostIds || [];
+            }
+          } catch (e) {
+            console.error('Failed to fetch likes:', e);
+          }
+        }
         
-        // Transform posts using pre-fetched user data
+        // Transform posts using pre-fetched user data and likes
         return posts.map((p: any) => {
           const user = userMap.get(p.userId);
           const username = user?.username || (user?.displayName ? user.displayName.split(' ')[0] : "creator");
@@ -119,6 +144,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             comments: p.commentCount !== undefined ? p.commentCount : 0,
             timeAgo: formatTimeAgo(p.createdAt),
             category: p.category || "for-you",
+            isLiked: likedPostIds.includes(p.id),
           };
         });
       } catch {

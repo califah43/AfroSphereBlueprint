@@ -472,6 +472,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============ LIKE ROUTES ============
+  app.post("/api/likes/posts/batch-check", async (req, res) => {
+    try {
+      const { userId, postIds } = req.body;
+      if (!userId || !Array.isArray(postIds)) {
+        return res.status(400).json({ error: "Invalid request" });
+      }
+      
+      const likedPostIds: string[] = [];
+      for (const postId of postIds) {
+        const hasLiked = await storage.hasUserLikedPost(userId, postId);
+        if (hasLiked) likedPostIds.push(postId);
+      }
+      
+      res.json({ likedPostIds });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   app.get("/api/likes/posts/check/:userId/:postId", async (req, res) => {
     try {
       const { userId, postId } = req.params;

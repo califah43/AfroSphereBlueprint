@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -50,6 +49,7 @@ export default function PostDetail({
 }: PostDetailProps) {
   const { toast } = useToast();
   const genreData = genre ? GENRES[genre.toUpperCase()] : null;
+  const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const [comments, setComments] = useState(initialComments);
@@ -64,21 +64,6 @@ export default function PostDetail({
     }
     return userId;
   };
-
-  // Check like status using React Query
-  const { data: likeStatusData } = useQuery({
-    queryKey: [`/api/likes/posts/check/${getUserId()}/${postId}`],
-    queryFn: async () => {
-      const userId = getUserId();
-      if (!userId) return { liked: false };
-      const res = await fetch(`/api/likes/posts/check/${userId}/${postId}`);
-      if (res.ok) return res.json();
-      return { liked: false };
-    },
-    staleTime: 30000,
-  });
-
-  const isLiked = likeStatusData?.liked || false;
 
   const handleLike = async () => {
     const userId = getUserId();

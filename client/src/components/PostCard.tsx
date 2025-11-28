@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -51,6 +50,7 @@ interface PostCardProps {
 
 export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick, onHashtagClick }: PostCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likes, setLikes] = useState(post.likes);
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -65,21 +65,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     }
     return userId;
   };
-
-  // Check like status using React Query
-  const { data: likeStatusData } = useQuery({
-    queryKey: [`/api/likes/posts/check/${getUserId()}/${post.id}`],
-    queryFn: async () => {
-      const userId = getUserId();
-      if (!userId) return { liked: false };
-      const res = await fetch(`/api/likes/posts/check/${userId}/${post.id}`);
-      if (res.ok) return res.json();
-      return { liked: false };
-    },
-    staleTime: 30000, // 30 seconds
-  });
-
-  const isLiked = likeStatusData?.liked || false;
 
   const handleLike = async () => {
     const userId = getUserId();
