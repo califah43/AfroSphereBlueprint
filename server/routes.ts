@@ -366,11 +366,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const posts = await storage.listPosts(1000, 0);
       const filtered = posts.filter(p => p.caption?.toLowerCase().includes(`#${tag}`));
       
-      res.json(filtered);
+      // Enrich posts with username
+      const enrichedPosts = await Promise.all(
+        filtered.map(async (post) => {
+          const user = await storage.getUser(post.userId);
+          return {
+            ...post,
+            username: user?.username || "creator",
+          };
+        })
+      );
+      
+      res.json(enrichedPosts);
     } catch (error) {
       res.status(400).json({ error: "Failed to search hashtag" });
     }
   });
+
 
   // ============ SETTINGS ROUTES ============
   app.get("/api/settings/:userId", async (req, res) => {

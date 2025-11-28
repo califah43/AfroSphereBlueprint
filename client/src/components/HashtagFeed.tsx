@@ -54,7 +54,7 @@ export default function HashtagFeed({ hashtag, onClose }: HashtagFeedProps) {
         if (data && data.length > 0) {
           const formattedPosts: Post[] = data.map((p: any) => ({
             id: p.id,
-            author: { username: p.userId || "creator" },
+            author: { username: p.username || "creator" },
             imageUrl: p.image,
             caption: p.caption,
             likes: p.likes || 0,
