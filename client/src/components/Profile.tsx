@@ -331,24 +331,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           {/* Action Buttons - Premium */}
           <div className="flex gap-2 mb-6">
             {isOwnProfile ? (
-              <>
-                <Button
-                  className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-10 rounded-lg text-sm shadow-lg shadow-primary/20"
-                  onClick={onEditProfile}
-                  data-testid="button-edit-profile"
-                >
-                  Edit Profile
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={onSettings}
-                  className="h-10 w-10 rounded-lg hover-elevate"
-                  data-testid="button-settings-icon"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </>
+              <Button
+                className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-10 rounded-lg text-sm shadow-lg shadow-primary/20"
+                onClick={onEditProfile}
+                data-testid="button-edit-profile"
+              >
+                Edit Profile
+              </Button>
             ) : (
               <Button 
                 className={`flex-1 font-bold h-10 rounded-lg text-sm shadow-lg ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-secondary/20' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 shadow-primary/20'}`}
