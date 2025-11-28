@@ -61,12 +61,14 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
       setIsLoading(true);
       try {
         const currentUserId = localStorage.getItem("currentUserId");
+        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
         const res = await fetch('/api/comments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             postId,
             userId: currentUserId,
+            username: userData.username,
             text: newComment,
             replyTo: null,
           }),
@@ -92,12 +94,14 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
       setIsLoading(true);
       try {
         const currentUserId = localStorage.getItem("currentUserId");
+        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
         const res = await fetch('/api/comments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             postId,
             userId: currentUserId,
+            username: userData.username,
             text: replyText,
             replyTo: commentId,
           }),
