@@ -452,8 +452,8 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
                   <Button type="submit" disabled={isLoading} className="w-full" data-testid="button-signup-submit">
                     {isLoading ? "Creating..." : "Create Account"}
                   </Button>
-                  <Button type="button" variant="outline" className="w-full" data-testid="button-google-signup">
-                    Continue with Google
+                  <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignUp} disabled={googleLoading || isLoading} data-testid="button-google-signup">
+                    {googleLoading ? "Connecting..." : "Sign up with Google"}
                   </Button>
                 </form>
               </CardContent>
