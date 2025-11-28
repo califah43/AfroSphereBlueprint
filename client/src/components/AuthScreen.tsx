@@ -14,6 +14,22 @@ interface AuthScreenProps {
   onLogoClick?: () => void;
 }
 
+const getErrorMessage = (error: any): string => {
+  const code = error?.code || "";
+  const messages: Record<string, string> = {
+    "auth/invalid-email": "Please enter a valid email address.",
+    "auth/user-disabled": "This account has been disabled.",
+    "auth/user-not-found": "No account found with this email.",
+    "auth/wrong-password": "Incorrect password. Try again.",
+    "auth/email-already-in-use": "This email is already registered.",
+    "auth/weak-password": "Password must be at least 6 characters.",
+    "auth/invalid-credential": "Invalid email or password.",
+    "auth/operation-not-allowed": "Account creation is currently disabled.",
+    "auth/too-many-requests": "Too many login attempts. Try again later.",
+  };
+  return messages[code] || (error?.message || "An error occurred. Please try again.");
+};
+
 export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenProps) {
   const [signupData, setSignupData] = useState({ email: "", username: "", password: "" });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -72,7 +88,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
       onAuthComplete(true);
     } catch (error: any) {
-      const errorMsg = error.message || "Failed to create account";
+      const errorMsg = getErrorMessage(error);
       setSignupError(errorMsg);
       toast({ title: "Signup failed", description: errorMsg, variant: "destructive", duration: 4000 });
       console.error("Signup error:", error);
@@ -132,7 +148,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
       toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
       onAuthComplete(false);
     } catch (error: any) {
-      const errorMsg = error.message || "Failed to sign in";
+      const errorMsg = getErrorMessage(error);
       setLoginError(errorMsg);
       toast({ title: "Login failed", description: errorMsg, variant: "destructive", duration: 4000 });
       console.error("Login error:", error);
@@ -171,7 +187,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
-                  {loginError && <div className="bg-destructive/10 border border-destructive text-destructive rounded p-3 text-sm" data-testid="error-login">{loginError}</div>}
+                  {loginError && <div className="bg-destructive/10 border border-destructive/50 text-destructive rounded-lg p-4 text-sm font-medium" data-testid="error-login">⚠️ {loginError}</div>}
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
@@ -217,7 +233,7 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
-                  {signupError && <div className="bg-destructive/10 border border-destructive text-destructive rounded p-3 text-sm" data-testid="error-signup">{signupError}</div>}
+                  {signupError && <div className="bg-destructive/10 border border-destructive/50 text-destructive rounded-lg p-4 text-sm font-medium" data-testid="error-signup">⚠️ {signupError}</div>}
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
