@@ -173,6 +173,15 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         return postCategory === activeCategory.toLowerCase();
       });
 
+  // Pass activeCategory to CollapsibleHeader for tab styling
+  const categoriesWithForYou = [
+    { id: "for-you", label: "For You" },
+    { id: "fashion", label: "Fashion" },
+    { id: "music", label: "Music" },
+    { id: "art", label: "Art" },
+    { id: "culture", label: "Culture" },
+  ];
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (scrollContainerRef.current?.scrollTop === 0) {
       touchStartY.current = e.touches[0].clientY;

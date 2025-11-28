@@ -34,7 +34,7 @@ export default function CollapsibleHeader({ isRefreshing, activeCategory, onCate
               key={category}
               onClick={() => onCategoryChange?.(category.toLowerCase().replace(" ", "-"))}
               className={`whitespace-nowrap px-3.5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
-                activeCategory === category.toLowerCase()
+                activeCategory === category.toLowerCase().replace(" ", "-")
                   ? "bg-gradient-to-r from-primary to-orange-500 text-white shadow-md hover-elevate"
                   : "bg-muted/30 text-muted-foreground hover:bg-muted/60 border border-border/30"
               }`}
