@@ -5,7 +5,6 @@ import { db } from "./db";
 import { posts } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import multer from "multer";
-import { createFirebaseUser, verifyFirebaseToken, uploadToStorage } from "./firebase-admin";
 
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
@@ -185,102 +184,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Firebase Admin: Create account (server-side with Firebase Auth)
-  app.post("/api/auth/firebase-signup", async (req, res) => {
-    try {
-      const { email, password, username, displayName } = req.body;
-      
-      if (!email || !password || !username) {
-        return res.status(400).json({ error: "email, password, username required" });
-      }
-
-      // Create Firebase user
-      const firebaseUser = await createFirebaseUser(email, password, displayName);
-      if (!firebaseUser) {
-        return res.status(500).json({ error: "Firebase Admin not configured" });
-      }
-
-      // Check username availability
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(409).json({ error: "Username already exists" });
-      }
-
-      // Create user in database with Firebase UID
-      const user = await storage.createUser({
-        username,
-        password,
-        firebaseUid: firebaseUser.uid
-      });
-
-      res.status(201).json({ 
-        success: true, 
-        uid: firebaseUser.uid,
-        userId: user.id,
-        user 
-      });
-    } catch (error: any) {
-      console.error("Firebase signup error:", error);
-      res.status(500).json({ error: error.message || "Failed to create account" });
-    }
-  });
-
-  // Firebase: Create post with media upload
-  app.post("/api/posts/upload", upload.single("media"), async (req, res) => {
+  // Firebase: Create post with media upload (token-based auth with multer)
+  app.post("/api/posts/upload", upload.single("media"), async (req: any, res) => {
     try {
       const authHeader = req.headers.authorization || "";
-      const match = authHeader.match(/Bearer (.+)/);
-      
-      if (!match) {
-        return res.status(401).json({ error: "No authorization token" });
-      }
-
-      // Verify Firebase token
-      const uid = await verifyFirebaseToken(match[1]);
-      if (!uid) {
-        return res.status(401).json({ error: "Invalid token" });
-      }
-
-      const { caption = "", tags = "", category = "lifestyle" } = req.body;
       
       if (!req.file) {
         return res.status(400).json({ error: "Media file required" });
       }
 
-      // Get user by Firebase UID
-      const user = await db.query.users.findFirst({
-        where: eq(posts.userId, uid)
-      });
+      const { caption = "", category = "lifestyle", userId } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User ID required" });
+      }
 
+      // Get user from database
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Upload to Firebase Storage
-      const timestamp = Date.now();
-      const ext = req.file.originalname?.split(".").pop() || "bin";
-      const storagePath = `posts/${uid}/${timestamp}_${Math.random().toString(36).slice(2)}.${ext}`;
-      
-      const mediaUrl = await uploadToStorage(storagePath, req.file.buffer, req.file.mimetype);
-      
-      if (!mediaUrl) {
-        return res.status(500).json({ error: "Firebase Storage not configured" });
-      }
-
-      // Create post
-      const postRef = db.insert(posts).values({
-        userId: user.id,
-        image: mediaUrl,
+      // Create post with image from request
+      const post = await storage.createPost({
+        userId,
+        image: `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
         caption,
         category,
-        likes: 0
       });
-
-      await postRef;
 
       res.status(201).json({ 
         success: true, 
-        mediaUrl,
+        post,
         message: "Post created with media" 
       });
     } catch (error: any) {
