@@ -116,7 +116,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createUser({
         username,
         password: "password123",
-        displayName: username.replace(/_/g, " "),
       });
     } catch (e) {
       // User may already exist
