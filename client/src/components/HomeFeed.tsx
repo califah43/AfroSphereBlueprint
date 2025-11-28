@@ -62,28 +62,38 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     queryKey: ['/api/posts', refreshKey],
     queryFn: async () => {
       try {
-        const res = await fetch('/api/posts?limit=50');
-        const posts = await res.json();
+        // Fetch posts and all users in parallel
+        const [postsRes, usersRes] = await Promise.all([
+          fetch('/api/posts?limit=50'),
+          fetch('/api/users/all'),
+        ]);
         
-        // Transform backend posts to match frontend structure
-        return Promise.all(posts.map(async (p: any) => {
-          try {
-            const userRes = await fetch(`/api/users/${p.userId}`);
-            const user = await userRes.json();
-            return {
-              id: p.id,
-              author: { username: user.username || "creator", avatar: user.avatar },
-              imageUrl: p.image,
-              caption: p.caption,
-              likes: p.likes || 0,
-              comments: p.commentCount || 0,
-              timeAgo: p.createdAt ? formatTimeAgo(new Date(p.createdAt)) : "now",
-              category: p.category,
-            };
-          } catch (e) {
-            return null;
-          }
-        })).then(posts => posts.filter(Boolean));
+        const posts = await postsRes.json();
+        const allUsers = usersRes.ok ? await usersRes.json() : [];
+        
+        // Create a map for fast user lookup
+        const userMap = new Map();
+        allUsers.forEach((u: any) => {
+          userMap.set(u.id, u);
+        });
+        
+        // Transform posts using pre-fetched user data
+        return posts.map((p: any) => {
+          const user = userMap.get(p.userId);
+          return {
+            id: p.id,
+            author: { 
+              username: user?.username || "creator", 
+              avatar: user?.avatar || "" 
+            },
+            imageUrl: p.image,
+            caption: p.caption,
+            likes: p.likes || 0,
+            comments: p.commentCount || 0,
+            timeAgo: p.createdAt ? formatTimeAgo(new Date(p.createdAt)) : "now",
+            category: p.category,
+          };
+        });
       } catch {
         return mockPosts;
       }
