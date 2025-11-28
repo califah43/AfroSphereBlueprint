@@ -323,26 +323,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/comments", async (req, res) => {
     try {
-      const parsed = insertCommentSchema.parse(req.body);
-      
-      // Get the current user's username - handle both database UUID and Firebase UID
+      let userId = req.body.userId;
       let username = "creator";
+      
+      // Map Firebase UID to database user ID and get username
       try {
-        // First try by database UUID
-        let user = await storage.getUser(parsed.userId);
-        if (user?.username) {
+        const allUsers = await db.query.users.findMany();
+        let user = allUsers.find(u => u.id === userId);
+        
+        // If not found by UUID, try by Firebase UID (for backward compat)
+        if (!user) {
+          user = allUsers.find(u => u.firebaseUid === userId);
+        }
+        
+        // If still not found, try finding by any matching pattern (loose match)
+        if (!user && userId) {
+          user = allUsers.find(u => 
+            u.username === req.body.username || 
+            u.firebaseUid === userId ||
+            u.id === userId
+          );
+        }
+        
+        if (user) {
+          userId = user.id; // Use database UUID
           username = user.username;
-        } else {
-          // Try by Firebase UID
-          const allUsers = await db.query.users.findMany();
-          user = allUsers.find(u => u.firebaseUid === parsed.userId);
-          if (user?.username) {
-            username = user.username;
-          }
         }
       } catch (e) {
-        // Use default "creator" if lookup fails
+        // Proceed with Firebase UID if lookup fails
       }
+      
+      const parsed = insertCommentSchema.parse({
+        postId: req.body.postId,
+        userId: userId,
+        text: req.body.text,
+        replyTo: req.body.replyTo || null,
+      });
       
       const comment = await storage.createComment(parsed);
       
@@ -361,6 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(enrichedComment);
     } catch (error) {
+      console.error("Comment creation error:", error);
       res.status(400).json({ error: "Invalid request" });
     }
   });
