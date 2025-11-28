@@ -38,6 +38,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
   const [displayedPosts, setDisplayedPosts] = useState<Post[]>(mockPosts);
   const [hasNewPosts, setHasNewPosts] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollTop, setLastScrollTop] = useState(0);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
@@ -99,13 +101,22 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
     }
   };
 
-  // Infinite scroll detection
+  // Infinite scroll detection + header visibility
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
+      
+      // Handle header visibility
+      const scrollDelta = scrollTop - lastScrollTop;
+      if (scrollDelta < -10) {
+        setIsHeaderVisible(true);
+      } else if (scrollDelta > 10) {
+        setIsHeaderVisible(false);
+      }
+      setLastScrollTop(scrollTop);
       
       // Load more when near bottom
       if (scrollHeight - scrollTop - clientHeight < 500 && displayedPosts.length < 50) {
@@ -121,25 +132,26 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick }: HomeFeedPr
       }
     };
 
-    container.addEventListener("scroll", handleScroll);
+    container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [displayedPosts]);
+  }, [displayedPosts, lastScrollTop]);
 
   return (
     <div
-      className="pb-20 h-screen"
+      className="pb-20"
       data-testid="container-home-feed"
       ref={scrollContainerRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{ overflowY: "auto" }}
+      style={{ overflowY: "auto", height: "100vh" }}
     >
       {/* Collapsible Header */}
       <CollapsibleHeader 
         isRefreshing={isRefreshing}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
+        isVisible={isHeaderVisible}
       />
 
       {/* Pull-to-Refresh Indicator */}
