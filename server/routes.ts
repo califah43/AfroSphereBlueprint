@@ -320,13 +320,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId, postId } = req.body;
       const hasLiked = await storage.hasUserLikedPost(userId, postId);
       
+      let newLikeCount = 0;
       if (hasLiked) {
         await storage.unlikePost(userId, postId);
-        res.json({ liked: false });
       } else {
         await storage.likePost(userId, postId);
-        res.json({ liked: true });
       }
+      
+      // Fetch updated post to get the new like count
+      const updatedPost = await storage.getPost(postId);
+      newLikeCount = updatedPost?.likes || 0;
+      
+      res.json({ liked: !hasLiked, likes: newLikeCount });
     } catch (error) {
       res.status(400).json({ error: "Invalid request" });
     }
@@ -340,11 +345,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (hasLiked) {
         await storage.unlikeComment(userId, commentId);
-        res.json({ liked: false });
       } else {
         await storage.likeComment(userId, commentId);
-        res.json({ liked: true });
       }
+      
+      // Fetch updated comment to get the new like count
+      const updatedComment = await storage.getComment(commentId);
+      const newLikeCount = updatedComment?.likes || 0;
+      
+      res.json({ liked: !hasLiked, likes: newLikeCount });
     } catch (error) {
       res.status(400).json({ error: "Invalid request" });
     }
