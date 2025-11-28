@@ -87,29 +87,29 @@ export default function App() {
       const userId = localStorage.getItem("currentUserId");
       const userData = localStorage.getItem("currentUserData");
       
-      // If user was previously logged in, fetch fresh data from backend
+      // If user was previously logged in, go to main immediately
       if (userId && userData) {
-        try {
-          const response = await fetch(`/api/users/${userId}`);
-          if (response.ok) {
-            const freshData = await response.json();
-            localStorage.setItem("currentUserData", JSON.stringify(freshData));
-          } else {
-            // If user ID not found, clear session and go to auth
-            localStorage.removeItem("currentUserId");
-            localStorage.removeItem("currentUserData");
-            setAppState("auth");
-            return;
-          }
-        } catch (error) {
-          // Silently handle fetch errors during session check
-        }
+        setAppState("main");
         
-        // Show splash screen briefly then go to main
-        const timer = setTimeout(() => {
-          setAppState("main");
-        }, 1500);
-        return () => clearTimeout(timer);
+        // Fetch fresh data in the background without blocking
+        fetch(`/api/users/${userId}`)
+          .then(res => {
+            if (res.ok) {
+              return res.json();
+            } else {
+              localStorage.removeItem("currentUserId");
+              localStorage.removeItem("currentUserData");
+            }
+          })
+          .then(freshData => {
+            if (freshData) {
+              localStorage.setItem("currentUserData", JSON.stringify(freshData));
+            }
+          })
+          .catch(() => {
+            // Silently handle errors - use cached data
+          });
+        return;
       }
     };
     
