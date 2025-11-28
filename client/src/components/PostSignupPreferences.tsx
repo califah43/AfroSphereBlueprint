@@ -1,24 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Music, Shirt, Palette, Film, Footprints, Camera, Laugh, Zap, Trophy, Plane, UtensilsCrossed, Heart } from "lucide-react";
 
 interface PostSignupPreferencesProps {
   onComplete: (interests: string[]) => void;
 }
 
 const INTEREST_CATEGORIES = [
-  { id: "music", label: "Music", icon: "🎵" },
-  { id: "fashion", label: "Fashion", icon: "👗" },
-  { id: "art", label: "Art & Design", icon: "🎨" },
-  { id: "film", label: "Film & Video", icon: "🎬" },
-  { id: "dance", label: "Dance", icon: "💃" },
-  { id: "photography", label: "Photography", icon: "📸" },
-  { id: "comedy", label: "Comedy", icon: "😂" },
-  { id: "tech", label: "Tech & Innovation", icon: "💻" },
-  { id: "sports", label: "Sports", icon: "⚽" },
-  { id: "travel", label: "Travel", icon: "✈️" },
-  { id: "food", label: "Food & Cooking", icon: "🍲" },
-  { id: "wellness", label: "Wellness", icon: "🧘" },
+  { id: "music", label: "Music", icon: Music },
+  { id: "fashion", label: "Fashion", icon: Shirt },
+  { id: "art", label: "Art & Design", icon: Palette },
+  { id: "film", label: "Film & Video", icon: Film },
+  { id: "dance", label: "Dance", icon: Footprints },
+  { id: "photography", label: "Photography", icon: Camera },
+  { id: "comedy", label: "Comedy", icon: Laugh },
+  { id: "tech", label: "Tech & Innovation", icon: Zap },
+  { id: "sports", label: "Sports", icon: Trophy },
+  { id: "travel", label: "Travel", icon: Plane },
+  { id: "food", label: "Food & Cooking", icon: UtensilsCrossed },
+  { id: "wellness", label: "Wellness", icon: Heart },
 ];
 
 export default function PostSignupPreferences({ onComplete }: PostSignupPreferencesProps) {
@@ -58,7 +59,9 @@ export default function PostSignupPreferences({ onComplete }: PostSignupPreferen
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="grid grid-cols-2 gap-3">
-          {INTEREST_CATEGORIES.map((category) => (
+          {INTEREST_CATEGORIES.map((category) => {
+            const IconComponent = category.icon;
+            return (
             <button
               key={category.id}
               onClick={() => toggleInterest(category.id)}
@@ -69,14 +72,17 @@ export default function PostSignupPreferences({ onComplete }: PostSignupPreferen
               }`}
               data-testid={`button-interest-${category.id}`}
             >
-              <span className="text-3xl">{category.icon}</span>
+              <IconComponent className={`w-6 h-6 ${
+                selected.includes(category.id) ? "text-primary" : "text-muted-foreground"
+              }`} />
               <span className={`text-xs font-semibold ${
                 selected.includes(category.id) ? "text-primary" : "text-foreground"
               }`}>
                 {category.label}
               </span>
             </button>
-          ))}
+          );
+          })}
         </div>
 
         {/* Selection Count */}

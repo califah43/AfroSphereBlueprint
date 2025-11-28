@@ -173,6 +173,7 @@ export default function App() {
     const updated = {
       ...currentUserData,
       username: signupUsername,
+      displayName: signupUsername,
       avatar: signupProfileData.avatar,
       banner: signupProfileData.banner,
       bio: signupProfileData.bio,
@@ -181,22 +182,29 @@ export default function App() {
     };
     localStorage.setItem("currentUserData", JSON.stringify(updated));
 
-    // Save to backend
+    // Save to backend with all profile data
     try {
       const userId = localStorage.getItem("currentUserId");
       if (userId) {
-        await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/users/${userId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             displayName: signupUsername,
             bio: signupProfileData.bio,
             profession: signupProfileData.profession,
+            avatar: signupProfileData.avatar,
+            banner: signupProfileData.banner,
           }),
         });
+        
+        if (response.ok) {
+          const savedUser = await response.json();
+          localStorage.setItem("currentUserData", JSON.stringify(savedUser));
+        }
       }
     } catch (e) {
-      // Backend sync error - profile data saved locally
+      console.error("Error saving profile:", e);
     }
 
     setAppState("main");
