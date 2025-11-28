@@ -225,36 +225,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
       {/* Profile Content - Ultra Compact */}
       <div className="max-w-md mx-auto px-4 -mt-12 relative z-10 pb-4">
-        {/* Avatar & Info Section */}
-        <div className="mb-4">
-          {/* Avatar with name/badge on same line */}
-          <div className="flex gap-3 items-start mb-3">
-            <button
-              onClick={() => userProfile.avatar && setShowPictureModal(true)}
-              className={`relative flex-shrink-0 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
-              data-testid="button-view-avatar"
-            >
-              <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted flex-shrink-0">
-                {userProfile.avatar ? (
-                  <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
-                    <span className="text-lg font-bold text-foreground">{userProfile.username[0].toUpperCase()}</span>
-                  </div>
-                )}
-              </div>
-            </button>
-            
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-black" data-testid="text-profile-displayname">
-                  {userProfile.displayName}
-                </h1>
-                <CreatorBadge type="fashion-vanguard" size="sm" />
-              </div>
-              <p className="text-xs text-muted-foreground" data-testid="text-profile-username">@{userProfile.username}</p>
+        {/* Avatar Section - Centered */}
+        <div className="text-center mb-4">
+          <button
+            onClick={() => userProfile.avatar && setShowPictureModal(true)}
+            className={`relative inline-block mb-2 ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
+            data-testid="button-view-avatar"
+          >
+            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted">
+              {userProfile.avatar ? (
+                <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <span className="text-lg font-bold text-foreground">{userProfile.username[0].toUpperCase()}</span>
+                </div>
+              )}
             </div>
+          </button>
+
+          {/* Name, Badge & Username */}
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <h1 className="text-lg font-black" data-testid="text-profile-displayname">
+              {userProfile.displayName}
+            </h1>
+            <CreatorBadge type="fashion-vanguard" size="sm" />
           </div>
+          <p className="text-xs text-muted-foreground mb-2" data-testid="text-profile-username">@{userProfile.username}</p>
 
           {/* Bio */}
           <p className="text-sm text-foreground leading-tight mb-2" data-testid="text-profile-bio">
@@ -263,7 +259,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
           {/* Professional Info - Inline Compact */}
           {(userProfile.profession || userProfile.location) && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-3">
               {userProfile.profession && (
                 <span>{userProfile.profession}</span>
               )}
@@ -280,7 +276,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           )}
 
           {/* Stats - Minimal */}
-          <div className="flex gap-6 mb-4 text-sm">
+          <div className="flex gap-6 justify-center mb-4 text-sm">
             <button
               onClick={onFollowersClick}
               className="hover:opacity-70 transition-opacity"
