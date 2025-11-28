@@ -48,10 +48,24 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         bio: "",
         location: "",
         avatar: "",
+        website: "",
+        profession: "",
         followerCount: 0,
         followingCount: 0,
         postCount: 0,
       };
+      
+      // Register user to backend
+      try {
+        await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: signupData.username, password: signupData.password }),
+        });
+      } catch (e) {
+        console.log("Backend sync note:", e);
+      }
+      
       localStorage.setItem("currentUserId", userCredential.user.uid);
       localStorage.setItem("currentUserData", JSON.stringify(userData));
       console.log("Signup:", userCredential.user);
