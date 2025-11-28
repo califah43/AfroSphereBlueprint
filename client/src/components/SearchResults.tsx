@@ -12,6 +12,7 @@ interface SearchResultsProps {
   onClose: () => void;
   onHashtagClick?: (hashtag: string) => void;
   onUserClick?: (username: string) => void;
+  onPostClick?: (postId: string) => void;
 }
 
 const mockUsers = [
@@ -39,7 +40,7 @@ const mockPosts = [
   { id: "6", image: musicImage },
 ];
 
-export default function SearchResults({ onClose, onHashtagClick, onUserClick }: SearchResultsProps) {
+export default function SearchResults({ onClose, onHashtagClick, onUserClick, onPostClick }: SearchResultsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -287,7 +288,11 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick }: 
               {mockPosts.map((post) => (
                 <button
                   key={post.id}
-                  className="aspect-square hover-elevate overflow-hidden rounded-lg ring-1 ring-border/50 group transition-all duration-300"
+                  onClick={() => {
+                    onPostClick?.(post.id);
+                    onClose();
+                  }}
+                  className="aspect-square hover-elevate overflow-hidden rounded-lg ring-1 ring-border/50 group transition-all duration-300 relative"
                   data-testid={`search-post-${post.id}`}
                 >
                   <img 

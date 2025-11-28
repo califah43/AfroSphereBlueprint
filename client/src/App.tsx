@@ -395,6 +395,7 @@ export default function App() {
               onClose={() => setModalView("none")}
               onHashtagClick={handleOpenHashtagFeed}
               onUserClick={handleOpenUserProfile}
+              onPostClick={handleOpenPostDetail}
             />
           )}
 
