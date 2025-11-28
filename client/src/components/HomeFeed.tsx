@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
 import CollapsibleHeader from "./CollapsibleHeader";
@@ -82,6 +82,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
     queryKey: ['/api/posts', refreshKey],
+    placeholderData: keepPreviousData, // Keep showing old data while refetching - no skeleton flash!
     queryFn: async () => {
       try {
         // Get current user ID
