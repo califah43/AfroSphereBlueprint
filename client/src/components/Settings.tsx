@@ -166,7 +166,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
       });
       if (response.ok) {
         setEditMode("none");
-        setEditData({ password: "", newPassword: "", confirmPassword: "", reportText: "" });
+        setEditData({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
       }
     } catch (e) {
       console.error("Failed to update password:", e);
