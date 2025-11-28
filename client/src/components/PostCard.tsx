@@ -170,86 +170,54 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
   return (
     <div className="bg-background overflow-hidden mb-0 border-b border-border/20" data-testid={`card-post-${post.id}`}>
-      {/* Image Section - FIRST */}
-      <div 
-        className="relative bg-gradient-to-br from-muted/40 to-muted/20 w-full" 
-        onDoubleClick={handleDoubleClick}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <img
-          src={currentImage}
-          alt="Post content"
-          className="w-full aspect-square object-cover cursor-pointer select-none"
-          data-testid={`img-post-${post.id}`}
-          draggable={false}
-        />
-        
-        {/* Image carousel indicators - TOP OF IMAGE */}
-        {allImages.length > 1 && (
-          <div className="absolute top-3 left-1/2 transform -translate-x-1/2 flex gap-1 px-2.5 py-1.5 bg-primary/80 backdrop-blur-sm rounded-full">
-            {allImages.map((_, idx) => (
-              <div
-                key={idx}
-                className={`h-2 w-2 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white' : 'bg-white/50'}`}
-                data-testid={`indicator-image-${idx}`}
-              />
-            ))}
-          </div>
-        )}
-        
-        {showHeart && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart 
-              className="w-28 h-28 text-white fill-white drop-shadow-lg" 
-              style={{ animation: 'instagramHeartBurst 0.8s ease-out forwards' }} 
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Engagement Stats Below Image - X/Twitter Style */}
-      <div className="px-4 py-3 flex justify-between text-xs text-muted-foreground border-b border-border/10">
-        <button className="hover:text-foreground transition-colors" data-testid={`button-comments-stat-${post.id}`}>
-          <MessageCircle className="inline h-4 w-4 mr-1" /> {post.comments}
-        </button>
-        <button className="hover:text-foreground transition-colors" data-testid={`button-shares-stat-${post.id}`}>
-          <Share2 className="inline h-4 w-4 mr-1" /> {Math.floor(post.likes * 0.3)}
-        </button>
-        <button className="hover:text-foreground transition-colors" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
-          <Heart className={`inline h-4 w-4 mr-1 ${isLiked ? "fill-primary text-primary" : ""}`} /> {likes}
-        </button>
-        <button className="hover:text-foreground transition-colors" data-testid={`button-views-stat-${post.id}`}>
-          <Eye className="inline h-4 w-4 mr-1" /> {Math.floor(post.likes * 0.5)}
-        </button>
-      </div>
-
-      {/* Author Profile Below Stats */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/10">
+      {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style */}
+      <div className="flex items-start justify-between gap-3 px-4 py-3">
         <button 
           onClick={() => onAuthorClick?.(post.author.username)}
-          className="flex items-center gap-2 hover-elevate flex-1 transition-all group"
+          className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-10 h-10">
+          <Avatar className="w-12 h-12">
             <AvatarImage src={post.author.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 text-xs font-semibold">{post.author.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{post.author.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div className="text-left min-w-0">
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 flex-wrap">
             <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
               {post.author.username}
             </p>
-            <p className="text-xs text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
+            <p className="text-sm text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
-        </button>
+
+          {/* Caption Text - Right Below Header */}
+          <p className="text-sm leading-relaxed mt-2 text-foreground" data-testid={`text-caption-${post.id}`}>
+            {post.caption?.split(/(\#\w+)/g).map((part, i) => 
+              part.startsWith('#') ? (
+                <button
+                  key={i}
+                  onClick={() => onHashtagClick?.(part.substring(1))}
+                  className="text-primary hover:text-primary/80 font-semibold transition-colors"
+                  data-testid={`button-hashtag-${part.substring(1)}`}
+                >
+                  {part}
+                </button>
+              ) : (
+                part
+              )
+            )}
+          </p>
+        </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="icon"
-              className="hover-elevate active-elevate-2"
+              className="hover-elevate active-elevate-2 flex-shrink-0"
               data-testid={`button-menu-${post.id}`}
             >
               <MoreVertical className="h-5 w-5" />
@@ -332,76 +300,80 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         </AlertDialog>
       </div>
 
-      {/* Caption & Actions - LAST */}
-      <div className="px-4 py-3 space-y-3">
-        {/* Caption Section */}
-        <p className="text-sm leading-relaxed">
-          <span className="font-bold text-foreground">{post.author.username}</span>{" "}
-          <span className="text-foreground/90" data-testid={`text-caption-${post.id}`}>
-            {post.caption?.split(/(\#\w+)/g).map((part, i) => 
-              part.startsWith('#') ? (
-                <button
-                  key={i}
-                  onClick={() => onHashtagClick?.(part.substring(1))}
-                  className="text-primary hover:text-primary/80 font-semibold transition-colors"
-                  data-testid={`button-hashtag-${part.substring(1)}`}
-                >
-                  {part}
-                </button>
-              ) : (
-                part
-              )
-            )}
-          </span>
-        </p>
-
-        {/* Comments Link */}
-        {post.comments > 0 && (
-          <button
-            onClick={() => onComment?.(post.id)}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-            data-testid={`button-view-comments-${post.id}`}
-          >
-            View all {post.comments} {post.comments === 1 ? "comment" : "comments"}
-          </button>
+      {/* Image Section - Rounded Corners */}
+      <div 
+        className="relative mx-4 mb-3 rounded-2xl overflow-hidden bg-gradient-to-br from-muted/40 to-muted/20" 
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img
+          src={currentImage}
+          alt="Post content"
+          className="w-full aspect-square object-cover cursor-pointer select-none"
+          data-testid={`img-post-${post.id}`}
+          draggable={false}
+        />
+        
+        {/* Image carousel indicators */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1 px-2.5 py-1.5 bg-black/40 backdrop-blur-sm rounded-full">
+            {allImages.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1.5 w-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-2.5 bg-white' : 'bg-white/50'}`}
+                data-testid={`indicator-image-${idx}`}
+              />
+            ))}
+          </div>
         )}
-
-        {/* Action Buttons - Bottom */}
-        <div className="flex items-center justify-between -mx-2 pt-2 border-t border-border/10">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onComment?.(post.id)}
-            className="hover-elevate active-elevate-2 flex-1"
-            data-testid={`button-comment-${post.id}`}
-          >
-            <MessageCircle className="h-5 w-5 mr-2" />
-            <span className="text-xs">Comment</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              onShare?.(post.id);
-            }}
-            className="hover-elevate active-elevate-2 flex-1"
-            data-testid={`button-share-${post.id}`}
-          >
-            <Share2 className="h-5 w-5 mr-2" />
-            <span className="text-xs">Share</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBookmark}
-            className="hover-elevate active-elevate-2 flex-1"
-            data-testid={`button-bookmark-${post.id}`}
-          >
-            <Bookmark className={`h-5 w-5 mr-2 ${isBookmarked ? "fill-current text-primary" : ""}`} />
-            <span className="text-xs">Save</span>
-          </Button>
-        </div>
+        
+        {showHeart && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Heart 
+              className="w-28 h-28 text-white fill-white drop-shadow-lg" 
+              style={{ animation: 'instagramHeartBurst 0.8s ease-out forwards' }} 
+            />
+          </div>
+        )}
       </div>
+
+      {/* Engagement Stats - Twitter X Style Bottom */}
+      <div className="px-4 py-3 flex justify-between text-xs text-muted-foreground border-t border-border/10">
+        <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={() => onComment?.(post.id)} data-testid={`button-comments-stat-${post.id}`}>
+          <MessageCircle className="h-4 w-4" />
+          <span>{post.comments}</span>
+        </button>
+        <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-shares-stat-${post.id}`}>
+          <Share2 className="h-4 w-4" />
+          <span>{Math.floor(post.likes * 0.3)}</span>
+        </button>
+        <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
+          <Heart className={`h-4 w-4 ${isLiked ? "fill-primary text-primary" : ""}`} />
+          <span>{likes}</span>
+        </button>
+        <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-views-stat-${post.id}`}>
+          <Eye className="h-4 w-4" />
+          <span>{Math.floor(post.likes * 0.5)}</span>
+        </button>
+        <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={handleBookmark} data-testid={`button-bookmark-${post.id}`}>
+          <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current text-primary" : ""}`} />
+        </button>
+        <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-share-action-${post.id}`}>
+          <Share2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Comments Link */}
+      {post.comments > 0 && (
+        <button
+          onClick={() => onComment?.(post.id)}
+          className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          data-testid={`button-view-comments-${post.id}`}
+        >
+          View all {post.comments} {post.comments === 1 ? "comment" : "comments"}
+        </button>
+      )}
     </div>
   );
 }
