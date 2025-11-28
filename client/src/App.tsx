@@ -23,9 +23,12 @@ import PostDetail from "./components/PostDetail";
 import FollowersList from "./components/FollowersList";
 import ShareSheet from "./components/ShareSheet";
 import BottomNav from "./components/BottomNav";
+import PostSignupUsername from "./components/PostSignupUsername";
+import PostSignupProfile from "./components/PostSignupProfile";
+import PostSignupPreferences from "./components/PostSignupPreferences";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
-type AppState = "splash" | "onboarding" | "auth" | "main" | "admin";
+type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
 
@@ -41,6 +44,8 @@ export default function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [clickResetTimer, setClickResetTimer] = useState<NodeJS.Timeout | null>(null);
   const [adminSection, setAdminSection] = useState("dashboard");
+  const [signupUsername, setSignupUsername] = useState("");
+  const [signupProfileData, setSignupProfileData] = useState({ avatar: "", banner: "", bio: "", profession: "" });
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -144,6 +149,51 @@ export default function App() {
   };
 
   const handleAuthComplete = () => {
+    setAppState("post-signup-username");
+  };
+
+  const handleUsernameComplete = (username: string) => {
+    setSignupUsername(username);
+    setAppState("post-signup-profile");
+  };
+
+  const handleProfileComplete = (data: { avatar: string; banner: string; bio: string; profession: string }) => {
+    setSignupProfileData(data);
+    setAppState("post-signup-preferences");
+  };
+
+  const handlePreferencesComplete = async (interests: string[]) => {
+    // Save signup data to localStorage
+    const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    const updated = {
+      ...currentUserData,
+      username: signupUsername,
+      avatar: signupProfileData.avatar,
+      banner: signupProfileData.banner,
+      bio: signupProfileData.bio,
+      profession: signupProfileData.profession,
+      interests: interests,
+    };
+    localStorage.setItem("currentUserData", JSON.stringify(updated));
+
+    // Save to backend
+    try {
+      const userId = localStorage.getItem("currentUserId");
+      if (userId) {
+        await fetch(`/api/users/${userId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            displayName: signupUsername,
+            bio: signupProfileData.bio,
+            profession: signupProfileData.profession,
+          }),
+        });
+      }
+    } catch (e) {
+      console.log("Backend sync note:", e);
+    }
+
     setAppState("main");
   };
 
@@ -224,6 +274,18 @@ export default function App() {
         )}
       </>
     );
+  }
+
+  if (appState === "post-signup-username") {
+    return <PostSignupUsername onComplete={handleUsernameComplete} />;
+  }
+
+  if (appState === "post-signup-profile") {
+    return <PostSignupProfile username={signupUsername} onComplete={handleProfileComplete} />;
+  }
+
+  if (appState === "post-signup-preferences") {
+    return <PostSignupPreferences onComplete={handlePreferencesComplete} />;
   }
 
   if (appState === "admin") {
