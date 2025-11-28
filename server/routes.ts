@@ -110,6 +110,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await seedDatabase();
 
   // ============ AUTH ROUTES ============
+  // Map Firebase UID to database user ID
+  app.get("/api/auth/map-user/:firebaseUid", async (req, res) => {
+    try {
+      const firebaseUid = req.params.firebaseUid;
+      // Try to find user by firebaseUid
+      const allUsers = await db.query.users.findMany();
+      const user = allUsers.find(u => u.firebaseUid === firebaseUid);
+      
+      if (user) {
+        res.json({ userId: user.id, username: user.username });
+      } else {
+        res.status(404).json({ error: "User not found for Firebase UID" });
+      }
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   app.get("/api/auth/check-username/:username", async (req, res) => {
     try {
       const existingUser = await storage.getUserByUsername(req.params.username);
@@ -227,32 +245,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/comments/post/:postId", async (req, res) => {
     const comments = await storage.listComments(req.params.postId);
     
+    // Get all users once to avoid repeated queries
+    const allUsers = await db.query.users.findMany();
+    
     // Enrich comments with username and replies
     const enrichedComments = await Promise.all(comments.map(async (comment) => {
       let author = "creator";
       
-      // Try to get user by ID (handle both database UUID and Firebase UID)
-      try {
-        const user = await storage.getUser(comment.userId);
-        if (user?.username) {
-          author = user.username;
-        }
-      } catch (e) {
-        // Silent fallback - user lookup failed
+      // Try to get user by database UUID first
+      let user = allUsers.find(u => u.id === comment.userId);
+      
+      // If not found by UUID, try by Firebase UID
+      if (!user) {
+        user = allUsers.find(u => u.firebaseUid === comment.userId);
       }
       
-      // If still showing "creator", try to look up by Firebase UID pattern
-      if (author === "creator") {
-        try {
-          // Search all users to find one with matching Firebase auth ID
-          const allUsers = await db.query.users.findMany();
-          const foundUser = allUsers.find(u => u.username && comment.userId === u.username);
-          if (foundUser?.username) {
-            author = foundUser.username;
-          }
-        } catch (e) {
-          // Fallback to "creator" if all lookups fail
-        }
+      if (user?.username) {
+        author = user.username;
       }
       
       const replies = await storage.getCommentReplies(comment.id);
@@ -260,26 +269,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Enrich replies with usernames and all fields
       const enrichedReplies = await Promise.all(replies.map(async (reply) => {
         let replyAuthor = "creator";
-        try {
-          const replyUser = await storage.getUser(reply.userId);
-          if (replyUser?.username) {
-            replyAuthor = replyUser.username;
-          }
-        } catch (e) {
-          // Silent fallback
+        
+        // Try by database UUID first
+        let replyUser = allUsers.find(u => u.id === reply.userId);
+        
+        // If not found by UUID, try by Firebase UID
+        if (!replyUser) {
+          replyUser = allUsers.find(u => u.firebaseUid === reply.userId);
         }
         
-        // If still showing "creator", try fallback lookup
-        if (replyAuthor === "creator") {
-          try {
-            const allUsers = await db.query.users.findMany();
-            const foundUser = allUsers.find(u => u.username && reply.userId === u.username);
-            if (foundUser?.username) {
-              replyAuthor = foundUser.username;
-            }
-          } catch (e) {
-            // Fallback to "creator"
-          }
+        if (replyUser?.username) {
+          replyAuthor = replyUser.username;
         }
         
         return {
@@ -325,12 +325,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertCommentSchema.parse(req.body);
       
-      // Get the current user's username for the comment author field
+      // Get the current user's username - handle both database UUID and Firebase UID
       let username = "creator";
       try {
-        const user = await storage.getUser(parsed.userId);
+        // First try by database UUID
+        let user = await storage.getUser(parsed.userId);
         if (user?.username) {
           username = user.username;
+        } else {
+          // Try by Firebase UID
+          const allUsers = await db.query.users.findMany();
+          user = allUsers.find(u => u.firebaseUid === parsed.userId);
+          if (user?.username) {
+            username = user.username;
+          }
         }
       } catch (e) {
         // Use default "creator" if lookup fails
