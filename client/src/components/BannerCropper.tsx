@@ -15,6 +15,7 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [displayHeight, setDisplayHeight] = useState(0);
 
   const BANNER_HEIGHT = 96; // h-24 = 96px
   const BANNER_WIDTH = 430; // mobile width
@@ -22,7 +23,14 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
-      setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+      const naturalWidth = img.naturalWidth;
+      const naturalHeight = img.naturalHeight;
+      setImageDimensions({ width: naturalWidth, height: naturalHeight });
+      
+      // Calculate the display height based on aspect ratio
+      const aspectRatio = naturalHeight / naturalWidth;
+      const displayH = BANNER_WIDTH * aspectRatio;
+      setDisplayHeight(displayH);
     };
     img.src = imageUrl;
   }, [imageUrl]);
@@ -33,10 +41,10 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || displayHeight === 0) return;
 
     const delta = e.clientY - startY;
-    const maxOffset = Math.max(0, imageDimensions.height - BANNER_HEIGHT);
+    const maxOffset = Math.max(0, displayHeight - BANNER_HEIGHT);
     let newOffset = offsetY - delta;
     newOffset = Math.max(0, Math.min(newOffset, maxOffset));
 
@@ -49,29 +57,34 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   };
 
   const handleApply = () => {
-    if (!containerRef.current || !imageRef.current) return;
+    if (!imageRef.current) return;
 
     const canvas = document.createElement("canvas");
-    canvas.width = BANNER_WIDTH;
-    canvas.height = BANNER_HEIGHT;
+    canvas.width = imageDimensions.width;
+    canvas.height = imageDimensions.height;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Calculate the source rectangle for cropping
-    const scaleX = imageDimensions.width / BANNER_WIDTH;
-    const scaleY = imageDimensions.height / imageRef.current.clientHeight;
+    ctx.drawImage(imageRef.current, 0, 0);
 
-    const sourceX = 0;
-    const sourceY = offsetY * scaleY;
-    const sourceWidth = imageDimensions.width;
-    const sourceHeight = BANNER_HEIGHT * scaleY;
+    // Calculate the crop rectangle based on displayed offset
+    const scale = imageDimensions.width / BANNER_WIDTH;
+    const sourceY = Math.round(offsetY * scale);
+    const sourceHeight = Math.round(BANNER_HEIGHT * scale);
 
-    ctx.drawImage(
-      imageRef.current,
-      sourceX,
+    const croppedCanvas = document.createElement("canvas");
+    croppedCanvas.width = BANNER_WIDTH;
+    croppedCanvas.height = BANNER_HEIGHT;
+
+    const croppedCtx = croppedCanvas.getContext("2d");
+    if (!croppedCtx) return;
+
+    croppedCtx.drawImage(
+      canvas,
+      0,
       sourceY,
-      sourceWidth,
+      imageDimensions.width,
       sourceHeight,
       0,
       0,
@@ -79,7 +92,7 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
       BANNER_HEIGHT
     );
 
-    const croppedData = canvas.toDataURL("image/jpeg", 0.9);
+    const croppedData = croppedCanvas.toDataURL("image/jpeg", 0.9);
     onApply(croppedData, { x: 0, y: offsetY });
   };
 
@@ -102,19 +115,25 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
       {/* Cropper Area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden bg-black flex items-center justify-center cursor-grab active:cursor-grabbing"
+        className="flex-1 overflow-hidden bg-black flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <div className="relative" style={{ width: BANNER_WIDTH }}>
+        <div 
+          className="relative" 
+          style={{ 
+            width: BANNER_WIDTH,
+            height: displayHeight,
+          }}
+        >
           {/* Full Image */}
           <img
             ref={imageRef}
             src={imageUrl}
             alt="Banner to crop"
-            className="w-full object-cover"
+            className="w-full h-full object-cover absolute top-0 left-0"
             style={{
               transform: `translateY(-${offsetY}px)`,
               userSelect: "none",
@@ -122,11 +141,11 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
             }}
           />
 
-          {/* Banner Selection Frame */}
+          {/* Banner Selection Frame - Fixed Position */}
           <div
             className="absolute left-0 right-0 border-4 border-white pointer-events-none z-10"
             style={{
-              top: 0,
+              top: offsetY,
               height: BANNER_HEIGHT,
               boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.5)",
             }}
