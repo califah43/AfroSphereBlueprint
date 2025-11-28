@@ -20,6 +20,7 @@ import Comments from "./components/Comments";
 import SearchResults from "./components/SearchResults";
 import HashtagFeed from "./components/HashtagFeed";
 import PostDetail from "./components/PostDetail";
+import PostDetailModal from "./components/PostDetailModal";
 import FollowersList from "./components/FollowersList";
 import ShareSheet from "./components/ShareSheet";
 import BottomNav from "./components/BottomNav";
@@ -414,50 +415,12 @@ export default function App() {
             />
           )}
 
-          {modalView === "post-detail" && selectedPostId && (() => {
-            const [postData, setPostData] = useState<any>(null);
-            const [postAuthor, setPostAuthor] = useState<any>(null);
-            
-            useEffect(() => {
-              const fetchPostData = async () => {
-                try {
-                  const res = await fetch(`/api/posts/${selectedPostId}`);
-                  if (res.ok) {
-                    const post = await res.json();
-                    setPostData(post);
-                    
-                    // Fetch author data
-                    const authorRes = await fetch(`/api/users/${post.userId}`);
-                    if (authorRes.ok) {
-                      const author = await authorRes.json();
-                      setPostAuthor(author);
-                    }
-                  }
-                } catch (error) {
-                  console.error("Failed to fetch post:", error);
-                }
-              };
-              
-              fetchPostData();
-            }, [selectedPostId]);
-            
-            return postData ? (
-              <PostDetail
-                postId={selectedPostId}
-                author={{ username: postAuthor?.username || "creator" }}
-                imageUrl={postData.image}
-                caption={postData.caption}
-                likes={postData.likes}
-                timeAgo={postData.createdAt ? new Date(postData.createdAt).toLocaleString() : "now"}
-                comments={[]}
-                onClose={() => setModalView("none")}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-screen">
-                <p className="text-muted-foreground">Loading post...</p>
-              </div>
-            );
-          })()}
+          {modalView === "post-detail" && selectedPostId && (
+            <PostDetailModal
+              postId={selectedPostId}
+              onClose={() => setModalView("none")}
+            />
+          )}
 
           {modalView === "followers" && (() => {
             const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
