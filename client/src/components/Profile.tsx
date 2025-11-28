@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,104 +31,64 @@ const mockPosts = [
   { id: "6", image: musicImage },
 ];
 
-const userProfiles: Record<string, any> = {
-  adikeafrica: {
-    displayName: "Adike Wilson",
-    username: "adikeafrica",
-    bio: "Fashion designer & cultural storyteller 🌍✨ Celebrating African creativity through modern design",
-    followers: "1.2K",
-    following: "485",
-    posts: "127",
-  },
-  zara_style: {
-    displayName: "Zara Style",
-    username: "zara_style",
-    bio: "New collection: Bold patterns, sustainable fabrics. Shop local, think global 🌍",
-    followers: "8.5K",
-    following: "234",
-    posts: "89",
-  },
-  beat_masta: {
-    displayName: "Beat Master",
-    username: "beat_masta",
-    bio: "Producer | Beatmaker | Creating the future of music 🎵",
-    followers: "12.3K",
-    following: "567",
-    posts: "156",
-  },
-  kojoart: {
-    displayName: "Kojo Art",
-    username: "kojoart",
-    bio: "Contemporary artist exploring African heritage through modern art 🎨",
-    followers: "8.9K",
-    following: "342",
-    posts: "67",
-  },
-};
-
 export default function Profile({ isOwnProfile = true, username, onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
-  
-  // Get real user data from localStorage if own profile
-  const getProfileData = () => {
-    if (isOwnProfile) {
-      const storedData = localStorage.getItem("currentUserData");
-      if (storedData) {
-        try {
-          const userData = JSON.parse(storedData);
-          return {
-            displayName: userData.displayName || userData.username || userData.email?.split('@')[0] || "Your Profile",
-            username: userData.username || userData.email?.split('@')[0] || "user",
-            bio: userData.bio || "Creative on AfroSphere",
-            location: userData.location || "",
-            website: userData.website || "",
-            profession: userData.profession || "",
-            followers: userData.followerCount?.toString() || "0",
-            following: userData.followingCount?.toString() || "0",
-            posts: userData.postCount?.toString() || "0",
-            avatar: userData.avatar || "",
-            banner: userData.banner || "",
-          };
-        } catch (e) {
-          console.log("Error parsing user data");
-          return {
-            displayName: "Your Profile",
-            username: "user",
-            bio: "Creative on AfroSphere",
-            location: "",
-            website: "",
-            profession: "",
-            followers: "0",
-            following: "0",
-            posts: "0",
-            avatar: "",
-            banner: "",
-          };
-        }
-      }
-      return {
-        displayName: "Your Profile",
-        username: "user",
-        bio: "Creative on AfroSphere",
-        location: "",
-        website: "",
-        profession: "",
-        followers: "0",
-        following: "0",
-        posts: "0",
-        avatar: "",
-        banner: "",
-      };
-    }
-    return userProfiles[username || "user"] || userProfiles.adikeafrica;
-  };
-  
-  const userProfile = getProfileData();
 
+  // Fetch user data from backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (isOwnProfile) {
+          const storedData = localStorage.getItem("currentUserData");
+          if (storedData) {
+            const userData = JSON.parse(storedData);
+            setUserProfile({
+              displayName: userData.displayName || userData.username || "Your Profile",
+              username: userData.username || "user",
+              bio: userData.bio || "Creative on AfroSphere",
+              location: userData.location || "",
+              website: userData.website || "",
+              profession: userData.profession || "",
+              followers: userData.followerCount?.toString() || "0",
+              following: userData.followingCount?.toString() || "0",
+              posts: userData.postCount?.toString() || "0",
+              avatar: userData.avatar || "",
+              banner: userData.banner || "",
+            });
+          }
+        } else if (username) {
+          // Fetch from backend by username
+          const res = await fetch(`/api/users/username/${username}`);
+          if (res.ok) {
+            const userData = await res.json();
+            setUserProfile({
+              displayName: userData.displayName || userData.username || "Creator",
+              username: userData.username || username,
+              bio: userData.bio || "Creative on AfroSphere",
+              location: userData.location || "",
+              website: userData.website || "",
+              profession: userData.profession || "",
+              followers: userData.followerCount?.toString() || "0",
+              following: userData.followingCount?.toString() || "0",
+              posts: userData.postCount?.toString() || "0",
+              avatar: userData.avatar || "",
+              banner: userData.banner || "",
+            });
+          }
+        }
+      } catch (error) {
+        console.log("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [username, isOwnProfile]);
+  
   // Get the username for API calls (use stored for own profile, fallback for others)
   const getApiUsername = () => {
     if (isOwnProfile) {
