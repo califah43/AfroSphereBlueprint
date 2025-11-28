@@ -87,23 +87,51 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
     }
   };
 
-  const handleSave = () => {
-    const updated = {
-      ...JSON.parse(localStorage.getItem("currentUserData") || "{}"),
-      displayName: formData.displayName,
-      username: formData.username,
-      bio: formData.bio,
-      location: formData.location,
-      website: formData.website,
-      profession: formData.profession,
-      avatar: formData.avatar,
-      banner: formData.banner,
-    };
-    localStorage.setItem("currentUserData", JSON.stringify(updated));
-    toast({ title: "Profile saved!", description: "Your profile updates have been saved" });
-    console.log("Saving profile:", formData);
-    onSave?.(formData);
-    onClose();
+  const handleSave = async () => {
+    try {
+      const userId = localStorage.getItem("currentUserId");
+      if (!userId) {
+        toast({ title: "Error", description: "User not found", variant: "destructive" });
+        return;
+      }
+
+      // Save to backend
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: formData.displayName,
+          bio: formData.bio,
+          location: formData.location,
+          website: formData.website,
+          profession: formData.profession,
+          avatar: formData.avatar,
+          banner: formData.banner,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save");
+
+      // Update localStorage with complete data
+      const updated = {
+        ...JSON.parse(localStorage.getItem("currentUserData") || "{}"),
+        displayName: formData.displayName,
+        username: formData.username,
+        bio: formData.bio,
+        location: formData.location,
+        website: formData.website,
+        profession: formData.profession,
+        avatar: formData.avatar,
+        banner: formData.banner,
+      };
+      localStorage.setItem("currentUserData", JSON.stringify(updated));
+      
+      toast({ title: "Profile saved!", description: "Your profile updates have been saved" });
+      onSave?.(formData);
+      onClose();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
+    }
   };
 
   return (

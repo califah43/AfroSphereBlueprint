@@ -12,6 +12,9 @@ export const users = pgTable("users", {
   bio: text("bio").default(""),
   location: text("location").default(""),
   avatar: text("avatar").default(""),
+  banner: text("banner").default(""),
+  website: text("website").default(""),
+  profession: text("profession").default(""),
   followerCount: integer("follower_count").default(0),
   followingCount: integer("following_count").default(0),
   postCount: integer("post_count").default(0),
@@ -27,6 +30,9 @@ export const updateUserSchema = createInsertSchema(users).pick({
   bio: true,
   location: true,
   avatar: true,
+  banner: true,
+  website: true,
+  profession: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

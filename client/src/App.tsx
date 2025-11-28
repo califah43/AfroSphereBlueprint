@@ -48,12 +48,22 @@ export default function App() {
 
   // Check if user is already logged in (session persistence)
   useEffect(() => {
-    const checkExistingSession = () => {
+    const checkExistingSession = async () => {
       const userId = localStorage.getItem("currentUserId");
       const userData = localStorage.getItem("currentUserData");
       
-      // If user was previously logged in, go straight to main app
+      // If user was previously logged in, fetch fresh data from backend
       if (userId && userData) {
+        try {
+          const response = await fetch(`/api/users/${userId}`);
+          if (response.ok) {
+            const freshData = await response.json();
+            localStorage.setItem("currentUserData", JSON.stringify(freshData));
+          }
+        } catch (error) {
+          console.log("Failed to fetch fresh user data:", error);
+        }
+        
         // Show splash screen briefly then go to main
         const timer = setTimeout(() => {
           setAppState("main");
