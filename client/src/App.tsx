@@ -325,6 +325,7 @@ export default function App() {
               <Explore
                 onSearchClick={() => setModalView("search")}
                 onPostClick={handleOpenPostDetail}
+                onHashtagClick={handleOpenHashtagFeed}
               />
             </div>
           )}

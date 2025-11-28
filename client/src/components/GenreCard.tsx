@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { GENRES } from "@shared/genres";
+import { Music, Palette, Zap, Heart } from "lucide-react";
 
 interface GenreCardProps {
   genreId: string;
@@ -7,8 +8,17 @@ interface GenreCardProps {
   postsCount?: number;
 }
 
+const genreIcons: Record<string, React.ReactNode> = {
+  FASHION: <Zap className="w-8 h-8 text-primary" />,
+  MUSIC: <Music className="w-8 h-8 text-primary" />,
+  ART: <Palette className="w-8 h-8 text-primary" />,
+  CULTURE: <Heart className="w-8 h-8 text-primary" />,
+  LIFESTYLE: <Heart className="w-8 h-8 text-primary" />,
+};
+
 export default function GenreCard({ genreId, onClick, postsCount }: GenreCardProps) {
   const genre = GENRES[genreId.toUpperCase()];
+  const icon = genreIcons[genreId.toUpperCase()] || <Zap className="w-8 h-8 text-primary" />;
   
   if (!genre) return null;
 
@@ -19,7 +29,9 @@ export default function GenreCard({ genreId, onClick, postsCount }: GenreCardPro
       data-testid={`genre-card-${genre.id}`}
     >
       <div className="flex items-start justify-between mb-2">
-        <span className="text-3xl">{genre.emoji}</span>
+        <div className="flex items-center justify-center w-8 h-8">
+          {icon}
+        </div>
         {postsCount && (
           <span className="text-xs bg-muted px-2 py-1 rounded-full">{postsCount}K posts</span>
         )}
