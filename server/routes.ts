@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { MemStorage } from "./storage";
+import { DbStorage } from "./storage-db";
 
-const storage = new MemStorage();
+const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
 
 // Export storage for seeding
