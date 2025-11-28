@@ -80,6 +80,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     const newLiked = !isLiked;
     const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
     
+    setIsLiked(newLiked);
     setLikes(newLikes);
 
     try {
@@ -94,6 +95,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         if (data.likes !== undefined) {
           setLikes(data.likes);
         }
+        setIsLiked(data.liked);
         
         if (data.liked) {
           toast({ title: "Post liked!", description: "Added to your liked posts" });
@@ -102,12 +104,14 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         }
       } else {
         // Rollback on error
+        setIsLiked(previousLiked);
         setLikes(previousLikes);
         toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
       }
       onLike?.(post.id);
     } catch (error) {
       // Rollback on error
+      setIsLiked(previousLiked);
       setLikes(previousLikes);
       toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }
