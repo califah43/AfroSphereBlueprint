@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -49,49 +50,38 @@ export default function PostDetail({
 }: PostDetailProps) {
   const { toast } = useToast();
   const genreData = genre ? GENRES[genre.toUpperCase()] : null;
-  const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
 
-  // Check if current user has liked this post on component mount
-  useEffect(() => {
-    const checkLikeStatus = async () => {
-      let userId = localStorage.getItem("currentUserId");
-      const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-      if (userData && userData.id && userData.id !== userId) {
-        userId = userData.id;
-      }
-      if (userId && postId) {
-        try {
-          const url = `/api/likes/posts/check/${userId}/${postId}`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && typeof data.liked === 'boolean') {
-              setIsLiked(data.liked);
-            }
-          } else {
-            console.warn(`Like check failed with status ${res.status}`);
-          }
-        } catch (error) {
-          console.error("Error checking like status:", error);
-        }
-      }
-    };
-    checkLikeStatus();
-  }, [postId]);
-
-  const handleLike = async () => {
-    // Get the REAL database UUID, not Firebase UID
+  // Get current user ID
+  const getUserId = () => {
     let userId = localStorage.getItem("currentUserId");
     const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-    
-    // If currentUserId looks like a Firebase UID, use the database ID from userData
     if (userData && userData.id && userData.id !== userId) {
       userId = userData.id;
     }
+    return userId;
+  };
+
+  // Check like status using React Query
+  const { data: likeStatusData } = useQuery({
+    queryKey: [`/api/likes/posts/check/${getUserId()}/${postId}`],
+    queryFn: async () => {
+      const userId = getUserId();
+      if (!userId) return { liked: false };
+      const res = await fetch(`/api/likes/posts/check/${userId}/${postId}`);
+      if (res.ok) return res.json();
+      return { liked: false };
+    },
+    staleTime: 30000,
+  });
+
+  const isLiked = likeStatusData?.liked || false;
+
+  const handleLike = async () => {
+    const userId = getUserId();
     
     if (!userId) {
       toast({ title: "Please sign in to like posts", variant: "destructive" });
@@ -99,12 +89,9 @@ export default function PostDetail({
     }
 
     // Optimistic update - update UI immediately
-    const previousLiked = isLiked;
     const previousLikes = likes;
-    const newLiked = !isLiked;
-    const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
+    const newLikes = isLiked ? likes - 1 : likes + 1;
     
-    setIsLiked(newLiked);
     setLikes(newLikes);
 
     try {
@@ -116,8 +103,6 @@ export default function PostDetail({
 
       if (res.ok) {
         const data = await res.json();
-        // Confirm the server response
-        setIsLiked(data.liked);
         if (data.likes !== undefined) {
           setLikes(data.likes);
         }
@@ -129,13 +114,11 @@ export default function PostDetail({
         }
       } else {
         // Rollback on error
-        setIsLiked(previousLiked);
         setLikes(previousLikes);
         toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
       }
     } catch (error) {
       // Rollback on error
-      setIsLiked(previousLiked);
       setLikes(previousLikes);
       toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }

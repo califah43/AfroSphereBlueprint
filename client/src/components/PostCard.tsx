@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -49,50 +50,39 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick, onHashtagClick }: PostCardProps) {
-  const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likes, setLikes] = useState(post.likes);
   const [showHeart, setShowHeart] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
 
-  // Check if current user has liked this post on component mount
-  useEffect(() => {
-    const checkLikeStatus = async () => {
-      let userId = localStorage.getItem("currentUserId");
-      const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-      if (userData && userData.id && userData.id !== userId) {
-        userId = userData.id;
-      }
-      if (userId && post.id) {
-        try {
-          const url = `/api/likes/posts/check/${userId}/${post.id}`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && typeof data.liked === 'boolean') {
-              setIsLiked(data.liked);
-            }
-          } else {
-            console.warn(`Like check failed with status ${res.status}`);
-          }
-        } catch (error) {
-          console.error("Error checking like status:", error);
-        }
-      }
-    };
-    checkLikeStatus();
-  }, [post.id]);
-
-  const handleLike = async () => {
-    // Get the REAL database UUID, not Firebase UID
+  // Get current user ID
+  const getUserId = () => {
     let userId = localStorage.getItem("currentUserId");
     const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-    
-    // If currentUserId looks like a Firebase UID, use the database ID from userData
     if (userData && userData.id && userData.id !== userId) {
       userId = userData.id;
     }
+    return userId;
+  };
+
+  // Check like status using React Query
+  const { data: likeStatusData } = useQuery({
+    queryKey: [`/api/likes/posts/check/${getUserId()}/${post.id}`],
+    queryFn: async () => {
+      const userId = getUserId();
+      if (!userId) return { liked: false };
+      const res = await fetch(`/api/likes/posts/check/${userId}/${post.id}`);
+      if (res.ok) return res.json();
+      return { liked: false };
+    },
+    staleTime: 30000, // 30 seconds
+  });
+
+  const isLiked = likeStatusData?.liked || false;
+
+  const handleLike = async () => {
+    const userId = getUserId();
     
     if (!userId) {
       toast({ title: "Please sign in to like posts", variant: "destructive" });
@@ -105,7 +95,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     const newLiked = !isLiked;
     const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
     
-    setIsLiked(newLiked);
     setLikes(newLikes);
 
     try {
@@ -117,8 +106,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
       if (res.ok) {
         const data = await res.json();
-        // Confirm the server response
-        setIsLiked(data.liked);
         if (data.likes !== undefined) {
           setLikes(data.likes);
         }
@@ -130,14 +117,12 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         }
       } else {
         // Rollback on error
-        setIsLiked(previousLiked);
         setLikes(previousLikes);
         toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
       }
       onLike?.(post.id);
     } catch (error) {
       // Rollback on error
-      setIsLiked(previousLiked);
       setLikes(previousLikes);
       toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }
