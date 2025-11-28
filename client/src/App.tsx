@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { requestNotificationPermission, setupMessageListener } from "./lib/fcm";
+import { useSwipeBack } from "@/hooks/useSwipeBack";
 import SplashScreen from "./components/SplashScreen";
 import OnboardingSlides from "./components/OnboardingSlides";
 import AuthScreen from "./components/AuthScreen";
@@ -271,6 +272,17 @@ export default function App() {
       window.dispatchEvent(new CustomEvent('refreshPosts'));
     }
   };
+
+  // iOS-style swipe back gesture
+  useSwipeBack({
+    onSwipeBack: () => {
+      // Close any open modal first
+      if (modalView !== "none") {
+        setModalView("none");
+      }
+    },
+    enabled: modalView !== "none", // Only enable swipe when modal is open
+  });
 
   const handleLogout = () => {
     localStorage.removeItem("currentUserId");
