@@ -196,21 +196,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/users/:id", async (req, res) => {
     try {
       const updates = updateUserSchema.parse(req.body);
-      let user = await storage.updateUser(req.params.id, updates);
+      const user = await storage.updateUser(req.params.id, updates);
       
-      // If user doesn't exist, create them with the updates
       if (!user) {
-        const userData = {
-          username: `user_${req.params.id.substring(0, 8)}`,
-          password: "temp_password",
-          ...updates,
-        };
-        user = await storage.createUser(userData);
+        return res.status(404).json({ error: "User not found" });
       }
       
       res.json(user);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid request" });
+    } catch (error: any) {
+      console.error("Profile update error:", error);
+      res.status(400).json({ error: error.message || "Invalid request" });
     }
   });
 
