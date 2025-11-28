@@ -22,31 +22,26 @@ interface ProfileProps {
   onFollowingClick?: () => void;
 }
 
-const mockPosts = [
-  { id: "1", image: fashionImage },
-  { id: "2", image: artImage },
-  { id: "3", image: musicImage },
-  { id: "4", image: fashionImage },
-  { id: "5", image: artImage },
-  { id: "6", image: musicImage },
-];
-
 export default function Profile({ isOwnProfile = true, username, onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch user data from backend
+  // Fetch user data and posts from backend
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        let userId: string = "";
         if (isOwnProfile) {
           const storedData = localStorage.getItem("currentUserData");
           if (storedData) {
             const userData = JSON.parse(storedData);
+            userId = userData.id || "";
             setUserProfile({
               displayName: userData.displayName || userData.username || "Your Profile",
               username: userData.username || "user",
@@ -66,6 +61,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           const res = await fetch(`/api/users/username/${username}`);
           if (res.ok) {
             const userData = await res.json();
+            userId = userData.id || "";
             setUserProfile({
               displayName: userData.displayName || userData.username || "Creator",
               username: userData.username || username,
@@ -81,8 +77,20 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             });
           }
         }
+
+        // Fetch user's posts
+        if (userId) {
+          setPostsLoading(true);
+          const postsRes = await fetch(`/api/posts/user/${userId}`);
+          if (postsRes.ok) {
+            const posts = await postsRes.json();
+            setUserPosts(posts || []);
+          }
+          setPostsLoading(false);
+        }
       } catch (error) {
         console.log("Error fetching user data:", error);
+        setPostsLoading(false);
       }
     };
 
@@ -330,7 +338,16 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <div className="mt-6">
             {activeTab === "posts" && (
               <>
-                {isOwnProfile && userProfile.posts === "0" ? (
+                {postsLoading ? (
+                  <div className="grid grid-cols-3 gap-1 mt-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div
+                        key={i}
+                        className="aspect-square overflow-hidden rounded-md bg-muted animate-pulse"
+                      />
+                    ))}
+                  </div>
+                ) : userPosts.length === 0 ? (
                   <div className="py-20 text-center">
                     <div className="w-16 h-16 rounded-full bg-primary/8 flex items-center justify-center mx-auto mb-4">
                       <Share2 className="h-7 w-7 text-primary/40" />
@@ -340,7 +357,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-1 mt-4">
-                    {mockPosts.map((post) => (
+                    {userPosts.map((post) => (
                       <button
                         key={post.id}
                         onClick={() => onPostClick?.(post.id)}
