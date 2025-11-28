@@ -47,6 +47,25 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
 
+  // Helper to format time - MUST be defined before query
+  const formatTimeAgo = (dateString: string | null | undefined): string => {
+    if (!dateString) return "now";
+    const date = new Date(dateString);
+    const now = Date.now();
+    const diff = now - date.getTime();
+    
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (seconds < 60) return "now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return "1d ago";
+    return `${days}d ago`;
+  };
+
   // Listen for post refresh events (triggered when comments are added)
   useEffect(() => {
     const handleRefresh = () => {
@@ -91,7 +110,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             caption: p.caption,
             likes: p.likes || 0,
             comments: p.commentCount || 0,
-            timeAgo: p.createdAt ? formatTimeAgo(new Date(p.createdAt)) : "now",
+            timeAgo: formatTimeAgo(p.createdAt),
             category: p.category,
           };
         });
@@ -100,19 +119,6 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       }
     },
   });
-
-  // Helper to format time
-  const formatTimeAgo = (date: Date) => {
-    const now = Date.now();
-    const diff = now - date.getTime();
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    
-    if (hours === 0) return "now";
-    if (hours < 24) return `${hours}h ago`;
-    if (days === 1) return "1d ago";
-    return `${days}d ago`;
-  };
 
   // Fallback to mock data if API returns empty
   useEffect(() => {
