@@ -1,0 +1,291 @@
+Nice — I’ll give you a drop-in server + client example that Replit AI (or your dev team) can copy-and-paste and use right away.
+This code creates accounts (server-side using Firebase Admin) and creates posts (uploads media to Firebase Storage + writes Firestore doc). It also verifies the user’s Firebase ID token so only legit users can create posts.
+
+Do the steps exactly below. I’ll include:
+	•	package.json (deps)
+	•	index.js (Express server with endpoints)
+	•	Example client-side calls (browser / curl)
+	•	Replit env setup notes and security notes
+
+⸻
+
+1) Set up environment on Replit (important)
+
+Create these environment variables in Replit secrets (Environment variables):
+	•	SERVICE_ACCOUNT_JSON — the full service account JSON stringified (paste the JSON file contents as a single string; see note below).
+	•	FIREBASE_PROJECT_ID — your projectId (e.g., afrosphere)
+	•	STORAGE_BUCKET — your storage bucket (e.g., afrosphere.appspot.com)
+	•	PORT — optional, default 3000
+
+How to add SERVICE_ACCOUNT_JSON on Replit: paste the JSON contents into the env var value. The server will parse process.env.SERVICE_ACCOUNT_JSON.
+
+Alternative: upload the JSON to the Replit filesystem and set GOOGLE_APPLICATION_CREDENTIALS to the path — but env var JSON is safer for Replit.
+
+⸻
+
+2) package.json
+
+{
+  "name": "afrosphere-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "firebase-admin": "^11.10.0",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5",
+    "busboy": "^1.6.0"
+  }
+}
+
+
+⸻
+
+3) index.js — Express server (create accounts + create posts)
+
+// index.js
+const express = require('express');
+const admin = require('firebase-admin');
+const multer = require('multer');
+const cors = require('cors');
+const { Readable } = require('stream');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ----- Initialize Firebase Admin using SERVICE_ACCOUNT_JSON env var -----
+if (!process.env.SERVICE_ACCOUNT_JSON) {
+  console.error('Missing SERVICE_ACCOUNT_JSON env var');
+  process.exit(1);
+}
+
+const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_JSON);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: process.env.STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
+});
+
+const db = admin.firestore();
+const bucket = admin.storage().bucket();
+
+// --------- Simple middleware to verify Firebase ID token -----------
+async function verifyFirebaseIdToken(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const match = authHeader.match(/Bearer (.+)/);
+  if (!match) return res.status(401).json({ error: 'No Authorization token provided' });
+  const idToken = match[1];
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    req.uid = decoded.uid;
+    next();
+  } catch (err) {
+    console.error('Error verifying ID token:', err);
+    return res.status(401).json({ error: 'Invalid ID token' });
+  }
+}
+
+// ------------------ Endpoint: Create Account (admin-created) ------------------
+// NOTE: For normal client-side signups use Firebase client SDK (safer). This route
+// is useful if you want server-side creation, tests, or seeded users.
+app.post('/api/createAccount', async (req, res) => {
+  try {
+    const { email, password, displayName, username } = req.body;
+    if (!email || !password || !username) {
+      return res.status(400).json({ error: 'email, password, username required' });
+    }
+
+    // Create user in Firebase Auth
+    const userRecord = await admin.auth().createUser({
+      email,
+      password,
+      displayName,
+    });
+
+    // Create user doc in Firestore
+    const userDoc = {
+      uid: userRecord.uid,
+      email: userRecord.email,
+      displayName: displayName || '',
+      username,
+      avatar: null,
+      bio: '',
+      followersCount: 0,
+      followingCount: 0,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    await db.collection('users').doc(userRecord.uid).set(userDoc);
+
+    return res.json({ success: true, uid: userRecord.uid, userDoc });
+  } catch (err) {
+    console.error('createAccount error:', err);
+    // Friendly error message
+    return res.status(500).json({ error: err.message || 'Server error' });
+  }
+});
+
+// ------------------ Upload handling for posts ------------------
+// multer memory storage (we upload file buffer directly to Firebase Storage)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }); // 50MB limit
+
+// ------------------ Endpoint: Create Post (authenticated) ------------------
+app.post('/api/createPost', verifyFirebaseIdToken, upload.single('media'), async (req, res) => {
+  try {
+    const uid = req.uid;
+    const { caption = '', tags = '' } = req.body; // tags as comma-separated
+    const file = req.file; // optional if text-only posts allowed (here you required media)
+
+    if (!file) {
+      return res.status(400).json({ error: 'media file is required' });
+    }
+
+    // Generate a storage file path, e.g., posts/{uid}/{timestamp}_{originalname}
+    const timestamp = Date.now();
+    const ext = (file.originalname && file.originalname.split('.').pop()) || 'bin';
+    const filename = `posts/${uid}/${timestamp}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const fileRef = bucket.file(filename);
+
+    // Convert buffer to stream and upload
+    const stream = Readable.from(file.buffer);
+    const writeStream = fileRef.createWriteStream({
+      metadata: {
+        contentType: file.mimetype
+      },
+      resumable: false
+    });
+
+    stream.pipe(writeStream);
+
+    await new Promise((resolve, reject) => {
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
+    });
+
+    // Make file public URL (optional). Better: use signed URLs or secure access tied to rules.
+    // For simplicity, store the storage path and a downloadable URL.
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+
+    // Create the post document in Firestore
+    const postRef = db.collection('posts').doc();
+    const postData = {
+      postId: postRef.id,
+      uid,
+      mediaUrl: publicUrl,
+      storagePath: filename,
+      caption,
+      tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      likesCount: 0,
+      commentsCount: 0,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    await postRef.set(postData);
+
+    // Optionally increment user's post count (transaction)
+    const userRef = db.collection('users').doc(uid);
+    await db.runTransaction(async tx => {
+      const userSnap = await tx.get(userRef);
+      if (!userSnap.exists) {
+        // create minimal user doc if missing
+        tx.set(userRef, { uid, postsCount: 1 }, { merge: true });
+      } else {
+        const prev = userSnap.get('postsCount') || 0;
+        tx.update(userRef, { postsCount: prev + 1 });
+      }
+    });
+
+    return res.json({ success: true, post: postData });
+  } catch (err) {
+    console.error('createPost error:', err);
+    return res.status(500).json({ error: err.message || 'Server error' });
+  }
+});
+
+// --------- Quick get post (public) ----------
+app.get('/api/post/:id', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const snap = await db.collection('posts').doc(postId).get();
+    if (!snap.exists) return res.status(404).json({ error: 'Not found' });
+    return res.json({ post: snap.data() });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+⸻
+
+4) Client-side: create account & create post examples
+
+A) Create account (recommendation: normally create accounts on client with Firebase Client SDK; this is server-side option)
+
+curl -X POST https://your-replit-url/api/createAccount \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret123","displayName":"Ayo","username":"ayo"}'
+
+B) Client flow (preferred) — create account on client using Firebase JS SDK (example)
+
+Use Firebase client SDK to sign up, then retrieve idToken and use it to call /api/createPost.
+
+// after user signs up / logs in with firebase client SDK:
+const user = firebase.auth().currentUser;
+const idToken = await user.getIdToken(/* forceRefresh */ true);
+
+// then call createPost endpoint using fetch with Authorization header
+const formData = new FormData();
+formData.append('media', fileInput.files[0]); // file object
+formData.append('caption', 'My post caption');
+formData.append('tags', 'fashion,afro');
+
+const res = await fetch('https://your-replit-url/api/createPost', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer ' + idToken
+  },
+  body: formData
+});
+const data = await res.json();
+console.log(data);
+
+
+⸻
+
+5) Important security & production notes
+	1.	Always verify ID tokens on the server using admin.auth().verifyIdToken. The verifyFirebaseIdToken middleware above does that. Do not accept uid from the client without verification.
+	2.	Service account JSON must stay secret. Use Replit secrets. Never commit to GitHub.
+	3.	Storage public URLs: I used a public URL pattern for simplicity. Prefer signed URLs or restrict Storage access and serve media through your server or via security rules.
+	4.	File size limits: multer memory storage uses memory — consider streaming and resumable uploads for large video files or use Firebase client SDK upload directly from the client to Storage (recommended) and only notify server to create post doc. That scales better.
+	5.	Content moderation: Add a cloud function or a moderation queue before making posts visible. For MVP you can allow public posts but plan moderation.
+	6.	Firestore indexes: If you query for feeds (order by createdAt), create indexes in Firestore console if needed.
+	7.	Throttling & rate limits: Implement rate limiting if you expect automated mass requests.
+
+⸻
+
+6) Alternative recommended approach (scalable, simpler for clients)
+
+A common pattern for media-first apps:
+	•	Client uploads media directly to Firebase Storage using the Firebase client SDK (authenticated user).
+	•	After upload completes, client calls your server endpoint or a direct Firestore posts write with the mediaPath and metadata.
+	•	Server-side Cloud Function triggers on new posts docs to generate thumbnails, run moderation, send notifications, and update aggregates.
+
+This reduces server memory usage and is faster.
+
+⸻
+
+7) If you want, next I can:
+	•	Provide a Cloud Function example to auto-generate likesCount updates, or to moderate content.
+	•	Provide client-side Firebase Storage upload code and permissions example (best practice).
+	•	Provide Firestore security rules that allow authenticated users to create posts only under their uid (if you want direct writes from client).
+
+Tell me which of the three above you want now and I’ll produce copy/paste-ready code.
