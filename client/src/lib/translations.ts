@@ -473,101 +473,253 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.profession": "Iṣẹ́",
   },
   ha: {
-    // Navigation - using romanized Hausa
+    // Navigation
     "nav.home": "Gida",
     "nav.explore": "Leka",
     "nav.create": "Sawa",
     "nav.notifications": "Sanarwa",
     "nav.profile": "Tarihi",
     
-    // Basic structure with English fallback for complex terms
+    // Feed
     "feed.noPost": "Babu abubuwa a halin yanzu",
     "feed.beFirst": "Ku zama na farko na ba da wani abubuwa!",
     "feed.newPosts": "Duba sabuwar abubuwa",
     
+    // Settings
     "settings.title": "Saitunan",
     "settings.account": "Asusun",
     "settings.privateAccount": "Asusun Sirri",
     "settings.privateAccountDesc": "Kawai masu aminci za su iya ganin abubuwa",
     "settings.language": "Harshe",
     "settings.languageDesc": "Canja harshen da ke so",
-    "settings.logout": "Fita",
-    "settings.logoutDesc": "Fita daga wannan na kwamfurta",
-    "settings.deleteAccount": "Share Asusun",
-    "settings.deleteAccountDesc": "Cire asusun ku ba da sabuwar karya",
+    
+    // Auth
+    "auth.signUp": "Foruko",
+    "auth.login": "Shiga",
+    "auth.email": "Imel",
+    "auth.password": "Kalmar Wucewa",
+    "auth.username": "Sunan Mai Amfani",
+    "auth.signUpGoogle": "Foruko tare da Google",
+    "auth.loginGoogle": "Shiga tare da Google",
     
     // Common
     "common.save": "Ajiye",
     "common.cancel": "Soke",
     "common.delete": "Share",
+    "common.edit": "Gyara",
     "common.close": "Rufe",
     "common.loading": "Nawa...",
     "common.error": "Kuskure",
     "common.success": "Nasara",
+    
+    // CreatePost
+    "create.title": "Sawa Abubuwa",
+    "create.caption": "Menene lokacin ku?",
+    "create.category": "Zaɓi Nau'i",
+    "create.addPhoto": "Ƙara hoton ku na farko",
+    "create.maxFiles": "Max 10 faili, 10MB kowanne",
+    "create.shareCaption": "Shirya al'adunka...",
+    "create.selectCategory": "Zaɓi daya",
+    "create.hashtags": "Alamar Taushi",
+    "create.hashtagPlaceholder": "#satin #sana'a",
+    "create.missingFields": "Sassa da ba a samuwa ba",
+    "create.missingFieldsDesc": "Da fatan za a ƙara abubuwa da angalau hoton guda",
+    
+    // Comments
+    "comments.title": "Hira",
+    "comments.addComment": "Ƙara sharhi...",
+    "comments.writeReply": "Rubuta amsa...",
+    "comments.reply": "Amsa",
+    "comments.noComments": "Babu sharhi a halin yanzu",
+    
+    // EditProfile
+    "profile.displayName": "Sunan Nuni",
+    "profile.bio": "Tarihi",
+    "profile.location": "Wuri",
+    "profile.profession": "Sana'a",
+    "profile.saveChanges": "Ajiye Canjin",
+    
+    // Explore
+    "explore.title": "Leka",
+    "explore.searchPlaceholder": "Neman masu aiki...",
+    "explore.trendingHashtags": "Alamar da ta Girma",
+    
+    // Community Guidelines
+    "guidelines.title": "Dokkin Jama'a",
+    "guidelines.subtitle": "Jiyya AfroSphere sannu da mutunci",
+    "guidelines.rule1": "Kuwa da Mutunci",
+    "guidelines.rule1Desc": "Babu magana maƙarƙari, cin zarrafi, ko ɓacin kai. Mutuntaci wajen mutane, addini, kabin, da al'ada.",
+    "guidelines.rule2": "Babu Ciwo ko Lattice",
+    "guidelines.rule2Desc": "Abubuwan da ke nunawa, kayatarwa, ko koyarwa ciwo ana haramta.",
+    "guidelines.rule3": "Babu Aikin Haramu",
+    "guidelines.rule3Desc": "Babu ƙarawa na madarai maraba, makamashi, ko aikacin jinai.",
+    "guidelines.agree": "Na fahimta kuma na kubaltar da waɗannan mwongozo",
   },
   am: {
-    // Navigation - Amharic
+    // Navigation
     "nav.home": "ቤት",
     "nav.explore": "ዳሎ",
     "nav.create": "ሠሪ",
     "nav.notifications": "ማስታወቂያ",
     "nav.profile": "ገጽ",
     
+    // Feed
     "feed.noPost": "መልእክቶች የሉም",
     "feed.beFirst": "ጀማሪው ይሁኑ!",
     "feed.newPosts": "አዲስ መልእክቶችን ይመልከቱ",
     
+    // Settings
     "settings.title": "ቅንብሮች",
     "settings.account": "ሂሳብ",
     "settings.privateAccount": "ግላዊ ሂሳብ",
     "settings.privateAccountDesc": "የተጋለጠ ተከታዮች ብቻ ልጥፎችዎን ማየት ይችላሉ",
     "settings.language": "ቋንቋ",
     "settings.languageDesc": "የተመረጠ ቋንቋ ይቀይሩ",
-    "settings.logout": "ወጣ",
-    "settings.logoutDesc": "ከዚህ መሳሪያ ወጣ",
-    "settings.deleteAccount": "ሂሳብ ሰርዝ",
-    "settings.deleteAccountDesc": "ሂሳብህን ለዘላለም ሰርዝ",
+    
+    // Auth
+    "auth.signUp": "ተመዝገብ",
+    "auth.login": "ግባ",
+    "auth.email": "ኢሜይል",
+    "auth.password": "ይህ ቃል",
+    "auth.username": "የተጠቃሚ ስም",
+    "auth.signUpGoogle": "Google ጋር ተመዝገብ",
+    "auth.loginGoogle": "Google ጋር ግባ",
     
     // Common
     "common.save": "አስቀምጥ",
     "common.cancel": "ተወ",
     "common.delete": "ሰርዝ",
+    "common.edit": "ርትዕ",
     "common.close": "ዝጋ",
     "common.loading": "ሸክም ተለዋ...",
     "common.error": "ስህተት",
     "common.success": "ስኬት",
+    
+    // CreatePost
+    "create.title": "መልእክት ይዘርጋ",
+    "create.caption": "ምን ነገር ወደ ላይ?",
+    "create.category": "ምድብ ይምረጡ",
+    "create.addPhoto": "የመጀመሪያ ስእልዎን ይጨምሩ",
+    "create.maxFiles": "ከ 10 ፋይሎች, 10MB እያንዳንዱ",
+    "create.shareCaption": "ባህል ይጋራ...",
+    "create.selectCategory": "አንዱን ይምረጡ",
+    "create.hashtags": "Hashtag",
+    "create.hashtagPlaceholder": "#ስታይል #ሥነ ጥበብ",
+    "create.missingFields": "የጎደሉ ሜዳዎች",
+    "create.missingFieldsDesc": "እባክዎ መልእክት እና ቢያንስ ምስል አንድ ይጨምሩ",
+    
+    // Comments
+    "comments.title": "አስተያየት",
+    "comments.addComment": "አስተያየት ይጨምሩ...",
+    "comments.writeReply": "መልስ ይፃፉ...",
+    "comments.reply": "ምላሽ",
+    "comments.noComments": "አስተያየት ገና የለም",
+    
+    // EditProfile
+    "profile.displayName": "ስም ታይ",
+    "profile.bio": "ባዮግራፊ",
+    "profile.location": "ቦታ",
+    "profile.profession": "ሙያ",
+    "profile.saveChanges": "ለውጦችን ያስቀምጡ",
+    
+    // Explore
+    "explore.title": "ዳሎ",
+    "explore.searchPlaceholder": "ሰራተኞች ይፈልጉ...",
+    "explore.trendingHashtags": "ተወዳጅ Hashtags",
+    
+    // Community Guidelines
+    "guidelines.title": "አህባብ መመሪያዎች",
+    "guidelines.subtitle": "AfroSphere ደህንነት እና ክብር ይግበሩ",
+    "guidelines.rule1": "ክብር ይገባ",
+    "guidelines.rule1Desc": "ምንም ጸረ-ሰብ ንግግር, ስድብ, ወይም ምንም ዓይነት መስቀያ የለም. ሰዎችን, ሃይማኖትን, 족ትንን እና ባህልን ክብር ሰጥ.",
+    "guidelines.rule2": "ምንም ሥር የወሰደ ወይም ጉዳት የለም",
+    "guidelines.rule2Desc": "ሥር የወሰደ, ማስፈራራት ወይም ሥር የወሰደ ሥራ እንዳይደገሙ.",
+    "guidelines.rule3": "ምንም ወጥር ተግባር የለም",
+    "guidelines.rule3Desc": "ለድንገተኛ መድኃኒት, ሌላ ወይም ወጥር ግዜ ምንም ዓይነት ጥሰት የለም.",
+    "guidelines.agree": "እነዚህን መመሪያዎች ተረድተው እና አብቅተዋል",
   },
   xh: {
-    // Navigation - Xhosa
+    // Navigation
     "nav.home": "Ekhaya",
     "nav.explore": "Vunja Umkhonyeni",
     "nav.create": "Yenza",
     "nav.notifications": "Izaziso",
     "nav.profile": "Iprofayili",
     
+    // Feed
     "feed.noPost": "Akukho imisebenzi kanje",
     "feed.beFirst": "Yibe yokuqala ukwabelana nento entle!",
     "feed.newPosts": "Jonga eminye imisebenzi",
     
+    // Settings
     "settings.title": "Isethingi",
     "settings.account": "Iacounts",
     "settings.privateAccount": "Iacounts esiyimfihlo",
     "settings.privateAccountDesc": "Kuphela abavumeli abavumelekileyo banokubona amaposi akho",
     "settings.language": "Ulwimi",
     "settings.languageDesc": "Tshintsha ulwimi olukhetho",
-    "settings.logout": "Phuma",
-    "settings.logoutDesc": "Phuma kwesi sisikhokelo",
-    "settings.deleteAccount": "Cima iakaunti",
-    "settings.deleteAccountDesc": "Susa i-akaunt yakho ngonaphakade",
+    
+    // Auth
+    "auth.signUp": "Bolyelana",
+    "auth.login": "Ngena",
+    "auth.email": "I-imeyile",
+    "auth.password": "Igama-zintambo",
+    "auth.username": "Igama lomsebenzisi",
+    "auth.signUpGoogle": "Bolyelana nge-Google",
+    "auth.loginGoogle": "Ngena nge-Google",
     
     // Common
     "common.save": "Gcina",
     "common.cancel": "Rhoxisa",
     "common.delete": "Cima",
+    "common.edit": "Hlela",
     "common.close": "Vala",
-    "common.loading": "Ilodinh...",
+    "common.loading": "Iyalwenza...",
     "common.error": "Impazamo",
     "common.success": "Impumelelo",
+    
+    // CreatePost
+    "create.title": "Yenza Ipost",
+    "create.caption": "Ayini ekuqondekayo?",
+    "create.category": "Khetha Udidi",
+    "create.addPhoto": "Yongeza ifoto yakho yokuqala",
+    "create.maxFiles": "Max 10 ifayili, 10MB nganye",
+    "create.shareCaption": "Yabelana ngombango wakho...",
+    "create.selectCategory": "Khetha enye",
+    "create.hashtags": "I-Hashtags",
+    "create.hashtagPlaceholder": "#isitayile #isayensi",
+    "create.missingFields": "Izalanzi ezikutywala",
+    "create.missingFieldsDesc": "Sicela ungeze imessage kunye nokusetyenziswa kwezifoto ezinye",
+    
+    // Comments
+    "comments.title": "Iinkcukacha",
+    "comments.addComment": "Yongeza ingxelo...",
+    "comments.writeReply": "Bhala impendulo...",
+    "comments.reply": "Phendula",
+    "comments.noComments": "Akukho nkcukacha nje",
+    
+    // EditProfile
+    "profile.displayName": "Igama elibonakalisayo",
+    "profile.bio": "I-Bio",
+    "profile.location": "Indawo",
+    "profile.profession": "Umsebenzi",
+    "profile.saveChanges": "Gcina Izilungeleyo",
+    
+    // Explore
+    "explore.title": "Vunja Umkhonyeni",
+    "explore.searchPlaceholder": "Sesha abalikho...",
+    "explore.trendingHashtags": "I-Hashtags Ezisetyenziselwayo",
+    
+    // Community Guidelines
+    "guidelines.title": "Imithetho yoMphakathi",
+    "guidelines.subtitle": "Gcina i-AfroSphere ikhuselekile kwaye ngokuhloniphile",
+    "guidelines.rule1": "Ba ngokuhloniphile",
+    "guidelines.rule1Desc": "Akukho utshintsho lwa panzi, uqhanqalazo, okanye isigwebo. Hlonipha umuntu, inkolelo, isiko, kunye nomzi.",
+    "guidelines.rule2": "Akukho Ugwebo Okanye Imibi",
+    "guidelines.rule2Desc": "Ixesha elibophela, imibi, okanye imfundiso yotshintsho ayivumelekanga.",
+    "guidelines.rule3": "Akukho Imisebenzi Engekho Emthethweni",
+    "guidelines.rule3Desc": "Akukho uphakamelo lwedanga elingekho mthethweni, iimpilo, okanye umsebenzi womfazelo.",
+    "guidelines.agree": "Ndiyaqonda kwaye ndivuma ukuba ndlandele ezi mitatane",
   },
 };
 
