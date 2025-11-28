@@ -1,6 +1,6 @@
 import { db } from './db';
 import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
@@ -126,7 +126,7 @@ export class DbStorage implements IStorage {
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
-    await db.delete(likes).where(eq(likes.userId, userId)).where(eq(likes.postId, postId));
+    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
@@ -140,7 +140,7 @@ export class DbStorage implements IStorage {
   }
 
   async unlikeComment(userId: string, commentId: string): Promise<void> {
-    await db.delete(likes).where(eq(likes.userId, userId));
+    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
   }
 
   async followUser(followerId: string, followingId: string): Promise<Follow> {
@@ -149,7 +149,7 @@ export class DbStorage implements IStorage {
   }
 
   async unfollowUser(followerId: string, followingId: string): Promise<void> {
-    await db.delete(follows).where(eq(follows.followerId, followerId));
+    await db.delete(follows).where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)));
   }
 
   async isFollowing(followerId: string, followingId: string): Promise<boolean> {
@@ -184,7 +184,7 @@ export class DbStorage implements IStorage {
   }
 
   async markNotificationAsRead(id: string): Promise<void> {
-    await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
+    await db.update(notifications).set({ read: true }).where(eq(notifications.id, id));
   }
 
   async getUserSettings(userId: string): Promise<UserSettings | undefined> {
