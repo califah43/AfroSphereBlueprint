@@ -127,26 +127,38 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     try {
       const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
       
-      // Try to fetch user from database - need to find by getting any users and matching by Firebase UID
+      // Fetch ALL users and find one matching this Firebase UID
       let dbUser = null;
       try {
-        // First try to get stored data from previous login/signup
-        const storedData = localStorage.getItem("currentUserData");
-        if (storedData) {
-          const parsed = JSON.parse(storedData);
-          if (parsed.username) {
-            // Try to fetch using the stored username
-            const res = await fetch(`/api/users/username/${parsed.username}`);
-            if (res.ok) {
-              dbUser = await res.json();
-            }
-          }
+        const usersRes = await fetch('/api/users/all');
+        if (usersRes.ok) {
+          const allUsers = await usersRes.json();
+          // Find user by Firebase UID
+          dbUser = allUsers.find((u: any) => u.firebaseUid === userCredential.user.uid);
         }
       } catch (e) {
-        console.log("Could not fetch user by stored username");
+        console.log("Could not fetch all users");
       }
       
-      // If we found a database user, use their real ID
+      // If still not found, try by stored username
+      if (!dbUser) {
+        try {
+          const storedData = localStorage.getItem("currentUserData");
+          if (storedData) {
+            const parsed = JSON.parse(storedData);
+            if (parsed.username) {
+              const res = await fetch(`/api/users/username/${parsed.username}`);
+              if (res.ok) {
+                dbUser = await res.json();
+              }
+            }
+          }
+        } catch (e) {
+          console.log("Could not fetch user by stored username");
+        }
+      }
+      
+      // Store the REAL database user
       if (dbUser) {
         localStorage.setItem("currentUserId", dbUser.id);
         localStorage.setItem("currentUserData", JSON.stringify({
@@ -154,14 +166,13 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
           firebaseUid: userCredential.user.uid,
         }));
       } else {
-        // Fallback: create minimal profile with Firebase UID (backward compatibility)
-        const username = loginData.email.split('@')[0];
+        // Only fallback if absolutely necessary
         localStorage.setItem("currentUserId", userCredential.user.uid);
         localStorage.setItem("currentUserData", JSON.stringify({
           id: userCredential.user.uid,
           email: userCredential.user.email,
-          username: username,
-          displayName: username,
+          username: userCredential.user.email.split('@')[0],
+          displayName: userCredential.user.email.split('@')[0],
           bio: "",
           location: "",
           avatar: "",
@@ -169,7 +180,6 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         }));
       }
       
-      console.log("Login:", userCredential.user);
       toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
       onAuthComplete(false);
     } catch (error: any) {
