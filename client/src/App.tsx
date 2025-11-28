@@ -453,20 +453,24 @@ export default function App() {
             />
           )}
 
-          {modalView === "user-profile" && selectedUsername && (
-            <div className="flex-1 overflow-y-auto">
-              <Profile
-                isOwnProfile={selectedUsername === "adikeafrica"}
-                username={selectedUsername}
-                onClose={() => setModalView("none")}
-                onEditProfile={() => setModalView("edit-profile")}
-                onSettings={() => setModalView("settings")}
-                onPostClick={handleOpenPostDetail}
-                onFollowersClick={() => setModalView("followers")}
-                onFollowingClick={() => setModalView("followers")}
-              />
-            </div>
-          )}
+          {modalView === "user-profile" && selectedUsername && (() => {
+            const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
+            const currentUsername = currentUserData.username || "";
+            return (
+              <div className="flex-1 overflow-y-auto">
+                <Profile
+                  isOwnProfile={selectedUsername === currentUsername}
+                  username={selectedUsername}
+                  onClose={() => setModalView("none")}
+                  onEditProfile={() => setModalView("edit-profile")}
+                  onSettings={() => setModalView("settings")}
+                  onPostClick={handleOpenPostDetail}
+                  onFollowersClick={() => setModalView("followers")}
+                  onFollowingClick={() => setModalView("followers")}
+                />
+              </div>
+            );
+          })()}
           </div>
         </div>
         <Toaster />
