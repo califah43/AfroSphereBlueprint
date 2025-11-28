@@ -1,0 +1,177 @@
+Alright Ejeh is here — let me fix this clean and sharp for you.
+Your likes not counting, feeds loading slowly, comments not showing counts, comment likes disappearing — all these come from the same two root problems:
+
+ROOT PROBLEM
+	1.	Your Firestore structure is not optimized for count fields.
+	2.	You are not using atomic increments & real-time listeners.
+
+So instead of every like being fetched manually (slow + inconsistent), you need proper counters + real-time updates.
+
+Below is the exact fixed Firestore structure and the code you need to drop into your app immediately.
+
+⸻
+
+✅ FIRESTORE STRUCTURE (Corrected)
+
+Collections
+
+/posts/{postId}
+/posts/{postId}/comments/{commentId}
+/posts/{postId}/comments/{commentId}/replies/{replyId}
+
+Fields Required
+
+🔥 On every post document:
+
+likeCount: number
+commentCount: number
+createdAt: Timestamp
+
+🔥 On every comment document:
+
+likeCount: number
+replyCount: number
+createdAt: Timestamp
+
+🔥 On every reply document:
+
+likeCount: number
+createdAt: Timestamp
+
+🔥 User likes:
+
+/posts/{postId}/likes/{userId}
+/posts/{postId}/comments/{commentId}/likes/{userId}
+/posts/{postId}/comments/{commentId}/replies/{replyId}/likes/{userId}
+
+This solves:
+	•	Likes disappearing
+	•	Comment likes not counting
+	•	Replies likes not saved
+
+⸻
+
+✅ LIKE SYSTEM (Drop-in Code)
+
+Works for Posts, Comments, Replies (just change the path).
+
+Atomic Like Toggle
+
+async function toggleLike(ref, userId) {
+  const likeRef = ref.collection("likes").doc(userId);
+  const doc = await likeRef.get();
+
+  if (doc.exists) {
+    // UNLIKE
+    await likeRef.delete();
+    await ref.update({
+      likeCount: firebase.firestore.FieldValue.increment(-1)
+    });
+  } else {
+    // LIKE
+    await likeRef.set({ userId, likedAt: Date.now() });
+    await ref.update({
+      likeCount: firebase.firestore.FieldValue.increment(1)
+    });
+  }
+}
+
+Usage
+
+Like a post
+
+toggleLike(db.collection("posts").doc(postId), userId);
+
+Like a comment
+
+toggleLike(db.collection("posts").doc(postId)
+  .collection("comments").doc(commentId), userId);
+
+Like a reply
+
+toggleLike(db.collection("posts").doc(postId)
+  .collection("comments").doc(commentId)
+  .collection("replies").doc(replyId), userId);
+
+
+⸻
+
+✅ REAL-TIME COUNTERS (No lag)
+
+This makes sure your feeds load instantly, counts update instantly.
+
+Listen to a Post
+
+db.collection("posts")
+  .doc(postId)
+  .onSnapshot(doc => {
+    const post = doc.data();
+    setPost(post);
+  });
+
+Listen to Comments
+
+db.collection("posts").doc(postId)
+  .collection("comments")
+  .orderBy("createdAt", "asc")
+  .onSnapshot(snapshot => {
+    const comments = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    setComments(comments);
+  });
+
+Listen to Replies
+
+db.collection("posts").doc(postId)
+  .collection("comments").doc(commentId)
+  .collection("replies")
+  .orderBy("createdAt", "asc")
+  .onSnapshot(snapshot => {
+    const replies = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    setReplies(replies);
+  });
+
+
+⸻
+
+✅ COMMENT COUNTS (Fix disappearing counts)
+
+Every time a comment is added:
+
+await postRef.update({
+  commentCount: firebase.firestore.FieldValue.increment(1)
+});
+
+Every time a reply is added:
+
+await commentRef.update({
+  replyCount: firebase.firestore.FieldValue.increment(1)
+});
+
+
+⸻
+
+🔥 WHY YOUR OLD SYSTEM FAILED
+	•	You were counting likes by querying documents instead of storing counters.
+	•	You weren’t using atomic increments (Firestores official method).
+	•	You weren’t using real-time listeners.
+	•	So counts didn’t update → they looked empty → likes disappeared → UI misbehaved.
+
+Now everything becomes instant, smooth, correct, and scalable.
+
+⸻
+
+🚀 If you want…
+
+I can also generate:
+
+✅ Entire backend feed structure
+✅ Optimized database rules
+✅ New feed loading algorithm (FAST)
+✅ Offline caching for faster load
+✅ Cloud Functions that auto-count comments & likes
+
+Just say:
+
+“Ejeh give me the full feed backend”
+
+I’ll drop everything you need.
