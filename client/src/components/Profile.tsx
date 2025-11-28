@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, X } from "lucide-react";
+import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CreatorBadge from "./CreatorBadge";
 import ProfilePictureModal from "./ProfilePictureModal";
@@ -250,96 +250,147 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
 
           {/* Name & Bio */}
-          <h1 className="text-2xl font-bold mb-0.5" data-testid="text-profile-displayname">
+          <h1 className="text-3xl font-black mb-1" data-testid="text-profile-displayname">
             {userProfile.displayName}
           </h1>
-          <p className="text-sm text-primary font-semibold mb-2" data-testid="text-profile-username">
+          <p className="text-sm text-primary font-semibold mb-3" data-testid="text-profile-username">
             @{userProfile.username}
           </p>
-          <p className="text-sm text-muted-foreground mb-2" data-testid="text-profile-bio">
+          <p className="text-sm text-foreground leading-relaxed mb-3" data-testid="text-profile-bio">
             {userProfile.bio}
           </p>
 
-          {/* Stats - Elegant Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-4 bg-muted/40 rounded-lg p-3 border border-border">
+          {/* Professional Info */}
+          <div className="flex flex-col gap-2 mb-4 text-sm">
+            {userProfile.location && (
+              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>{userProfile.location}</span>
+              </div>
+            )}
+            {userProfile.profession && (
+              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <Briefcase className="h-4 w-4 text-primary" />
+                <span>{userProfile.profession}</span>
+              </div>
+            )}
+            {userProfile.website && (
+              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+                <Link className="h-4 w-4" />
+                <span className="truncate">{userProfile.website}</span>
+              </a>
+            )}
+          </div>
+
+          {/* Stats - Premium Grid */}
+          <div className="grid grid-cols-3 gap-3 mb-5 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-orange-500/5 border border-primary/10">
             <button
               onClick={onFollowersClick}
-              className="text-center hover-elevate transition-all group"
+              className="flex flex-col items-center gap-1.5 hover-elevate transition-all group py-1"
               data-testid="button-view-followers"
             >
-              <p className="text-lg font-bold text-primary" data-testid="text-followers-count">
-                {userProfile.followers}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">Followers</p>
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
+                <p className="text-base font-bold text-foreground" data-testid="text-followers-count">
+                  {userProfile.followers}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground font-medium">Followers</p>
             </button>
             
-            <div className="border-l border-r border-border" />
+            <div className="w-px bg-border/30" />
             
             <button
               onClick={onFollowingClick}
-              className="text-center hover-elevate transition-all group"
+              className="flex flex-col items-center gap-1.5 hover-elevate transition-all group py-1"
               data-testid="button-view-following"
             >
-              <p className="text-lg font-bold text-primary" data-testid="text-following-count">
-                {userProfile.following}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">Following</p>
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
+                <p className="text-base font-bold text-foreground" data-testid="text-following-count">
+                  {userProfile.following}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground font-medium">Following</p>
             </button>
 
-            <div className="border-l border-border" />
+            <div className="w-px bg-border/30" />
             
-            <div className="text-center">
-              <p className="text-lg font-bold text-primary" data-testid="text-posts-count">
-                {userProfile.posts}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">Posts</p>
-            </div>
+            <button
+              onClick={() => onPostClick?.("1")}
+              className="flex flex-col items-center gap-1.5 hover-elevate transition-all group py-1"
+              data-testid="button-view-posts-count"
+            >
+              <div className="flex items-center gap-1">
+                <Grid3X3 className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
+                <p className="text-base font-bold text-foreground" data-testid="text-posts-count">
+                  {userProfile.posts}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground font-medium">Posts</p>
+            </button>
           </div>
 
-          {/* Action Buttons - Elegant */}
-          {isOwnProfile ? (
-            <Button
-              className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-semibold h-9 rounded-lg text-sm"
-              onClick={onEditProfile}
-              data-testid="button-edit-profile"
-            >
-              Edit Profile
-            </Button>
-          ) : (
-            <Button 
-              className={`w-full font-semibold rounded-lg h-9 text-sm ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90' : 'bg-primary text-white hover:bg-primary/90'}`}
-              onClick={toggleFollow}
-              disabled={isLoading}
-              data-testid="button-follow"
-            >
-              {isLoading ? "..." : (isFollowing ? "Following" : "Follow")}
-            </Button>
-          )}
+          {/* Action Buttons - Premium */}
+          <div className="flex gap-2 mb-6">
+            {isOwnProfile ? (
+              <>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold h-10 rounded-lg text-sm shadow-lg shadow-primary/20"
+                  onClick={onEditProfile}
+                  data-testid="button-edit-profile"
+                >
+                  Edit Profile
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onSettings}
+                  className="h-10 w-10 rounded-lg hover-elevate"
+                  data-testid="button-settings-icon"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </>
+            ) : (
+              <Button 
+                className={`flex-1 font-bold h-10 rounded-lg text-sm shadow-lg ${isFollowing ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-secondary/20' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 shadow-primary/20'}`}
+                onClick={toggleFollow}
+                disabled={isLoading}
+                data-testid="button-follow"
+              >
+                {isLoading ? "..." : (isFollowing ? "Following" : "Follow")}
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* Posts Tabs - Minimal & Elegant */}
-        <div className="mt-4 border-t border-border pt-4">
+        {/* Posts Tabs - Premium & Smooth */}
+        <div className="mt-6 border-t border-border pt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-border rounded-none p-0 h-auto">
+            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b-2 border-border rounded-none p-0 h-auto gap-0">
               <TabsTrigger 
                 value="posts" 
                 data-testid="tab-posts"
-                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-sm"
+                className="border-b-3 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-bold text-sm data-[state=active]:text-primary hover:text-primary transition-colors"
               >
+                <Grid3X3 className="h-4 w-4 mr-2" />
                 Posts
               </TabsTrigger>
               <TabsTrigger 
                 value="liked" 
                 data-testid="tab-liked"
-                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-sm"
+                className="border-b-3 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-bold text-sm data-[state=active]:text-primary hover:text-primary transition-colors"
               >
+                <Heart className="h-4 w-4 mr-2" />
                 Liked
               </TabsTrigger>
               <TabsTrigger 
                 value="saved" 
                 data-testid="tab-saved"
-                className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-semibold text-sm"
+                className="border-b-3 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none py-3 font-bold text-sm data-[state=active]:text-primary hover:text-primary transition-colors"
               >
+                <Share2 className="h-4 w-4 mr-2" />
                 Saved
               </TabsTrigger>
             </TabsList>
