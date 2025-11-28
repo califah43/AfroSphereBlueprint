@@ -224,8 +224,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
-      <div className="max-w-md mx-auto px-4 pt-4 relative z-10 pb-6">
-        {/* Avatar */}
+      <div className="max-w-md mx-auto px-4 -mt-8 relative z-10 pb-6">
+        {/* Avatar - Overlaps Banner */}
         <div className="flex justify-center mb-4">
           <button
             onClick={() => userProfile.avatar && setShowPictureModal(true)}
@@ -244,7 +244,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </button>
         </div>
 
-        {/* Name, Badge & Username - Centered */}
+        {/* Name, Badge & Username - Below Banner */}
         <div className="text-center mb-4">
           {/* Name & Badge */}
           <div className="flex items-center justify-center gap-2 mb-0.5">
