@@ -81,7 +81,12 @@ export class DbStorage implements IStorage {
   }
 
   async listPosts(limit = 20, offset = 0): Promise<Post[]> {
-    return db.query.posts.findMany({ limit, offset });
+    // Order by createdAt descending so newest posts appear first
+    return db.query.posts.findMany({ 
+      limit, 
+      offset,
+      orderBy: (posts, { desc }) => [desc(posts.createdAt)]
+    });
   }
 
   async listPostsByUser(userId: string): Promise<Post[]> {

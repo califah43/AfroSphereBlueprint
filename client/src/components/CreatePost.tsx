@@ -59,7 +59,19 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
 
     setIsSubmitting(true);
     try {
-      const userId = localStorage.getItem("currentUserId") || "current-user";
+      // Get the REAL database UUID, not Firebase UID
+      let userId = localStorage.getItem("currentUserId");
+      const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      
+      // If currentUserId looks like a Firebase UID, use the database ID from userData
+      if (userData && userData.id && userData.id !== userId) {
+        userId = userData.id;
+      }
+      
+      if (!userId || userId === "current-user") {
+        throw new Error("User not authenticated. Please sign in again.");
+      }
+
       const postData = {
         userId,
         caption,
@@ -88,6 +100,9 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
         className: "border-primary/20 bg-card",
       });
 
+      // Refresh posts feed
+      window.dispatchEvent(new Event('refreshPosts'));
+      
       onPost?.(createdPost);
       onClose();
     } catch (error: any) {

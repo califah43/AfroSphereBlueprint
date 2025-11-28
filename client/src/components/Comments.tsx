@@ -86,15 +86,26 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
     if (newComment.trim()) {
       setIsLoading(true);
       try {
-        const currentUserId = localStorage.getItem("currentUserId");
+        // Get the REAL database UUID, not Firebase UID
+        let currentUserId = localStorage.getItem("currentUserId");
         const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        
+        // If currentUserId looks like a Firebase UID, use the database ID from userData
+        if (userData && userData.id && userData.id !== currentUserId) {
+          currentUserId = userData.id;
+        }
+        
+        if (!currentUserId) {
+          throw new Error("User not authenticated");
+        }
+        
         const res = await fetch('/api/comments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             postId,
             userId: currentUserId,
-            username: userData.username,
+            username: userData.username || "creator",
             text: newComment,
             replyTo: null,
           }),
@@ -103,13 +114,13 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
           const newCommentObj = await res.json();
           const mappedComment: Comment = {
             id: newCommentObj.id,
-            author: newCommentObj.author || "creator",
+            author: newCommentObj.author || userData.username || "creator",
             text: newCommentObj.text,
             likes: newCommentObj.likes || 0,
             timeAgo: newCommentObj.timeAgo || "now",
             isLiked: false,
             replies: [],
-            avatar: newCommentObj.avatar,
+            avatar: newCommentObj.avatar || userData.avatar,
           };
           setComments([...comments, mappedComment]);
           setNewComment("");

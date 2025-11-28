@@ -57,7 +57,15 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const { toast } = useToast();
 
   const handleLike = async () => {
-    const userId = localStorage.getItem("currentUserId");
+    // Get the REAL database UUID, not Firebase UID
+    let userId = localStorage.getItem("currentUserId");
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    
+    // If currentUserId looks like a Firebase UID, use the database ID from userData
+    if (userData && userData.id && userData.id !== userId) {
+      userId = userData.id;
+    }
+    
     if (!userId) {
       toast({ title: "Please sign in to like posts", variant: "destructive" });
       return;
@@ -76,7 +84,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         setLikes(data.likes || (data.liked ? likes + 1 : likes - 1));
         
         if (data.liked) {
-          toast({ title: "Post liked! ❤️", description: "Added to your liked posts" });
+          toast({ title: "Post liked!", description: "Added to your liked posts" });
         }
       }
       onLike?.(post.id);
