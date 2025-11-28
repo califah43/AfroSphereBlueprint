@@ -1,7 +1,7 @@
 import { db } from './db';
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings } from '@shared/schema';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings } from '@shared/schema';
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
 export interface IStorage {
@@ -37,6 +37,12 @@ export interface IStorage {
   markNotificationAsRead(id: string): Promise<void>;
   getUserSettings(userId: string): Promise<UserSettings | undefined>;
   saveUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings>;
+  blockUser(userId: string, blockedUserId: string): Promise<BlockedUser>;
+  unblockUser(userId: string, blockedUserId: string): Promise<void>;
+  getBlockedUsers(userId: string): Promise<User[]>;
+  submitReport(userId: string, reportType: string, description: string, postId?: string, reportedUserId?: string): Promise<UserReport>;
+  getReports(): Promise<UserReport[]>;
+  deleteUser(userId: string): Promise<void>;
   saveFCMToken(userId: string, token: string): Promise<void>;
   getFCMToken(userId: string): Promise<string | undefined>;
 }
@@ -244,6 +250,44 @@ export class DbStorage implements IStorage {
     }
     const [newSettings] = await db.insert(userSettings).values({ userId, ...settings }).returning();
     return newSettings;
+  }
+
+  async blockUser(userId: string, blockedUserId: string): Promise<BlockedUser> {
+    const [blocked] = await db.insert(blockedUsers).values({ userId, blockedUserId }).returning();
+    return blocked;
+  }
+
+  async unblockUser(userId: string, blockedUserId: string): Promise<void> {
+    await db.delete(blockedUsers).where(and(eq(blockedUsers.userId, userId), eq(blockedUsers.blockedUserId, blockedUserId)));
+  }
+
+  async getBlockedUsers(userId: string): Promise<User[]> {
+    const blocked = await db.query.blockedUsers.findMany({ where: eq(blockedUsers.userId, userId) });
+    const blockedUserIds = blocked.map(b => b.blockedUserId);
+    if (blockedUserIds.length === 0) return [];
+    return db.query.users.findMany({ where: (u) => blockedUserIds.includes(u.id) });
+  }
+
+  async submitReport(userId: string, reportType: string, description: string, postId?: string, reportedUserId?: string): Promise<UserReport> {
+    const [report] = await db.insert(userReports).values({ userId, reportType, description, postId, reportedUserId }).returning();
+    return report;
+  }
+
+  async getReports(): Promise<UserReport[]> {
+    return db.query.userReports.findMany({ orderBy: (t) => t.createdAt });
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    // Delete all user data
+    await db.delete(posts).where(eq(posts.userId, userId));
+    await db.delete(comments).where(eq(comments.userId, userId));
+    await db.delete(likes).where(eq(likes.userId, userId));
+    await db.delete(follows).where(eq(follows.followerId, userId));
+    await db.delete(follows).where(eq(follows.followingId, userId));
+    await db.delete(notifications).where(eq(notifications.userId, userId));
+    await db.delete(userSettings).where(eq(userSettings.userId, userId));
+    await db.delete(blockedUsers).where(eq(blockedUsers.userId, userId));
+    await db.delete(users).where(eq(users.id, userId));
   }
 
   async saveFCMToken(userId: string, token: string): Promise<void> {

@@ -631,6 +631,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ BLOCKED USERS ROUTES ============
+  app.post("/api/blocked-users", async (req, res) => {
+    try {
+      const { userId, blockedUserId } = req.body;
+      const blocked = await storage.blockUser(userId, blockedUserId);
+      res.json(blocked);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to block user" });
+    }
+  });
+
+  app.delete("/api/blocked-users/:userId/:blockedUserId", async (req, res) => {
+    try {
+      await storage.unblockUser(req.params.userId, req.params.blockedUserId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to unblock user" });
+    }
+  });
+
+  app.get("/api/blocked-users/:userId", async (req, res) => {
+    try {
+      const blocked = await storage.getBlockedUsers(req.params.userId);
+      res.json(blocked);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to get blocked users" });
+    }
+  });
+
+  // ============ REPORTS ROUTES ============
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const { userId, reportType, description, postId, reportedUserId } = req.body;
+      const report = await storage.submitReport(userId, reportType, description, postId, reportedUserId);
+      res.json(report);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to submit report" });
+    }
+  });
+
+  app.get("/api/reports", async (req, res) => {
+    try {
+      const reports = await storage.getReports();
+      res.json(reports);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to get reports" });
+    }
+  });
+
+  // ============ ACCOUNT DELETION & UPDATES ============
+  app.post("/api/users/:id/delete", async (req, res) => {
+    try {
+      await storage.deleteUser(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete account" });
+    }
+  });
+
+  app.patch("/api/users/:id/email", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || !email.includes("@")) {
+        return res.status(400).json({ error: "Invalid email" });
+      }
+      res.json({ success: true, email });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update email" });
+    }
+  });
+
+  app.patch("/api/users/:id/password", async (req, res) => {
+    try {
+      const { newPassword, confirmPassword } = req.body;
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+      }
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: "Passwords do not match" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update password" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {

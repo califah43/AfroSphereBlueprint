@@ -142,22 +142,37 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
     }
   };
 
-  const handleSaveEmail = () => {
-    if (editData.email || editData.phone) {
-      setEditMode("none");
-      setEditData({ ...editData, email: "", phone: "" });
+  const handleSaveEmail = async () => {
+    if (!editData.email && !editData.phone) return;
+    try {
+      const response = await fetch(`/api/users/${userId}/email`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: editData.email }),
+      });
+      if (response.ok) {
+        setEditMode("none");
+        setEditData({ ...editData, email: "", phone: "" });
+      }
+    } catch (e) {
+      console.error("Failed to save email:", e);
     }
   };
 
-  const handleSavePassword = () => {
-    if (editData.newPassword === editData.confirmPassword && editData.newPassword) {
-      setEditMode("none");
-      setEditData({
-        ...editData,
-        password: "",
-        newPassword: "",
-        confirmPassword: "",
+  const handleSavePassword = async () => {
+    if (editData.newPassword !== editData.confirmPassword || !editData.newPassword) return;
+    try {
+      const response = await fetch(`/api/users/${userId}/password`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: editData.newPassword, confirmPassword: editData.confirmPassword }),
       });
+      if (response.ok) {
+        setEditMode("none");
+        setEditData({ password: "", newPassword: "", confirmPassword: "", reportText: "" });
+      }
+    } catch (e) {
+      console.error("Failed to update password:", e);
     }
   };
 
@@ -778,7 +793,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
               icon={AlertCircle}
               label="Report a Problem"
               description="Tell us if something is not working"
-              onClick={() => setEditMode("report")}
+              onClick={() => { setEditData({ ...editData, reportText: "" }); setEditMode("report"); }}
             />
             <SettingButton
               icon={Lock}
