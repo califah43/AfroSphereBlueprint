@@ -153,3 +153,29 @@ export const userSettings = pgTable("user_settings", {
 });
 
 export type UserSettings = typeof userSettings.$inferSelect;
+
+// ============ BLOCKED USERS ============
+export const blockedUsers = pgTable("blocked_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(), // The user doing the blocking
+  blockedUserId: varchar("blocked_user_id").notNull(), // The user being blocked
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type BlockedUser = typeof blockedUsers.$inferSelect;
+
+// ============ USER REPORTS ============
+export const userReports = pgTable("user_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(), // The user submitting the report
+  reportType: text("report_type").notNull(), // "problem", "content", "user", etc.
+  description: text("description").notNull(),
+  postId: varchar("post_id"), // Optional: post being reported
+  reportedUserId: varchar("reported_user_id"), // Optional: user being reported
+  status: text("status").default("pending"), // "pending", "reviewed", "resolved"
+  adminNotes: text("admin_notes"), // Admin notes on the report
+  createdAt: timestamp("created_at").defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+});
+
+export type UserReport = typeof userReports.$inferSelect;
