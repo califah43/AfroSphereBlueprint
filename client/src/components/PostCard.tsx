@@ -71,6 +71,15 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
       return;
     }
 
+    // Optimistic update - update UI immediately
+    const previousLiked = isLiked;
+    const previousLikes = likes;
+    const newLiked = !isLiked;
+    const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
+    
+    setIsLiked(newLiked);
+    setLikes(newLikes);
+
     try {
       const res = await fetch('/api/likes/posts', {
         method: 'POST',
@@ -80,19 +89,28 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
       if (res.ok) {
         const data = await res.json();
+        // Confirm the server response
         setIsLiked(data.liked);
         if (data.likes !== undefined) {
           setLikes(data.likes);
-        } else {
-          setLikes(data.liked ? likes + 1 : Math.max(0, likes - 1));
         }
         
         if (data.liked) {
           toast({ title: "Post liked!", description: "Added to your liked posts" });
+        } else {
+          toast({ title: "Post unliked", description: "Removed from your liked posts" });
         }
+      } else {
+        // Rollback on error
+        setIsLiked(previousLiked);
+        setLikes(previousLikes);
+        toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
       }
       onLike?.(post.id);
     } catch (error) {
+      // Rollback on error
+      setIsLiked(previousLiked);
+      setLikes(previousLikes);
       toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }
   };

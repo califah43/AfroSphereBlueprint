@@ -46,6 +46,7 @@ export default function PostDetail({
   genre,
   onClose,
 }: PostDetailProps) {
+  const { toast } = useToast();
   const genreData = genre ? GENRES[genre.toUpperCase()] : null;
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -53,9 +54,62 @@ export default function PostDetail({
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes(isLiked ? likes - 1 : likes + 1);
+  const handleLike = async () => {
+    // Get the REAL database UUID, not Firebase UID
+    let userId = localStorage.getItem("currentUserId");
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    
+    // If currentUserId looks like a Firebase UID, use the database ID from userData
+    if (userData && userData.id && userData.id !== userId) {
+      userId = userData.id;
+    }
+    
+    if (!userId) {
+      toast({ title: "Please sign in to like posts", variant: "destructive" });
+      return;
+    }
+
+    // Optimistic update - update UI immediately
+    const previousLiked = isLiked;
+    const previousLikes = likes;
+    const newLiked = !isLiked;
+    const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
+    
+    setIsLiked(newLiked);
+    setLikes(newLikes);
+
+    try {
+      const res = await fetch('/api/likes/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, postId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Confirm the server response
+        setIsLiked(data.liked);
+        if (data.likes !== undefined) {
+          setLikes(data.likes);
+        }
+        
+        if (data.liked) {
+          toast({ title: "Post liked!", description: "Added to your liked posts" });
+        } else {
+          toast({ title: "Post unliked", description: "Removed from your liked posts" });
+        }
+      } else {
+        // Rollback on error
+        setIsLiked(previousLiked);
+        setLikes(previousLikes);
+        toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
+      }
+    } catch (error) {
+      // Rollback on error
+      setIsLiked(previousLiked);
+      setLikes(previousLikes);
+      toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
+    }
   };
 
   const handleComment = (e: React.FormEvent) => {
