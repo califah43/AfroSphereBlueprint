@@ -51,6 +51,7 @@ export const posts = pgTable("posts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   image: text("image").notNull(),
+  images: text("images").array().default(sql`'{}'`), // Multiple images support
   caption: text("caption").default(""),
   category: text("category").notNull(), // "Fashion", "Music", "Art", "Culture", "Lifestyle"
   likes: integer("likes").default(0),

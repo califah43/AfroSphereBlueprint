@@ -79,7 +79,8 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
         userId,
         caption,
         category: category || "lifestyle",
-        image: mediaPreviews[0],
+        image: mediaPreviews[0], // Primary image (first one)
+        images: mediaPreviews, // All images for carousel
       };
 
       const controller = new AbortController();
