@@ -11,11 +11,9 @@ import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSche
 // Export storage for seeding
 export { storage };
 
-let hasSeeded = false;
-
-// Seed data function - runs only once
+// Seed data function - runs every time to ensure posts have likes
 async function seedDatabase() {
-  if (hasSeeded) return; // Only seed once per server instance
+  // Always sync seed data to ensure posts have proper likes
   
   const mockPostsData = [
     // Fashion
@@ -67,8 +65,13 @@ async function seedDatabase() {
       });
       
       if (existingPost) {
-        // Update existing post with seed likes and other data
-        await db.update(posts).set({ likes: postData.likes }).where(eq(posts.id, existingPost.id));
+        // Update existing post with seed image, caption, category, and likes
+        await db.update(posts).set({ 
+          image: postData.image,
+          caption: postData.caption,
+          category: postData.category,
+          likes: postData.likes 
+        }).where(eq(posts.id, existingPost.id));
       } else {
         // Create new post
         const post = await storage.createPost({
@@ -82,8 +85,6 @@ async function seedDatabase() {
       }
     }
   }
-
-  hasSeeded = true;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -323,14 +324,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/comments", async (req, res) => {
     try {
       const parsed = insertCommentSchema.parse(req.body);
-      const comment = await storage.createComment(parsed);
       
-      // Use username from request if provided, otherwise lookup from database
-      let username = req.body.username || "creator";
-      if (!req.body.username) {
-        const user = await storage.getUser(comment.userId);
-        username = user?.username || "creator";
+      // Get the current user's username for the comment author field
+      let username = "creator";
+      try {
+        const user = await storage.getUser(parsed.userId);
+        if (user?.username) {
+          username = user.username;
+        }
+      } catch (e) {
+        // Use default "creator" if lookup fails
       }
+      
+      const comment = await storage.createComment(parsed);
       
       const enrichedComment = {
         id: comment.id,
