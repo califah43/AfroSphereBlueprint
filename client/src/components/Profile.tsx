@@ -84,6 +84,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             displayName: userData.displayName || userData.username || userData.email?.split('@')[0] || "Your Profile",
             username: userData.username || userData.email?.split('@')[0] || "user",
             bio: userData.bio || "Creative on AfroSphere",
+            location: userData.location || "",
+            website: userData.website || "",
+            profession: userData.profession || "",
             followers: userData.followerCount?.toString() || "0",
             following: userData.followingCount?.toString() || "0",
             posts: userData.postCount?.toString() || "0",
@@ -92,11 +95,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           };
         } catch (e) {
           console.log("Error parsing user data");
-          // Return user data instead of falling back to mock
           return {
             displayName: "Your Profile",
             username: "user",
             bio: "Creative on AfroSphere",
+            location: "",
+            website: "",
+            profession: "",
             followers: "0",
             following: "0",
             posts: "0",
@@ -105,11 +110,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           };
         }
       }
-      // Return user data instead of falling back to mock
       return {
         displayName: "Your Profile",
         username: "user",
         bio: "Creative on AfroSphere",
+        location: "",
+        website: "",
+        profession: "",
         followers: "0",
         following: "0",
         posts: "0",
