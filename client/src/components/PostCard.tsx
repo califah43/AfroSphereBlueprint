@@ -359,9 +359,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={handleBookmark} data-testid={`button-bookmark-${post.id}`}>
           <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current text-primary" : ""}`} />
         </button>
-        <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-share-action-${post.id}`}>
-          <Share2 className="h-4 w-4" />
-        </button>
       </div>
 
       {/* Comments Link */}
