@@ -169,23 +169,77 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   return (
-    <div className="bg-background overflow-hidden mb-0 border-b border-border/20 hover-elevate transition-all duration-300" data-testid={`card-post-${post.id}`}>
-      {/* Header - Full Width Edge-to-Edge */}
+    <div className="bg-background overflow-hidden mb-0 border-b border-border/20" data-testid={`card-post-${post.id}`}>
+      {/* Image Section - FIRST */}
+      <div 
+        className="relative bg-gradient-to-br from-muted/40 to-muted/20 w-full" 
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img
+          src={currentImage}
+          alt="Post content"
+          className="w-full aspect-square object-cover cursor-pointer select-none"
+          data-testid={`img-post-${post.id}`}
+          draggable={false}
+        />
+        
+        {/* Image carousel indicators - TOP OF IMAGE */}
+        {allImages.length > 1 && (
+          <div className="absolute top-3 left-1/2 transform -translate-x-1/2 flex gap-1 px-2.5 py-1.5 bg-primary/80 backdrop-blur-sm rounded-full">
+            {allImages.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-2 w-2 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white' : 'bg-white/50'}`}
+                data-testid={`indicator-image-${idx}`}
+              />
+            ))}
+          </div>
+        )}
+        
+        {showHeart && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Heart 
+              className="w-28 h-28 text-white fill-white drop-shadow-lg" 
+              style={{ animation: 'instagramHeartBurst 0.8s ease-out forwards' }} 
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Engagement Stats Below Image - X/Twitter Style */}
+      <div className="px-4 py-3 flex justify-between text-xs text-muted-foreground border-b border-border/10">
+        <button className="hover:text-foreground transition-colors" data-testid={`button-comments-stat-${post.id}`}>
+          <MessageCircle className="inline h-4 w-4 mr-1" /> {post.comments}
+        </button>
+        <button className="hover:text-foreground transition-colors" data-testid={`button-shares-stat-${post.id}`}>
+          <Share2 className="inline h-4 w-4 mr-1" /> {Math.floor(post.likes * 0.3)}
+        </button>
+        <button className="hover:text-foreground transition-colors" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
+          <Heart className={`inline h-4 w-4 mr-1 ${isLiked ? "fill-primary text-primary" : ""}`} /> {likes}
+        </button>
+        <button className="hover:text-foreground transition-colors" data-testid={`button-views-stat-${post.id}`}>
+          <Eye className="inline h-4 w-4 mr-1" /> {Math.floor(post.likes * 0.5)}
+        </button>
+      </div>
+
+      {/* Author Profile Below Stats */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/10">
         <button 
           onClick={() => onAuthorClick?.(post.author.username)}
-          className="flex items-center gap-3 hover-elevate flex-1 rounded-lg px-0 py-0 transition-all group"
+          className="flex items-center gap-2 hover-elevate flex-1 transition-all group"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-12 h-12 ring-2 ring-primary/20 shadow-md">
+          <Avatar className="w-10 h-10">
             <AvatarImage src={post.author.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{post.author.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 text-xs font-semibold">{post.author.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div className="text-left">
-            <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors" data-testid={`text-username-${post.id}`}>
+          <div className="text-left min-w-0">
+            <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
               {post.author.username}
             </p>
-            <p className="text-xs text-muted-foreground/70 font-medium" data-testid={`text-time-${post.id}`}>
+            <p className="text-xs text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
@@ -194,7 +248,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
-              size="icon" 
+              size="icon"
               className="hover-elevate active-elevate-2"
               data-testid={`button-menu-${post.id}`}
             >
@@ -210,7 +264,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                   data-testid={`button-delete-own-${post.id}`}
                 >
                   <Trash2 className="mr-3 h-4 w-4" />
-                  <span className="font-medium">Delete post for me</span>
+                  <span className="font-medium">Delete post</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </>
@@ -231,7 +285,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                   data-testid={`button-report-${post.id}`}
                 >
                   <Flag className="mr-3 h-4 w-4" />
-                  <span className="font-medium">Report post</span>
+                  <span>Report post</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </>
@@ -261,150 +315,91 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               </AlertDialogTitle>
               <AlertDialogDescription className="text-sm">
                 {isOwnPost 
-                  ? "This action cannot be undone. The post will be removed only from your profile and view." 
-                  : "Help us understand the problem. We'll review your report and take action if needed."}
+                  ? "This action cannot be undone." 
+                  : "Help us understand the problem. We'll review and take action if needed."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-3">
-              <AlertDialogCancel className="hover:bg-muted">Cancel</AlertDialogCancel>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction 
                 onClick={handleDelete} 
-                className={isOwnPost ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "bg-primary hover:bg-primary/90"}
+                className={isOwnPost ? "bg-destructive text-destructive-foreground" : "bg-primary"}
               >
-                {isOwnPost ? "Delete for me" : "Send Report"}
+                {isOwnPost ? "Delete" : "Report"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
 
-      {/* Image Section - Enhanced */}
-      <div 
-        className="relative bg-gradient-to-br from-muted/40 to-muted/20" 
-        onDoubleClick={handleDoubleClick}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <img
-          src={currentImage}
-          alt="Post content"
-          className="w-full aspect-[3/4] object-cover cursor-pointer select-none"
-          data-testid={`img-post-${post.id}`}
-          draggable={false}
-        />
-        
-        {/* Image carousel indicators - Elegant */}
-        {allImages.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full">
-            {allImages.map((_, idx) => (
-              <div
-                key={idx}
-                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-2.5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/60'}`}
-                data-testid={`indicator-image-${idx}`}
-              />
-            ))}
-          </div>
-        )}
-        
-        {showHeart && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart 
-              className="w-28 h-28 text-white fill-white drop-shadow-lg" 
-              style={{ animation: 'instagramHeartBurst 0.8s ease-out forwards' }} 
-            />
-          </div>
-        )}
-      </div>
+      {/* Caption & Actions - LAST */}
+      <div className="px-4 py-3 space-y-3">
+        {/* Caption Section */}
+        <p className="text-sm leading-relaxed">
+          <span className="font-bold text-foreground">{post.author.username}</span>{" "}
+          <span className="text-foreground/90" data-testid={`text-caption-${post.id}`}>
+            {post.caption?.split(/(\#\w+)/g).map((part, i) => 
+              part.startsWith('#') ? (
+                <button
+                  key={i}
+                  onClick={() => onHashtagClick?.(part.substring(1))}
+                  className="text-primary hover:text-primary/80 font-semibold transition-colors"
+                  data-testid={`button-hashtag-${part.substring(1)}`}
+                >
+                  {part}
+                </button>
+              ) : (
+                part
+              )
+            )}
+          </span>
+        </p>
 
-      {/* Content Section - Premium Spacing */}
-      <div className="px-4 py-4 space-y-4">
-        {/* Engagement Bar - Refined */}
-        <div className="flex items-center justify-between -mx-2">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLike}
-              className="hover-elevate active-elevate-2 transition-all"
-              data-testid={`button-like-${post.id}`}
-            >
-              <Heart className={`h-6 w-6 transition-all ${isLiked ? "fill-primary text-primary scale-110" : "text-foreground"}`} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onComment?.(post.id)}
-              className="hover-elevate active-elevate-2"
-              data-testid={`button-comment-${post.id}`}
-            >
-              <MessageCircle className="h-6 w-6" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                onShare?.(post.id);
-                toast({
-                  title: "Share sheet opened",
-                  description: "Choose how you want to share this post",
-                });
-              }}
-              className="hover-elevate active-elevate-2"
-              data-testid={`button-share-${post.id}`}
-            >
-              <Share2 className="h-6 w-6" />
-            </Button>
-          </div>
+        {/* Comments Link */}
+        {post.comments > 0 && (
+          <button
+            onClick={() => onComment?.(post.id)}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            data-testid={`button-view-comments-${post.id}`}
+          >
+            View all {post.comments} {post.comments === 1 ? "comment" : "comments"}
+          </button>
+        )}
+
+        {/* Action Buttons - Bottom */}
+        <div className="flex items-center justify-between -mx-2 pt-2 border-t border-border/10">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
+            onClick={() => onComment?.(post.id)}
+            className="hover-elevate active-elevate-2 flex-1"
+            data-testid={`button-comment-${post.id}`}
+          >
+            <MessageCircle className="h-5 w-5 mr-2" />
+            <span className="text-xs">Comment</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              onShare?.(post.id);
+            }}
+            className="hover-elevate active-elevate-2 flex-1"
+            data-testid={`button-share-${post.id}`}
+          >
+            <Share2 className="h-5 w-5 mr-2" />
+            <span className="text-xs">Share</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleBookmark}
-            className="hover-elevate active-elevate-2"
+            className="hover-elevate active-elevate-2 flex-1"
             data-testid={`button-bookmark-${post.id}`}
           >
-            <Bookmark className={`h-6 w-6 transition-all ${isBookmarked ? "fill-current text-primary" : "text-foreground"}`} />
+            <Bookmark className={`h-5 w-5 mr-2 ${isBookmarked ? "fill-current text-primary" : ""}`} />
+            <span className="text-xs">Save</span>
           </Button>
-        </div>
-
-        {/* Likes Count - Elegant Typography */}
-        <div className="space-y-2.5">
-          <p className="text-sm font-bold text-foreground transition-all duration-300" data-testid={`text-likes-${post.id}`}>
-            {likes.toLocaleString()} {likes === 1 ? "like" : "likes"}
-          </p>
-
-          {/* Caption Section */}
-          <div className="space-y-2">
-            <p className="text-sm leading-relaxed">
-              <span className="font-bold text-foreground">{post.author.username}</span>{" "}
-              <span className="text-foreground/90" data-testid={`text-caption-${post.id}`}>
-                {post.caption?.split(/(\#\w+)/g).map((part, i) => 
-                  part.startsWith('#') ? (
-                    <button
-                      key={i}
-                      onClick={() => onHashtagClick?.(part.substring(1))}
-                      className="text-primary hover:text-primary/80 font-semibold transition-colors"
-                      data-testid={`button-hashtag-${part.substring(1)}`}
-                    >
-                      {part}
-                    </button>
-                  ) : (
-                    part
-                  )
-                )}
-              </span>
-            </p>
-
-            {/* Comments Link */}
-            {post.comments > 0 && (
-              <button
-                onClick={() => onComment?.(post.id)}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-                data-testid={`button-view-comments-${post.id}`}
-              >
-                View all {post.comments} {post.comments === 1 ? "comment" : "comments"}
-              </button>
-            )}
-          </div>
         </div>
       </div>
     </div>
