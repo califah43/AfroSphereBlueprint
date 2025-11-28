@@ -413,6 +413,10 @@ export default function App() {
               onPost={() => {
                 setModalView("none");
               }}
+              onNavigateHome={() => {
+                setActiveTab("home");
+                setModalView("none");
+              }}
             />
           )}
 

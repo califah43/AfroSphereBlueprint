@@ -14,9 +14,10 @@ import { queryClient } from "@/lib/queryClient";
 interface CreatePostProps {
   onClose: () => void;
   onPost?: (data: any) => void;
+  onNavigateHome?: () => void;
 }
 
-export default function CreatePost({ onClose, onPost }: CreatePostProps) {
+export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePostProps) {
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState("");
   const [hashtags, setHashtags] = useState("");
@@ -98,11 +99,6 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       if (!res.ok) throw new Error("Failed to create post");
 
       const createdPost = await res.json();
-      toast({
-        title: "Post created!",
-        description: "Your post has been shared with the community.",
-        className: "border-primary/20 bg-card",
-      });
 
       // Invalidate all caches to trigger refetch
       await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
@@ -111,6 +107,7 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
       window.dispatchEvent(new Event('refreshPosts'));
       
       onPost?.(createdPost);
+      onNavigateHome?.(); // Navigate home immediately
       onClose();
     } catch (error: any) {
       if (error.name === 'AbortError') {
