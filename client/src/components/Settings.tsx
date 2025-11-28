@@ -304,104 +304,58 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
     );
   };
 
-  // Modal renderers - these now render on top of main settings
-  const Modal = ({ title, children }: any) => (
-    <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto" onClick={() => setEditMode("none")}>
-      <div className="flex items-center justify-center min-h-screen p-4" onClick={(e) => e.stopPropagation()}>
-        <div className="bg-background rounded-lg border border-border max-w-md w-full">
-          <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10 rounded-t-lg">
-            <h2 className="text-lg font-bold">{title}</h2>
-            <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
-          </div>
-          <div className="max-w-md mx-auto px-4 py-6 space-y-4">{children}</div>
-        </div>
-      </div>
-    </div>
-  );
+  // Early modals - simple returns
+  if (editMode === "help") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Help Center</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><p className="text-sm"><strong>Getting Started</strong></p><p className="text-xs text-muted-foreground">Learn how to create posts, follow creators, and explore content.</p><p className="text-sm mt-4"><strong>Common Questions</strong></p><p className="text-xs text-muted-foreground">How to edit my profile • How to report content • Privacy settings</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></div></div>;
+  }
 
-  const renderModal = () => {
-    if (editMode === "help") {
-      return <Modal title="Help Center"><div className="space-y-3"><p className="text-sm"><strong>Getting Started</strong></p><p className="text-xs text-muted-foreground">Learn how to create posts, follow creators, and explore content.</p><p className="text-sm mt-4"><strong>Common Questions</strong></p><p className="text-xs text-muted-foreground">How to edit my profile • How to report content • Privacy settings</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
-    }
+  if (editMode === "report") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Report a Problem</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><textarea placeholder="Describe your issue..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { setEditMode("none"); } }} className="w-full bg-primary">Send Report</Button></div></div></div>;
+  }
 
-    if (editMode === "report") {
-      return <Modal title="Report a Problem"><div className="space-y-3"><textarea placeholder="Describe your issue..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { setEditMode("none"); } }} className="w-full bg-primary">Send Report</Button></div></Modal>;
-    }
+  if (editMode === "about") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">About AfroSphere</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-4"><p className="text-sm"><strong>AfroSphere v1.0.0</strong></p><p className="text-xs text-muted-foreground">Africa's creative home for emerging artists, musicians, and cultural creators.</p><p className="text-xs text-muted-foreground mt-2">Built with passion for African talent • Powered by community • Made for creators</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></div></div>;
+  }
 
-    if (editMode === "about") {
-      return <Modal title="About AfroSphere"><div className="space-y-4"><p className="text-sm"><strong>AfroSphere v1.0.0</strong></p><p className="text-xs text-muted-foreground">Africa's creative home for emerging artists, musicians, and cultural creators.</p><p className="text-xs text-muted-foreground mt-2">Built with passion for African talent • Powered by community • Made for creators</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
-    }
+  if (editMode === "guidelines") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Community Guidelines</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><p className="text-xs"><strong>Be Respectful</strong></p><p className="text-xs text-muted-foreground">Treat all creators with dignity and kindness.</p><p className="text-xs mt-2"><strong>No Harassment</strong></p><p className="text-xs text-muted-foreground">Don't engage in bullying or hateful behavior.</p><p className="text-xs mt-2"><strong>Original Content</strong></p><p className="text-xs text-muted-foreground">Share authentic, creative work. Respect others' rights.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">I Understand</Button></div></div></div>;
+  }
 
-    if (editMode === "guidelines") {
-      return <Modal title="Community Guidelines"><div className="space-y-3"><p className="text-xs"><strong>Be Respectful</strong></p><p className="text-xs text-muted-foreground">Treat all creators with dignity and kindness.</p><p className="text-xs mt-2"><strong>No Harassment</strong></p><p className="text-xs text-muted-foreground">Don't engage in bullying or hateful behavior.</p><p className="text-xs mt-2"><strong>Original Content</strong></p><p className="text-xs text-muted-foreground">Share authentic, creative work. Respect others' rights.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">I Understand</Button></div></Modal>;
-    }
+  if (editMode === "blocked") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Blocked Users</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><p className="text-xs text-muted-foreground">You currently have no blocked users.</p><p className="text-xs text-muted-foreground mt-2">Blocked users cannot see your posts or contact you.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></div></div>;
+  }
 
-    if (editMode === "blocked") {
-      return <Modal title="Blocked Users"><div className="space-y-3"><p className="text-xs text-muted-foreground">You currently have no blocked users.</p><p className="text-xs text-muted-foreground mt-2">Blocked users cannot see your posts or contact you.</p><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></Modal>;
-    }
+  if (editMode === "reportContent") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Report Content</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><textarea placeholder="Why are you reporting this post?..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button></div></div></div>;
+  }
 
-    if (editMode === "reportContent") {
-      return <Modal title="Report Content"><div className="space-y-3"><textarea placeholder="Why are you reporting this post?..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-24" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} /><Button onClick={() => { if (editData.reportText) { setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button></div></Modal>;
-    }
+  if (editMode === "textSize") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Text Size</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><div className="flex gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "normal"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "normal" ? "default" : "outline"} className="flex-1">Normal</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "large" ? "default" : "outline"} className="flex-1">Large</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "extra-large" ? "default" : "outline"} className="flex-1">XL</Button></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></div></div>;
+  }
 
-    if (editMode === "textSize") {
-      return <Modal title="Text Size"><div className="space-y-3"><div className="flex gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "normal"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "normal" ? "default" : "outline"} className="flex-1">Normal</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "large" ? "default" : "outline"} className="flex-1">Large</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, textSize: "extra-large"}}); handleToggle("display", "textSize", true); }} variant={settings.display.textSize === "extra-large" ? "default" : "outline"} className="flex-1">XL</Button></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Done</Button></div></Modal>;
-    }
+  if (editMode === "download") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Download Your Data</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><p className="text-xs text-muted-foreground">Get a copy of all your profile data, posts, and activity.</p><Button onClick={() => { setEditMode("none"); }} className="w-full bg-primary">Download Now</Button></div></div></div>;
+  }
 
-    if (editMode === "download") {
-      return <Modal title="Download Your Data"><div className="space-y-3"><p className="text-xs text-muted-foreground">Get a copy of all your profile data, posts, and activity.</p><Button onClick={() => { setEditMode("none"); }} className="w-full bg-primary">Download Now</Button></div></Modal>;
-    }
+  if (editMode === "sessions") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Active Sessions</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><div className="bg-card/50 border border-border/50 p-3 rounded"><p className="text-xs font-semibold">This Device</p><p className="text-xs text-muted-foreground">Last active now</p></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></div></div>;
+  }
 
-    if (editMode === "sessions") {
-      return <Modal title="Active Sessions"><div className="space-y-3"><div className="bg-card/50 border border-border/50 p-3 rounded"><p className="text-xs font-semibold">This Device</p><p className="text-xs text-muted-foreground">Last active now</p></div><Button onClick={() => setEditMode("none")} className="w-full bg-primary mt-6">Close</Button></div></Modal>;
-    }
+  if (editMode === "2fa") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Two-Factor Authentication</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></div></div>;
+  }
 
-    if (editMode === "2fa") {
-      return <Modal title="Two-Factor Authentication"><div className="space-y-3"><p className="text-xs text-muted-foreground">Add an extra security layer to your account with 2FA.</p><Button onClick={() => { setEditMode("none"); }} className="w-full bg-primary">Enable 2FA</Button></div></Modal>;
-    }
+  if (editMode === "language") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Language</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-3"><div className="flex flex-col gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full">English</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full">Español</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full">Français</Button></div></div></div></div>;
+  }
 
-    if (editMode === "language") {
-      return <Modal title="Language"><div className="space-y-3"><div className="flex flex-col gap-2"><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "en"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "en" ? "default" : "outline"} className="w-full">English</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "es"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "es" ? "default" : "outline"} className="w-full">Español</Button><Button onClick={() => { setSettings({...settings, display: {...settings.display, language: "fr"}}); handleToggle("display", "language", true); setEditMode("none"); }} variant={settings.display.language === "fr" ? "default" : "outline"} className="w-full">Français</Button></div></div></Modal>;
-    }
+  if (editMode === "email") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Email & Phone</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-2"><Label>Email</Label><Input type="email" placeholder="you@example.com" value={editData.email} onChange={(e) => setEditData({...editData, email: e.target.value})} /></div><div className="space-y-2"><Label>Phone</Label><Input type="tel" placeholder="+234 123 456 7890" value={editData.phone} onChange={(e) => setEditData({...editData, phone: e.target.value})} /></div><Button onClick={handleSaveEmail} className="w-full bg-primary">Save Changes</Button></div></div>;
+  }
 
-    if (editMode === "email") {
-      return (
-        <Modal title="Email & Phone">
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input type="email" placeholder="you@example.com" value={editData.email} onChange={(e) => setEditData({...editData, email: e.target.value})} />
-          </div>
-          <div className="space-y-2">
-            <Label>Phone</Label>
-            <Input type="tel" placeholder="+234 123 456 7890" value={editData.phone} onChange={(e) => setEditData({...editData, phone: e.target.value})} />
-          </div>
-          <Button onClick={handleSaveEmail} className="w-full bg-primary">Save Changes</Button>
-        </Modal>
-      );
-    }
-
-    if (editMode === "password") {
-      return (
-        <Modal title="Change Password">
-          <div className="space-y-2">
-            <Label>Current Password</Label>
-            <Input type="password" value={editData.password} onChange={(e) => setEditData({...editData, password: e.target.value})} />
-          </div>
-          <div className="space-y-2">
-            <Label>New Password</Label>
-            <Input type="password" value={editData.newPassword} onChange={(e) => setEditData({...editData, newPassword: e.target.value})} />
-          </div>
-          <div className="space-y-2">
-            <Label>Confirm Password</Label>
-            <Input type="password" value={editData.confirmPassword} onChange={(e) => setEditData({...editData, confirmPassword: e.target.value})} />
-          </div>
-          <Button onClick={handleSavePassword} className="w-full bg-primary">Update Password</Button>
-        </Modal>
-      );
-    }
-
-    return null;
-  };
+  if (editMode === "password") {
+    return <div className="fixed inset-0 bg-background z-50 overflow-y-auto"><div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10"><h2 className="text-lg font-bold">Change Password</h2><Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button></div><div className="max-w-md mx-auto px-4 py-6 space-y-4"><div className="space-y-2"><Label>Current Password</Label><Input type="password" value={editData.password} onChange={(e) => setEditData({...editData, password: e.target.value})} /></div><div className="space-y-2"><Label>New Password</Label><Input type="password" value={editData.newPassword} onChange={(e) => setEditData({...editData, newPassword: e.target.value})} /></div><div className="space-y-2"><Label>Confirm Password</Label><Input type="password" value={editData.confirmPassword} onChange={(e) => setEditData({...editData, confirmPassword: e.target.value})} /></div><Button onClick={handleSavePassword} className="w-full bg-primary">Update Password</Button></div></div>;
+  }
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto" data-testid="settings-container">
@@ -710,9 +664,6 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
         </>
         )}
       </div>
-      
-      {/* Render modal on top */}
-      {renderModal()}
     </div>
   );
 }
