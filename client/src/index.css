@@ -313,29 +313,34 @@
   }
 }
 
-/* TEXT SIZE SCALING - MINIMAL SCALING WITHOUT LAYOUT ISSUES */
+/* AFROSPHERE FONT SIZE SYSTEM - Clean and Scalable */
 :root {
-  --text-scale: 1;
+  --font-small: 13px;
+  --font-big: 17px;
+  --font-large: 22px;
+}
+
+/* Text Size Presets */
+.text-size-normal {
+  /* Default sizes - no change needed */
 }
 
 .text-size-large {
-  --text-scale: 1.02;
+  /* Large preset: increase all text by one tier */
 }
-
-.text-size-large body,
-.text-size-large p,
-.text-size-large span,
-.text-size-large div {
-  font-size: calc(1em * var(--text-scale));
+.text-size-large * {
+  font-size: var(--font-big) !important;
+}
+.text-size-large h1, .text-size-large h2, .text-size-large h3, .text-size-large h4, .text-size-large h5, .text-size-large h6 {
+  font-size: var(--font-large) !important;
 }
 
 .text-size-extra-large {
-  --text-scale: 1.04;
+  /* Extra-large preset: maximize readability */
 }
-
-.text-size-extra-large body,
-.text-size-extra-large p,
-.text-size-extra-large span,
-.text-size-extra-large div {
-  font-size: calc(1em * var(--text-scale));
+.text-size-extra-large * {
+  font-size: var(--font-large) !important;
+}
+.text-size-extra-large h1, .text-size-extra-large h2, .text-size-extra-large h3, .text-size-extra-large h4, .text-size-extra-large h5, .text-size-extra-large h6 {
+  font-size: calc(var(--font-large) * 1.3) !important;
 }
