@@ -184,20 +184,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     <div className="pb-20" data-testid="container-profile">
       {/* Sticky Header */}
       <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between z-20">
-        <div className="flex items-center gap-3 flex-1">
-          {!isOwnProfile && onClose && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="hover-elevate"
-              data-testid="button-close-profile"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          )}
-          <h2 className="text-lg font-semibold">@{userProfile.username}</h2>
-        </div>
+        {!isOwnProfile && onClose && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="hover-elevate"
+            data-testid="button-close-profile"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        )}
+        <div className="flex-1" />
         {isOwnProfile && (
           <Button
             variant="ghost"
