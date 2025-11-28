@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import splashLogo from "@assets/generated_images/transparent_outlined_african_continent_logo.png";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 interface AuthScreenProps {
@@ -31,84 +31,11 @@ const getErrorMessage = (error: any): string => {
 };
 
 export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenProps) {
-  const [signupData, setSignupData] = useState({ email: "", username: "", password: "" });
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [signupError, setSignupError] = useState("");
   const [loginError, setLoginError] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
-
-  // Helper: Generate unique username from email
-  const generateUsernameFromEmail = (email: string) => {
-    const base = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-    return base || `user${Math.random().toString(36).substr(2, 9)}`;
-  };
-
-  const handleGoogleSignUp = async () => {
-    setGoogleLoading(true);
-    setSignupError("");
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      
-      // Generate username from email
-      let username = generateUsernameFromEmail(userCredential.user.email || "user");
-      
-      // Check if username is available
-      let usernameCheckRes = await fetch(`/api/auth/check-username/${username}`);
-      let usernameCheckData = await usernameCheckRes.json();
-      
-      // If taken, add random suffix
-      if (!usernameCheckData.available) {
-        username = `${username}${Math.floor(Math.random() * 10000)}`;
-        usernameCheckRes = await fetch(`/api/auth/check-username/${username}`);
-        usernameCheckData = await usernameCheckRes.json();
-        
-        if (!usernameCheckData.available) {
-          throw new Error("Could not generate available username");
-        }
-      }
-      
-      // Register with backend
-      try {
-        await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            password: userCredential.user.uid,
-            firebaseUid: userCredential.user.uid,
-          }),
-        });
-      } catch (e) {
-        console.log("Backend sync note:", e);
-      }
-      
-      // Fetch the created user
-      const userRes = await fetch(`/api/users/username/${username}`);
-      if (userRes.ok) {
-        const dbUser = await userRes.json();
-        localStorage.setItem("currentUserId", dbUser.id);
-        localStorage.setItem("currentUserData", JSON.stringify({
-          ...dbUser,
-          firebaseUid: userCredential.user.uid,
-        }));
-      }
-      
-      // Store signup username for profile setup
-      setSignupData({ email: userCredential.user.email || "", username, password: userCredential.user.uid });
-      toast({ title: "Account created!", description: "Now set up your profile", duration: 3000 });
-      onAuthComplete(true);
-    } catch (error: any) {
-      const errorMsg = getErrorMessage(error);
-      setSignupError(errorMsg);
-      toast({ title: "Google signup failed", description: errorMsg, variant: "destructive", duration: 4000 });
-      console.error("Google signup error:", error);
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -167,91 +94,6 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSignupError("");
-    setIsLoading(true);
-    try {
-      // Check if username is available
-      const usernameCheckRes = await fetch(`/api/auth/check-username/${signupData.username}`);
-      const usernameCheckData = await usernameCheckRes.json();
-      
-      if (!usernameCheckData.available) {
-        const errorMsg = "Username already taken. Choose a different one.";
-        setSignupError(errorMsg);
-        toast({ title: "Username unavailable", description: errorMsg, variant: "destructive", duration: 4000 });
-        setIsLoading(false);
-        return;
-      }
-
-      const userCredential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
-      const userData = {
-        id: userCredential.user.uid,
-        email: userCredential.user.email,
-        username: signupData.username,
-        displayName: signupData.username,
-        bio: "",
-        location: "",
-        avatar: "",
-        website: "",
-        profession: "",
-        followerCount: 0,
-        followingCount: 0,
-        postCount: 0,
-      };
-      
-      // Register user to backend with Firebase UID
-      try {
-        await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            username: signupData.username, 
-            password: signupData.password,
-            firebaseUid: userCredential.user.uid,
-          }),
-        });
-      } catch (e) {
-        console.log("Backend sync note:", e);
-      }
-      
-      // Fetch the actual database user to get their real UUID
-      let dbUserId = userCredential.user.uid;
-      try {
-        // Wait a moment for the register endpoint to complete
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const userRes = await fetch(`/api/users/username/${signupData.username}`);
-        if (userRes.ok) {
-          const dbUser = await userRes.json();
-          dbUserId = dbUser.id;
-          localStorage.setItem("currentUserId", dbUser.id);
-          localStorage.setItem("currentUserData", JSON.stringify({
-            ...dbUser,
-            firebaseUid: userCredential.user.uid,
-          }));
-        } else {
-          // Fallback - store Firebase UID but try to use database ID
-          localStorage.setItem("currentUserId", userCredential.user.uid);
-          localStorage.setItem("currentUserData", JSON.stringify(userData));
-        }
-      } catch (e) {
-        localStorage.setItem("currentUserId", userCredential.user.uid);
-        localStorage.setItem("currentUserData", JSON.stringify(userData));
-      }
-      
-      console.log("Signup:", userCredential.user);
-      toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
-      onAuthComplete(true);
-    } catch (error: any) {
-      const errorMsg = getErrorMessage(error);
-      setSignupError(errorMsg);
-      toast({ title: "Signup failed", description: errorMsg, variant: "destructive", duration: 4000 });
-      console.error("Signup error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -354,11 +196,6 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         </div>
 
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login" data-testid="tab-login">Login</TabsTrigger>
-            <TabsTrigger value="signup" data-testid="tab-signup">Sign Up</TabsTrigger>
-          </TabsList>
-
           <TabsContent value="login">
             <Card>
               <CardHeader>
