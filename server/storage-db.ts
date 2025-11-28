@@ -1,0 +1,210 @@
+import { db } from './db';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings } from '@shared/schema';
+import { randomUUID } from 'crypto';
+
+export interface IStorage {
+  getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, updates: any): Promise<User | undefined>;
+  getPost(id: string): Promise<Post | undefined>;
+  listPosts(limit?: number, offset?: number): Promise<Post[]>;
+  listPostsByUser(userId: string): Promise<Post[]>;
+  listPostsByCategory(category: string, limit?: number): Promise<Post[]>;
+  createPost(post: InsertPost): Promise<Post>;
+  deletePost(id: string): Promise<void>;
+  getComment(id: string): Promise<Comment | undefined>;
+  listComments(postId: string): Promise<Comment[]>;
+  getCommentReplies(commentId: string): Promise<Comment[]>;
+  createComment(comment: InsertComment): Promise<Comment>;
+  deleteComment(id: string): Promise<void>;
+  likePost(userId: string, postId: string): Promise<Like>;
+  unlikePost(userId: string, postId: string): Promise<void>;
+  hasUserLikedPost(userId: string, postId: string): Promise<boolean>;
+  likeComment(userId: string, commentId: string): Promise<Like>;
+  unlikeComment(userId: string, commentId: string): Promise<void>;
+  followUser(followerId: string, followingId: string): Promise<Follow>;
+  unfollowUser(followerId: string, followingId: string): Promise<void>;
+  isFollowing(followerId: string, followingId: string): Promise<boolean>;
+  getFollowers(userId: string): Promise<User[]>;
+  getFollowing(userId: string): Promise<User[]>;
+  getBadges(userId: string): Promise<CreatorBadge | undefined>;
+  addBadge(userId: string, badge: string): Promise<CreatorBadge>;
+  createNotification(notification: any): Promise<Notification>;
+  listNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<void>;
+  getUserSettings(userId: string): Promise<UserSettings | undefined>;
+  saveUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings>;
+  saveFCMToken(userId: string, token: string): Promise<void>;
+  getFCMToken(userId: string): Promise<string | undefined>;
+}
+
+export class DbStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await db.query.users.findFirst({ where: eq(users.id, id) });
+    return result;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.query.users.findFirst({ where: eq(users.username, username) });
+    return result;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = randomUUID();
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      id,
+      displayName: '',
+      bio: '',
+      location: '',
+      avatar: '',
+      banner: '',
+      website: '',
+      profession: '',
+    }).returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: any): Promise<User | undefined> {
+    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return user;
+  }
+
+  async getPost(id: string): Promise<Post | undefined> {
+    const result = await db.query.posts.findFirst({ where: eq(posts.id, id) });
+    return result;
+  }
+
+  async listPosts(limit = 20, offset = 0): Promise<Post[]> {
+    return db.query.posts.findMany({ limit, offset });
+  }
+
+  async listPostsByUser(userId: string): Promise<Post[]> {
+    return db.query.posts.findMany({ where: eq(posts.userId, userId) });
+  }
+
+  async listPostsByCategory(category: string, limit = 20): Promise<Post[]> {
+    return db.query.posts.findMany({ where: eq(posts.category, category), limit });
+  }
+
+  async createPost(post: InsertPost): Promise<Post> {
+    const [newPost] = await db.insert(posts).values(post).returning();
+    return newPost;
+  }
+
+  async deletePost(id: string): Promise<void> {
+    await db.delete(posts).where(eq(posts.id, id));
+  }
+
+  async getComment(id: string): Promise<Comment | undefined> {
+    return db.query.comments.findFirst({ where: eq(comments.id, id) });
+  }
+
+  async listComments(postId: string): Promise<Comment[]> {
+    return db.query.comments.findMany({ where: eq(comments.postId, postId) });
+  }
+
+  async getCommentReplies(commentId: string): Promise<Comment[]> {
+    return db.query.comments.findMany({ where: eq(comments.replyTo, commentId) });
+  }
+
+  async createComment(comment: InsertComment): Promise<Comment> {
+    const [newComment] = await db.insert(comments).values(comment).returning();
+    return newComment;
+  }
+
+  async deleteComment(id: string): Promise<void> {
+    await db.delete(comments).where(eq(comments.id, id));
+  }
+
+  async likePost(userId: string, postId: string): Promise<Like> {
+    const [like] = await db.insert(likes).values({ userId, postId }).returning();
+    return like;
+  }
+
+  async unlikePost(userId: string, postId: string): Promise<void> {
+    await db.delete(likes).where(eq(likes.userId, userId)).where(eq(likes.postId, postId));
+  }
+
+  async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
+    const like = await db.query.likes.findFirst({ where: eq(likes.userId, userId) });
+    return !!like;
+  }
+
+  async likeComment(userId: string, commentId: string): Promise<Like> {
+    const [like] = await db.insert(likes).values({ userId, commentId }).returning();
+    return like;
+  }
+
+  async unlikeComment(userId: string, commentId: string): Promise<void> {
+    await db.delete(likes).where(eq(likes.userId, userId));
+  }
+
+  async followUser(followerId: string, followingId: string): Promise<Follow> {
+    const [follow] = await db.insert(follows).values({ followerId, followingId }).returning();
+    return follow;
+  }
+
+  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+    await db.delete(follows).where(eq(follows.followerId, followerId));
+  }
+
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    const follow = await db.query.follows.findFirst({ where: eq(follows.followerId, followerId) });
+    return !!follow;
+  }
+
+  async getFollowers(userId: string): Promise<User[]> {
+    return db.query.users.findMany();
+  }
+
+  async getFollowing(userId: string): Promise<User[]> {
+    return db.query.users.findMany();
+  }
+
+  async getBadges(userId: string): Promise<CreatorBadge | undefined> {
+    return db.query.creatorBadges.findFirst({ where: eq(creatorBadges.userId, userId) });
+  }
+
+  async addBadge(userId: string, badge: string): Promise<CreatorBadge> {
+    const [newBadge] = await db.insert(creatorBadges).values({ userId, badges: [badge] }).returning();
+    return newBadge;
+  }
+
+  async createNotification(notification: any): Promise<Notification> {
+    const [notif] = await db.insert(notifications).values(notification).returning();
+    return notif;
+  }
+
+  async listNotifications(userId: string): Promise<Notification[]> {
+    return db.query.notifications.findMany({ where: eq(notifications.userId, userId) });
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
+  }
+
+  async getUserSettings(userId: string): Promise<UserSettings | undefined> {
+    return db.query.userSettings.findFirst({ where: eq(userSettings.userId, userId) });
+  }
+
+  async saveUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings> {
+    let result = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, userId) });
+    if (result) {
+      const [updated] = await db.update(userSettings).set(settings).where(eq(userSettings.userId, userId)).returning();
+      return updated;
+    }
+    const [newSettings] = await db.insert(userSettings).values({ userId, ...settings }).returning();
+    return newSettings;
+  }
+
+  async saveFCMToken(userId: string, token: string): Promise<void> {
+  }
+
+  async getFCMToken(userId: string): Promise<string | undefined> {
+    return undefined;
+  }
+}
