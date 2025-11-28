@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
+import CommunityGuidelines from "./CommunityGuidelines";
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
@@ -268,6 +269,14 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
   };
 
   const renderModal = () => {
+    if (editMode === "guidelines") {
+      return (
+        <CommunityGuidelines
+          onClose={() => setEditMode("none")}
+        />
+      );
+    }
+
     if (editMode === "help") {
       return (
         <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
