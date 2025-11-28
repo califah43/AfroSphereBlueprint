@@ -163,7 +163,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             {!isOwnPost && (
               <>
                 <DropdownMenuItem 
-                  onClick={() => console.log("Not interested")}
+                  onClick={() => {}}
                   className="cursor-pointer"
                   data-testid={`button-not-interested-${post.id}`}
                 >

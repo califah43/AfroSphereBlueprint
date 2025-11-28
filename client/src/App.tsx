@@ -66,7 +66,7 @@ export default function App() {
             localStorage.setItem("currentUserData", JSON.stringify(freshData));
           }
         } catch (error) {
-          console.log("Failed to fetch fresh user data:", error);
+          // Silently handle fetch errors during session check
         }
         
         // Show splash screen briefly then go to main
@@ -86,26 +86,26 @@ export default function App() {
       try {
         // Register service worker for background messages
         if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(err => {
-            console.log("Service worker registration failed:", err);
+          navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(() => {
+            // Service worker registration failed - this is optional
           });
         }
 
         // Request notification permission
         const token = await requestNotificationPermission();
         if (token) {
-          console.log("FCM token obtained, saving to backend");
           // Save token to backend
           await fetch("/api/notifications/fcm-token", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token, userId: "current-user" }),
-          }).catch(err => console.log("Failed to save FCM token:", err));
+          }).catch(() => {
+            // FCM token save failed - notifications will still work
+          });
         }
 
         // Setup listener for foreground messages
         setupMessageListener((payload) => {
-          console.log("Message received:", payload);
           // Show notification or update UI
           if (payload.notification) {
             new Notification(payload.notification.title || "AfroSphere", {
@@ -115,7 +115,7 @@ export default function App() {
           }
         });
       } catch (error) {
-        console.log("FCM initialization skipped:", error);
+        // FCM initialization skipped - app continues to work without notifications
       }
     };
 
@@ -195,7 +195,7 @@ export default function App() {
         });
       }
     } catch (e) {
-      console.log("Backend sync note:", e);
+      // Backend sync error - profile data saved locally
     }
 
     setAppState("main");
@@ -361,8 +361,7 @@ export default function App() {
           {modalView === "create" && (
             <CreatePost
               onClose={() => setModalView("none")}
-              onPost={(data) => {
-                console.log("Posted:", data);
+              onPost={() => {
                 setModalView("none");
               }}
             />
@@ -371,8 +370,7 @@ export default function App() {
           {modalView === "edit-profile" && (
             <EditProfile
               onClose={() => setModalView("none")}
-              onSave={(data) => {
-                console.log("Profile updated:", data);
+              onSave={() => {
                 setModalView("none");
               }}
             />
