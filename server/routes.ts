@@ -192,10 +192,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/comments/post/:postId", async (req, res) => {
     const comments = await storage.listComments(req.params.postId);
     
-    // Enrich comments with replies
+    // Enrich comments with username and replies
     const enrichedComments = await Promise.all(comments.map(async (comment) => {
+      const user = await storage.getUser(comment.userId);
       const replies = await storage.getCommentReplies(comment.id);
-      return { ...comment, replies };
+      
+      // Enrich replies with usernames
+      const enrichedReplies = await Promise.all(replies.map(async (reply) => {
+        const replyUser = await storage.getUser(reply.userId);
+        return {
+          ...reply,
+          author: replyUser?.username || "creator",
+          timeAgo: reply.createdAt ? `${Math.floor((Date.now() - new Date(reply.createdAt).getTime()) / 3600000)}h ago` : "now",
+        };
+      }));
+      
+      return {
+        ...comment,
+        author: user?.username || "creator",
+        timeAgo: comment.createdAt ? `${Math.floor((Date.now() - new Date(comment.createdAt).getTime()) / 3600000)}h ago` : "now",
+        replies: enrichedReplies,
+      };
     }));
     
     res.json(enrichedComments);
@@ -211,7 +228,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertCommentSchema.parse(req.body);
       const comment = await storage.createComment(parsed);
-      res.status(201).json(comment);
+      
+      // Enrich response with username
+      const user = await storage.getUser(comment.userId);
+      const enrichedComment = {
+        ...comment,
+        author: user?.username || "creator",
+        timeAgo: "now",
+      };
+      
+      res.status(201).json(enrichedComment);
     } catch (error) {
       res.status(400).json({ error: "Invalid request" });
     }
