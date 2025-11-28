@@ -82,9 +82,29 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState<"none" | "email" | "password" | "phone" | "help" | "report" | "about" | "guidelines" | "blocked" | "reportContent" | "textSize" | "download" | "sessions" | "2fa" | "language">("none");
   const [editData, setEditData] = useState({ email: "", phone: "", password: "", newPassword: "", confirmPassword: "", reportText: "" });
+  const [scrollPosition, setScrollPosition] = useState(0);
   const { toast } = useToast();
   const userId = localStorage.getItem("currentUserId") || "default-user";
   const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
+
+  // Save scroll position when opening a modal, restore when closing
+  useEffect(() => {
+    if (editMode !== "none") {
+      // Save scroll position when opening a modal
+      const settingsContainer = document.querySelector("[data-testid='settings-container']");
+      if (settingsContainer) {
+        setScrollPosition(settingsContainer.scrollTop);
+      }
+    } else if (scrollPosition > 0) {
+      // Restore scroll position when closing modal
+      const settingsContainer = document.querySelector("[data-testid='settings-container']");
+      if (settingsContainer) {
+        setTimeout(() => {
+          settingsContainer.scrollTop = scrollPosition;
+        }, 0);
+      }
+    }
+  }, [editMode]);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -389,7 +409,7 @@ export default function Settings({ onClose, onLogout, onEditProfile }: SettingsP
   }
 
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-background z-50 overflow-y-auto" data-testid="settings-container">
       {/* Sticky Header */}
       <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10 backdrop-blur-sm bg-background/95">
         <h2 className="text-2xl font-bold flex items-center gap-2" data-testid="text-settings-title">
