@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import splashLogo from "@assets/generated_images/transparent_outlined_african_continent_logo.png";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 interface AuthScreenProps {
@@ -36,7 +36,136 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
   const [isLoading, setIsLoading] = useState(false);
   const [signupError, setSignupError] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
+
+  // Helper: Generate unique username from email
+  const generateUsernameFromEmail = (email: string) => {
+    const base = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    return base || `user${Math.random().toString(36).substr(2, 9)}`;
+  };
+
+  const handleGoogleSignUp = async () => {
+    setGoogleLoading(true);
+    setSignupError("");
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Generate username from email
+      let username = generateUsernameFromEmail(userCredential.user.email || "user");
+      
+      // Check if username is available
+      let usernameCheckRes = await fetch(`/api/auth/check-username/${username}`);
+      let usernameCheckData = await usernameCheckRes.json();
+      
+      // If taken, add random suffix
+      if (!usernameCheckData.available) {
+        username = `${username}${Math.floor(Math.random() * 10000)}`;
+        usernameCheckRes = await fetch(`/api/auth/check-username/${username}`);
+        usernameCheckData = await usernameCheckRes.json();
+        
+        if (!usernameCheckData.available) {
+          throw new Error("Could not generate available username");
+        }
+      }
+      
+      // Register with backend
+      try {
+        await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            password: userCredential.user.uid,
+            firebaseUid: userCredential.user.uid,
+          }),
+        });
+      } catch (e) {
+        console.log("Backend sync note:", e);
+      }
+      
+      // Fetch the created user
+      const userRes = await fetch(`/api/users/username/${username}`);
+      if (userRes.ok) {
+        const dbUser = await userRes.json();
+        localStorage.setItem("currentUserId", dbUser.id);
+        localStorage.setItem("currentUserData", JSON.stringify({
+          ...dbUser,
+          firebaseUid: userCredential.user.uid,
+        }));
+      }
+      
+      // Store signup username for profile setup
+      setSignupData({ email: userCredential.user.email || "", username, password: userCredential.user.uid });
+      toast({ title: "Account created!", description: "Now set up your profile", duration: 3000 });
+      onAuthComplete(true);
+    } catch (error: any) {
+      const errorMsg = getErrorMessage(error);
+      setSignupError(errorMsg);
+      toast({ title: "Google signup failed", description: errorMsg, variant: "destructive", duration: 4000 });
+      console.error("Google signup error:", error);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setLoginError("");
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Find user by Firebase UID or email
+      let dbUser = null;
+      try {
+        const usersRes = await fetch('/api/users/all');
+        if (usersRes.ok) {
+          const allUsers = await usersRes.json();
+          dbUser = allUsers.find((u: any) => u.firebaseUid === userCredential.user.uid);
+          
+          if (!dbUser && userCredential.user.email) {
+            const emailDomain = userCredential.user.email.split('@')[0];
+            dbUser = allUsers.find((u: any) => u.username === emailDomain || u.username === userCredential.user.email);
+          }
+        }
+      } catch (e) {
+        console.log("Could not fetch all users");
+      }
+      
+      if (dbUser && dbUser.id) {
+        localStorage.setItem("currentUserId", dbUser.id);
+        // Update firebaseUid if not set
+        if (!dbUser.firebaseUid) {
+          try {
+            await fetch(`/api/users/${dbUser.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ firebaseUid: userCredential.user.uid }),
+            });
+          } catch (e) {
+            console.log("Could not update firebaseUid");
+          }
+        }
+        localStorage.setItem("currentUserData", JSON.stringify({
+          ...dbUser,
+          firebaseUid: userCredential.user.uid,
+        }));
+        toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
+        onAuthComplete(false);
+      } else {
+        throw new Error("User account not found. Please sign up instead.");
+      }
+    } catch (error: any) {
+      const errorMsg = getErrorMessage(error);
+      setLoginError(errorMsg);
+      toast({ title: "Google login failed", description: errorMsg, variant: "destructive", duration: 4000 });
+      console.error("Google login error:", error);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,11 +394,11 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
                   <button type="button" className="text-sm text-primary hover:underline" data-testid="button-forgot-password">
                     Forgot password?
                   </button>
-                  <Button type="submit" disabled={isLoading} className="w-full" data-testid="button-login-submit">
+                  <Button type="submit" disabled={isLoading || googleLoading} className="w-full" data-testid="button-login-submit">
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
-                  <Button type="button" variant="outline" className="w-full" data-testid="button-google-login">
-                    Continue with Google
+                  <Button type="button" variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={googleLoading || isLoading} data-testid="button-google-login">
+                    {googleLoading ? "Connecting..." : "Continue with Google"}
                   </Button>
                 </form>
               </CardContent>
