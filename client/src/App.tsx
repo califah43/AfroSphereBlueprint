@@ -290,13 +290,17 @@ export default function App() {
             />
           )}
 
-          {modalView === "settings" && (
-            <Settings
-              onClose={() => setModalView("none")}
-              onLogout={handleLogout}
-              onEditProfile={() => setModalView("edit-profile")}
-            />
-          )}
+          {modalView === "settings" && (() => {
+            const currentUserId = localStorage.getItem("currentUserId");
+            return (
+              <Settings
+                userId={currentUserId || undefined}
+                onClose={() => setModalView("none")}
+                onLogout={handleLogout}
+                onEditProfile={() => setModalView("edit-profile")}
+              />
+            );
+          })()}
 
           {modalView === "comments" && commentsPostData && (
             <Comments
