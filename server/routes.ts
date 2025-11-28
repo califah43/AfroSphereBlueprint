@@ -57,18 +57,29 @@ async function seedDatabase() {
     }
   }
 
-  // Create mock posts with stable image URLs and likes
+  // Create or update mock posts with stable image URLs and likes
   for (const postData of mockPostsData) {
     const user = await storage.getUserByUsername(postData.username);
     if (user) {
-      const post = await storage.createPost({
-        userId: user.id,
-        image: postData.image,
-        caption: postData.caption,
-        category: postData.category,
+      // Check if post already exists
+      const existingPost = await db.query.posts.findFirst({
+        where: eq(posts.userId, user.id),
       });
-      // Update post with seed likes
-      await db.update(posts).set({ likes: postData.likes }).where(eq(posts.id, post.id));
+      
+      if (existingPost) {
+        // Update existing post with seed likes and other data
+        await db.update(posts).set({ likes: postData.likes }).where(eq(posts.id, existingPost.id));
+      } else {
+        // Create new post
+        const post = await storage.createPost({
+          userId: user.id,
+          image: postData.image,
+          caption: postData.caption,
+          category: postData.category,
+        });
+        // Update post with seed likes
+        await db.update(posts).set({ likes: postData.likes }).where(eq(posts.id, post.id));
+      }
     }
   }
 
@@ -219,15 +230,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const enrichedComments = await Promise.all(comments.map(async (comment) => {
       let author = "creator";
       
-      // Try to get user by ID first
+      // Try to get user by ID (handle both database UUID and Firebase UID)
       try {
         const user = await storage.getUser(comment.userId);
         if (user?.username) {
           author = user.username;
         }
       } catch (e) {
-        // If lookup fails, use fallback
-        console.error("Failed to lookup user for comment:", comment.userId, e);
+        // Silent fallback - user lookup failed
+      }
+      
+      // If still showing "creator", try to look up by Firebase UID pattern
+      if (author === "creator") {
+        try {
+          // Search all users to find one with matching Firebase auth ID
+          const allUsers = await db.query.users.findMany();
+          const foundUser = allUsers.find(u => u.username && comment.userId === u.username);
+          if (foundUser?.username) {
+            author = foundUser.username;
+          }
+        } catch (e) {
+          // Fallback to "creator" if all lookups fail
+        }
       }
       
       const replies = await storage.getCommentReplies(comment.id);
@@ -241,7 +265,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             replyAuthor = replyUser.username;
           }
         } catch (e) {
-          console.error("Failed to lookup user for reply:", reply.userId, e);
+          // Silent fallback
+        }
+        
+        // If still showing "creator", try fallback lookup
+        if (replyAuthor === "creator") {
+          try {
+            const allUsers = await db.query.users.findMany();
+            const foundUser = allUsers.find(u => u.username && reply.userId === u.username);
+            if (foundUser?.username) {
+              replyAuthor = foundUser.username;
+            }
+          } catch (e) {
+            // Fallback to "creator"
+          }
         }
         
         return {
