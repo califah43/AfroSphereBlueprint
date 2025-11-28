@@ -95,7 +95,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         return;
       }
 
-      // Save to backend
+      // Save to backend (only text fields, store images in localStorage)
       const response = await fetch(`/api/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -105,8 +105,6 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           location: formData.location,
           website: formData.website,
           profession: formData.profession,
-          avatar: formData.avatar,
-          banner: formData.banner,
         }),
       });
 
