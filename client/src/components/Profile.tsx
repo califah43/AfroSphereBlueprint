@@ -226,7 +226,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       {/* Profile Content - Compact & Refined for Mobile */}
       <div className="max-w-md mx-auto px-4 -mt-8 relative z-10 pb-6">
         {/* Avatar - Overlaps Banner */}
-        <div className="flex justify-center mb-4">
+        <div className="flex mb-4">
           <button
             onClick={() => userProfile.avatar && setShowPictureModal(true)}
             className={`relative ${userProfile.avatar ? 'hover-elevate cursor-pointer' : ''}`}
@@ -244,10 +244,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </button>
         </div>
 
-        {/* Name, Badge & Username - Below Banner */}
-        <div className="text-center mb-4">
+        {/* Name, Badge & Username - Left Aligned */}
+        <div className="mb-4">
           {/* Name & Badge */}
-          <div className="flex items-center justify-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 mb-0.5">
             <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
               {userProfile.displayName}
             </h1>
