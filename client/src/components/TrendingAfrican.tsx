@@ -35,10 +35,13 @@ export default function TrendingAfrican() {
               <p className="text-xs text-muted-foreground">{item.count} posts</p>
             </div>
             {item.trend === "hot" ? (
-              <Badge className="bg-primary text-primary-foreground text-xs">🔥 Hot</Badge>
+              <Badge className="bg-primary text-primary-foreground text-xs flex items-center gap-1">
+                <Flame className="h-3 w-3" />
+                Hot
+              </Badge>
             ) : (
-              <Badge variant="outline" className="text-xs">
-                <TrendingUp className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="text-xs flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
                 Rising
               </Badge>
             )}

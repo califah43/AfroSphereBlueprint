@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Flame } from "lucide-react";
 import fashionImage from "@assets/generated_images/Fashion_category_hero_image_37046966.png";
 
 interface FeaturedCreator {
@@ -47,8 +47,9 @@ export default function FeaturedAfrican() {
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-bold text-sm">{creator.username}</p>
                   {creator.isHot && (
-                    <Badge className="bg-primary text-primary-foreground text-xs h-5">
-                      🔥 Hot
+                    <Badge className="bg-primary text-primary-foreground text-xs h-5 flex items-center gap-1">
+                      <Flame className="h-3 w-3" />
+                      Hot
                     </Badge>
                   )}
                 </div>
@@ -61,8 +62,10 @@ export default function FeaturedAfrican() {
       </div>
 
       <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20">
-        <p className="text-xs text-muted-foreground text-center">
-          ✨ Celebrating African creativity every day ✨
+        <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Celebrating African creativity every day
+          <Sparkles className="h-4 w-4 text-primary" />
         </p>
       </div>
     </div>
