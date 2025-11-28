@@ -82,8 +82,27 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
         console.log("Backend sync note:", e);
       }
       
-      localStorage.setItem("currentUserId", userCredential.user.uid);
-      localStorage.setItem("currentUserData", JSON.stringify(userData));
+      // Fetch the actual database user to get their real UUID
+      try {
+        const userRes = await fetch(`/api/users/username/${signupData.username}`);
+        if (userRes.ok) {
+          const dbUser = await userRes.json();
+          localStorage.setItem("currentUserId", dbUser.id);
+          localStorage.setItem("currentUserData", JSON.stringify({
+            ...dbUser,
+            firebaseUid: userCredential.user.uid,
+          }));
+        } else {
+          // Fallback if fetch fails
+          localStorage.setItem("currentUserId", userCredential.user.uid);
+          localStorage.setItem("currentUserData", JSON.stringify(userData));
+        }
+      } catch (e) {
+        console.log("Could not fetch database user:", e);
+        localStorage.setItem("currentUserId", userCredential.user.uid);
+        localStorage.setItem("currentUserData", JSON.stringify(userData));
+      }
+      
       console.log("Signup:", userCredential.user);
       toast({ title: "Account created!", description: "Welcome to AfroSphere", duration: 3000 });
       onAuthComplete(true);
@@ -103,36 +122,38 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
     setIsLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
-      localStorage.setItem("currentUserId", userCredential.user.uid);
       
-      // Check if user data exists in localStorage from signup
-      let storedData = localStorage.getItem("currentUserData");
-      
-      // If not, try to fetch from backend
-      if (!storedData) {
-        try {
-          const res = await fetch(`/api/settings/${userCredential.user.uid}`);
-          if (res.ok) {
-            const backendData = await res.json();
-            storedData = JSON.stringify({
-              id: userCredential.user.uid,
-              email: userCredential.user.email,
-              username: backendData.username || userCredential.user.email?.split('@')[0] || "user",
-              displayName: backendData.displayName || userCredential.user.email?.split('@')[0] || "User",
-              bio: backendData.bio || "",
-              location: "",
-              avatar: "",
-            });
+      // Try to fetch user from database - need to find by getting any users and matching by Firebase UID
+      let dbUser = null;
+      try {
+        // First try to get stored data from previous login/signup
+        const storedData = localStorage.getItem("currentUserData");
+        if (storedData) {
+          const parsed = JSON.parse(storedData);
+          if (parsed.username) {
+            // Try to fetch using the stored username
+            const res = await fetch(`/api/users/username/${parsed.username}`);
+            if (res.ok) {
+              dbUser = await res.json();
+            }
           }
-        } catch (e) {
-          console.log("Could not fetch user data from backend");
         }
+      } catch (e) {
+        console.log("Could not fetch user by stored username");
       }
       
-      // If still no data, create minimal profile from email
-      if (!storedData) {
+      // If we found a database user, use their real ID
+      if (dbUser) {
+        localStorage.setItem("currentUserId", dbUser.id);
+        localStorage.setItem("currentUserData", JSON.stringify({
+          ...dbUser,
+          firebaseUid: userCredential.user.uid,
+        }));
+      } else {
+        // Fallback: create minimal profile with Firebase UID (backward compatibility)
         const username = loginData.email.split('@')[0];
-        storedData = JSON.stringify({
+        localStorage.setItem("currentUserId", userCredential.user.uid);
+        localStorage.setItem("currentUserData", JSON.stringify({
           id: userCredential.user.uid,
           email: userCredential.user.email,
           username: username,
@@ -140,10 +161,10 @@ export default function AuthScreen({ onAuthComplete, onLogoClick }: AuthScreenPr
           bio: "",
           location: "",
           avatar: "",
-        });
+          firebaseUid: userCredential.user.uid,
+        }));
       }
       
-      localStorage.setItem("currentUserData", storedData);
       console.log("Login:", userCredential.user);
       toast({ title: "Welcome back!", description: "Successfully signed in", duration: 3000 });
       onAuthComplete(false);
