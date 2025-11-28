@@ -296,7 +296,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
               <textarea placeholder="Tell us what happened. Include error messages if any..." className="w-full p-3 border border-border rounded-lg bg-card/50 text-sm min-h-32 resize-none mt-2" value={editData.reportText} onChange={(e) => setEditData({...editData, reportText: e.target.value})} />
             </div>
             <p className="text-xs text-muted-foreground">Our support team will review your report within 24-48 hours and reach out if we need more information. Thank you for helping us create a better experience!</p>
-            <Button onClick={() => { if (editData.reportText) { setEditData({...editData, reportText: ""}); setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button>
+            <Button onClick={async () => { if (!editData.reportText) return; try { await fetch("/api/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, reportType: "problem", description: editData.reportText }) }); setEditData({...editData, reportText: ""}); setEditMode("none"); } catch (e) { console.error("Report failed:", e); } }} className="w-full bg-primary">Submit Report</Button>
           </div>
         </div>
       );
@@ -405,7 +405,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
             </div>
             <p className="text-xs text-muted-foreground">Common reasons: Harassment, Hate speech, Violence, Explicit content, Spam, Misinformation, Copyright violation</p>
             <p className="text-xs text-muted-foreground">Our team will review your report and take appropriate action within 24 hours. Thank you for helping keep AfroSphere safe!</p>
-            <Button onClick={() => { if (editData.reportText) { setEditData({...editData, reportText: ""}); setEditMode("none"); } }} className="w-full bg-primary">Submit Report</Button>
+            <Button onClick={async () => { if (!editData.reportText) return; try { await fetch("/api/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, reportType: "content", description: editData.reportText }) }); setEditData({...editData, reportText: ""}); setEditMode("none"); } catch (e) { console.error("Report failed:", e); } }} className="w-full bg-primary">Submit Report</Button>
           </div>
         </div>
       );
