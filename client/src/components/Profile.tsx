@@ -98,6 +98,41 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
     fetchUserData();
   }, [username, isOwnProfile]);
+
+  // Listen for post refresh events to refetch user's posts
+  useEffect(() => {
+    const handleRefresh = async () => {
+      try {
+        let userId: string = "";
+        if (isOwnProfile) {
+          const storedData = localStorage.getItem("currentUserData");
+          if (storedData) {
+            const userData = JSON.parse(storedData);
+            userId = userData.id || "";
+          }
+        } else if (username) {
+          const res = await fetch(`/api/users/username/${username}`);
+          if (res.ok) {
+            const userData = await res.json();
+            userId = userData.id || "";
+          }
+        }
+
+        if (userId) {
+          const postsRes = await fetch(`/api/posts/user/${userId}`);
+          if (postsRes.ok) {
+            const posts = await postsRes.json();
+            setUserPosts(posts || []);
+          }
+        }
+      } catch (error) {
+        console.log("Error refreshing user posts:", error);
+      }
+    };
+
+    window.addEventListener('refreshPosts', handleRefresh);
+    return () => window.removeEventListener('refreshPosts', handleRefresh);
+  }, [username, isOwnProfile]);
   
   // Get the username for API calls (use stored for own profile, fallback for others)
   const getApiUsername = () => {

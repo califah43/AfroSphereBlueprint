@@ -9,6 +9,7 @@ import { X, Upload, ImageIcon, Sparkles, Sun, Contrast } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import { GENRE_LIST } from "@shared/genres";
+import { queryClient } from "@/lib/queryClient";
 
 interface CreatePostProps {
   onClose: () => void;
@@ -102,7 +103,10 @@ export default function CreatePost({ onClose, onPost }: CreatePostProps) {
         className: "border-primary/20 bg-card",
       });
 
-      // Refresh posts feed
+      // Invalidate all caches to trigger refetch
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      
+      // Also dispatch event for any other listeners
       window.dispatchEvent(new Event('refreshPosts'));
       
       onPost?.(createdPost);
