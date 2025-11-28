@@ -747,6 +747,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId }: S
                 checked={settings.display.darkMode}
                 onCheckedChange={(value) => {
                   handleToggle("display", "darkMode", value);
+                  localStorage.setItem("darkMode", String(value));
                   if (value) {
                     document.documentElement.classList.add("dark");
                   } else {

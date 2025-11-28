@@ -49,7 +49,12 @@ export default function App() {
   const [signupProfileData, setSignupProfileData] = useState({ avatar: "", banner: "", bio: "", profession: "" });
 
   useEffect(() => {
-    document.documentElement.classList.add("dark");
+    const darkMode = localStorage.getItem("darkMode");
+    if (darkMode === "false") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
   }, []);
 
   // Check if user is already logged in (session persistence)
