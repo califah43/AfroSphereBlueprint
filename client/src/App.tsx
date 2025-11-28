@@ -215,6 +215,15 @@ export default function App() {
     setModalView("comments");
   };
 
+  const handleCommentAdded = (newCommentCount: number) => {
+    // Refetch posts to update comment counts in HomeFeed
+    if (activeTab === "home") {
+      // Trigger refetch by modifying a state that HomeFeed watches
+      // This will cause the posts query to refetch
+      window.dispatchEvent(new CustomEvent('refreshPosts'));
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("currentUserId");
     localStorage.removeItem("currentUserData");

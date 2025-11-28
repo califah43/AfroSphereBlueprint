@@ -30,9 +30,10 @@ interface CommentsProps {
   postImage: string;
   postCaption: string;
   onClose: () => void;
+  onCommentAdded?: (updatedCommentCount: number) => void;
 }
 
-export default function Comments({ postId, postImage, postCaption, onClose }: CommentsProps) {
+export default function Comments({ postId, postImage, postCaption, onClose, onCommentAdded }: CommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -112,6 +113,18 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
           };
           setComments([...comments, mappedComment]);
           setNewComment("");
+          
+          // Fetch updated post to get fresh comment count
+          try {
+            const postRes = await fetch(`/api/posts/${postId}`);
+            if (postRes.ok) {
+              const postData = await postRes.json();
+              onCommentAdded?.(postData.commentCount || comments.length + 1);
+            }
+          } catch (e) {
+            // Fallback: just increment count locally
+            onCommentAdded?.(comments.length + 1);
+          }
         } else {
           console.error("Failed to post comment:", res.status);
         }
@@ -161,6 +174,18 @@ export default function Comments({ postId, postImage, postCaption, onClose }: Co
           );
           setReplyText("");
           setReplyingTo(null);
+          
+          // Fetch updated post to get fresh comment count
+          try {
+            const postRes = await fetch(`/api/posts/${postId}`);
+            if (postRes.ok) {
+              const postData = await postRes.json();
+              onCommentAdded?.(postData.commentCount || comments.length + 1);
+            }
+          } catch (e) {
+            // Fallback: just increment count locally
+            onCommentAdded?.(comments.length + 1);
+          }
         } else {
           console.error("Failed to post reply:", res.status);
         }
