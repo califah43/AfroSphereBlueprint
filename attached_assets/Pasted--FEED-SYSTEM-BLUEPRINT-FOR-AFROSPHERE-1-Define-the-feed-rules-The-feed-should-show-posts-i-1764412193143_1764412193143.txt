@@ -1,0 +1,89 @@
+// FEED SYSTEM BLUEPRINT FOR AFROSPHERE
+
+// 1. Define the feed rules
+// The feed should show posts in this order:
+// - Posts from people the user follows (priority)
+// - Trending posts (based on likes + comments + recency)
+// - Recent posts from the whole community (fallback)
+
+feed_rules = {
+  follow_priority_weight: 0.7,     // 70% posts from people user follows
+  trending_priority_weight: 0.2,   // 20% trending posts
+  global_recent_weight: 0.1        // 10% global posts
+}
+
+// 2. Fetch posts from Firebase
+async function fetchFeed(userId) {
+  
+  // Load following list
+  const followingList = await db.get("users/" + userId + "/following")
+
+  // Fetch posts from followed accounts
+  const followingPosts = await db.query("posts")
+     .where("postedBy IN", followingList)
+     .orderBy("createdAt", "desc")
+     .limit(40)
+
+  // Fetch trending posts
+  const trendingPosts = await db.query("posts")
+     .orderBy("engagementScore", "desc")  // engagementScore = likes + comments + saves
+     .limit(20)
+
+  // Fetch global recent posts
+  const recentPosts = await db.query("posts")
+     .orderBy("createdAt", "desc")
+     .limit(20)
+
+  // Mix them together using the weights
+  const feed = mixPosts(followingPosts, trendingPosts, recentPosts, feed_rules)
+
+  return feed
+}
+
+// 3. Ranking function for the feed
+function mixPosts(following, trending, recent, rules) {
+  
+  const finalFeed = []
+
+  // Add following posts
+  finalFeed.push(...following.slice(0, Math.floor(40 * rules.follow_priority_weight)))
+
+  // Add trending posts
+  finalFeed.push(...trending.slice(0, Math.floor(40 * rules.trending_priority_weight)))
+
+  // Add recent posts
+  finalFeed.push(...recent.slice(0, Math.floor(40 * rules.global_recent_weight)))
+
+  // Shuffle slightly to feel natural
+  return shuffle(finalFeed)
+}
+
+// 4. Engagement scoring system
+// This updates when user likes or comments
+
+function updateEngagement(postId) {
+  const post = db.get("posts/" + postId)
+
+  post.engagementScore =
+      (post.likes * 1)
+    + (post.comments * 2)
+    + (post.saves * 3)
+
+  db.update("posts/" + postId, { engagementScore: post.engagementScore })
+}
+
+// 5. Infinite scrolling
+// When user reaches 80% scroll depth, load more
+
+window.onScroll = () => {
+  if (scrollDepth >= 80%) {
+    loadMoreFeed()
+  }
+}
+
+async function loadMoreFeed() {
+  const newPosts = await fetchFeed(currentUser)
+  render(newPosts)
+}
+
+// END OF FEED BLUEPRINT

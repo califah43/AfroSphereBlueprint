@@ -60,6 +60,7 @@ export const posts = pgTable("posts", {
   hashtags: text("hashtags").default(""), // Hashtags as comma-separated string
   likes: integer("likes").default(0),
   commentCount: integer("comment_count").default(0),
+  engagementScore: integer("engagement_score").default(0), // likes * 1 + comments * 2 + saves * 3
   createdAt: timestamp("created_at").defaultNow(),
 });
 

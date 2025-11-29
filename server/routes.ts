@@ -285,33 +285,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============ POST ROUTES ============
   app.get("/api/posts", async (req, res) => {
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const limit = Math.min(parseInt(req.query.limit as string) || 40, 100);
     const offset = parseInt(req.query.offset as string) || 0;
     const viewerId = req.query.viewerId as string;
-    let posts = await storage.listPosts(limit, offset);
-    
-    // Filter private account posts
-    if (viewerId) {
-      posts = await Promise.all(
-        posts.map(async (post) => {
+
+    try {
+      // Get all posts for ranking (before filtering)
+      const allPosts = await db.query.posts.findMany({ limit: 200 });
+
+      // Calculate engagement score for each post
+      const postsWithEngagement = allPosts.map(post => ({
+        ...post,
+        engagementScore: (post.likes * 1) + (post.commentCount * 2),
+      }));
+
+      // Fetch following list and user data
+      const followingPosts: typeof allPosts = [];
+      const trendingPosts: typeof allPosts = [];
+      const recentPosts: typeof allPosts = [];
+
+      if (viewerId) {
+        // Get user's following list
+        const followingData = await db.query.follows.findMany({
+          where: eq(follows.followerId, viewerId),
+        });
+        const followingIds = new Set(followingData.map(f => f.followingId));
+
+        // Categorize posts
+        for (const post of postsWithEngagement) {
           const owner = await storage.getUser(post.userId);
+          
+          // Filter private account posts
           if (owner?.isPrivate && owner.id !== viewerId) {
             const isFollower = await storage.isFollowing(viewerId, post.userId);
-            if (!isFollower) {
-              return null;
+            if (!isFollower) continue;
+          }
+
+          if (followingIds.has(post.userId)) {
+            followingPosts.push(post);
+          } else {
+            if (post.engagementScore > 5) {
+              trendingPosts.push(post);
+            } else {
+              recentPosts.push(post);
             }
           }
-          return post;
-        })
-      ).then(p => p.filter(Boolean) as typeof posts);
-    } else {
-      posts = posts.filter(p => {
-        const owner = db.query.users.findFirst({ where: eq(users.id, p.userId) });
-        return !(owner as any)?.isPrivate;
-      });
+        }
+      } else {
+        // No viewer, just categorize by engagement
+        for (const post of postsWithEngagement) {
+          const owner = await storage.getUser(post.userId);
+          if (!owner?.isPrivate) {
+            if (post.engagementScore > 5) {
+              trendingPosts.push(post);
+            } else {
+              recentPosts.push(post);
+            }
+          }
+        }
+      }
+
+      // Sort each category by engagement/recency
+      followingPosts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+      trendingPosts.sort((a, b) => b.engagementScore - a.engagementScore);
+      recentPosts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+
+      // Mix posts using weighted algorithm
+      const feedSize = limit;
+      const followWeight = 0.7;
+      const trendWeight = 0.2;
+      const recentWeight = 0.1;
+
+      const followCount = Math.floor(feedSize * followWeight);
+      const trendCount = Math.floor(feedSize * trendWeight);
+      const recentCount = feedSize - followCount - trendCount;
+
+      const feed = [
+        ...followingPosts.slice(0, followCount),
+        ...trendingPosts.slice(0, trendCount),
+        ...recentPosts.slice(0, recentCount),
+      ];
+
+      // Apply offset and limit
+      const paginatedFeed = feed.slice(offset, offset + limit);
+
+      res.json(paginatedFeed);
+    } catch (error) {
+      console.error("Feed fetch error:", error);
+      // Fallback to simple recent posts
+      const posts = await storage.listPosts(limit, offset);
+      res.json(posts);
     }
-    
-    res.json(posts);
   });
 
   app.get("/api/posts/category/:category", async (req, res) => {
