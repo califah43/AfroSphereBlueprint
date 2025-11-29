@@ -323,6 +323,37 @@ export class DbStorage implements IStorage {
     await db.delete(userBadges).where(and(eq(userBadges.userId, userId), eq(userBadges.badgeId, badgeId)));
   }
 
+  async getAllBadgesWithUsers(): Promise<any[]> {
+    const allUserBadges = await db.query.userBadges.findMany();
+    const badgeLookup = new Map();
+    
+    for (const ub of allUserBadges) {
+      const badge = await db.query.badges.findFirst({ where: eq(badges.id, ub.badgeId) });
+      if (badge) {
+        if (!badgeLookup.has(ub.userId)) {
+          badgeLookup.set(ub.userId, []);
+        }
+        badgeLookup.get(ub.userId).push(badge);
+      }
+    }
+
+    const result: any[] = [];
+    for (const [userId, userBadges] of badgeLookup.entries()) {
+      for (const badge of userBadges) {
+        result.push({
+          userId,
+          badgeId: badge.id,
+          name: badge.name,
+          iconSvg: badge.iconSvg,
+          description: badge.description,
+          type: badge.type,
+          id: badge.id,
+        });
+      }
+    }
+    return result;
+  }
+
   async saveFCMToken(userId: string, token: string): Promise<void> {
   }
 

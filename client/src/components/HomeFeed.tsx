@@ -109,14 +109,21 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
           userMap.set(u.id, u);
         });
 
-        // Create a map for fast badge lookup by userId
+        // Create a map for fast badge lookup by userId (allBadges is already assignment objects)
         const badgeMap = new Map();
-        (allBadges || []).forEach((badgeAssignment: any) => {
-          if (!badgeMap.has(badgeAssignment.userId)) {
-            badgeMap.set(badgeAssignment.userId, []);
-          }
-          badgeMap.get(badgeAssignment.userId).push(badgeAssignment);
-        });
+        if (Array.isArray(allBadges)) {
+          allBadges.forEach((badgeAssignment: any) => {
+            if (!badgeMap.has(badgeAssignment.userId)) {
+              badgeMap.set(badgeAssignment.userId, []);
+            }
+            badgeMap.get(badgeAssignment.userId).push({
+              id: badgeAssignment.badgeId || badgeAssignment.id,
+              name: badgeAssignment.name,
+              iconSvg: badgeAssignment.iconSvg,
+              type: badgeAssignment.type,
+            });
+          });
+        }
 
         // Batch check likes for real posts
         let likedPostIds: string[] = [];
