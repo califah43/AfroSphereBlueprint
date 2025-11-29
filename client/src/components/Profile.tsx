@@ -203,22 +203,54 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const toggleFollow = async () => {
     setIsLoading(true);
     try {
-      const followUsername = getApiUsername();
-      const endpoint = isFollowing ? `/api/follows/unfollow/${followUsername}` : `/api/follows/${followUsername}`;
-      const method = isFollowing ? 'DELETE' : 'POST';
+      const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      const currentUserId = currentUserData?.id;
+      const targetUsername = username;
       
-      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
-      if (res.ok) {
-        setIsFollowing(!isFollowing);
+      if (!currentUserId || !targetUsername) {
         toast({
-          title: isFollowing ? "Unfollowed" : "Following",
-          description: isFollowing ? `You unfollowed @${getApiUsername()}` : `You're now following @${getApiUsername()}`,
+          title: "Error",
+          description: "Missing user information",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Fetch target user by username to get their ID
+      const userRes = await fetch(`/api/users/${targetUsername}`);
+      if (!userRes.ok) {
+        toast({
+          title: "Error",
+          description: "User not found",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const targetUser = await userRes.json();
+      const targetUserId = targetUser.id;
+      
+      const res = await fetch('/api/follows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          followerId: currentUserId, 
+          followingId: targetUserId 
+        })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setIsFollowing(data.following);
+        toast({
+          title: data.following ? "Following" : "Unfollowed",
+          description: data.following ? `You're now following @${targetUsername}` : `You unfollowed @${targetUsername}`,
           className: "border-primary/20 bg-card",
         });
       } else {
         toast({
           title: "Error",
-          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'} @${getApiUsername()}`,
+          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'}`,
           variant: "destructive",
         });
       }

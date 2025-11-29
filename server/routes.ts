@@ -608,12 +608,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (isFollowing) {
         await storage.unfollowUser(followerId, followingId);
+        // Update counts
+        const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
+        const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
+        if (follower) {
+          await db.update(users).set({ followingCount: Math.max(0, (follower.followingCount || 1) - 1) }).where(eq(users.id, followerId));
+        }
+        if (following) {
+          await db.update(users).set({ followerCount: Math.max(0, (following.followerCount || 1) - 1) }).where(eq(users.id, followingId));
+        }
         res.json({ following: false });
       } else {
         await storage.followUser(followerId, followingId);
+        // Update counts
+        const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
+        const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
+        if (follower) {
+          await db.update(users).set({ followingCount: (follower.followingCount || 0) + 1 }).where(eq(users.id, followerId));
+        }
+        if (following) {
+          await db.update(users).set({ followerCount: (following.followerCount || 0) + 1 }).where(eq(users.id, followingId));
+        }
         res.json({ following: true });
       }
     } catch (error) {
+      console.error("Follow error:", error);
       res.status(400).json({ error: "Invalid request" });
     }
   });

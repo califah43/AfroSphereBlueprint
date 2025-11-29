@@ -214,11 +214,17 @@ export class DbStorage implements IStorage {
   }
 
   async getFollowers(userId: string): Promise<User[]> {
-    return db.query.users.findMany();
+    const followRecords = await db.query.follows.findMany({ where: eq(follows.followingId, userId) });
+    const followerIds = followRecords.map(f => f.followerId);
+    if (followerIds.length === 0) return [];
+    return db.query.users.findMany({ where: inArray(users.id, followerIds) });
   }
 
   async getFollowing(userId: string): Promise<User[]> {
-    return db.query.users.findMany();
+    const followRecords = await db.query.follows.findMany({ where: eq(follows.followerId, userId) });
+    const followingIds = followRecords.map(f => f.followingId);
+    if (followingIds.length === 0) return [];
+    return db.query.users.findMany({ where: inArray(users.id, followingIds) });
   }
 
   async createNotification(notification: any): Promise<Notification> {
