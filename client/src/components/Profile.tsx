@@ -459,7 +459,11 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <Button
               variant="ghost"
               size="icon"
-              onClick={onSettings}
+              onClick={() => {
+                if (onSettings) {
+                  onSettings();
+                }
+              }}
               data-testid="button-settings"
               className="hover-elevate"
             >
