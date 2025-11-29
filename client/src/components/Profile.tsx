@@ -636,24 +636,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         {userProfile && (
         <div className="flex gap-2 mb-6">
           {isOwnProfile ? (
-            <>
-              <Button
-                className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-9 shadow-sm"
-                onClick={onEditProfile}
-                data-testid="button-edit-profile"
-              >
-                Edit Profile
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 hover-elevate"
-                onClick={onSettings}
-                data-testid="button-profile-settings"
-              >
-                <Settings size={18} />
-              </Button>
-            </>
+            <Button
+              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-9 shadow-sm"
+              onClick={onEditProfile}
+              data-testid="button-edit-profile"
+            >
+              Edit Profile
+            </Button>
           ) : (
             <>
               <Button 
