@@ -283,6 +283,14 @@ export const translations: Record<Language, Record<string, string>> = {
     "feed.startedFollowing": "started following you",
     "feed.commented": "commented on your post",
     "feed.trending": "Your post is trending in",
+    
+    // Notifications
+    "notifications.title": "Notifications",
+    "notifications.noNotifications": "No notifications yet",
+    "notifications.youllSeeUpdates": "You'll see updates here",
+    "notifications.today": "Today",
+    "notifications.earlier": "Earlier",
+    "notifications.follow": "Follow",
   },
   sw: {
     // Navigation

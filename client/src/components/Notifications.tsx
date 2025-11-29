@@ -15,50 +15,6 @@ interface Notification {
   isUnread?: boolean;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "like",
-    user: "zara_style",
-    text: "liked your post",
-    timeAgo: "2m ago",
-    postThumbnail: fashionImage,
-    isUnread: true,
-  },
-  {
-    id: "2",
-    type: "follow",
-    user: "kwame_creative",
-    text: "started following you",
-    timeAgo: "1h ago",
-    isUnread: true,
-  },
-  {
-    id: "3",
-    type: "comment",
-    user: "amara_fashion",
-    text: "commented: \"This is amazing!\"",
-    timeAgo: "3h ago",
-    postThumbnail: fashionImage,
-  },
-  {
-    id: "4",
-    type: "trending",
-    user: "afrosphere",
-    text: "Your post is trending in Fashion",
-    timeAgo: "5h ago",
-    postThumbnail: fashionImage,
-  },
-  {
-    id: "5",
-    type: "like",
-    user: "kojoart",
-    text: "liked your post",
-    timeAgo: "1d ago",
-    postThumbnail: fashionImage,
-  },
-];
-
 const getNotificationIcon = (type: string) => {
   switch (type) {
     case "like":
@@ -95,7 +51,53 @@ interface NotificationsProps {
 
 export default function Notifications({ onUserClick }: NotificationsProps) {
   const { t } = useLanguage();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  
+  // Generate mock notifications with translations
+  const getMockNotifications = (): Notification[] => [
+    {
+      id: "1",
+      type: "like",
+      user: "zara_style",
+      text: t("feed.liked"),
+      timeAgo: "2m ago",
+      postThumbnail: fashionImage,
+      isUnread: true,
+    },
+    {
+      id: "2",
+      type: "follow",
+      user: "kwame_creative",
+      text: t("feed.startedFollowing"),
+      timeAgo: "1h ago",
+      isUnread: true,
+    },
+    {
+      id: "3",
+      type: "comment",
+      user: "amara_fashion",
+      text: `${t("feed.commented")}: "This is amazing!"`,
+      timeAgo: "3h ago",
+      postThumbnail: fashionImage,
+    },
+    {
+      id: "4",
+      type: "trending",
+      user: "afrosphere",
+      text: `${t("feed.trending")} Fashion`,
+      timeAgo: "5h ago",
+      postThumbnail: fashionImage,
+    },
+    {
+      id: "5",
+      type: "like",
+      user: "kojoart",
+      text: t("feed.liked"),
+      timeAgo: "1d ago",
+      postThumbnail: fashionImage,
+    },
+  ];
+  
+  const [notifications, setNotifications] = useState<Notification[]>(getMockNotifications());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         }
 
         if (!userId) {
-          setNotifications(mockNotifications);
+          setNotifications(getMockNotifications());
           setIsLoading(false);
           return;
         }
@@ -156,19 +158,19 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
             })
           );
 
-          setNotifications(transformedNotifications.length > 0 ? transformedNotifications : mockNotifications);
+          setNotifications(transformedNotifications.length > 0 ? transformedNotifications : getMockNotifications());
         } else {
-          setNotifications(mockNotifications);
+          setNotifications(getMockNotifications());
         }
       } catch (error) {
         console.log("Using mock notifications:", error);
-        setNotifications(mockNotifications);
+        setNotifications(getMockNotifications());
       } finally {
         setIsLoading(false);
       }
     };
     fetchNotifications();
-  }, []);
+  }, [t]);
 
   // Helper function to format time ago
   const formatTimeAgo = (dateString: string | null | undefined): string => {
@@ -196,7 +198,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         <div className="max-w-md mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold flex items-center gap-2" data-testid="text-notifications-title">
             <Bell className="h-6 w-6 text-primary" />
-            Notifications
+            {t("notifications.title")}
           </h1>
         </div>
       </div>
@@ -204,7 +206,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
       <div className="max-w-md mx-auto px-4">
         {/* Today Section */}
         <div className="py-4 mt-2">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Today</h2>
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide" data-testid="text-notifications-today">{t("notifications.today")}</h2>
         </div>
 
         <div className="space-y-2">
@@ -250,7 +252,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
                     className="bg-primary hover:bg-primary/90 text-white font-semibold h-8 text-xs flex-shrink-0" 
                     data-testid={`button-follow-back-${notif.id}`}
                   >
-                    Follow
+                    {t("notifications.follow")}
                   </Button>
                 )}
               </div>
@@ -265,7 +267,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
 
         {/* Earlier Section */}
         <div className="py-4 mt-6">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Earlier</h2>
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide" data-testid="text-notifications-earlier">{t("notifications.earlier")}</h2>
         </div>
 
         <div className="space-y-2">
@@ -313,8 +315,8 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         {notifications.length === 0 && (
           <div className="py-16 text-center">
             <Bell className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground font-medium">No notifications yet</p>
-            <p className="text-xs text-muted-foreground mt-1">You'll see updates here</p>
+            <p className="text-muted-foreground font-medium" data-testid="text-no-notifications">{t("notifications.noNotifications")}</p>
+            <p className="text-xs text-muted-foreground mt-1" data-testid="text-see-updates">{t("notifications.youllSeeUpdates")}</p>
           </div>
         )}
       </div>
