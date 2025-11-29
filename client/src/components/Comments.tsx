@@ -423,6 +423,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                         <BadgeDisplay userId={comment.id} className="inline-flex" />
                       </div>
                       <p className="text-xs text-muted-foreground font-medium">@{comment.author || "user"}</p>
+                      <span className="text-xs text-muted-foreground font-medium">·</span>
                       <span className="text-xs text-muted-foreground font-medium" data-testid={`text-comment-time-${comment.id}`}>
                         {comment.timeAgo}
                       </span>
@@ -526,6 +527,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                   <BadgeDisplay userId={reply.id} className="inline-flex" />
                                 </div>
                                 <p className="text-xs text-muted-foreground/70">@{reply.author || "user"}</p>
+                                <span className="text-xs text-muted-foreground/70">·</span>
                                 <span className="text-xs text-muted-foreground/70" data-testid={`text-reply-time-${reply.id}`}>
                                   {reply.timeAgo}
                                 </span>
