@@ -287,7 +287,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts", async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const offset = parseInt(req.query.offset as string) || 0;
-    const posts = await storage.listPosts(limit, offset);
+    const viewerId = req.query.viewerId as string;
+    let posts = await storage.listPosts(limit, offset);
+    
+    // Filter private account posts
+    if (viewerId) {
+      posts = await Promise.all(
+        posts.map(async (post) => {
+          const owner = await storage.getUser(post.userId);
+          if (owner?.isPrivate && owner.id !== viewerId) {
+            const isFollower = await storage.isFollowing(viewerId, post.userId);
+            if (!isFollower) {
+              return null;
+            }
+          }
+          return post;
+        })
+      ).then(p => p.filter(Boolean) as typeof posts);
+    } else {
+      posts = posts.filter(p => {
+        const owner = db.query.users.findFirst({ where: eq(users.id, p.userId) });
+        return !(owner as any)?.isPrivate;
+      });
+    }
+    
     res.json(posts);
   });
 
@@ -668,11 +691,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/follows", async (req, res) => {
     try {
       const { followerId, followingId } = req.body;
-      const isFollowing = await storage.isFollowing(followerId, followingId);
+      const targetUser = await storage.getUser(followingId);
       
+      // Check if trying to unfollow
+      const isFollowing = await storage.isFollowing(followerId, followingId);
       if (isFollowing) {
         await storage.unfollowUser(followerId, followingId);
-        // Update counts
         const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
         const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
         if (follower) {
@@ -682,47 +706,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await db.update(users).set({ followerCount: Math.max(0, (following.followerCount || 1) - 1) }).where(eq(users.id, followingId));
         }
         res.json({ following: false });
-      } else {
-        await storage.followUser(followerId, followingId);
-        // Update counts
-        const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
-        const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
-        if (follower) {
-          await db.update(users).set({ followingCount: (follower.followingCount || 0) + 1 }).where(eq(users.id, followerId));
-        }
-        if (following) {
-          await db.update(users).set({ followerCount: (following.followerCount || 0) + 1 }).where(eq(users.id, followingId));
-        }
-        
-        // Create notification for followed user
-        try {
-          const followerUser = await storage.getUser(followerId);
-          await storage.createNotification({
-            userId: followingId,
-            type: 'follow',
-            fromUserId: followerId,
-            message: `${followerUser?.displayName || followerUser?.username || 'Someone'} started following you`,
-          });
-          
-          // Send FCM push notification to followed user
-          const fcmToken = await storage.getFCMToken(followingId);
-          if (fcmToken) {
-            await sendPushNotification(
-              fcmToken,
-              `New follower: ${followerUser?.displayName || followerUser?.username || 'Someone'}`,
-              'Someone just started following you',
-              { type: 'follow', userId: followerId }
-            );
-          }
-        } catch (e) {
-          console.error('Failed to create follow notification:', e);
-        }
-        
-        res.json({ following: true });
+        return;
       }
+      
+      // Check if target is private - if so, create follow request instead
+      if (targetUser?.isPrivate) {
+        const hasRequest = await storage.hasFollowRequest(followerId, followingId);
+        if (hasRequest) {
+          return res.status(400).json({ error: "Follow request already sent" });
+        }
+        await storage.createFollowRequest(followerId, followingId);
+        
+        // Notify private account owner of follow request
+        const requesterUser = await storage.getUser(followerId);
+        await storage.createNotification({
+          userId: followingId,
+          type: 'followRequest',
+          fromUserId: followerId,
+          message: `${requesterUser?.displayName || requesterUser?.username || 'Someone'} wants to follow you`,
+        });
+        
+        res.json({ followRequest: true });
+        return;
+      }
+      
+      // Regular follow for public accounts
+      await storage.followUser(followerId, followingId);
+      const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
+      const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
+      if (follower) {
+        await db.update(users).set({ followingCount: (follower.followingCount || 0) + 1 }).where(eq(users.id, followerId));
+      }
+      if (following) {
+        await db.update(users).set({ followerCount: (following.followerCount || 0) + 1 }).where(eq(users.id, followingId));
+      }
+      
+      try {
+        await storage.createNotification({
+          userId: followingId,
+          type: 'follow',
+          fromUserId: followerId,
+          message: `${follower?.displayName || follower?.username || 'Someone'} started following you`,
+        });
+      } catch (e) {
+        console.error('Failed to create follow notification:', e);
+      }
+      
+      res.json({ following: true });
     } catch (error) {
       console.error("Follow error:", error);
       res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
+  // Follow request endpoints
+  app.get("/api/follow-requests/:userId", async (req, res) => {
+    try {
+      const requests = await storage.getFollowRequests(req.params.userId);
+      const enriched = await Promise.all(
+        requests.map(async (req: any) => {
+          const user = await storage.getUser(req.requesterUserId);
+          return { ...req, requesterUser: user };
+        })
+      );
+      res.json(enriched);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch follow requests" });
+    }
+  });
+
+  app.post("/api/follow-requests/accept", async (req, res) => {
+    try {
+      const { requesterUserId, targetUserId } = req.body;
+      await storage.acceptFollowRequest(requesterUserId, targetUserId);
+      
+      const requesterUser = await storage.getUser(requesterUserId);
+      await storage.createNotification({
+        userId: requesterUserId,
+        type: 'followAccepted',
+        fromUserId: targetUserId,
+        message: `${requesterUser?.displayName || requesterUser?.username || 'Someone'} accepted your follow request`,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to accept follow request" });
+    }
+  });
+
+  app.post("/api/follow-requests/decline", async (req, res) => {
+    try {
+      const { requesterUserId, targetUserId } = req.body;
+      await storage.declineFollowRequest(requesterUserId, targetUserId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to decline follow request" });
     }
   });
 
