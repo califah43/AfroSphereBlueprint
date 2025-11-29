@@ -224,6 +224,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     if (pullDistance > 80 && !isRefreshing) {
       setIsRefreshing(true);
       setHasNewPosts(false);
+      // Invalidate query to force refetch of real posts
+      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
       setTimeout(() => {
         setIsRefreshing(false);
         setPullDistance(0);
