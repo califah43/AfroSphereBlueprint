@@ -230,6 +230,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile picture upload endpoint (Firebase Storage via client-side)
+  app.post("/api/users/:id/profile-picture", async (req, res) => {
+    try {
+      const { userId, profileImageUrl } = req.body;
+      
+      if (!userId || !profileImageUrl) {
+        return res.status(400).json({ error: "User ID and profile image URL required" });
+      }
+
+      const user = await storage.updateUser(userId, { profileImageUrl });
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json({ success: true, user });
+    } catch (error: any) {
+      console.error("Profile picture update error:", error);
+      res.status(500).json({ error: error.message || "Failed to update profile picture" });
+    }
+  });
+
   app.post("/api/users", async (req, res) => {
     try {
       const parsed = insertUserSchema.parse(req.body);

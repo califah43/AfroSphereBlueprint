@@ -1,13 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock } from "lucide-react";
+import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import CreatorBadge from "./CreatorBadge";
 import BadgeDisplay from "./BadgeDisplay";
 import ProfilePictureModal from "./ProfilePictureModal";
+import ProfilePicture from "./ProfilePicture";
+import ImageViewer from "./ImageViewer";
+import { useProfilePictureUpload } from "@/hooks/useProfilePictureUpload";
+import { getCacheBustedUrl } from "@/lib/imageCompression";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 import artImage from "@assets/generated_images/African_art_post_example_49c114b5.png";
@@ -31,6 +35,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [isFollowRequestPending, setIsFollowRequestPending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string>("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
@@ -38,6 +43,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [postsLoading, setPostsLoading] = useState(false);
   const [isAccountPrivate, setIsAccountPrivate] = useState(false);
   const [userBadges, setUserBadges] = useState<any[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadProfilePicture, isUploading } = useProfilePictureUpload();
   const { toast } = useToast();
 
   // Fetch user data and posts from backend
@@ -63,6 +70,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               following: userData.followingCount?.toString() || "0",
               posts: userData.postCount?.toString() || "0",
               avatar: userData.avatar || "",
+              profileImageUrl: userData.profileImageUrl || "",
               banner: userData.banner || "",
             });
           }
@@ -85,6 +93,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               following: userData.followingCount?.toString() || "0",
               posts: userData.postCount?.toString() || "0",
               avatar: userData.avatar || "",
+              profileImageUrl: userData.profileImageUrl || "",
               banner: userData.banner || "",
             });
           }
@@ -460,23 +469,69 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         )}
 
         {/* Avatar - Overlaps Banner */}
-        <div className="flex mb-4 -mt-14">
-          <button
-            onClick={() => userProfile?.avatar && setShowPictureModal(true)}
-            className={`relative ${userProfile?.avatar ? 'hover-elevate cursor-pointer' : ''}`}
-            data-testid="button-view-avatar"
-          >
-            <div className="w-16 h-16 rounded-full ring-3 ring-background overflow-hidden bg-muted shadow-sm">
-              {userProfile?.avatar ? (
-                <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-orange-500/20">
-                  <span className="text-lg font-black text-foreground">{userProfile?.username?.[0]?.toUpperCase() || "U"}</span>
-                </div>
-              )}
+        <div className="flex mb-4 -mt-14 relative">
+          <ProfilePicture
+            src={userProfile?.profileImageUrl || userProfile?.avatar}
+            alt="Profile picture"
+            size="lg"
+            onClick={() => setShowImageViewer(true)}
+            editable={isOwnProfile}
+            onEditClick={() => fileInputRef.current?.click()}
+            className="ring-3 ring-background shadow-sm"
+          />
+          
+          {/* Hidden file input for profile picture upload */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file || !userId) return;
+
+              try {
+                const newUrl = await uploadProfilePicture(file, userId);
+                if (newUrl) {
+                  setUserProfile((prev: any) => ({
+                    ...prev,
+                    profileImageUrl: newUrl,
+                  }));
+                  
+                  const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+                  userData.profileImageUrl = newUrl;
+                  localStorage.setItem("currentUserData", JSON.stringify(userData));
+                  
+                  toast({
+                    title: "Success",
+                    description: "Profile picture updated!",
+                  });
+                }
+              } catch (error) {
+                toast({
+                  title: "Error",
+                  description: "Failed to upload profile picture",
+                  variant: "destructive",
+                });
+              }
+            }}
+            data-testid="input-profile-picture-upload"
+          />
+
+          {isUploading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+              <Loader2 className="text-white animate-spin" size={24} />
             </div>
-          </button>
+          )}
         </div>
+
+        {/* Full-screen Image Viewer */}
+        <ImageViewer
+          src={userProfile?.profileImageUrl || userProfile?.avatar || ""}
+          alt="Profile picture"
+          isOpen={showImageViewer}
+          onClose={() => setShowImageViewer(false)}
+        />
 
         {/* Name & Username - Left Aligned */}
         <div className="mb-4">
