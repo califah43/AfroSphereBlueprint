@@ -116,6 +116,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.editProfile": "Edit Profile",
     "profile.follow": "Follow",
     "profile.unfollow": "Unfollow",
+    "profile.privateAccount": "This account is private",
+    "profile.sendFollowRequest": "Send Follow Request",
+    "profile.followRequestSent": "Follow request sent",
+    "profile.followRequestPending": "Follow request pending",
+    "profile.viewFollowRequests": "Follow Requests",
+    "profile.acceptFollowRequest": "Accept",
+    "profile.declineFollowRequest": "Decline",
+    "profile.missingUserInfo": "Missing user information",
+    "profile.userNotFound": "User not found",
+    "profile.failedToToggleFollow": "Failed to follow/unfollow",
+    "profile.connectionError": "Connection error",
+    "profile.failedToProcess": "Failed to process request",
     
     // Notifications
     "notifications.title": "Notifications",
