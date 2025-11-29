@@ -136,7 +136,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   const handleBannerCropApply = (croppedData: string) => {
     setFormData({ ...formData, banner: croppedData });
     setShowBannerCropper(false);
-    toast({ title: "Banner updated", description: "Your new banner is ready to save" });
+    toast({ title: t("profile.bannerUpdated"), description: t("profile.bannerReadyToSave") });
   };
 
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -151,7 +151,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
     try {
       const userId = localStorage.getItem("currentUserId");
       if (!userId) {
-        toast({ title: "Error", description: "User not found", variant: "destructive" });
+        toast({ title: t("common.error"), description: t("profile.userNotFound"), variant: "destructive" });
         return;
       }
 
@@ -205,11 +205,11 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       
       // Trigger comment refetch for username/badge updates
       window.dispatchEvent(new Event('profileUpdated'));
-      
+      toast({ title: t("profile.profileSaved"), description: t("profile.profileUpdatesSaved") });
       onClose();
     } catch (error) {
       console.error("Save error:", error);
-      toast({ title: "Error", description: String(error) || "Failed to save profile", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("profile.failedToSaveProfile"), variant: "destructive" });
     }
   };
 
@@ -236,7 +236,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         >
           <X className="h-5 w-5" />
         </Button>
-        <h2 className="text-base font-black tracking-tight" data-testid="text-edit-title">Edit Profile</h2>
+        <h2 className="text-base font-black tracking-tight" data-testid="text-edit-title">{t("profile.editProfile")}</h2>
         <Button 
           onClick={handleSave} 
           className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-8 px-3"

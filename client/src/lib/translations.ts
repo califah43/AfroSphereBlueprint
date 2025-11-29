@@ -188,33 +188,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "guidelines.rule10": "Cultural Respect",
     "guidelines.rule10Desc": "Respect sacred traditions, rites, and leaders. Avoid mocking or demeaning cultural practices.",
     "guidelines.agree": "I understand and agree to follow these guidelines",
-    
-    // Profile & Follow
-    "profile.editProfile": "Edit Profile",
-    "profile.photoUpdated": "Profile photo updated",
-    "profile.photoReadyToSave": "Your new profile photo is ready to save",
-    "profile.bannerUpdated": "Banner updated",
-    "profile.bannerReadyToSave": "Your new banner is ready to save",
-    "profile.profileSaved": "Profile saved!",
-    "profile.profileUpdatesSaved": "Your profile updates have been saved",
-    "profile.failedToSaveProfile": "Failed to save profile",
-    "profile.userNotFound": "User not found",
-    "profile.following": "Following",
-    "profile.unfollowed": "Unfollowed",
-    "profile.nowFollowing": "You're now following @{username}",
-    "profile.unflowedUser": "You unfollowed @{username}",
-    "profile.failedToFollow": "Failed to follow",
-    "profile.failedToUnfollow": "Failed to unfollow",
-    "profile.failedToToggleFollow": "Failed to toggle follow",
-    "profile.connectionError": "Connection Error",
-    "profile.failedToProcess": "Unable to process your request. Please try again.",
-    "profile.missingUserInfo": "Missing user information",
-    "profile.failedReadProfilePhoto": "Failed to read profile photo",
-    "profile.failedReadBannerImage": "Failed to read banner image",
-    
-    // Admin
-    "admin.userSettingsManager": "User Settings Manager",
-    "admin.systemSettings": "System Settings",
   },
   sw: {
     // Navigation

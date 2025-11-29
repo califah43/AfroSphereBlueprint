@@ -302,8 +302,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       
       if (!currentUserId || !targetUsername) {
         toast({
-          title: "Error",
-          description: "Missing user information",
+          title: t("common.error"),
+          description: t("profile.missingUserInfo"),
           variant: "destructive",
         });
         return;
@@ -313,8 +313,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       const userRes = await fetch(`/api/users/username/${targetUsername}`);
       if (!userRes.ok) {
         toast({
-          title: "Error",
-          description: "User not found",
+          title: t("common.error"),
+          description: t("profile.userNotFound"),
           variant: "destructive",
         });
         return;
@@ -364,22 +364,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
         
         toast({
-          title: data.following ? "Following" : "Unfollowed",
+          title: data.following ? t("profile.following") : t("profile.unfollowed"),
           description: data.following ? `You're now following @${targetUsername}` : `You unfollowed @${targetUsername}`,
           className: "border-primary/20 bg-card",
         });
       } else {
         toast({
-          title: "Error",
-          description: `Failed to ${isFollowing ? 'unfollow' : 'follow'}`,
+          title: t("common.error"),
+          description: t("profile.failedToToggleFollow"),
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
       toast({
-        title: "Connection Error",
-        description: "Unable to process your request. Please try again.",
+        title: t("profile.connectionError"),
+        description: t("profile.failedToProcess"),
         variant: "destructive",
       });
     } finally {
