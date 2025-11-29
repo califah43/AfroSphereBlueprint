@@ -1,0 +1,118 @@
+Implement a profile header image selector with a movable crop rectangle.
+
+FEATURES:
+1. When user taps the header area, open image picker.
+2. After selecting an image, open a full-screen cropping modal.
+3. Show the selected image in a zoomable + draggable container.
+4. Overlay a fixed rectangle crop frame with rounded corners (16px radius).
+5. User can:
+   - Drag the image behind the frame
+   - Pinch-to-zoom the image
+   - Move the crop area to choose the exact region
+6. The crop frame does NOT move. Only the image moves.
+7. Add a "Crop" button.
+8. On crop, export the exact rectangle region as the final header image.
+
+CODE STRUCTURE:
+
+Create component: HeaderCropper
+--------------------------------
+- State:
+  selectedImage (string)
+  scale (number)
+  positionX (number)
+  positionY (number)
+  isDragging (boolean)
+
+- UI:
+  Fullscreen modal
+  Image element wrapped in gesture handlers:
+    - PanGesture for drag
+    - PinchGesture for zoom
+  Fixed crop frame positioned at center
+  Buttons: Cancel, Crop
+
+- CSS:
+  .crop-frame {
+     width: 100%;
+     max-width: 330px;
+     height: 120px;
+     border-radius: 16px;
+     border: 2px solid rgba(255,255,255,0.8);
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     pointer-events: none;
+     overflow: hidden;
+  }
+
+- Logic for moving image:
+  Allow transform:
+     transform: translate(positionX, positionY) scale(scale);
+
+- Limit scaling:
+     min scale = 1.0
+     max scale = 4.0
+
+- Export crop:
+  Use canvas to:
+     1. Create canvas with crop-frame width/height.
+     2. Draw the image onto canvas applying:
+         - offsetX = (-frameX - positionX)
+         - offsetY = (-frameY - positionY)
+         - scale applied to width/height
+     3. Convert to dataURL.
+     4. Upload as user's header image.
+
+React/Next.js Example Code Stub:
+--------------------------------
+
+function HeaderCropper() {
+  const [image, setImage] = useState(null);
+  const [scale, setScale] = useState(1);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const frameSize = { width: 330, height: 120 };
+
+  const handleCrop = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = frameSize.width;
+    canvas.height = frameSize.height;
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(
+      imageRef.current,
+      -pos.x,
+      -pos.y,
+      imageWidth * scale,
+      imageHeight * scale
+    );
+
+    const finalURL = canvas.toDataURL("image/png");
+    uploadHeader(finalURL);
+  }
+
+  return (
+    <Modal>
+      <div className="crop-container">
+        <img
+          src={image}
+          ref={imageRef}
+          style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})` }}
+        />
+        <div className="crop-frame"></div>
+        <button onClick={handleCrop}>Crop</button>
+        <button onClick={() => close()}>Cancel</button>
+      </div>
+    </Modal>
+  );
+}
+
+ADMIN SIDE:
+- Save cropped header to user profile record: /users/{uid}/headerImage
+- Display it as top banner on profile.
+
+BEHAVIOR:
+- Header image should be 100% width.
+- Maintain 16px radius on corners.
+- On scroll, header collapses into a compact bar.
