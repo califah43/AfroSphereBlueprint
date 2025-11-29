@@ -1226,7 +1226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed default badges
   app.post("/api/admin/badges/seed", async (req, res) => {
     try {
-      const defaultBadges = [
+      const defaultBadges: Array<{ name: string; type: string; description: string; iconSvg: string }> = [
         { name: "Verified", type: "verified", description: "Verified creator account", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1E3A8A"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' },
         { name: "King", type: "cultural", description: "Cultural royalty", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#D4AF37"><path d="M12 2l3 6h6l-5 3 2 7-7-5-7 5 2-7-5-3h6zm0 2.5L9.5 8h5L12 4.5z"/></svg>' },
         { name: "Queen", type: "cultural", description: "Cultural excellence", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#9333EA"><path d="M12 2l3 6h6l-5 3 2 7-7-5-7 5 2-7-5-3h6zm0 2.5L9.5 8h5L12 4.5z"/></svg>' },
@@ -1239,8 +1239,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { name: "Pioneer", type: "achievement", description: "Early adopter and innovator", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#06B6D4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
       ];
 
+      const existingBadges = await storage.getBadges();
       for (const badge of defaultBadges) {
-        const existing = (await storage.getBadges()).find(b => b.name === badge.name);
+        const existing = existingBadges.find((b: Badge) => b.name === badge.name);
         if (!existing) {
           await storage.createBadge(badge);
         }

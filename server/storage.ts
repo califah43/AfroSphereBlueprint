@@ -56,6 +56,7 @@ export interface IStorage {
   getUserBadges(userId: string): Promise<Badge[]>;
   assignBadge(userId: string, badgeId: string): Promise<UserBadge>;
   removeBadge(userId: string, badgeId: string): Promise<void>;
+  getAllFCMTokens(): Promise<Map<string, string>>;
 }
 
 export class MemStorage implements IStorage {
