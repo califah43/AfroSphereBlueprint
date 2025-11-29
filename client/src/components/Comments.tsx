@@ -450,12 +450,19 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
       {/* Post Preview - Elegant Card */}
       <div className="mx-4 mt-3 mb-4 p-3 rounded-xl bg-card border border-border/50 backdrop-blur-sm hover-elevate transition-all">
         <div className="flex gap-3 items-start">
-          <img
-            src={postImage}
-            alt="Post"
-            className="w-14 h-14 object-cover rounded-lg border border-border"
-            data-testid="img-post-thumbnail"
-          />
+          <div className="relative w-14 h-14 flex-shrink-0">
+            <img
+              src={currentImage}
+              alt="Post"
+              className="w-14 h-14 object-cover rounded-lg border border-border"
+              data-testid="img-post-thumbnail"
+            />
+            {allImages.length > 1 && (
+              <div className="absolute -bottom-1 -right-1 bg-primary rounded-full w-5 h-5 flex items-center justify-center text-white text-xs font-bold">
+                {allImages.length}
+              </div>
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Post</p>
             <p className="text-sm line-clamp-2 text-foreground leading-snug" data-testid="text-post-caption">

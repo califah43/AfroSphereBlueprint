@@ -32,7 +32,7 @@ interface HomeFeedProps {
   onOpenShare?: () => void;
   onUserProfileClick?: (username: string) => void;
   onHashtagClick?: (hashtag: string) => void;
-  onCommentClick?: (postId: string, imageUrl: string, caption: string) => void;
+  onCommentClick?: (postId: string, imageUrl: string | string[], caption: string) => void;
 }
 
 export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagClick, onCommentClick }: HomeFeedProps) {
@@ -368,7 +368,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
                     post={post}
                     isOwnPost={post.author.username === "adikeafrica"}
                     onLike={(id) => console.log("Liked:", id)}
-                    onComment={(id) => onCommentClick?.(id, post.imageUrl, post.caption)}
+                    onComment={(id) => onCommentClick?.(id, post.images && post.images.length > 0 ? post.images : post.imageUrl, post.caption)}
                     onShare={(id) => onOpenShare?.()}
                     onBookmark={(id) => console.log("Bookmark:", id)}
                     onAuthorClick={(username) => onUserProfileClick?.(username)}

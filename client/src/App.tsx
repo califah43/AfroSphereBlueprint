@@ -263,7 +263,7 @@ export default function App() {
     }
   };
 
-  const handleOpenComments = (postId: string, image: string, caption: string) => {
+  const handleOpenComments = (postId: string, image: string | string[], caption: string) => {
     setCommentsPostData({ postId, image, caption });
     setModalView("comments");
   };
@@ -473,7 +473,7 @@ export default function App() {
           {modalView === "comments" && commentsPostData && (
             <Comments
               postId={commentsPostData.postId}
-              postImage={commentsPostData.image}
+              postImage={commentsPostData.image || ""}
               postCaption={commentsPostData.caption}
               onClose={() => setModalView("none")}
               onCommentAdded={handleCommentAdded}
