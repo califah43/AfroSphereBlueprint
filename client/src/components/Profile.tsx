@@ -486,7 +486,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (
-              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" title="Private account" />
+              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
             )}
             {userBadges && userBadges.length > 0 && (
               <div className="flex items-center gap-1">
