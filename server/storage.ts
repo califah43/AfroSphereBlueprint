@@ -97,6 +97,7 @@ export class MemStorage implements IStorage {
       bio: "",
       location: "",
       avatar: "",
+      profileImageUrl: "",
       banner: "",
       website: "",
       profession: "",
@@ -106,6 +107,10 @@ export class MemStorage implements IStorage {
       followerCount: 0,
       followingCount: 0,
       postCount: 0,
+      status: "active",
+      suspensionReason: "",
+      bannedReason: "",
+      disabledReason: "",
     };
     this.users.set(id, user);
     return user;
