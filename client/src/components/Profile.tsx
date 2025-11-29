@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/context/LanguageContext";
 import CreatorBadge from "./CreatorBadge";
 import BadgeDisplay from "./BadgeDisplay";
 import ProfilePictureModal from "./ProfilePictureModal";
@@ -25,7 +25,7 @@ interface ProfileProps {
 }
 
 export default function Profile({ isOwnProfile = true, username, onClose, onEditProfile, onSettings, onPostClick, onFollowersClick, onFollowingClick }: ProfileProps) {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -621,8 +621,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                       <div className="w-16 h-16 rounded-full bg-primary/8 flex items-center justify-center mx-auto mb-4">
                         <Share2 className="h-7 w-7 text-primary/40" />
                       </div>
-                      <p className="text-foreground font-semibold text-lg">No posts yet</p>
-                      <p className="text-sm text-muted-foreground mt-2">Share your first post to get started</p>
+                      <p className="text-foreground font-semibold text-lg" data-testid="text-no-posts">{t("feed.noPosts")}</p>
+                      <p className="text-sm text-muted-foreground mt-2" data-testid="text-share-first">Share your first post to get started</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-1 mt-4">

@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, UserPlus, TrendingUp, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 interface Notification {
@@ -93,6 +94,7 @@ interface NotificationsProps {
 }
 
 export default function Notifications({ onUserClick }: NotificationsProps) {
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [isLoading, setIsLoading] = useState(true);
 

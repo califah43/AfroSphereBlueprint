@@ -46,7 +46,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
   const [replyText, setReplyText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -454,8 +454,8 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
               <Heart className="h-6 w-6 text-primary/40" />
             </div>
-            <p className="text-muted-foreground text-sm font-medium">No comments yet</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Be the first to share your thoughts</p>
+            <p className="text-muted-foreground text-sm font-medium" data-testid="text-no-comments">{t("feed.noComments")}</p>
+            <p className="text-xs text-muted-foreground/60 mt-1" data-testid="text-be-first">{t("feed.beFirst")}</p>
           </div>
         ) : (
           comments.map((comment) => (
