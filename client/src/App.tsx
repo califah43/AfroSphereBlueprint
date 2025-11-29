@@ -396,6 +396,16 @@ export default function App() {
                 onSearchClick={() => setModalView("search")}
                 onPostClick={handleOpenPostDetail}
                 onHashtagClick={handleOpenHashtagFeed}
+                onCategoryClick={(category) => {
+                  // Navigate to category filter view
+                  console.log("Category clicked:", category);
+                  setModalView("none");
+                }}
+                onGenreClick={(genreId) => {
+                  // Navigate to genre filter view
+                  console.log("Genre clicked:", genreId);
+                  setModalView("none");
+                }}
               />
             </div>
           )}

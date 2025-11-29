@@ -16,24 +16,24 @@ interface Creator {
 
 const suggestedCreators: Creator[] = [
   {
-    username: "yara_designs",
-    name: "Yara Design Studio",
-    bio: "Contemporary African fashion with a modern twist",
-    followers: "8.5K",
+    username: "adikeafrica",
+    name: "Adike Africa",
+    bio: "Celebrating our roots with modern style. Ankara fusion fashion.",
+    followers: "12.5K",
     badge: "fashion-vanguard",
   },
   {
-    username: "malik_sounds",
-    name: "Malik Beats",
-    bio: "Afrobeats producer & sound engineer",
-    followers: "12.3K",
+    username: "beat_masta",
+    name: "Beat Masta",
+    bio: "Afrobeats meets amapiano. New music dropping Friday!",
+    followers: "9.8K",
     badge: "music-star",
   },
   {
-    username: "ada_art",
-    name: "Ada Contemporary",
-    bio: "Visual artist exploring African heritage",
-    followers: "6.2K",
+    username: "kojoart",
+    name: "Kojo Art",
+    bio: "New pieces inspired by Adinkra symbols. Contemporary African art.",
+    followers: "7.3K",
     badge: "top-artist",
   },
 ];
