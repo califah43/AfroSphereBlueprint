@@ -212,7 +212,8 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             <p className="text-xs text-muted-foreground/60" data-testid={`text-handle-${post.id}`}>
               @{post.author.uniqueUsername}
             </p>
-            <p className="text-sm text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
+            <span className="text-xs text-muted-foreground/60">·</span>
+            <p className="text-xs text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
