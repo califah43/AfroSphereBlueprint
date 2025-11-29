@@ -264,12 +264,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "notifications.follow": "Fuatilia",
     
     // Profile
-    "profile.posts": "Posts",
-    "profile.followers": "Wafuasi",
-    "profile.following": "Inafuatilia",
     "profile.editProfile": "Hariri Wasifu",
-    "profile.follow": "Fuatilia",
-    "profile.unfollow": "Sita Kuanzia Kufuatilia",
     "profile.privateAccount": "Akaunti hii ni ya haraka",
     "profile.sendFollowRequest": "Tuma Ombi la Kufuatilia",
     "profile.followRequestSent": "Ombi la kufuatilia limetumwa",
@@ -282,7 +277,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.failedToToggleFollow": "Imeshindwa kuanzia au kusita",
     "profile.connectionError": "Kosa la muunganisho",
     "profile.failedToProcess": "Imeshindwa kukanisha ombi",
-    "profile.saveChanges": "Hifadhi Mabadiliko",
     "profile.nameRequired": "Jina linaloonekana linahitajika",
     
     // Explore
@@ -609,18 +603,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.bio": "Ìtàn-àrùn",
     "profile.location": "Ibílẹ̀",
     "profile.profession": "Iṣẹ́",
-    "profile.follow": "Tẹ̀ní",
-    "profile.unfollow": "Tán Tẹ̀ní",
-    "profile.followers": "Àwọn Ọ̀dọ̀mọ̀",
-    "profile.following": "Ń tẹ̀ní",
-    "profile.posts": "Àwọn Àkọsílẹ̀",
-    "profile.saveChanges": "Tó Pé Àwọn Àwọn",
-    "profile.nameRequired": "Jina la Difunga Linahitajika",
-    "create.title": "Yenza Ipost",
-    "create.post": "Chapisha",
-    "create.cancel": "Ghairi",
-    "notifications.title": "Ìkilo",
-    "notifications.noNotifications": "Hakuna Arifa Bado",
   },
   ha: {
     // Navigation
