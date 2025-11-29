@@ -12,6 +12,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface BadgeItem {
   id: string;
@@ -20,6 +27,11 @@ interface BadgeItem {
   icon: string;
   color: string;
   usersCount: number;
+}
+
+interface UserOption {
+  id: string;
+  username: string;
 }
 
 const DEFAULT_BADGES: BadgeItem[] = [
@@ -104,6 +116,8 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [assigningBadgeId, setAssigningBadgeId] = useState<string | null>(null);
   const [assignUsername, setAssignUsername] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [usersList, setUsersList] = useState<UserOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSeedingBadges, setIsSeedingBadges] = useState(false);
 
@@ -123,6 +137,18 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
       console.error("Failed to fetch badges:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/users/all");
+      if (response.ok) {
+        const data = await response.json();
+        setUsersList(data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
     }
   };
 
@@ -223,39 +249,28 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   };
 
   const handleAssignBadge = async () => {
-    if (!assigningBadgeId || !assignUsername) {
-      toast({ title: "Error", description: "Badge and username required", variant: "destructive" });
+    if (!assigningBadgeId || !selectedUserId) {
+      toast({ title: "Error", description: "Badge and user required", variant: "destructive" });
       return;
     }
     
     try {
       setIsLoading(true);
-      // First, find the user by username
-      const userRes = await fetch(`/api/users/username/${assignUsername}`);
-      if (!userRes.ok) {
-        toast({ title: "Error", description: "User not found", variant: "destructive" });
-        setIsLoading(false);
-        return;
-      }
-      
-      const user = await userRes.json();
-      const userId = user.id;
-      
-      // Now assign the badge
       const response = await fetch("/api/admin/badges/assign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
+          userId: selectedUserId,
           badgeId: assigningBadgeId,
         }),
       });
       
       if (response.ok) {
         const badgeName = badges.find(b => b.id === assigningBadgeId)?.name;
-        toast({ title: "Success", description: `Badge "${badgeName}" assigned to @${assignUsername}` });
+        const selectedUser = usersList.find(u => u.id === selectedUserId);
+        toast({ title: "Success", description: `Badge "${badgeName}" assigned to @${selectedUser?.username}` });
         setAssigningBadgeId(null);
-        setAssignUsername("");
+        setSelectedUserId("");
         await fetchBadges();
       } else {
         toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
@@ -438,7 +453,10 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() => setAssigningBadgeId(badge.id)}
+                      onClick={() => {
+                        setAssigningBadgeId(badge.id);
+                        fetchUsers();
+                      }}
                       data-testid={`button-assign-badge-${badge.id}`}
                     >
                       Assign to User
@@ -447,21 +465,25 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                   <DialogContent data-testid={`dialog-assign-badge-${badge.id}`}>
                     <DialogHeader>
                       <DialogTitle>Assign Badge: {badge.name}</DialogTitle>
-                      <DialogDescription>Search and assign this badge to a user</DialogDescription>
+                      <DialogDescription>Select a user to assign this badge to</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium" data-testid="label-search-user">
-                          Search User
+                        <label className="text-sm font-medium" data-testid="label-select-user">
+                          Select User
                         </label>
-                        <input
-                          type="text"
-                          value={assignUsername}
-                          onChange={(e) => setAssignUsername(e.target.value)}
-                          placeholder="Enter username..."
-                          className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
-                          data-testid="input-search-user"
-                        />
+                        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                          <SelectTrigger data-testid="trigger-select-user">
+                            <SelectValue placeholder="Choose a user..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {usersList.map((user) => (
+                              <SelectItem key={user.id} value={user.id} data-testid={`option-user-${user.id}`}>
+                                {user.username}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="p-3 bg-muted/50 rounded-md flex items-center gap-2">
                         <div className="w-5 h-5" dangerouslySetInnerHTML={{ __html: badge.icon }} />
