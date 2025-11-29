@@ -490,6 +490,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const comment = await storage.createComment(parsed);
       
+      // Create notification for post owner when commented
+      try {
+        const post = await storage.getPost(parsed.postId);
+        if (post && post.userId !== userId) {
+          const commenterUser = await storage.getUser(userId);
+          await storage.createNotification({
+            userId: post.userId,
+            type: 'comment',
+            fromUserId: userId,
+            postId: parsed.postId,
+            message: `${commenterUser?.displayName || commenterUser?.username || 'Someone'} commented on your post`,
+          });
+        }
+      } catch (e) {
+        console.error('Failed to create comment notification:', e);
+      }
+      
       const enrichedComment = {
         id: comment.id,
         userId: comment.userId,
@@ -558,6 +575,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.unlikePost(userId, postId);
       } else {
         await storage.likePost(userId, postId);
+        
+        // Create notification for post owner when liked
+        try {
+          const post = await storage.getPost(postId);
+          if (post && post.userId !== userId) {
+            const likerUser = await storage.getUser(userId);
+            await storage.createNotification({
+              userId: post.userId,
+              type: 'like',
+              fromUserId: userId,
+              postId: postId,
+              message: `${likerUser?.displayName || likerUser?.username || 'Someone'} liked your post`,
+            });
+          }
+        } catch (e) {
+          console.error('Failed to create like notification:', e);
+        }
       }
       
       // Fetch updated post to get the new like count
