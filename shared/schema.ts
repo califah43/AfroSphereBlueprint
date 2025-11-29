@@ -239,3 +239,13 @@ export const hashtags = pgTable("hashtags", {
 });
 
 export type Hashtag = typeof hashtags.$inferSelect;
+
+// ============ HASHTAG FOLLOWS ============
+export const hashtagFollows = pgTable("hashtag_follows", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  hashtagId: varchar("hashtag_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type HashtagFollow = typeof hashtagFollows.$inferSelect;

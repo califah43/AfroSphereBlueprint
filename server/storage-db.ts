@@ -1,6 +1,6 @@
 import { db } from './db';
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests } from '@shared/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows } from '@shared/schema';
+import { eq, and, inArray, like, desc } from 'drizzle-orm';
 import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
@@ -50,6 +50,13 @@ export interface IStorage {
   deleteUser(userId: string): Promise<void>;
   saveFCMToken(userId: string, token: string): Promise<void>;
   getFCMToken(userId: string): Promise<string | undefined>;
+  searchUsers(query: string, limit?: number): Promise<User[]>;
+  searchHashtags(query: string, limit?: number): Promise<Hashtag[]>;
+  searchPosts(query: string, limit?: number): Promise<Post[]>;
+  followHashtag(userId: string, hashtagId: string): Promise<any>;
+  unfollowHashtag(userId: string, hashtagId: string): Promise<void>;
+  isFollowingHashtag(userId: string, hashtagId: string): Promise<boolean>;
+  updateHashtagUsage(tag: string): Promise<void>;
 }
 
 export class DbStorage implements IStorage {
