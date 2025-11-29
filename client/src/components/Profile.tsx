@@ -10,6 +10,7 @@ import BadgeDisplay from "./BadgeDisplay";
 import ProfilePictureModal from "./ProfilePictureModal";
 import ProfilePicture from "./ProfilePicture";
 import ImageViewer from "./ImageViewer";
+import HeaderCropper from "./HeaderCropper";
 import { useProfilePictureUpload } from "@/hooks/useProfilePictureUpload";
 import { getCacheBustedUrl } from "@/lib/imageCompression";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
@@ -36,6 +37,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
+  const [showHeaderCropper, setShowHeaderCropper] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string>("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
@@ -431,23 +433,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       )}
 
       {/* Elegant Banner - Extends to Top */}
-      <div className="relative h-32 overflow-hidden -mt-0">
+      <div 
+        className="relative h-32 overflow-hidden -mt-0 cursor-pointer group"
+        onClick={() => isOwnProfile && setShowHeaderCropper(true)}
+        data-testid="div-profile-banner"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
           {userProfile?.banner ? (
             <img
               src={userProfile.banner}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-85"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
             />
           ) : (
             <img
               src={bannerImage}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-85"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
             />
           )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        {isOwnProfile && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors opacity-0 group-hover:opacity-100" data-testid="div-banner-overlay">
+            <span className="text-white text-sm font-semibold" data-testid="text-edit-banner">Edit Header</span>
+          </div>
+        )}
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
