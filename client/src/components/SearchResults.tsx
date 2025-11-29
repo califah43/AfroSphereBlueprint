@@ -128,7 +128,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick, on
                     <Hash className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="flex-1 text-left">
                       <p className="font-semibold text-sm group-hover:text-primary transition-colors">#{hashtag.tag}</p>
-                      <p className="text-xs text-muted-foreground">{hashtag.usageCount.toLocaleString()} uses</p>
+                      <p className="text-xs text-muted-foreground">{(hashtag.usageCount || 0).toLocaleString()} uses</p>
                     </div>
                   </button>
                 ))}
@@ -159,7 +159,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick, on
                     </div>
                     <div className="flex-1 text-left">
                       <p className="font-semibold text-sm group-hover:text-primary transition-colors">#{hashtag.tag}</p>
-                      <p className="text-xs text-muted-foreground">{hashtag.usageCount.toLocaleString()} uses</p>
+                      <p className="text-xs text-muted-foreground">{(hashtag.usageCount || 0).toLocaleString()} uses</p>
                     </div>
                     <Flame className="h-4 w-4 text-orange-500" />
                   </button>
@@ -237,7 +237,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick, on
                         </Avatar>
                         <div className="flex-1 text-left">
                           <p className="font-bold text-sm group-hover:text-primary transition-colors">@{user.username}</p>
-                          <p className="text-xs text-muted-foreground">{user.followerCount.toLocaleString()} followers</p>
+                          <p className="text-xs text-muted-foreground">{(user.followerCount || 0).toLocaleString()} followers</p>
                         </div>
                         <Button
                           size="sm"
@@ -275,7 +275,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick, on
                         </div>
                         <div className="flex-1 text-left">
                           <p className="font-bold text-sm group-hover:text-primary transition-colors">#{hashtag.tag}</p>
-                          <p className="text-xs text-muted-foreground">{hashtag.usageCount.toLocaleString()} uses</p>
+                          <p className="text-xs text-muted-foreground">{(hashtag.usageCount || 0).toLocaleString()} uses</p>
                         </div>
                       </button>
                     ))}
@@ -309,7 +309,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick, on
                       <div className="flex-1 text-left">
                         <p className="font-bold text-sm group-hover:text-primary transition-colors">@{user.username}</p>
                         <p className="text-xs text-muted-foreground">{user.displayName}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{user.followerCount.toLocaleString()} followers</p>
+                        <p className="text-xs text-muted-foreground mt-1">{(user.followerCount || 0).toLocaleString()} followers</p>
                       </div>
                       <Button
                         size="sm"
@@ -347,7 +347,7 @@ export default function SearchResults({ onClose, onHashtagClick, onUserClick, on
                       </div>
                       <div className="flex-1 text-left">
                         <p className="font-bold text-sm group-hover:text-primary transition-colors">#{hashtag.tag}</p>
-                        <p className="text-xs text-muted-foreground">{hashtag.usageCount.toLocaleString()} uses</p>
+                        <p className="text-xs text-muted-foreground">{(hashtag.usageCount || 0).toLocaleString()} uses</p>
                       </div>
                     </button>
                   ))}
