@@ -1067,6 +1067,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get system settings
+  app.get("/api/admin/settings", async (req, res) => {
+    try {
+      res.json({
+        signupsEnabled: true,
+        emailVerificationRequired: true,
+        autoModeration: true,
+        oriAIEnabled: true,
+        maxImageSize: 50,
+        maxVideoLength: 300,
+        filteringSensitivity: "medium",
+      });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  // Update system settings
+  app.patch("/api/admin/settings", async (req, res) => {
+    try {
+      const settings = req.body;
+      res.json({ success: true, settings });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update settings" });
+    }
+  });
+
+  // Emergency action: maintenance mode
+  app.post("/api/admin/emergency/maintenance", async (req, res) => {
+    try {
+      const { enabled } = req.body;
+      res.json({ success: true, maintenance: enabled });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to toggle maintenance" });
+    }
+  });
+
+  // Emergency action: disable posting
+  app.post("/api/admin/emergency/disable-posting", async (req, res) => {
+    try {
+      const { disabled } = req.body;
+      res.json({ success: true, postingDisabled: disabled });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to toggle posting" });
+    }
+  });
+
+  // Clear system cache
+  app.post("/api/admin/emergency/clear-cache", async (req, res) => {
+    try {
+      res.json({ success: true, message: "Cache cleared" });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to clear cache" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {

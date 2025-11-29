@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,43 @@ export default function EmergencyControlPanel({ onBack, isOwner = false }: Emerg
     title: "",
     description: "",
   });
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleEmergencyAction = async (action: string) => {
+    try {
+      setIsProcessing(true);
+      let response;
+      
+      if (action === "maintenance") {
+        response = await fetch("/api/admin/emergency/maintenance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: true }),
+        });
+      } else if (action === "disable_posting") {
+        response = await fetch("/api/admin/emergency/disable-posting", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disabled: true }),
+        });
+      } else if (action === "clear_cache") {
+        response = await fetch("/api/admin/emergency/clear-cache", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (response?.ok) {
+        alert(`Action "${action}" executed successfully`);
+        setConfirmDialog({ open: false, action: "", title: "", description: "" });
+      }
+    } catch (error) {
+      console.error("Failed to execute emergency action:", error);
+      alert("Failed to execute action");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (!isOwner) {
     return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,52 @@ export default function SystemSettings({ onBack }: SystemSettingsProps) {
   const [autoModerationEnabled, setAutoModerationEnabled] = useState(true);
   const [filteringSensitivity, setFilteringSensitivity] = useState("medium");
   const [contentReviewAI, setContentReviewAI] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/settings");
+      if (response.ok) {
+        const data = await response.json();
+        setSignupsEnabled(data.signupsEnabled ?? true);
+        setEmailVerificationRequired(data.emailVerificationRequired ?? true);
+        setAutoModeration(data.autoModeration ?? true);
+        setMaxImageSize(data.maxImageSize ?? 50);
+        setMaxVideoLength(data.maxVideoLength ?? 300);
+      }
+    } catch (error) {
+      console.error("Failed to fetch settings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    try {
+      const response = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          signupsEnabled,
+          emailVerificationRequired,
+          autoModeration,
+          maxImageSize,
+          maxVideoLength,
+        }),
+      });
+      if (response.ok) {
+        alert("Settings saved successfully");
+      }
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      alert("Failed to save settings");
+    }
+  };
 
   const handleAddBlockedEmail = () => {
     if (newBlockedEmail && !blockedEmails.includes(newBlockedEmail)) {
