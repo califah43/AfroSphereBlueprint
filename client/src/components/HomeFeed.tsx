@@ -243,12 +243,18 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       
-      // Handle header visibility
-      const scrollDelta = scrollTop - lastScrollTop;
-      if (scrollDelta < -10) {
+      // Keep header visible during refresh
+      if (!isRefreshing) {
+        // Handle header visibility only when not refreshing
+        const scrollDelta = scrollTop - lastScrollTop;
+        if (scrollDelta < -10) {
+          setIsHeaderVisible(true);
+        } else if (scrollDelta > 10) {
+          setIsHeaderVisible(false);
+        }
+      } else {
+        // Always show header during refresh
         setIsHeaderVisible(true);
-      } else if (scrollDelta > 10) {
-        setIsHeaderVisible(false);
       }
       setLastScrollTop(scrollTop);
       
@@ -268,7 +274,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [displayedPosts, lastScrollTop]);
+  }, [displayedPosts, lastScrollTop, isRefreshing]);
 
   return (
     <div
