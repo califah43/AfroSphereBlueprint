@@ -357,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (user) {
-        author = user.username;
+        author = user.displayName || user.username;
         avatar = user.avatar || "";
       }
       
@@ -377,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         if (replyUser) {
-          replyAuthor = replyUser.username;
+          replyAuthor = replyUser.displayName || replyUser.username;
           replyAvatar = replyUser.avatar || "";
         }
         
