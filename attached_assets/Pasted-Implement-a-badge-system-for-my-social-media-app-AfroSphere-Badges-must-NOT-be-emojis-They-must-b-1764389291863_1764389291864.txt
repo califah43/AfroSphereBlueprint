@@ -1,0 +1,114 @@
+Implement a badge system for my social media app AfroSphere. 
+Badges must NOT be emojis. They must be unique custom SVG icons stored in my backend. Users must NOT be able to fake, type, or copy the badges using their keyboard.
+
+=== BADGE STORAGE ===
+Create a Firestore collection called "badges".
+Each badge document should have:
+- id: auto id
+- name: string
+- iconUrl: string (URL of the SVG icon stored in Firebase Storage)
+- description: string
+- type: string ("creator", "verified", "cultural", "achievement")
+
+Upload the SVG icons into Firebase Storage under: /badges/icons/
+Store the icon download URL in each badge document.
+
+=== BADGE TYPES TO CREATE ===
+Create the following badges:
+
+1. VERIFIED BADGE
+   name: "Verified"
+   type: "verified"
+   icon: use a unique blue-gold SVG shield (not emoji)
+
+2. KING BADGE
+   name: "King"
+   type: "cultural"
+   icon: use a gold crown SVG
+
+3. QUEEN BADGE
+   name: "Queen"
+   type: "cultural"
+   icon: use a purple-gold crown SVG
+
+4. CREATOR BADGE
+   name: "Creator"
+   type: "creator"
+   icon: use a camera/star SVG
+
+5. INFLUENCER BADGE
+   name: "Influencer"
+   type: "creator"
+   icon: use a sparkles/starburst SVG
+
+6. CULTURAL ICON BADGE
+   name: "Cultural Icon"
+   type: "cultural"
+   icon: use an African mask SVG
+
+7. SPIRITUAL FIGURE BADGE
+   name: "Spiritual Figure"
+   type: "cultural"
+   icon: use an Ifá/Opele-style symbolic SVG
+
+8. HERO BADGE
+   name: "Hero"
+   type: "achievement"
+   icon: use a medal SVG
+
+9. POPULAR CREATOR BADGE
+   name: "Popular Creator"
+   type: "achievement"
+   icon: use a fire/star SVG
+
+10. PIONEER BADGE
+    name: "Pioneer"
+    type: "achievement"
+    icon: use a diamond SVG
+
+=== USER PROFILE BADGES ===
+In Firestore create a field inside each user document:
+
+user.badges = array of badge IDs
+
+A user can have multiple badges.
+When displaying the username, fetch the badge icons from Storage using the stored iconUrl, and render the SVG icon next to the username. 
+Do NOT allow users to input emojis in username. Enforce this rule:
+username must match regex: ^[A-Za-z0-9._]+$
+
+This prevents users from adding emoji fakes.
+
+=== ADMIN PANEL FUNCTIONALITY ===
+Create an admin-only screen:
+- View all badges
+- Add new badge (SVG upload, name, description)
+- Assign badge to a user (search user → add badge ID to user.badges)
+- Remove badge from a user
+
+Admin authentication must use an environment variable:
+ADMIN_EMAIL = "myadminemail@example.com"
+
+Only this email can access badge management.
+
+=== FRONT-END DISPLAY ===
+When showing a post, comment, or profile:
+1. Fetch user.badges array
+2. For each badge ID, fetch iconUrl once and cache it
+3. Render the SVG icons in a small horizontal row next to the user’s name
+4. Badges should be clickable to show description
+
+=== SECURITY RULES ===
+Normal users cannot edit their badges.
+Only admin backend functions can modify badges.
+
+Add Firestore rules:
+
+match /users/{uid} {
+  allow update: if request.auth.token.email == ADMIN_EMAIL;
+  allow read: if true;
+}
+
+match /badges/{id} {
+  allow read: if true;
+  allow write: if request.auth.token.email == ADMIN_EMAIL;
+}

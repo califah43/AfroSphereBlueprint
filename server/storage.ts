@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings } from "@shared/schema";
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -51,6 +51,14 @@ export interface IStorage {
   saveUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings>;
   saveFCMToken(userId: string, token: string): Promise<void>;
   getFCMToken(userId: string): Promise<string | undefined>;
+
+  // Badges
+  getBadges(): Promise<Badge[]>;
+  createBadge(badge: InsertBadge): Promise<Badge>;
+  deleteBadge(badgeId: string): Promise<void>;
+  getUserBadges(userId: string): Promise<Badge[]>;
+  assignBadge(userId: string, badgeId: string): Promise<UserBadge>;
+  removeBadge(userId: string, badgeId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

@@ -187,3 +187,30 @@ export const userReports = pgTable("user_reports", {
 });
 
 export type UserReport = typeof userReports.$inferSelect;
+
+// ============ BADGES ============
+export const badges = pgTable("badges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // "verified", "cultural", "creator", "achievement"
+  iconSvg: text("icon_svg").notNull(), // SVG markup stored as text
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userBadges = pgTable("user_badges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  badgeId: varchar("badge_id").notNull(),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+});
+
+export type Badge = typeof badges.$inferSelect;
+export type UserBadge = typeof userBadges.$inferSelect;
+
+export const insertBadgeSchema = createInsertSchema(badges).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertBadge = z.infer<typeof insertBadgeSchema>;
