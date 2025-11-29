@@ -267,7 +267,6 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
     }
     
     try {
-      setIsLoading(true);
       const response = await fetch("/api/admin/badges/assign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -282,19 +281,14 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
         const selectedUser = usersList.find(u => u.id === selectedUserId);
         toast({ title: "Success", description: `Badge "${badgeName}" assigned to @${selectedUser?.username}` });
         await fetchBadges();
-        // Delay dialog close to let toast show
-        setTimeout(() => {
-          setShowAssignDialog(false);
-          setAssigningBadgeId(null);
-          setSelectedUserId("");
-        }, 1500);
+        setShowAssignDialog(false);
+        setAssigningBadgeId(null);
+        setSelectedUserId("");
       } else {
         toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
       }
     } catch (error) {
       toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
-    } finally {
-      setIsLoading(false);
     }
   };
 

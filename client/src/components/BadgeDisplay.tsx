@@ -26,18 +26,20 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
         const res = await fetch(`/api/badges/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
+          console.log("Fetched badges for user", userId, ":", data);
           // data is already the badges array
           const badgeList = (Array.isArray(data) ? data : (data.badges || [])).map((b: any) => ({
             userId,
             badgeId: b.id,
             name: b.name,
-            icon: b.iconSvg,
-            color: b.color,
+            icon: b.iconSvg || b.icon,
+            color: b.color || "#000",
           }));
+          console.log("Processed badge list:", badgeList);
           setBadges(badgeList);
         }
       } catch (error) {
-        console.log("Error fetching badges:", error);
+        console.error("Error fetching badges:", error);
       } finally {
         setIsLoading(false);
       }
