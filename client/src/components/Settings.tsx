@@ -297,7 +297,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "help") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Help Center</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -333,7 +333,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "report") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Report a Problem</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -353,7 +353,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "about") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">About AfroSphere</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -386,7 +386,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "guidelines") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Community Guidelines</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -422,7 +422,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "blocked") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Blocked Users</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -441,7 +441,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "reportContent") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Report Content</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -462,7 +462,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "textSize") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Text Size</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -484,7 +484,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "download") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Download Your Data</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -516,7 +516,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "sessions") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Active Sessions</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -550,7 +550,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "2fa") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Two-Factor Authentication</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -582,7 +582,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "language") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">{t("settings.language")}</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -605,7 +605,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "email") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Email and Phone</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -627,7 +627,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
     if (editMode === "password") {
       return (
-        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-background z-[100] overflow-y-auto">
           <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold">Change Password</h2>
             <Button variant="ghost" size="icon" onClick={() => setEditMode("none")}><X className="h-5 w-5" /></Button>
@@ -659,7 +659,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
   }
 
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-y-auto" data-testid="settings-container">
+    <div className="fixed inset-0 bg-background z-[100] overflow-y-auto" data-testid="settings-container">
       {/* Sticky Header */}
       <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10 backdrop-blur-sm bg-background/95">
         <h2 className="text-2xl font-bold flex items-center gap-2" data-testid="text-settings-title">
