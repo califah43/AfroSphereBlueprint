@@ -33,6 +33,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string>("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [likedPosts, setLikedPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isAccountPrivate, setIsAccountPrivate] = useState(false);
   const [userBadges, setUserBadges] = useState<any[]>([]);
@@ -119,14 +120,20 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
-          const [postsRes, badgesRes] = await Promise.all([
+          const [postsRes, badgesRes, likedRes] = await Promise.all([
             fetch(`/api/posts/user/${currentUserId}`),
-            fetch(`/api/badges/user/${currentUserId}`)
+            fetch(`/api/badges/user/${currentUserId}`),
+            fetch(`/api/posts/user/${currentUserId}/liked`)
           ]);
           
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
+          }
+          
+          if (likedRes.ok) {
+            const liked = await likedRes.json();
+            setLikedPosts(liked || []);
           }
           
           if (badgesRes.ok) {
@@ -170,10 +177,17 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
 
         if (userId) {
-          const postsRes = await fetch(`/api/posts/user/${userId}`);
+          const [postsRes, likedRes] = await Promise.all([
+            fetch(`/api/posts/user/${userId}`),
+            fetch(`/api/posts/user/${userId}/liked`)
+          ]);
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
+          }
+          if (likedRes.ok) {
+            const liked = await likedRes.json();
+            setLikedPosts(liked || []);
           }
         }
       } catch (error) {
@@ -565,11 +579,40 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               )}
               
               {activeTab === "liked" && (
-                <div className="py-16 text-center">
-                  <Heart className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-muted-foreground font-medium">No liked posts yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">Posts you like will appear here</p>
-                </div>
+                <>
+                  {likedPosts.length === 0 ? (
+                    <div className="py-16 text-center">
+                      <Heart className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                      <p className="text-muted-foreground font-medium">No liked posts yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">Posts you like will appear here</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-1 mt-4">
+                      {likedPosts.map((post) => {
+                        const imageUrl = post.images && post.images.length > 0 ? post.images[0] : (post.imageUrl || post.image);
+                        return (
+                          <button
+                            key={post.id}
+                            onClick={() => onPostClick?.(post.id)}
+                            className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate relative"
+                            data-testid={`liked-post-grid-${post.id}`}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt="Liked post"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            {post.images && post.images.length > 1 && (
+                              <div className="absolute top-1 right-1 bg-black/60 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-semibold">
+                                {post.images.length}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
               )}
               
               {activeTab === "saved" && (

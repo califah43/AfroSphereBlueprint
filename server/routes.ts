@@ -301,6 +301,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(posts);
   });
 
+  app.get("/api/posts/user/:userId/liked", async (req, res) => {
+    const posts = await storage.getUserLikedPosts(req.params.userId);
+    res.json(posts);
+  });
+
   app.get("/api/posts/:id", async (req, res) => {
     const post = await storage.getPost(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });

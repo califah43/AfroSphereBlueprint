@@ -104,6 +104,13 @@ export class DbStorage implements IStorage {
     return db.query.posts.findMany({ where: eq(posts.userId, userId) });
   }
 
+  async getUserLikedPosts(userId: string): Promise<Post[]> {
+    const userLikes = await db.query.likes.findMany({ where: eq(likes.userId, userId) });
+    const likedPostIds = userLikes.filter(l => l.postId).map(l => l.postId!);
+    if (likedPostIds.length === 0) return [];
+    return db.query.posts.findMany({ where: inArray(posts.id, likedPostIds) });
+  }
+
   async listPostsByCategory(category: string, limit = 20): Promise<Post[]> {
     return db.query.posts.findMany({ where: eq(posts.category, category), limit });
   }
