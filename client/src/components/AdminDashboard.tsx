@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, Settings, Users2, LogOut } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
 import UserManagement from "./UserManagement";
 import PostManagement from "./PostManagement";
 import BadgesManagement from "./BadgesManagement";
@@ -20,7 +19,6 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
-  const { t } = useLanguage();
   const [currentSection, setCurrentSection] = useState<string>("dashboard");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOwner] = useState(true);
@@ -55,23 +53,23 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
   };
 
   const metrics = [
-    { label: t("admin.totalUsers"), value: stats.totalUsers.toLocaleString(), icon: Users, color: "text-blue-500" },
-    { label: t("admin.totalPosts"), value: stats.totalPosts.toLocaleString(), icon: FileText, color: "text-orange-500" },
-    { label: t("admin.dailyActiveUsers"), value: stats.dailyActiveUsers.toLocaleString(), icon: TrendingUp, color: "text-green-500" },
-    { label: t("admin.reportsToday"), value: stats.reportsToday.toLocaleString(), icon: AlertCircle, color: "text-red-500" },
-    { label: t("admin.newSignupsToday"), value: stats.newSignupsToday.toLocaleString(), icon: UserPlus, color: "text-purple-500" },
+    { label: "Total Users", value: stats.totalUsers.toLocaleString(), icon: Users, color: "text-blue-500" },
+    { label: "Total Posts", value: stats.totalPosts.toLocaleString(), icon: FileText, color: "text-orange-500" },
+    { label: "Daily Active Users", value: stats.dailyActiveUsers.toLocaleString(), icon: TrendingUp, color: "text-green-500" },
+    { label: "Reports Today", value: stats.reportsToday.toLocaleString(), icon: AlertCircle, color: "text-red-500" },
+    { label: "New Sign-Ups Today", value: stats.newSignupsToday.toLocaleString(), icon: UserPlus, color: "text-purple-500" },
   ];
 
   const actions = [
-    { label: t("admin.refreshStats"), icon: RotateCw, onClick: handleRefresh, variant: "outline" as const },
-    { label: t("admin.userManagement"), icon: UserCog, onClick: () => setCurrentSection("users"), variant: "default" as const },
-    { label: t("admin.postManagement"), icon: FileCog, onClick: () => setCurrentSection("posts"), variant: "default" as const },
-    { label: t("admin.userSettingsManager"), icon: Settings, onClick: () => setCurrentSection("user-settings"), variant: "default" as const },
-    { label: t("admin.badgesManager"), icon: Badge, onClick: () => setCurrentSection("badges"), variant: "default" as const },
-    { label: t("admin.notificationsCenter"), icon: Bell, onClick: () => setCurrentSection("notifications"), variant: "default" as const },
-    { label: t("admin.systemLogs"), icon: FileJson, onClick: () => setCurrentSection("logs"), variant: "default" as const },
-    { label: t("admin.systemSettings"), icon: Settings, onClick: () => setCurrentSection("settings"), variant: "default" as const },
-    { label: t("admin.teamManagement"), icon: Users2, onClick: () => setCurrentSection("team"), variant: "default" as const },
+    { label: "Refresh Stats", icon: RotateCw, onClick: handleRefresh, variant: "outline" as const },
+    { label: "User Management", icon: UserCog, onClick: () => setCurrentSection("users"), variant: "default" as const },
+    { label: "Post Management", icon: FileCog, onClick: () => setCurrentSection("posts"), variant: "default" as const },
+    { label: "User Settings Manager", icon: Settings, onClick: () => setCurrentSection("user-settings"), variant: "default" as const },
+    { label: "Badges Manager", icon: Badge, onClick: () => setCurrentSection("badges"), variant: "default" as const },
+    { label: "Notifications Center", icon: Bell, onClick: () => setCurrentSection("notifications"), variant: "default" as const },
+    { label: "System Logs", icon: FileJson, onClick: () => setCurrentSection("logs"), variant: "default" as const },
+    { label: "System Settings", icon: Settings, onClick: () => setCurrentSection("settings"), variant: "default" as const },
+    { label: "Team Management", icon: Users2, onClick: () => setCurrentSection("team"), variant: "default" as const },
   ];
 
   if (currentSection === "users") {
@@ -121,10 +119,10 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-primary" data-testid="text-admin-title">
-              {t("admin.dashboard")}
+              Admin Dashboard
             </h1>
             <p className="text-muted-foreground mt-2" data-testid="text-admin-role">
-              {t("admin.superAdmin")} • {t("admin.systemAdmin")}
+              Super Admin • System Administrator
             </p>
           </div>
           <Button
