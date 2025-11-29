@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Camera, MapPin, Link as LinkIcon, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/LanguageContext";
 import BannerCropper from "./BannerCropper";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 
@@ -17,6 +18,7 @@ interface EditProfileProps {
 export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   // Load real user data from localStorage
   const { toast } = useToast();
+  const { t } = useLanguage();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,11 +103,11 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         const compressed = await compressImage(base64, 300000);
         console.log("Avatar compressed from", base64.length, "to", compressed.length);
         setFormData({ ...formData, avatar: compressed });
-        toast({ title: "Profile photo updated", description: "Your new profile photo is ready to save" });
+        toast({ title: t("profile.photoUpdated"), description: t("profile.photoReadyToSave") });
       };
       reader.onerror = () => {
         console.error("Failed to read avatar file");
-        toast({ title: "Error", description: "Failed to read profile photo", variant: "destructive" });
+        toast({ title: t("common.error"), description: t("profile.failedReadProfilePhoto"), variant: "destructive" });
       };
       reader.readAsDataURL(file);
     }
@@ -125,7 +127,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       };
       reader.onerror = () => {
         console.error("Failed to read banner file");
-        toast({ title: "Error", description: "Failed to read banner image", variant: "destructive" });
+        toast({ title: t("common.error"), description: t("profile.failedReadBannerImage"), variant: "destructive" });
       };
       reader.readAsDataURL(file);
     }
