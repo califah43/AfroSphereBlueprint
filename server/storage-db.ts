@@ -1,7 +1,7 @@
 import { db } from './db';
 import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows } from '@shared/schema';
 import { eq, and, inArray, like, desc } from 'drizzle-orm';
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge } from '@shared/schema';
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
 export interface IStorage {
@@ -417,5 +417,72 @@ export class DbStorage implements IStorage {
 
   async declineFollowRequest(requesterUserId: string, targetUserId: string): Promise<void> {
     await db.delete(followRequests).where(and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId)));
+  }
+
+  // ============ SEARCH ============
+  async searchUsers(query: string, limit = 20): Promise<User[]> {
+    const lowerQuery = query.toLowerCase();
+    return db.query.users.findMany({
+      where: (users, { or, ilike }) => or(
+        ilike(users.username, `%${lowerQuery}%`),
+        ilike(users.displayName, `%${lowerQuery}%`)
+      ),
+      limit
+    });
+  }
+
+  async searchHashtags(query: string, limit = 20): Promise<Hashtag[]> {
+    const lowerQuery = query.toLowerCase();
+    return db.query.hashtags.findMany({
+      where: (hashtags, { ilike }) => ilike(hashtags.tag, `%${lowerQuery}%`),
+      orderBy: (hashtags, { desc }) => [desc(hashtags.usageCount)],
+      limit
+    });
+  }
+
+  async searchPosts(query: string, limit = 20): Promise<Post[]> {
+    const lowerQuery = query.toLowerCase();
+    return db.query.posts.findMany({
+      where: (posts, { ilike }) => ilike(posts.caption, `%${lowerQuery}%`),
+      orderBy: (posts, { desc }) => [desc(posts.likes)],
+      limit
+    });
+  }
+
+  // ============ HASHTAG FOLLOWS ============
+  async followHashtag(userId: string, hashtagId: string): Promise<any> {
+    const [follow] = await db.insert(hashtagFollows).values({ userId, hashtagId }).returning();
+    return follow;
+  }
+
+  async unfollowHashtag(userId: string, hashtagId: string): Promise<void> {
+    await db.delete(hashtagFollows).where(
+      and(eq(hashtagFollows.userId, userId), eq(hashtagFollows.hashtagId, hashtagId))
+    );
+  }
+
+  async isFollowingHashtag(userId: string, hashtagId: string): Promise<boolean> {
+    const follow = await db.query.hashtagFollows.findFirst({
+      where: and(eq(hashtagFollows.userId, userId), eq(hashtagFollows.hashtagId, hashtagId))
+    });
+    return !!follow;
+  }
+
+  async updateHashtagUsage(tag: string): Promise<void> {
+    const existing = await db.query.hashtags.findFirst({
+      where: eq(hashtags.tag, tag.toLowerCase())
+    });
+
+    if (existing) {
+      await db.update(hashtags)
+        .set({ usageCount: (existing.usageCount || 0) + 1, lastUsed: new Date() })
+        .where(eq(hashtags.id, existing.id));
+    } else {
+      await db.insert(hashtags).values({
+        tag: tag.toLowerCase(),
+        usageCount: 1,
+        lastUsed: new Date()
+      });
+    }
   }
 }
