@@ -321,19 +321,31 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         const data = await res.json();
         setIsFollowing(data.following);
         
-        // Refetch target user data to get updated counts
-        try {
-          const refreshRes = await fetch(`/api/users/username/${targetUsername}`);
-          if (refreshRes.ok) {
-            const refreshedUser = await refreshRes.json();
-            setUserProfile((prev: any) => ({
-              ...prev,
-              followers: refreshedUser.followerCount?.toString() || "0",
-              following: refreshedUser.followingCount?.toString() || "0",
-            }));
+        // Optimistically update counts immediately
+        if (data.following) {
+          // When following: increase target's follower count and our following count
+          setUserProfile((prev: any) => ({
+            ...prev,
+            followers: (parseInt(prev.followers || "0") + 1).toString(),
+          }));
+          // Update current user's following count in localStorage
+          const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+          if (currentUserData && currentUserData.id) {
+            currentUserData.followingCount = (currentUserData.followingCount || 0) + 1;
+            localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
           }
-        } catch (e) {
-          console.log("Error refreshing user data:", e);
+        } else {
+          // When unfollowing: decrease target's follower count and our following count
+          setUserProfile((prev: any) => ({
+            ...prev,
+            followers: Math.max(0, parseInt(prev.followers || "1") - 1).toString(),
+          }));
+          // Update current user's following count in localStorage
+          const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+          if (currentUserData && currentUserData.id) {
+            currentUserData.followingCount = Math.max(0, (currentUserData.followingCount || 1) - 1);
+            localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
+          }
         }
         
         toast({

@@ -101,11 +101,15 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
 
       const createdPost = await res.json();
 
-      // Invalidate all caches to trigger refetch
-      await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      // Optimistically add the post to cache instead of full refetch
+      const previousPosts = queryClient.getQueryData(['/api/posts']) || [];
+      queryClient.setQueryData(['/api/posts'], [createdPost, ...previousPosts]);
       
-      // Also dispatch event for any other listeners
-      window.dispatchEvent(new Event('refreshPosts'));
+      // Also update user's post count
+      if (userData && userData.id) {
+        const previousUserPosts = queryClient.getQueryData(['/api/posts/user', userData.id]) || [];
+        queryClient.setQueryData(['/api/posts/user', userData.id], [createdPost, ...previousUserPosts]);
+      }
       
       onPost?.(createdPost);
       onNavigateHome?.(); // Navigate home immediately
