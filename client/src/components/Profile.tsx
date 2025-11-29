@@ -91,6 +91,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         // Fetch user's posts and badges in parallel
         if (currentUserId) {
           setPostsLoading(true);
+          
+          // Load cached badges immediately from localStorage
+          const cachedBadgesKey = `badges_${currentUserId}`;
+          const cachedBadges = localStorage.getItem(cachedBadgesKey);
+          if (cachedBadges) {
+            try {
+              setUserBadges(JSON.parse(cachedBadges));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
           const [postsRes, badgesRes] = await Promise.all([
             fetch(`/api/posts/user/${currentUserId}`),
             fetch(`/api/badges/user/${currentUserId}`)
@@ -103,7 +115,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           
           if (badgesRes.ok) {
             const badges = await badgesRes.json();
-            setUserBadges(Array.isArray(badges) ? badges : []);
+            const badgesArray = Array.isArray(badges) ? badges : [];
+            setUserBadges(badgesArray);
+            // Cache badges for instant load next time
+            localStorage.setItem(cachedBadgesKey, JSON.stringify(badgesArray));
           }
           
           setPostsLoading(false);
