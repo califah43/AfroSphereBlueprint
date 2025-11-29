@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { DbStorage } from "./storage-db";
 import { db } from "./db";
-import { posts } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { posts, likes } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 import multer from "multer";
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge } from "@shared/schema";
@@ -606,21 +606,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(following);
   });
 
-  // ============ BADGE ROUTES ============
-  app.get("/api/badges/:userId", async (req, res) => {
-    const badges = await storage.getBadges(req.params.userId);
-    res.json(badges || { userId: req.params.userId, badges: [], tier: "bronze" });
-  });
-
-  app.post("/api/badges", async (req, res) => {
-    try {
-      const { userId, badge } = req.body;
-      const result = await storage.addBadge(userId, badge);
-      res.json(result);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid request" });
-    }
-  });
+  // ============ BADGE ROUTES (moved to /api/badges and /api/admin/badges) ============
+  // Badge routes are now at /api/badges (public) and /api/admin/badges/* (admin)
+  // See below for the complete badge management system
 
   // ============ NOTIFICATION ROUTES ============
   app.get("/api/notifications/:userId", async (req, res) => {
