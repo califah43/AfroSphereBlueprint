@@ -205,6 +205,12 @@ export class MemStorage implements IStorage {
 
   // ============ LIKES ============
   async likePost(userId: string, postId: string): Promise<Like> {
+    // Check if user already liked this post - prevent duplicates
+    const existingLike = Array.from(this.likes.values()).find(l => l.userId === userId && l.postId === postId);
+    if (existingLike) {
+      return existingLike; // Return existing like, don't create duplicate
+    }
+    
     const id = randomUUID();
     const like: Like = { id, userId, postId, commentId: null, createdAt: new Date() };
     this.likes.set(id, like);
@@ -233,6 +239,12 @@ export class MemStorage implements IStorage {
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
+    // Check if user already liked this comment - prevent duplicates
+    const existingLike = Array.from(this.likes.values()).find(l => l.userId === userId && l.commentId === commentId);
+    if (existingLike) {
+      return existingLike; // Return existing like, don't create duplicate
+    }
+    
     const id = randomUUID();
     const like: Like = { id, userId, postId: null, commentId, createdAt: new Date() };
     this.likes.set(id, like);
