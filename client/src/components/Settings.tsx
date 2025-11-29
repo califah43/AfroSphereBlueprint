@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/context/LanguageContext";
 import CommunityGuidelines from "./CommunityGuidelines";
 
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -61,7 +61,7 @@ interface SettingsSections {
 
 export default function Settings({ onClose, onLogout, onEditProfile, userId, onTextSizeChange }: SettingsProps) {
   const { toast } = useToast();
-  const { t, language, setLanguage } = useTranslation();
+  const { t, language, setLanguage } = useLanguage();
   const [settings, setSettings] = useState<SettingsSections>({
     account: {
       privateAccount: false,
@@ -664,7 +664,7 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
       <div className="sticky top-0 bg-background border-b border-border px-4 py-4 flex items-center justify-between z-10 backdrop-blur-sm bg-background/95">
         <h2 className="text-2xl font-bold flex items-center gap-2" data-testid="text-settings-title">
           <Shield className="h-6 w-6 text-primary" />
-          Settings
+          {t("settings.title")}
         </h2>
         <Button 
           variant="ghost" 
@@ -679,43 +679,43 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
       <div className="max-w-md mx-auto px-4 py-6 pb-32 space-y-6">
         {isLoading ? (
-          <div className="py-12 text-center text-muted-foreground">Loading settings...</div>
+          <div className="py-12 text-center text-muted-foreground">{t("settings.loading")}</div>
         ) : (
         <>
         {/* ACCOUNT SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Account</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.account")}</h3>
           <div className="space-y-2">
             <SettingButton
               icon={Mail}
-              label="Email & Phone"
-              description="Manage your contact information"
+              label={t("settings.emailPhone")}
+              description={t("settings.emailPhoneDesc")}
               onClick={() => setEditMode("email")}
             />
             <SettingButton
               icon={Lock}
-              label="Password"
-              description="Change your password"
+              label={t("settings.password")}
+              description={t("settings.passwordDesc")}
               onClick={() => setEditMode("password")}
             />
             <SettingToggle
               icon={Smartphone}
-              label="Private Account"
-              description="Only approved followers can see your posts"
+              label={t("settings.privateAccount")}
+              description={t("settings.privateAccountDesc")}
               section="account"
               settingKey="privateAccount"
             />
             <SettingToggle
               icon={Users}
-              label="Allow Comments"
-              description="Let others comment on your posts"
+              label={t("settings.allowComments")}
+              description={t("settings.allowCommentsDesc")}
               section="account"
               settingKey="allowComments"
             />
             <SettingToggle
               icon={Bell}
-              label="Allow Mentions"
-              description="Allow people to mention you in posts"
+              label={t("settings.allowMentions")}
+              description={t("settings.allowMentionsDesc")}
               section="account"
               settingKey="allowMentions"
             />
@@ -724,47 +724,47 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
         {/* NOTIFICATIONS SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Notifications</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.notificationsSection")}</h3>
           <div className="space-y-2">
             <SettingToggle
               icon={Heart}
-              label="Likes"
-              description="Notify me when someone likes my post"
+              label={t("settings.likes")}
+              description={t("settings.likesDesc")}
               section="notifications"
               settingKey="likes"
             />
             <SettingToggle
               icon={Users}
-              label="Comments"
-              description="Notify me when someone comments"
+              label={t("settings.comments")}
+              description={t("settings.commentsDesc")}
               section="notifications"
               settingKey="comments"
             />
             <SettingToggle
               icon={Users}
-              label="New Followers"
-              description="Notify me when someone follows me"
+              label={t("settings.newFollowers")}
+              description={t("settings.newFollowersDesc")}
               section="notifications"
               settingKey="follows"
             />
             <SettingToggle
               icon={Share2}
-              label="Trending Posts"
-              description="Notify me about trending content"
+              label={t("settings.trendingPosts")}
+              description={t("settings.trendingPostsDesc")}
               section="notifications"
               settingKey="trending"
             />
             <SettingToggle
               icon={Bell}
-              label="Push Notifications"
-              description="Receive notifications on your device"
+              label={t("settings.pushNotifications")}
+              description={t("settings.pushNotificationsDesc")}
               section="notifications"
               settingKey="pushNotifications"
             />
             <SettingToggle
               icon={Mail}
-              label="Email Notifications"
-              description="Receive email updates"
+              label={t("settings.emailNotifications")}
+              description={t("settings.emailNotificationsDesc")}
               section="notifications"
               settingKey="emailNotifications"
             />
@@ -773,12 +773,12 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
         {/* PRIVACY SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Privacy</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.privacy")}</h3>
           <div className="space-y-2">
             <SettingToggle
               icon={Eye}
-              label="Activity Status"
-              description="Show when you are active"
+              label={t("settings.activityStatus")}
+              description={t("settings.activityStatusDesc")}
               section="privacy"
               settingKey="activityStatus"
             />
@@ -787,14 +787,14 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
         {/* DISPLAY SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Display</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.display")}</h3>
           <div className="space-y-2">
             <div className="flex items-start justify-between p-4 hover-elevate rounded-lg border border-border/50 bg-card/50 transition-all" data-testid="setting-dark-mode">
               <div className="flex items-start gap-3">
                 <Moon className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                 <div>
-                  <Label htmlFor="display-darkMode" className="text-sm font-medium cursor-pointer">Dark Mode</Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">Use dark theme for the app</p>
+                  <Label htmlFor="display-darkMode" className="text-sm font-medium cursor-pointer">{t("settings.darkMode")}</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("settings.darkModeDesc")}</p>
                 </div>
               </div>
               <Switch
@@ -814,14 +814,14 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
             </div>
             <SettingButton
               icon={Volume2}
-              label="Text Size"
-              description="Adjust text size for readability"
+              label={t("settings.textSize")}
+              description={t("settings.textSizeDesc")}
               onClick={() => setEditMode("textSize")}
             />
             <SettingButton
               icon={Globe}
-              label="Language"
-              description="Change your preferred language"
+              label={t("settings.language")}
+              description={t("settings.languageDesc")}
               onClick={() => setEditMode("language")}
             />
           </div>
@@ -829,26 +829,26 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
         {/* CONTENT SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Content</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.content")}</h3>
           <div className="space-y-2">
             <SettingToggle
               icon={AlertCircle}
-              label="Hide Explicit Content"
-              description="Filter sensitive content from your feed"
+              label={t("settings.hideExplicit")}
+              description={t("settings.hideExplicitDesc")}
               section="content"
               settingKey="hideExplicit"
             />
             <SettingToggle
               icon={Volume2}
-              label="Muted Words"
-              description="Hide content with specific words"
+              label={t("settings.mutedWords")}
+              description={t("settings.mutedWordsDesc")}
               section="content"
               settingKey="mutedWords"
             />
             <SettingToggle
               icon={Shield}
-              label="Restricted Mode"
-              description="Limited content recommendations"
+              label={t("settings.restrictedMode")}
+              description={t("settings.restrictedModeDesc")}
               section="content"
               settingKey="restrictedMode"
             />
@@ -857,36 +857,36 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
         {/* SUPPORT SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Support</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.support")}</h3>
           <div className="space-y-2">
             <SettingButton
               icon={HelpCircle}
-              label="Help Center"
-              description="Get help and learn how to use AfroSphere"
+              label={t("settings.helpCenter")}
+              description={t("settings.helpCenterDesc")}
               onClick={() => setEditMode("help")}
             />
             <SettingButton
               icon={Info}
-              label="About AfroSphere"
-              description="Learn more about our mission"
+              label={t("settings.aboutAfroSphere")}
+              description={t("settings.aboutAfroSphereDesc")}
               onClick={() => setEditMode("about")}
             />
             <SettingButton
               icon={Shield}
-              label="Community Guidelines"
-              description="Our rules for a safe community"
+              label={t("settings.communityGuidelines")}
+              description={t("settings.communityGuidelinesDesc")}
               onClick={() => setEditMode("guidelines")}
             />
             <SettingButton
               icon={AlertCircle}
-              label="Report a Problem"
-              description="Tell us if something is not working"
+              label={t("settings.reportProblem")}
+              description={t("settings.reportProblemDesc")}
               onClick={() => { setEditData({ ...editData, reportText: "" }); setEditMode("report"); }}
             />
             <SettingButton
               icon={Lock}
-              label="Blocked Users"
-              description="Manage your blocked list"
+              label={t("settings.blockedUsers")}
+              description={t("settings.blockedUsersDesc")}
               onClick={() => setEditMode("blocked")}
             />
           </div>
@@ -894,24 +894,24 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
 
         {/* SECURITY SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Security</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.security")}</h3>
           <div className="space-y-2">
             <SettingButton
               icon={Smartphone}
-              label="Active Sessions"
-              description="View your logged-in devices"
+              label={t("settings.activeSessions")}
+              description={t("settings.activeSessionsDesc")}
               onClick={() => setEditMode("sessions")}
             />
             <SettingButton
               icon={Lock}
-              label="Two-Factor Authentication"
-              description="Add extra security to your account"
+              label={t("settings.twoFactorAuth")}
+              description={t("settings.twoFactorAuthDesc")}
               onClick={() => setEditMode("2fa")}
             />
             <SettingButton
               icon={Trash2}
-              label="Download Your Data"
-              description="Get a copy of your data"
+              label={t("settings.downloadData")}
+              description={t("settings.downloadDataDesc")}
               onClick={() => setEditMode("download")}
             />
           </div>
