@@ -150,7 +150,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             id: p.id,
             author: { 
               id: p.userId,
-              username: user?.displayName || user?.username || "creator", 
+              username: user?.displayName || "creator",
               uniqueUsername: user?.username || "creator",
               avatar: user?.avatar || "" 
             },

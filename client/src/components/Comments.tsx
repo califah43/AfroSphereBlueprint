@@ -116,7 +116,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
       }
     };
     fetchComments();
-  }, [postId, currentUser?.username]);
+  }, [postId]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();

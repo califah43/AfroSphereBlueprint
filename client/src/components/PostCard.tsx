@@ -177,7 +177,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
       {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style */}
       <div className="flex items-start justify-between gap-3 px-4 py-3">
         <button 
-          onClick={() => onAuthorClick?.(post.author.username)}
+          onClick={() => onAuthorClick?.(post.author.uniqueUsername || post.author.username)}
           className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
