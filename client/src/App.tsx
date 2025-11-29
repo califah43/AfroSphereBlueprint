@@ -21,6 +21,8 @@ import Settings from "./components/Settings";
 import Comments from "./components/Comments";
 import SearchResults from "./components/SearchResults";
 import HashtagFeed from "./components/HashtagFeed";
+import CategoryFeed from "./components/CategoryFeed";
+import GenreFeed from "./components/GenreFeed";
 import PostDetail from "./components/PostDetail";
 import PostDetailModal from "./components/PostDetailModal";
 import FollowersList from "./components/FollowersList";
@@ -33,7 +35,7 @@ import fashionImage from "@assets/generated_images/African_fashion_post_example_
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
@@ -41,6 +43,8 @@ export default function App() {
   const [modalView, setModalView] = useState<ModalView>("none");
   const [commentsPostData, setCommentsPostData] = useState<any>(null);
   const [selectedHashtag, setSelectedHashtag] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedGenre, setSelectedGenre] = useState<string>("");
   const [selectedPostId, setSelectedPostId] = useState<string>("");
   const [selectedUsername, setSelectedUsername] = useState<string>("");
   const [logoClickCount, setLogoClickCount] = useState(0);
@@ -398,14 +402,12 @@ export default function App() {
                 onHashtagClick={handleOpenHashtagFeed}
                 onUserProfileClick={handleOpenUserProfile}
                 onCategoryClick={(category) => {
-                  // Navigate to category filter view
-                  console.log("Category clicked:", category);
-                  setModalView("none");
+                  setSelectedCategory(category);
+                  setModalView("category");
                 }}
                 onGenreClick={(genreId) => {
-                  // Navigate to genre filter view
-                  console.log("Genre clicked:", genreId);
-                  setModalView("none");
+                  setSelectedGenre(genreId);
+                  setModalView("genre");
                 }}
               />
             </div>
@@ -491,6 +493,22 @@ export default function App() {
             <HashtagFeed
               hashtag={selectedHashtag}
               onClose={() => setModalView("none")}
+            />
+          )}
+
+          {modalView === "category" && selectedCategory && (
+            <CategoryFeed
+              category={selectedCategory}
+              onClose={() => setModalView("none")}
+              onPostClick={handleOpenPostDetail}
+            />
+          )}
+
+          {modalView === "genre" && selectedGenre && (
+            <GenreFeed
+              genreId={selectedGenre}
+              onClose={() => setModalView("none")}
+              onPostClick={handleOpenPostDetail}
             />
           )}
 
