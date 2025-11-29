@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock, Loader2 } from "lucide-react";
+import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock, Loader2, Flag, Ban, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import CreatorBadge from "./CreatorBadge";
@@ -562,9 +562,15 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
 
           {/* Bio - Compact elegance */}
-          <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
+          <p className="text-xs text-foreground leading-tight mb-2 whitespace-pre-wrap" data-testid="text-profile-bio">
             {userProfile?.bio || "Creative on AfroSphere"}
           </p>
+
+          {/* Join Date */}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 mb-2">
+            <Calendar size={12} />
+            <span>Joined {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+          </div>
 
           {/* Creator Badge */}
           <div className="flex items-center">
@@ -598,10 +604,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Stats - Elegant Compact Cards */}
         {userProfile && (
-        <div className="grid grid-cols-2 gap-2 mb-4 p-2 bg-card rounded-md border border-border/50">
+        <div className="grid grid-cols-3 gap-2 mb-4 p-2 bg-card rounded-md border border-border/50">
+          <button
+            onClick={() => onPostClick?.('')}
+            className="text-center py-1.5 hover-elevate transition-all rounded"
+            data-testid="button-view-posts"
+          >
+            <p className="text-lg font-black text-foreground" data-testid="text-posts-count">{userProfile.posts}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Posts</p>
+          </button>
           <button
             onClick={onFollowersClick}
-            className="text-center py-1.5 hover-elevate transition-all rounded"
+            className="text-center py-1.5 hover-elevate transition-all rounded border-l border-border/50"
             data-testid="button-view-followers"
           >
             <p className="text-lg font-black text-foreground" data-testid="text-followers-count">{userProfile.followers}</p>
@@ -622,24 +636,64 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         {userProfile && (
         <div className="flex gap-2 mb-6">
           {isOwnProfile ? (
-            <Button
-              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-9 shadow-sm"
-              onClick={onEditProfile}
-              data-testid="button-edit-profile"
-            >
-              Edit Profile
-            </Button>
+            <>
+              <Button
+                className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-9 shadow-sm"
+                onClick={onEditProfile}
+                data-testid="button-edit-profile"
+              >
+                Edit Profile
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 hover-elevate"
+                onClick={onSettings}
+                data-testid="button-profile-settings"
+              >
+                <Settings size={18} />
+              </Button>
+            </>
           ) : (
-            <Button 
-              className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm ${isFollowRequestPending ? 'bg-card border border-border text-foreground hover:bg-card/80' : isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
-              onClick={toggleFollow}
-              disabled={isLoading || isFollowRequestPending}
-              data-testid="button-follow"
-            >
-              {isLoading ? "..." : (isFollowRequestPending ? t("profile.followRequestPending") : isFollowing ? t("profile.unfollow") : (isAccountPrivate ? t("profile.sendFollowRequest") : t("profile.follow")))}
-            </Button>
+            <>
+              <Button 
+                className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm ${isFollowRequestPending ? 'bg-card border border-border text-foreground hover:bg-card/80' : isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
+                onClick={toggleFollow}
+                disabled={isLoading || isFollowRequestPending}
+                data-testid="button-follow"
+              >
+                {isLoading ? "..." : (isFollowRequestPending ? t("profile.followRequestPending") : isFollowing ? t("profile.unfollow") : (isAccountPrivate ? t("profile.sendFollowRequest") : t("profile.follow")))}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 hover-elevate"
+                data-testid="button-report-user"
+                title="Report user"
+              >
+                <Flag size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 hover-elevate"
+                data-testid="button-block-user"
+                title="Block user"
+              >
+                <Ban size={18} />
+              </Button>
+            </>
           )}
         </div>
+        )}
+
+        {/* Private Account Message */}
+        {!isOwnProfile && isAccountPrivate && !isFollowing && !isFollowRequestPending && (
+          <div className="mb-6 p-4 bg-muted/30 rounded-lg border border-border/50 text-center">
+            <Lock className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-foreground mb-1">This account is private</p>
+            <p className="text-xs text-muted-foreground">Follow to see their posts</p>
+          </div>
         )}
 
         {/* Posts Tabs & Grid - Refined & Modern */}

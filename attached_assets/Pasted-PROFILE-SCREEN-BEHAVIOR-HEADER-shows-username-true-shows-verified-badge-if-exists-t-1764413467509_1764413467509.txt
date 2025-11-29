@@ -1,0 +1,86 @@
+PROFILE_SCREEN_BEHAVIOR {
+
+  HEADER {
+    shows_username: true
+    shows_verified_badge_if_exists: true
+    shows_profile_photo: true
+    profile_photo_click_opens_fullscreen_viewer: true
+    hides_on_scroll_down: true
+    reappears_on_scroll_up: true
+  }
+
+  USER_INFO_SECTION {
+    show_display_name: true
+    show_username: true
+    show_bio: true
+    bio_text_supports_multiline: true
+    show_join_date: true
+    show_badges: true // system-assigned badges only
+  }
+
+  STATS_SECTION {
+    show_posts_count: true
+    show_followers_count: true
+    show_following_count: true
+
+    clickable_items {
+      posts: opens_user_posts_grid
+      followers: opens_followers_list
+      following: opens_following_list
+    }
+  }
+
+  ACTION_BUTTONS {
+    if_viewing_own_profile {
+      show_edit_profile_button: true
+      show_settings_button: true
+      show_private_account_toggle: true
+    }
+    if_viewing_other_profile {
+      show_follow_unfollow_button: true
+      show_message_button_if_dm_enabled: false
+      show_report_button: true
+      show_block_button: true
+    }
+  }
+
+  TABS {
+    POSTS_TAB {
+      view_type: grid
+      supports_infinite_scroll: true
+      clicking_post_opens_post_view_screen: true
+    }
+    REELS_TAB {
+      view_type: vertical_fullscreen_scroll
+      loads_only_user_videos: true
+    }
+    TAGGED_TAB {
+      shows_posts_user_is_tagged_in: true
+    }
+  }
+
+  BEHAVIOR {
+    scroll_behavior {
+      header_hides_on_scroll_down: true
+      header_shows_on_scroll_up: true
+      pull_to_refresh_enabled: true
+    }
+
+    private_account_behavior {
+      if_account_is_private {
+        hide_posts_from_non_followers: true
+        hide_followers_list_from_non_followers: true
+        hide_following_list_from_non_followers: true
+        show_private_lock_message_to_non_followers: true
+      }
+    }
+
+    realtime_updates {
+      update_follow_button_in_realtime: true
+      update_follower_count_in_realtime: true
+      update_profile_photo_in_realtime: true
+      update_bio_in_realtime: true
+    }
+  }
+
+}
