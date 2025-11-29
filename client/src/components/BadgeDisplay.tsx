@@ -14,6 +14,9 @@ interface BadgeDisplayProps {
   preloadedBadges?: any[];
 }
 
+// Module-level cache for badge requests to prevent duplicate fetches
+const badgeCache = new Map<string, Promise<BadgeIcon[]>>();
+
 function BadgeIcon({ icon, name }: { icon: string; name: string }) {
   const dataUri = `data:image/svg+xml;base64,${btoa(icon)}`;
   
@@ -45,24 +48,40 @@ export default function BadgeDisplay({ userId, className = "", preloadedBadges }
       return;
     }
     
-    // Otherwise fetch badges
+    // Otherwise fetch badges with caching
     const fetchBadges = async () => {
       if (!userId) return;
       
       try {
         setIsLoading(true);
-        const res = await fetch(`/api/badges/user/${userId}`);
-        if (res.ok) {
-          const data = await res.json();
-          const badgeList = (Array.isArray(data) ? data : (data.badges || [])).map((b: any) => ({
-            userId,
-            badgeId: b.id,
-            name: b.name,
-            icon: b.iconSvg || b.icon,
-            color: b.color || "#000",
-          }));
+        
+        // Check cache first - if request is in progress, wait for it
+        if (badgeCache.has(userId)) {
+          const cachedPromise = badgeCache.get(userId)!;
+          const badgeList = await cachedPromise;
           setBadges(badgeList);
+          return;
         }
+        
+        // Create fetch promise and cache it
+        const fetchPromise = (async () => {
+          const res = await fetch(`/api/badges/user/${userId}`);
+          if (res.ok) {
+            const data = await res.json();
+            return (Array.isArray(data) ? data : (data.badges || [])).map((b: any) => ({
+              userId,
+              badgeId: b.id,
+              name: b.name,
+              icon: b.iconSvg || b.icon,
+              color: b.color || "#000",
+            }));
+          }
+          return [];
+        })();
+        
+        badgeCache.set(userId, fetchPromise);
+        const badgeList = await fetchPromise;
+        setBadges(badgeList);
       } catch (error) {
         console.error("Error fetching badges:", error);
       } finally {
