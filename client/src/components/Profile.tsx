@@ -432,54 +432,33 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Premium Profile Header */}
+      {/* Elegant Banner - Extends to Top */}
       <div 
-        className="relative overflow-hidden cursor-pointer group"
+        className="relative h-32 overflow-hidden -mt-0 cursor-pointer group"
         onClick={() => isOwnProfile && setShowHeaderCropper(true)}
         data-testid="div-profile-banner"
-        style={{ height: '200px' }}
       >
-        {/* Banner Image with Enhanced Styling */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-orange-400/70 to-pink-500/70">
-            {userProfile?.banner ? (
-              <img
-                src={userProfile.banner}
-                alt="Profile banner"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <img
-                src={bannerImage}
-                alt="Profile banner"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            )}
-          </div>
-          
-          {/* Sophisticated Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
+          {userProfile?.banner ? (
+            <img
+              src={userProfile.banner}
+              alt="Profile banner"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+            />
+          ) : (
+            <img
+              src={bannerImage}
+              alt="Profile banner"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+            />
+          )}
         </div>
-
-        {/* Edit Overlay for Own Profile */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         {isOwnProfile && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-200 backdrop-blur-sm" data-testid="div-banner-overlay">
-            <div className="flex flex-col items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <span className="text-white text-sm font-bold tracking-wide" data-testid="text-edit-banner">TAP TO EDIT</span>
-            </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors opacity-0 group-hover:opacity-100" data-testid="div-banner-overlay">
+            <span className="text-white text-sm font-semibold" data-testid="text-edit-banner">Edit Header</span>
           </div>
         )}
-
-        {/* Decorative Elements */}
-        <div className="absolute top-4 right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
-        <div className="absolute bottom-0 left-1/4 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
