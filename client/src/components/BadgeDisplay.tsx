@@ -14,23 +14,15 @@ interface BadgeDisplayProps {
 }
 
 function BadgeIcon({ icon, name }: { icon: string; name: string }) {
-  // Extract SVG content and viewBox
-  const viewBoxMatch = icon.match(/viewBox="([^"]*)"/);
-  const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 24 24";
+  const dataUri = `data:image/svg+xml;base64,${btoa(icon)}`;
   
-  // Extract everything between <svg> and </svg> without 's' flag
-  const startIdx = icon.indexOf('>');
-  const endIdx = icon.lastIndexOf('<');
-  const content = startIdx !== -1 && endIdx > startIdx ? icon.substring(startIdx + 1, endIdx) : "";
-
   return (
-    <div className="w-4 h-4" title={name}>
-      <svg
-        viewBox={viewBox}
-        className="w-full h-full"
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-    </div>
+    <img 
+      src={dataUri}
+      alt={name}
+      title={name}
+      className="w-4 h-4 inline-block"
+    />
   );
 }
 
