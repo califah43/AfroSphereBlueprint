@@ -1,6 +1,6 @@
 import { X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CommunityGuidelinesProps {
   onClose: () => void;
@@ -8,7 +8,7 @@ interface CommunityGuidelinesProps {
 }
 
 export default function CommunityGuidelines({ onClose, onAgree }: CommunityGuidelinesProps) {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
 
   const guidelines = [
     { rule: "guidelines.rule1", desc: "guidelines.rule1Desc" },

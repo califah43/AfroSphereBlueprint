@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { X, Upload, ImageIcon, Sparkles, Sun, Contrast } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/context/LanguageContext";
 import { GENRE_LIST } from "@shared/genres";
 import { queryClient } from "@/lib/queryClient";
 
@@ -28,7 +28,7 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
   const [showFilters, setShowFilters] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t } = useLanguage();
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

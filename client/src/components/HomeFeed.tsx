@@ -5,7 +5,7 @@ import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
 import CollapsibleHeader from "./CollapsibleHeader";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PostSkeleton = () => (
   <div className="mb-6 animate-pulse space-y-3 bg-gradient-to-b from-muted/20 to-muted/10 rounded-2xl p-5 border border-border/20 opacity-50">
@@ -36,7 +36,7 @@ interface HomeFeedProps {
 }
 
 export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagClick, onCommentClick }: HomeFeedProps) {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
