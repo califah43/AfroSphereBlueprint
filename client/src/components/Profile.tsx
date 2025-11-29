@@ -6,6 +6,7 @@ import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lo
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import CreatorBadge from "./CreatorBadge";
+import BadgeDisplay from "./BadgeDisplay";
 import ProfilePictureModal from "./ProfilePictureModal";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
@@ -30,6 +31,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [userId, setUserId] = useState<string>("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isAccountPrivate, setIsAccountPrivate] = useState(false);
@@ -39,12 +41,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        let userId: string = "";
+        let currentUserId: string = "";
         if (isOwnProfile) {
           const storedData = localStorage.getItem("currentUserData");
           if (storedData) {
             const userData = JSON.parse(storedData);
-            userId = userData.id || "";
+            currentUserId = userData.id || "";
+            setUserId(currentUserId);
             setIsAccountPrivate(userData.isPrivate || false);
             setUserProfile({
               displayName: userData.displayName || userData.username || "Your Profile",
@@ -65,7 +68,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           const res = await fetch(`/api/users/username/${username}`);
           if (res.ok) {
             const userData = await res.json();
-            userId = userData.id || "";
+            currentUserId = userData.id || "";
+            setUserId(currentUserId);
             setIsAccountPrivate(userData.isPrivate || false);
             setUserProfile({
               displayName: userData.displayName || userData.username || "Creator",
@@ -84,9 +88,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
 
         // Fetch user's posts
-        if (userId) {
+        if (currentUserId) {
           setPostsLoading(true);
-          const postsRes = await fetch(`/api/posts/user/${userId}`);
+          const postsRes = await fetch(`/api/posts/user/${currentUserId}`);
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
@@ -292,8 +296,11 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             {userProfile?.displayName || "Loading..."}
           </h1>
           
-          {/* Username */}
-          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+          {/* Username with Badges */}
+          <div className="flex items-center gap-1 mb-2">
+            <p className="text-xs text-muted-foreground font-medium" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+            {userId && <BadgeDisplay userId={userId} className="inline-flex" />}
+          </div>
 
           {/* Bio - Compact elegance */}
           <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
