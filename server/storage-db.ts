@@ -1,5 +1,5 @@
 import { db } from './db';
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges } from '@shared/schema';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests } from '@shared/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge } from '@shared/schema';
 import { randomUUID } from 'crypto';
@@ -373,5 +373,42 @@ export class DbStorage implements IStorage {
 
   async getFCMToken(userId: string): Promise<string | undefined> {
     return undefined;
+  }
+
+  // ============ FOLLOW REQUESTS ============
+  async createFollowRequest(requesterUserId: string, targetUserId: string): Promise<any> {
+    const [request] = await db.insert(followRequests).values({ requesterUserId, targetUserId }).returning();
+    return request;
+  }
+
+  async getFollowRequests(userId: string): Promise<any[]> {
+    return db.query.followRequests.findMany({ where: eq(followRequests.targetUserId, userId) });
+  }
+
+  async hasFollowRequest(requesterUserId: string, targetUserId: string): Promise<boolean> {
+    const request = await db.query.followRequests.findFirst({ 
+      where: and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId))
+    });
+    return !!request;
+  }
+
+  async acceptFollowRequest(requesterUserId: string, targetUserId: string): Promise<void> {
+    // Create follow relationship
+    await db.insert(follows).values({ followerId: requesterUserId, followingId: targetUserId });
+    // Delete follow request
+    await db.delete(followRequests).where(and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId)));
+    // Update counts
+    const requester = await db.query.users.findFirst({ where: eq(users.id, requesterUserId) });
+    const target = await db.query.users.findFirst({ where: eq(users.id, targetUserId) });
+    if (requester) {
+      await db.update(users).set({ followingCount: (requester.followingCount || 0) + 1 }).where(eq(users.id, requesterUserId));
+    }
+    if (target) {
+      await db.update(users).set({ followerCount: (target.followerCount || 0) + 1 }).where(eq(users.id, targetUserId));
+    }
+  }
+
+  async declineFollowRequest(requesterUserId: string, targetUserId: string): Promise<void> {
+    await db.delete(followRequests).where(and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId)));
   }
 }

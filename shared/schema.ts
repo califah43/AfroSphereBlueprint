@@ -215,3 +215,13 @@ export const insertBadgeSchema = createInsertSchema(badges).omit({
 });
 
 export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+
+// ============ FOLLOW REQUESTS ============
+export const followRequests = pgTable("follow_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  requesterUserId: varchar("requester_user_id").notNull(),
+  targetUserId: varchar("target_user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type FollowRequest = typeof followRequests.$inferSelect;

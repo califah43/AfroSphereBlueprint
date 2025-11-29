@@ -1,0 +1,87 @@
+FEATURE: USER PRIVACY SETTINGS
+
+When a user sets "isPrivate: true" in their profile,
+the following rules must apply across the entire app:
+
+1. PROFILE VISIBILITY
+   - If isPrivate is true:
+        Show the user’s profile ONLY to:
+            • themselves
+            • approved followers
+   - If a non-approved user opens the profile:
+        Show:
+            • profile picture
+            • username
+            • bio
+            • "This account is private" message
+            • Follow button
+        Hide:
+            • posts
+            • followers list
+            • following list
+
+2. FOLLOW REQUEST SYSTEM
+   - When isPrivate = true, the Follow button should send a "followRequest" instead of auto-follow.
+   - Store the request in:
+        /followRequests/{targetUserId}/{requesterUserId} = true
+   - The private account user should see:
+        • List of follow requests
+        • Buttons to "Accept" or "Decline"
+
+   On Accept:
+        • Add follower to /followers
+        • Add to /following of requester
+        • Delete followRequest
+
+   On Decline:
+        • Delete followRequest only
+
+3. POST VISIBILITY
+   - If isPrivate = true:
+        All posts under /posts/{userId} must only be readable by:
+            • the owner
+            • their followers
+
+4. FEED VISIBILITY
+   - The feed algorithm must NOT show private account posts
+     unless the viewer is a follower.
+
+   Condition check:
+        if postOwner.isPrivate == true:
+            if viewer is NOT a follower:
+                do not display the post
+
+5. COMMENTS RESTRICTIONS
+   - If an account is private:
+        Only approved followers can:
+            • like posts
+            • comment
+            • view comments
+
+6. SEARCH
+   - Private accounts CAN appear in search results, but:
+        • Their posts should NEVER preview in search
+        • A small "Private Account" label should show
+
+7. MESSAGING
+   - If isPrivate is true:
+        Only approved followers can send messages
+        Block all non-followers by default
+
+8. BLOCKING & UNFOLLOWING
+   - If a private account blocks someone:
+        • Remove follower
+        • Remove follow request if any
+        • Stop message access
+        • Stop post visibility immediately
+
+9. NOTIFICATIONS
+   - Private account user receives:
+        • “New follow request”
+        • “Your follow request was accepted/declined”
+
+10. ADMIN VIEW
+   - Admin should be able to see:
+        • isPrivate status
+        • pending follow requests
+        • privacy logs
