@@ -42,6 +42,12 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
   const [isLoading, setIsLoading] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
   const { t } = useTranslation();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    setCurrentUser(userData);
+  }, []);
 
   useEffect(() => {
     // Clear comments immediately when postId changes to prevent stale data
@@ -439,7 +445,13 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
               {/* Reply Input */}
               {replyingTo === comment.id && (
                 <form onSubmit={(e) => handleAddReply(comment.id, e)} className="ml-12 space-y-2 animate-in slide-in-from-top-2 duration-200">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-end">
+                    <Avatar className="w-7 h-7 border border-border/50 flex-shrink-0">
+                      {currentUser?.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.username} />}
+                      <AvatarFallback className="bg-primary/10 text-primary/70 text-xs font-bold">
+                        {(currentUser?.username || "U")[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <Input
                       placeholder={t("comments.writeReply")}
                       value={replyText}
@@ -453,7 +465,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                       type="submit"
                       size="icon"
                       disabled={!replyText.trim() || isLoading}
-                      className="bg-primary hover:bg-primary/90 rounded-full h-9 w-9"
+                      className="bg-primary hover:bg-primary/90 rounded-full h-9 w-9 flex-shrink-0"
                       data-testid={`button-send-reply-${comment.id}`}
                     >
                       <Send className="h-4 w-4" />
@@ -535,8 +547,9 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
       <form onSubmit={handleAddComment} className="sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent border-t border-border/30 px-4 py-4 backdrop-blur-md">
         <div className="flex gap-3 items-end">
           <Avatar className="w-9 h-9 border border-border flex-shrink-0">
+            {currentUser?.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.username} />}
             <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-400/30 text-primary text-xs font-bold">
-              Y
+              {(currentUser?.username || "U")[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 flex gap-2 min-w-0">
