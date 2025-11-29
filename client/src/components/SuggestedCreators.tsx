@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import CreatorBadge, { type BadgeType } from "./CreatorBadge";
 
 interface Creator {
+  id?: string;
   username: string;
   name: string;
   bio: string;
@@ -14,34 +15,71 @@ interface Creator {
   badge?: BadgeType;
 }
 
-const suggestedCreators: Creator[] = [
-  {
-    username: "adikeafrica",
-    name: "Adike Africa",
-    bio: "Celebrating our roots with modern style. Ankara fusion fashion.",
-    followers: "12.5K",
-    badge: "fashion-vanguard",
-  },
-  {
-    username: "beat_masta",
-    name: "Beat Masta",
-    bio: "Afrobeats meets amapiano. New music dropping Friday!",
-    followers: "9.8K",
-    badge: "music-star",
-  },
-  {
-    username: "kojoart",
-    name: "Kojo Art",
-    bio: "New pieces inspired by Adinkra symbols. Contemporary African art.",
-    followers: "7.3K",
-    badge: "top-artist",
-  },
-];
+const suggestedCreatorUsernames = ["adikeafrica", "beat_masta", "kojoart"];
+
+const badgeMap: Record<string, BadgeType> = {
+  "adikeafrica": "fashion-vanguard",
+  "beat_masta": "music-star",
+  "kojoart": "top-artist",
+};
 
 export default function SuggestedCreators() {
+  const [suggestedCreators, setSuggestedCreators] = useState<Creator[]>([]);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+
+  // Fetch real user data and follow status on mount
+  useEffect(() => {
+    const fetchCreatorsData = async () => {
+      try {
+        const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        const currentUserId = currentUserData?.id;
+
+        const creators: Creator[] = [];
+        const newFollowStates: Record<string, boolean> = {};
+
+        for (const username of suggestedCreatorUsernames) {
+          try {
+            const userRes = await fetch(`/api/users/username/${username}`);
+            if (userRes.ok) {
+              const userData = await userRes.json();
+              creators.push({
+                id: userData.id,
+                username: userData.username,
+                name: userData.displayName || userData.username,
+                bio: userData.bio || "Creative on AfroSphere",
+                followers: (userData.followerCount || 0).toLocaleString(),
+                badge: badgeMap[username],
+              });
+
+              // Check follow status if user is logged in
+              if (currentUserId && userData.id) {
+                try {
+                  const followRes = await fetch(`/api/follows/check?followerId=${currentUserId}&followingId=${userData.id}`);
+                  if (followRes.ok) {
+                    const followData = await followRes.json();
+                    newFollowStates[username] = followData.isFollowing || false;
+                  }
+                } catch (e) {
+                  console.log(`Failed to check follow status for ${username}`);
+                }
+              }
+            }
+          } catch (e) {
+            console.log(`Failed to fetch user ${username}`);
+          }
+        }
+
+        setSuggestedCreators(creators);
+        setFollowStates(newFollowStates);
+      } catch (error) {
+        console.log("Failed to fetch suggested creators data:", error);
+      }
+    };
+
+    fetchCreatorsData();
+  }, []);
 
   const toggleFollow = async (username: string) => {
     setLoading((prev) => ({ ...prev, [username]: true }));
@@ -87,6 +125,18 @@ export default function SuggestedCreators() {
       if (res.ok) {
         const data = await res.json();
         setFollowStates((prev) => ({ ...prev, [username]: data.following }));
+        
+        // Update current user's following count
+        const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        if (currentUserData && currentUserData.id) {
+          if (data.following) {
+            currentUserData.followingCount = (currentUserData.followingCount || 0) + 1;
+          } else {
+            currentUserData.followingCount = Math.max(0, (currentUserData.followingCount || 1) - 1);
+          }
+          localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
+        }
+        
         toast({
           title: data.following ? "Following" : "Unfollowed",
           description: data.following ? `You're now following @${username}` : `You unfollowed @${username}`,
