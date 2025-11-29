@@ -241,31 +241,34 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     }
   };
 
-  // Infinite scroll detection + header visibility
+  // Facebook-style header hide/show on scroll + infinite scroll
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
+      const currentScrollY = container.scrollTop;
+      const { scrollHeight, clientHeight } = container;
       
-      // Keep header visible during refresh
+      // Facebook-style header hide/show logic
       if (!isRefreshing) {
-        // Handle header visibility only when not refreshing
-        const scrollDelta = scrollTop - lastScrollTop;
-        if (scrollDelta < -10) {
-          setIsHeaderVisible(true);
-        } else if (scrollDelta > 10) {
+        // scroll down → hide header
+        if (currentScrollY > lastScrollTop) {
           setIsHeaderVisible(false);
+        }
+        // scroll up → show header
+        else {
+          setIsHeaderVisible(true);
         }
       } else {
         // Always show header during refresh
         setIsHeaderVisible(true);
       }
-      setLastScrollTop(scrollTop);
+
+      setLastScrollTop(currentScrollY);
       
       // Load more when near bottom
-      if (scrollHeight - scrollTop - clientHeight < 500 && displayedPosts.length < 50) {
+      if (scrollHeight - currentScrollY - clientHeight < 500 && displayedPosts.length < 50) {
         const offset = displayedPosts.length;
         fetch(`/api/posts?limit=20&offset=${offset}`)
           .then(res => res.json())
