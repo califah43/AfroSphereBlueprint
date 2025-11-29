@@ -485,4 +485,24 @@ export class DbStorage implements IStorage {
       });
     }
   }
+
+  async suspendUser(userId: string, reason: string): Promise<User | undefined> {
+    const [user] = await db.update(users).set({ status: "suspended", suspensionReason: reason }).where(eq(users.id, userId)).returning();
+    return user;
+  }
+
+  async banUser(userId: string, reason: string): Promise<User | undefined> {
+    const [user] = await db.update(users).set({ status: "banned", bannedReason: reason }).where(eq(users.id, userId)).returning();
+    return user;
+  }
+
+  async disableUser(userId: string, reason: string): Promise<User | undefined> {
+    const [user] = await db.update(users).set({ status: "disabled", disabledReason: reason }).where(eq(users.id, userId)).returning();
+    return user;
+  }
+
+  async restoreUser(userId: string): Promise<User | undefined> {
+    const [user] = await db.update(users).set({ status: "active", suspensionReason: "", bannedReason: "", disabledReason: "" }).where(eq(users.id, userId)).returning();
+    return user;
+  }
 }
