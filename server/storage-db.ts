@@ -1,7 +1,7 @@
 import { db } from './db';
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports } from '@shared/schema';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges } from '@shared/schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport } from '@shared/schema';
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
 export interface IStorage {
@@ -30,8 +30,12 @@ export interface IStorage {
   isFollowing(followerId: string, followingId: string): Promise<boolean>;
   getFollowers(userId: string): Promise<User[]>;
   getFollowing(userId: string): Promise<User[]>;
-  getBadges(userId: string): Promise<CreatorBadge | undefined>;
-  addBadge(userId: string, badge: string): Promise<CreatorBadge>;
+  getBadges(): Promise<Badge[]>;
+  createBadge(badge: InsertBadge): Promise<Badge>;
+  deleteBadge(badgeId: string): Promise<void>;
+  getUserBadges(userId: string): Promise<Badge[]>;
+  assignBadge(userId: string, badgeId: string): Promise<UserBadge>;
+  removeBadge(userId: string, badgeId: string): Promise<void>;
   createNotification(notification: any): Promise<Notification>;
   listNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(id: string): Promise<void>;
@@ -288,6 +292,36 @@ export class DbStorage implements IStorage {
     await db.delete(userSettings).where(eq(userSettings.userId, userId));
     await db.delete(blockedUsers).where(eq(blockedUsers.userId, userId));
     await db.delete(users).where(eq(users.id, userId));
+  }
+
+  // ============ BADGES ============
+  async getBadges(): Promise<Badge[]> {
+    return db.query.badges.findMany();
+  }
+
+  async createBadge(badge: InsertBadge): Promise<Badge> {
+    const [newBadge] = await db.insert(badges).values(badge).returning();
+    return newBadge;
+  }
+
+  async deleteBadge(badgeId: string): Promise<void> {
+    await db.delete(badges).where(eq(badges.id, badgeId));
+  }
+
+  async getUserBadges(userId: string): Promise<Badge[]> {
+    const userBadgeRecords = await db.query.userBadges.findMany({ where: eq(userBadges.userId, userId) });
+    const badgeIds = userBadgeRecords.map(ub => ub.badgeId);
+    if (badgeIds.length === 0) return [];
+    return db.query.badges.findMany({ where: inArray(badges.id, badgeIds) });
+  }
+
+  async assignBadge(userId: string, badgeId: string): Promise<UserBadge> {
+    const [userBadge] = await db.insert(userBadges).values({ userId, badgeId }).returning();
+    return userBadge;
+  }
+
+  async removeBadge(userId: string, badgeId: string): Promise<void> {
+    await db.delete(userBadges).where(and(eq(userBadges.userId, userId), eq(userBadges.badgeId, badgeId)));
   }
 
   async saveFCMToken(userId: string, token: string): Promise<void> {

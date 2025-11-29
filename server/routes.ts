@@ -6,7 +6,7 @@ import { posts } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import multer from "multer";
 const storage = new DbStorage();
-import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge } from "@shared/schema";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
