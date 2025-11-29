@@ -33,7 +33,7 @@ interface Comment {
 
 interface CommentsProps {
   postId: string;
-  postImage: string;
+  postImage: string | string[];
   postCaption: string;
   onClose: () => void;
   onCommentAdded?: (updatedCommentCount: number) => void;
@@ -46,8 +46,14 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
   const [replyText, setReplyText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
   const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  
+  // Get all images for carousel
+  const allImages = Array.isArray(postImage) ? postImage : [postImage];
+  const currentImage = allImages[currentImageIndex] || postImage;
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
