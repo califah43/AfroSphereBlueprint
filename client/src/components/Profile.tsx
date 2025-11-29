@@ -454,18 +454,20 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       <div className="max-w-md mx-auto px-4 relative z-10 pb-6">
         {/* Header for Own Profile (Settings) */}
         {isOwnProfile && (
-          <div className="flex items-center justify-between mb-4 -mt-14">
+          <div className="flex items-center justify-between mb-4 -mt-14 relative z-20">
             <div className="flex-1" />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => {
+                console.log("Settings button clicked! onSettings exists:", !!onSettings);
                 if (onSettings) {
+                  console.log("Calling onSettings handler");
                   onSettings();
                 }
               }}
               data-testid="button-settings"
-              className="hover-elevate"
+              className="hover-elevate z-20"
             >
               <Settings className="h-5 w-5" />
             </Button>
