@@ -304,16 +304,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "create.category": "Chagua Aina",
     "create.post": "Chapisha",
     "create.cancel": "Ghairi",
-    "create.hashtags": "Hashtags",
-    "create.hashtagPlaceholder": "#mitindo #sanaa",
-    "create.brightness": "Mwangaza",
-    "create.contrast": "Tofauti",
-    "create.saturation": "Saturation",
-    "create.proTipLabel": "Kidogo cha ushauri:",
-    "create.proTip": "Posts zinazoingilia utamaduni wa Kiafrika hufanya vizuri!",
-    "create.missingFields": "Sehemu zinazokosekana",
-    "create.missingFieldsDesc": "Tafadhali ongeza maoni na angalau picha moja",
-    "create.notAuthenticated": "Mtumiaji hajasomekeza. Tafadhali ingia tena.",
     
     // Admin
     "admin.dashboard": "Admin Dashboard",
@@ -329,10 +319,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "follow.notLoggedIn": "Haujaingia",
     "follow.unfollowed": "Usifuatilianaje",
     "follow.failed": "Imeshindwa kusita",
-    
-    // Guidelines
-    "guidelines.title": "Mwongozo wa Jamii",
-    "guidelines.subtitle": "Weka AfroSphere salama na muhimu",
     
     // Settings
     "settings.title": "Mipango",

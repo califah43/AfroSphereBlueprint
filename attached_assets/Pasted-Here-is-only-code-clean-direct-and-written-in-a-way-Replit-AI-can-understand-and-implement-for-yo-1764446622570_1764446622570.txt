@@ -1,0 +1,76 @@
+Here is only code, clean, direct, and written in a way Replit AI can understand and implement for your username–availability system exactly like X (Twitter):
+
+⸻
+
+
+// USERNAME EDIT SYSTEM (LIKE X / TWITTER)
+// Checks if the username is available before saving it.
+// Ensures usernames are unique across the platform.
+
+import { firestore } from "./firebase";  
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+
+export async function updateUsername(userId: string, newUsername: string) {
+  const formatted = newUsername.toLowerCase().trim();
+
+  // 1. Prevent emojis or special characters
+  const usernameRegex = /^[a-zA-Z0-9._]+$/;
+  if (!usernameRegex.test(formatted)) {
+    throw new Error("Invalid username format. Use letters, numbers, dot or underscore only.");
+  }
+
+  // 2. Check if username already exists
+  const usernameRef = doc(firestore, "usernames", formatted);
+  const usernameSnap = await getDoc(usernameRef);
+
+  if (usernameSnap.exists()) {
+    throw new Error("Username already taken.");
+  }
+
+  // 3. Reserve this username in the username table
+  await updateDoc(usernameRef, {
+    owner: userId,
+    reservedAt: Date.now()
+  });
+
+  // 4. Update the user profile with the new username
+  const userRef = doc(firestore, "users", userId);
+  await updateDoc(userRef, {
+    username: formatted
+  });
+
+  return "Username updated successfully.";
+}
+
+
+⸻
+
+🚀 HOW THE SYSTEM WORKS (IN CODE BEHAVIOR ONLY)
+
+Replit AI will understand this logic behind the code:
+
+// SYSTEM LOGIC
+// 1. User enters a username in the settings page
+// 2. The app sends the username to this function
+// 3. The function:
+//    - formats the username
+//    - prevents emojis
+//    - checks the `usernames` collection for availability
+//    - if free → it reserves it
+//    - if taken → shows error
+//    - then updates the user profile
+//
+// FIRESTORE STRUCTURE:
+//
+// users/{userId}
+//   - username: "califah_23"
+//
+// usernames/{username}
+//   - owner: "userId"
+//   - reservedAt: timestamp
+
+
+⸻
+
+If you want next:
+“Ejeh give me the code for username live-checking while typing (green tick / red error).”
