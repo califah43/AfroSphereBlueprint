@@ -339,58 +339,59 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                   Create Badge
                 </Button>
               </DialogTrigger>
-            <DialogContent data-testid="dialog-create-badge">
-              <DialogHeader>
-                <DialogTitle>Create New Badge</DialogTitle>
-                <DialogDescription>Add a new badge to the platform</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium" data-testid="label-badge-name">
-                    Badge Name
-                  </label>
-                  <input
-                    type="text"
-                    value={newBadgeName}
-                    onChange={(e) => setNewBadgeName(e.target.value)}
-                    placeholder="e.g., Top Creator"
-                    className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
-                    data-testid="input-badge-name"
-                  />
+              <DialogContent data-testid="dialog-create-badge">
+                <DialogHeader>
+                  <DialogTitle>Create New Badge</DialogTitle>
+                  <DialogDescription>Add a new badge to the platform</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium" data-testid="label-badge-name">
+                      Badge Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newBadgeName}
+                      onChange={(e) => setNewBadgeName(e.target.value)}
+                      placeholder="e.g., Top Creator"
+                      className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
+                      data-testid="input-badge-name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium" data-testid="label-badge-icon">
+                      Icon Emoji
+                    </label>
+                    <input
+                      type="text"
+                      value={newBadgeIcon}
+                      onChange={(e) => setNewBadgeIcon(e.target.value)}
+                      placeholder="e.g., ✨"
+                      className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
+                      data-testid="input-badge-icon"
+                      maxLength={2}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium" data-testid="label-badge-description">
+                      Description
+                    </label>
+                    <textarea
+                      value={newBadgeDesc}
+                      onChange={(e) => setNewBadgeDesc(e.target.value)}
+                      placeholder="Describe the badge purpose..."
+                      className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
+                      rows={3}
+                      data-testid="textarea-badge-description"
+                    />
+                  </div>
+                  <Button onClick={handleCreateBadge} className="w-full" data-testid="button-confirm-create">
+                    Create Badge
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-sm font-medium" data-testid="label-badge-icon">
-                    Icon Emoji
-                  </label>
-                  <input
-                    type="text"
-                    value={newBadgeIcon}
-                    onChange={(e) => setNewBadgeIcon(e.target.value)}
-                    placeholder="e.g., ✨"
-                    className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
-                    data-testid="input-badge-icon"
-                    maxLength={2}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium" data-testid="label-badge-description">
-                    Description
-                  </label>
-                  <textarea
-                    value={newBadgeDesc}
-                    onChange={(e) => setNewBadgeDesc(e.target.value)}
-                    placeholder="Describe the badge purpose..."
-                    className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm mt-1"
-                    rows={3}
-                    data-testid="textarea-badge-description"
-                  />
-                </div>
-                <Button onClick={handleCreateBadge} className="w-full" data-testid="button-confirm-create">
-                  Create Badge
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Badges Grid */}
