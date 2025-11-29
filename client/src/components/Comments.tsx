@@ -189,17 +189,29 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
         });
         if (res.ok) {
           const newCommentObj = await res.json();
+          
+          // Fetch user badges for the new comment
+          let userBadges: any[] = [];
+          try {
+            const badgesRes = await fetch(`/api/badges/user/${currentUserId}`);
+            if (badgesRes.ok) {
+              userBadges = await badgesRes.json();
+            }
+          } catch (e) {
+            // Badges fetch failed, use empty array
+          }
+          
           const mappedComment: Comment = {
             id: newCommentObj.id,
-            author: newCommentObj.author || userData.username || "creator",
+            author: userData.displayName || userData.username || "creator",
             text: newCommentObj.text,
             likes: newCommentObj.likes || 0,
             timeAgo: newCommentObj.timeAgo || "now",
             isLiked: false,
             replies: [],
-            avatar: newCommentObj.avatar || userData.avatar,
+            avatar: userData.profileImageUrl || userData.avatar || "",
             userId: currentUserId,
-            badges: newCommentObj.badges || [],
+            badges: userBadges,
           };
           setComments([...comments, mappedComment]);
           setNewComment("");
