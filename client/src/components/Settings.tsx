@@ -143,6 +143,24 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
     }
     
     if (userId) {
+      // If private account is toggled, also update user profile
+      if (section === "account" && key === "privateAccount") {
+        fetch(`/api/users/${userId}`, { 
+          method: 'PATCH', 
+          body: JSON.stringify({ isPrivate: value }), 
+          headers: { 'Content-Type': 'application/json' } 
+        }).then(() => {
+          // Update localStorage too
+          const storedData = localStorage.getItem("currentUserData");
+          if (storedData) {
+            const userData = JSON.parse(storedData);
+            userData.isPrivate = value;
+            localStorage.setItem("currentUserData", JSON.stringify(userData));
+            window.dispatchEvent(new Event('userPrivacyChanged'));
+          }
+        }).catch(e => console.error('Privacy update failed:', e));
+      }
+      
       const mapped: any = {
         privateAccount: newSettings.account.privateAccount,
         allowComments: newSettings.account.allowComments,

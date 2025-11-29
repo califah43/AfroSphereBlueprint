@@ -112,12 +112,14 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (storedData) {
             const userData = JSON.parse(storedData);
             userId = userData.id || "";
+            setIsAccountPrivate(userData.isPrivate || false);
           }
         } else if (username) {
           const res = await fetch(`/api/users/username/${username}`);
           if (res.ok) {
             const userData = await res.json();
             userId = userData.id || "";
+            setIsAccountPrivate(userData.isPrivate || false);
           }
         }
 
@@ -133,8 +135,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       }
     };
 
+    const handlePrivacyChange = () => {
+      if (isOwnProfile) {
+        const storedData = localStorage.getItem("currentUserData");
+        if (storedData) {
+          const userData = JSON.parse(storedData);
+          setIsAccountPrivate(userData.isPrivate || false);
+        }
+      }
+    };
+
     window.addEventListener('refreshPosts', handleRefresh);
-    return () => window.removeEventListener('refreshPosts', handleRefresh);
+    window.addEventListener('userPrivacyChanged', handlePrivacyChange);
+    return () => {
+      window.removeEventListener('refreshPosts', handleRefresh);
+      window.removeEventListener('userPrivacyChanged', handlePrivacyChange);
+    };
   }, [username, isOwnProfile]);
   
   // Get the username for API calls (use stored for own profile, fallback for others)
