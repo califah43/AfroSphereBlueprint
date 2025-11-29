@@ -1679,6 +1679,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ USER SUSPENSION/BAN/DISABLE ROUTES ============
+  app.post("/api/admin/suspend/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      if (!userId || !reason) {
+        return res.status(400).json({ error: "Missing userId or reason" });
+      }
+      const user = await storage.suspendUser(userId, reason);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to suspend user" });
+    }
+  });
+
+  app.post("/api/admin/ban/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      if (!userId || !reason) {
+        return res.status(400).json({ error: "Missing userId or reason" });
+      }
+      const user = await storage.banUser(userId, reason);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to ban user" });
+    }
+  });
+
+  app.post("/api/admin/disable/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      if (!userId || !reason) {
+        return res.status(400).json({ error: "Missing userId or reason" });
+      }
+      const user = await storage.disableUser(userId, reason);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to disable user" });
+    }
+  });
+
+  app.post("/api/admin/restore/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.restoreUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to restore user" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {
