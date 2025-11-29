@@ -211,7 +211,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "follow.notLoggedIn": "Not logged in",
     "follow.unfollowed": "Unfollowed",
     "follow.failed": "Failed to unfollow",
-    "follow.connectionError": "Connection Error",
     
     // Settings Sections
     "settings.account": "Account",
@@ -225,7 +224,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "settings.allowCommentsDesc": "Let others comment on your posts",
     "settings.allowMentions": "Allow Mentions",
     "settings.allowMentionsDesc": "Allow people to mention you in posts",
-    
     "settings.notificationsSection": "Notifications",
     "settings.likes": "Likes",
     "settings.likesDesc": "Notify me when someone likes my post",
@@ -239,11 +237,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "settings.pushNotificationsDesc": "Receive notifications on your device",
     "settings.emailNotifications": "Email Notifications",
     "settings.emailNotificationsDesc": "Receive email updates",
-    
     "settings.privacy": "Privacy",
     "settings.activityStatus": "Activity Status",
     "settings.activityStatusDesc": "Show when you are active",
-    
     "settings.display": "Display",
     "settings.darkMode": "Dark Mode",
     "settings.darkModeDesc": "Use dark theme for the app",
@@ -251,7 +247,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "settings.textSizeDesc": "Adjust text size for readability",
     "settings.language": "Language",
     "settings.languageDesc": "Change your preferred language",
-    
     "settings.content": "Content",
     "settings.hideExplicit": "Hide Explicit Content",
     "settings.hideExplicitDesc": "Filter sensitive content from your feed",
@@ -259,7 +254,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "settings.mutedWordsDesc": "Hide content with specific words",
     "settings.restrictedMode": "Restricted Mode",
     "settings.restrictedModeDesc": "Limited content recommendations",
-    
     "settings.support": "Support",
     "settings.helpCenter": "Help Center",
     "settings.helpCenterDesc": "Get help and learn how to use AfroSphere",
@@ -271,7 +265,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "settings.reportProblemDesc": "Tell us if something is not working",
     "settings.blockedUsers": "Blocked Users",
     "settings.blockedUsersDesc": "Manage your blocked list",
-    
     "settings.security": "Security",
     "settings.activeSessions": "Active Sessions",
     "settings.activeSessionsDesc": "View your logged-in devices",
@@ -281,6 +274,15 @@ export const translations: Record<Language, Record<string, string>> = {
     "settings.downloadDataDesc": "Get a copy of your data",
     "settings.loading": "Loading settings...",
     "settings.title": "Settings",
+    
+    // Feed & Comments
+    "feed.noComments": "No comments yet",
+    "feed.beFirst": "Be the first to share your thoughts",
+    "feed.noPosts": "No posts yet",
+    "feed.liked": "liked your post",
+    "feed.startedFollowing": "started following you",
+    "feed.commented": "commented on your post",
+    "feed.trending": "Your post is trending in",
   },
   sw: {
     // Navigation
