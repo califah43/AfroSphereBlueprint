@@ -338,7 +338,8 @@ export class DbStorage implements IStorage {
     }
 
     const result: any[] = [];
-    for (const [userId, userBadges] of badgeLookup.entries()) {
+    const entries = Array.from(badgeLookup.entries());
+    for (const [userId, userBadges] of entries) {
       for (const badge of userBadges) {
         result.push({
           userId,

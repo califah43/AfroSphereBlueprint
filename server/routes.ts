@@ -1150,6 +1150,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all user-badge assignments (for feed batch loading)
+  app.get("/api/badges/all", async (req, res) => {
+    try {
+      const allBadgesWithUsers = await storage.getAllBadgesWithUsers();
+      res.json(allBadgesWithUsers);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch all badges" });
+    }
+  });
+
   // Admin: Create badge
   app.post("/api/admin/badges", async (req, res) => {
     try {
