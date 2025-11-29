@@ -637,6 +637,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/follows/check", async (req, res) => {
+    try {
+      const { followerId, followingId } = req.query;
+      if (!followerId || !followingId) {
+        return res.status(400).json({ error: "Missing parameters" });
+      }
+      const isFollowing = await storage.isFollowing(followerId as string, followingId as string);
+      res.json({ isFollowing });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request" });
+    }
+  });
+
   app.get("/api/follows/followers/:userId", async (req, res) => {
     const followers = await storage.getFollowers(req.params.userId);
     res.json(followers);

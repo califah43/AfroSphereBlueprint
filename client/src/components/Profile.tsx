@@ -103,6 +103,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
+          // Check if current user is following this user (only for other profiles)
+          if (!isOwnProfile) {
+            try {
+              const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+              if (currentUserData?.id) {
+                const checkRes = await fetch(`/api/follows/check?followerId=${currentUserData.id}&followingId=${currentUserId}`);
+                if (checkRes.ok) {
+                  const data = await checkRes.json();
+                  setIsFollowing(data.isFollowing === true);
+                }
+              }
+            } catch (e) {
+              console.log("Error checking follow status:", e);
+            }
+          }
+          
           const [postsRes, badgesRes] = await Promise.all([
             fetch(`/api/posts/user/${currentUserId}`),
             fetch(`/api/badges/user/${currentUserId}`)
@@ -242,6 +258,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       if (res.ok) {
         const data = await res.json();
         setIsFollowing(data.following);
+        
+        // Refetch target user data to get updated counts
+        try {
+          const refreshRes = await fetch(`/api/users/username/${targetUsername}`);
+          if (refreshRes.ok) {
+            const refreshedUser = await refreshRes.json();
+            setUserProfile((prev: any) => ({
+              ...prev,
+              followers: refreshedUser.followerCount?.toString() || "0",
+              following: refreshedUser.followingCount?.toString() || "0",
+            }));
+          }
+        } catch (e) {
+          console.log("Error refreshing user data:", e);
+        }
+        
         toast({
           title: data.following ? "Following" : "Unfollowed",
           description: data.following ? `You're now following @${targetUsername}` : `You unfollowed @${targetUsername}`,
