@@ -159,21 +159,22 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
           };
         });
         
-        // Combine real posts (at top) with mock posts (below) - always show both
-        return [...transformedRealPosts, ...mockPosts];
+        // Return only real posts (sorted newest first from backend)
+        // Mock posts are not shown to avoid confusion with user's actual posts
+        return transformedRealPosts.length > 0 ? transformedRealPosts : [];
       } catch {
         return mockPosts;
       }
     },
   });
 
-  // Update displayed posts from API, always use provided data (mock data is already included in apiPosts)
+  // Update displayed posts from API
   useEffect(() => {
     if (apiPosts && apiPosts.length > 0) {
       setDisplayedPosts(apiPosts as Post[]);
-    } else if (!apiPosts || apiPosts.length === 0) {
-      // Ensure mock posts are shown when API is empty
-      setDisplayedPosts(mockPosts);
+    } else {
+      // Show empty feed if no real posts (don't show mock posts)
+      setDisplayedPosts([]);
     }
   }, [apiPosts]);
 
