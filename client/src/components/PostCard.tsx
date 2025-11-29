@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 export interface Post {
   id: string;
   author: {
+    id: string;
     username: string;
     avatar?: string;
   };
@@ -190,7 +191,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
                 {post.author.username}
               </p>
-              <BadgeDisplay userId={post.author.username} className="inline-flex" />
+              <BadgeDisplay userId={post.author.id} className="inline-flex" />
             </div>
             <p className="text-sm text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
