@@ -426,7 +426,19 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                         <p className="font-semibold text-sm text-foreground" data-testid={`text-comment-author-${comment.id}`}>
                           {comment.author || "Anonymous"}
                         </p>
-                        <BadgeDisplay userId={comment.id} className="inline-flex" />
+                        {comment.badges && comment.badges.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {comment.badges.map((badge: any) => (
+                              <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                                <img 
+                                  src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                                  alt={badge.name}
+                                  className="w-full h-full"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground font-medium">@{comment.author || "user"}</p>
                       <span className="text-xs text-muted-foreground font-medium">·</span>
@@ -530,7 +542,19 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                   <p className="font-semibold text-xs text-foreground/90" data-testid={`text-reply-author-${reply.id}`}>
                                     {reply.author || "Anonymous"}
                                   </p>
-                                  <BadgeDisplay userId={reply.id} className="inline-flex" />
+                                  {reply.badges && reply.badges.length > 0 && (
+                                    <div className="flex items-center gap-1">
+                                      {reply.badges.map((badge: any) => (
+                                        <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                                          <img 
+                                            src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                                            alt={badge.name}
+                                            className="w-full h-full"
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                                 <p className="text-xs text-muted-foreground/70">@{reply.author || "user"}</p>
                                 <span className="text-xs text-muted-foreground/70">·</span>

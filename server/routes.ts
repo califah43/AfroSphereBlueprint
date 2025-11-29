@@ -382,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Get badges for reply author
-        let replyBadges = [];
+        let replyBadges: any[] = [];
         if (replyUser) {
           try {
             replyBadges = await storage.getUserBadges(replyUser.id);
@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
       
       // Get badges for comment author
-      let authorBadges = [];
+      let authorBadges: any[] = [];
       if (user) {
         try {
           authorBadges = await storage.getUserBadges(user.id);
