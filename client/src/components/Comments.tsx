@@ -52,16 +52,56 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
     setCurrentUser(userData);
-    
-    // Listen for profile updates
-    const handleProfileUpdate = () => {
-      const updatedData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-      setCurrentUser(updatedData);
+  }, []);
+
+  // Refetch comments when profile is updated
+  useEffect(() => {
+    const handleProfileUpdate = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        const userId = userData?.id || "";
+        
+        const url = userId 
+          ? `/api/comments/post/${postId}?userId=${userId}`
+          : `/api/comments/post/${postId}`;
+        
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const mappedComments = data
+            .filter((c: any) => !c.replyTo)
+            .map((c: any) => ({
+              id: c.id,
+              author: c.author || "creator",
+              text: c.text,
+              likes: c.likes || 0,
+              timeAgo: c.timeAgo || "now",
+              isLiked: c.isLiked === true,
+              userId: c.userId,
+              badges: c.badges || [],
+              replies: (c.replies || []).map((r: any) => ({
+                id: r.id,
+                author: r.author || "creator",
+                text: r.text,
+                likes: r.likes || 0,
+                timeAgo: r.timeAgo || "now",
+                isLiked: r.isLiked === true,
+                avatar: r.avatar || "",
+                userId: r.userId,
+                badges: r.badges || [],
+              })),
+              avatar: c.avatar || "",
+            }));
+          setComments(mappedComments);
+        }
+      } catch (error) {
+        console.error("Failed to refetch comments:", error);
+      }
     };
-    
+
     window.addEventListener('profileUpdated', handleProfileUpdate);
     return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
-  }, []);
+  }, [postId]);
 
   useEffect(() => {
     // Clear comments immediately when postId changes to prevent stale data
