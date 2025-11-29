@@ -217,7 +217,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       }
       
       // Fetch target user by username to get their ID
-      const userRes = await fetch(`/api/users/${targetUsername}`);
+      const userRes = await fetch(`/api/users/username/${targetUsername}`);
       if (!userRes.ok) {
         toast({
           title: "Error",
