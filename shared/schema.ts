@@ -228,3 +228,14 @@ export const followRequests = pgTable("follow_requests", {
 });
 
 export type FollowRequest = typeof followRequests.$inferSelect;
+
+// ============ HASHTAGS ============
+export const hashtags = pgTable("hashtags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tag: text("tag").notNull().unique(),
+  usageCount: integer("usage_count").default(0),
+  lastUsed: timestamp("last_used").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Hashtag = typeof hashtags.$inferSelect;

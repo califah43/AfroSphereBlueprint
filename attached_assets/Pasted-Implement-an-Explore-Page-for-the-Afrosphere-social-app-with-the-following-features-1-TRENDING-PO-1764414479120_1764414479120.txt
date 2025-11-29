@@ -1,0 +1,56 @@
+Implement an Explore Page for the Afrosphere social app with the following features:
+
+1. TRENDING POSTS SYSTEM
+   - Create a Firestore collection "posts" with fields:
+       likes, commentsCount, saves, shares, views, timestamp.
+   - Add a computed "trendingScore" calculated as:
+       (likes * 2) + (commentsCount * 3) + (saves * 4) + (shares * 6) + (views * 0.5)
+   - Add a freshness decay:
+       trendingScore = trendingScore * timeDecay
+   - Query Explore posts ordered by trendingScore (desc) and timestamp (desc).
+   - Implement infinite scrolling.
+
+2. HASHTAG SYSTEM
+   - Create collection "hashtags" with:
+       usageCount, lastUsed.
+   - When a user posts content, auto-detect hashtags in the caption.
+   - Increase usageCount for each hashtag found.
+   - Create a hashtag feed page showing posts under each hashtag.
+   - Sort hashtag posts by trendingScore.
+
+3. TRENDING HASHTAGS
+   - Query top 20 hashtags sorted by usageCount (desc)
+     where lastUsed is within the last 48 hours.
+   - Display them horizontally on Explore.
+
+4. SEARCH SYSTEM
+   - Search must support querying:
+       users, hashtags, posts.
+   - Add Firestore index to allow searching by:
+       username, displayName, hashtag, caption.
+   - While typing, show live suggestions.
+   - Show verified users first in results.
+
+5. EXPLORE UI BEHAVIOR
+   - Use a masonry grid layout for Explore posts.
+   - Auto-play videos on mute.
+   - Add shimmer loading effect on scroll.
+   - Reload Explore content every 30 minutes.
+
+6. SECURITY FILTERS
+   - Filter out banned words from Explore.
+   - Hide posts flagged as nsfw or spam.
+   - Hide posts from banned users.
+
+7. FOLLOWING HASHTAGS
+   - Add a "follow hashtag" system.
+   - If user follows a tag, add tag feed results to their home feed.
+
+8. EXPLORE PAGE STRUCTURE
+   - Top search bar
+   - Trending hashtags slider
+   - Trending posts grid
+   - Suggested users section (“People You May Know”)
+   - Infinite scroll
+
+Make all features work with Firebase Firestore, Firebase Storage, Firebase Auth, and Cloud Functions for scoring and recalculation of trending posts.
