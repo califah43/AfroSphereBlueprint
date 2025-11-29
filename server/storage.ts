@@ -87,6 +87,7 @@ export class MemStorage implements IStorage {
       banner: "",
       website: "",
       profession: "",
+      isPrivate: false,
       firebaseUid: null,
       followerCount: 0,
       followingCount: 0,

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3 } from "lucide-react";
+import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import CreatorBadge from "./CreatorBadge";
@@ -32,6 +32,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [isAccountPrivate, setIsAccountPrivate] = useState(false);
   const { toast } = useToast();
 
   // Fetch user data and posts from backend
@@ -44,6 +45,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (storedData) {
             const userData = JSON.parse(storedData);
             userId = userData.id || "";
+            setIsAccountPrivate(userData.isPrivate || false);
             setUserProfile({
               displayName: userData.displayName || userData.username || "Your Profile",
               username: userData.username || "user",
@@ -64,6 +66,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (res.ok) {
             const userData = await res.json();
             userId = userData.id || "";
+            setIsAccountPrivate(userData.isPrivate || false);
             setUserProfile({
               displayName: userData.displayName || userData.username || "Creator",
               username: userData.username || username,
@@ -230,7 +233,11 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         {/* Header for Own Profile (Settings) */}
         {isOwnProfile && (
           <div className="flex items-center justify-between mb-4 -mt-14">
-            <div className="flex-1" />
+            <div className="flex-1 flex items-center gap-2">
+              {isAccountPrivate && (
+                <Lock className="h-4 w-4 text-muted-foreground" data-testid="icon-private-indicator" />
+              )}
+            </div>
             <Button
               variant="ghost"
               size="icon"

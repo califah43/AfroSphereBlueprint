@@ -17,6 +17,7 @@ export const users = pgTable("users", {
   banner: text("banner").default(""),
   website: text("website").default(""),
   profession: text("profession").default(""),
+  isPrivate: boolean("is_private").default(false),
   followerCount: integer("follower_count").default(0),
   followingCount: integer("following_count").default(0),
   postCount: integer("post_count").default(0),
@@ -40,6 +41,7 @@ export const updateUserSchema = createInsertSchema(users).pick({
   email: true,
   phone: true,
   password: true,
+  isPrivate: true,
 }).partial(); // Make all fields optional for profile updates
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
