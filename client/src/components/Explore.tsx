@@ -131,8 +131,8 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
           </div>
         )}
 
-        <FeaturedAfrican />
-        <TrendingAfrican />
+        <FeaturedAfrican onCreatorClick={onHashtagClick} />
+        <TrendingAfrican onHashtagClick={onHashtagClick} />
         
         <div>
           <h2 className="text-lg font-semibold mb-4">Explore Genres</h2>

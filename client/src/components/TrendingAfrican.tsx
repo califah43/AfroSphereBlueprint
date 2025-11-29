@@ -7,6 +7,10 @@ interface TrendingItem {
   trend: "rising" | "hot";
 }
 
+interface TrendingAfricanProps {
+  onHashtagClick?: (hashtag: string) => void;
+}
+
 const trendingAfrican: TrendingItem[] = [
   { hashtag: "#AfricanFashion", count: "2.3M", trend: "hot" },
   { hashtag: "#AfrobeatsGlobal", count: "1.8M", trend: "hot" },
@@ -15,7 +19,7 @@ const trendingAfrican: TrendingItem[] = [
   { hashtag: "#AfricanCreators", count: "1.2M", trend: "hot" },
 ];
 
-export default function TrendingAfrican() {
+export default function TrendingAfrican({ onHashtagClick }: TrendingAfricanProps) {
   return (
     <div className="max-w-md mx-auto px-4 py-4" data-testid="container-trending-african">
       <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
@@ -27,6 +31,7 @@ export default function TrendingAfrican() {
         {trendingAfrican.map((item, idx) => (
           <div
             key={item.hashtag}
+            onClick={() => onHashtagClick?.(item.hashtag.replace("#", ""))}
             className="flex items-center justify-between p-2 rounded-lg hover-elevate cursor-pointer bg-muted/50"
             data-testid={`trending-item-${idx}`}
           >

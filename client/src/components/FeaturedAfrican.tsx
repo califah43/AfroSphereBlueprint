@@ -11,6 +11,10 @@ interface FeaturedCreator {
   isHot?: boolean;
 }
 
+interface FeaturedAfricanProps {
+  onCreatorClick?: (username: string) => void;
+}
+
 const featuredCreators: FeaturedCreator[] = [
   {
     username: "adikeafrica",
@@ -21,7 +25,7 @@ const featuredCreators: FeaturedCreator[] = [
   },
 ];
 
-export default function FeaturedAfrican() {
+export default function FeaturedAfrican({ onCreatorClick }: FeaturedAfricanProps) {
   return (
     <div className="max-w-md mx-auto px-4 py-6" data-testid="container-featured-african">
       <div className="flex items-center gap-2 mb-4">
@@ -33,6 +37,7 @@ export default function FeaturedAfrican() {
         {featuredCreators.map((creator) => (
           <Card
             key={creator.username}
+            onClick={() => onCreatorClick?.(creator.username)}
             className="overflow-hidden hover-elevate cursor-pointer border-primary/20"
             data-testid={`featured-${creator.username}`}
           >
