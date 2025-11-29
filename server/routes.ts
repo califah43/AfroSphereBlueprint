@@ -312,11 +312,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const viewerId = req.query.viewerId as string;
 
     try {
-      // Get all posts for ranking (before filtering) - order by newest first
-      const allPosts = await db.query.posts.findMany({ 
-        limit: 200,
-        orderBy: (posts, { desc }) => [desc(posts.createdAt)]
-      });
+      // Get all posts for ranking (before filtering)
+      const allPosts = await db.query.posts.findMany({ limit: 200 });
 
       // Calculate engagement score for each post
       const postsWithEngagement = allPosts.map(post => ({
