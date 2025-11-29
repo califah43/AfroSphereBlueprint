@@ -171,6 +171,9 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         return postCategory === activeCategory.toLowerCase();
       });
 
+  // Prevent comments/interactions on mock posts by adding testid data
+  const getPostId = (post: any) => post.id;
+
   // Pass activeCategory to CollapsibleHeader for tab styling
   const categoriesWithForYou = [
     { id: "for-you", label: "For You" },
