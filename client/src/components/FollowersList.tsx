@@ -18,6 +18,7 @@ interface FollowersListProps {
   followerCount: string;
   followingCount: string;
   onClose: () => void;
+  onUserClick?: (username: string) => void;
 }
 
 export default function FollowersList({
@@ -25,6 +26,7 @@ export default function FollowersList({
   followerCount,
   followingCount,
   onClose,
+  onUserClick,
 }: FollowersListProps) {
   const [activeTab, setActiveTab] = useState("followers");
   const [followers, setFollowers] = useState<User[]>([]);
@@ -143,9 +145,10 @@ export default function FollowersList({
                 ) : (
                   <div className="space-y-0.5 divide-y divide-border/30">
                     {followers.map((user) => (
-                      <div
+                      <button
                         key={user.id}
-                        className="flex items-center gap-3 p-4 hover-elevate transition-all"
+                        onClick={() => onUserClick?.(user.username)}
+                        className="w-full flex items-center gap-3 p-4 hover-elevate transition-all text-left"
                         data-testid={`follower-${user.username}`}
                       >
                         <Avatar className="w-12 h-12 ring-2 ring-primary/20">
@@ -155,7 +158,7 @@ export default function FollowersList({
                           <p className="font-semibold text-sm">@{user.username}</p>
                           <p className="text-xs text-muted-foreground">{user.displayName}</p>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -178,9 +181,10 @@ export default function FollowersList({
                 ) : (
                   <div className="space-y-0.5 divide-y divide-border/30">
                     {following.map((user) => (
-                      <div
+                      <button
                         key={user.id}
-                        className="flex items-center gap-3 p-4 hover-elevate transition-all"
+                        onClick={() => onUserClick?.(user.username)}
+                        className="w-full flex items-center gap-3 p-4 hover-elevate transition-all text-left"
                         data-testid={`following-${user.username}`}
                       >
                         <Avatar className="w-12 h-12 ring-2 ring-primary/20">
@@ -190,7 +194,7 @@ export default function FollowersList({
                           <p className="font-semibold text-sm">@{user.username}</p>
                           <p className="text-xs text-muted-foreground">{user.displayName}</p>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}

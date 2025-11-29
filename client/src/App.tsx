@@ -527,6 +527,10 @@ export default function App() {
                 followerCount={currentUserData.followerCount?.toString() || "0"}
                 followingCount={currentUserData.followingCount?.toString() || "0"}
                 onClose={() => setModalView("none")}
+                onUserClick={(username) => {
+                  setSelectedUsername(username);
+                  setModalView("user-profile");
+                }}
               />
             );
           })()}
