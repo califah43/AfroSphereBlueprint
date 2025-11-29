@@ -13,7 +13,7 @@ export default function CollapsibleHeader({ isRefreshing, activeCategory, onCate
   return (
     <div
       className={`sticky top-0 bg-gradient-to-b from-background via-background/95 to-background/80 backdrop-blur-md border-b border-border/30 z-50 transition-all duration-300 transform-gpu shadow-sm ${
-        isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-0 opacity-100"
       }`}
     >
       <div className="max-w-md mx-auto px-4 py-4">

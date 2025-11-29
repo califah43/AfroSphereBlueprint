@@ -227,6 +227,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     if (pullDistance > 80 && !isRefreshing) {
       setIsRefreshing(true);
       setHasNewPosts(false);
+      setIsHeaderVisible(true); // Keep header visible during refresh
       // Force refetch in background - no artificial delay
       queryClient.refetchQueries({ queryKey: ['/api/posts'] });
       // End refresh animation after smooth completion
