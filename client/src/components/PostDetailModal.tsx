@@ -9,11 +9,14 @@ interface PostDetailModalProps {
 export default function PostDetailModal({ postId, onClose }: PostDetailModalProps) {
   const [postData, setPostData] = useState<any>(null);
   const [postAuthor, setPostAuthor] = useState<any>(null);
+  const [authorBadges, setAuthorBadges] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPostData = async () => {
       try {
+        // Fetch post data
         const res = await fetch(`/api/posts/${postId}`);
         if (res.ok) {
           const post = await res.json();
@@ -24,6 +27,20 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
           if (authorRes.ok) {
             const author = await authorRes.json();
             setPostAuthor(author);
+
+            // Fetch author badges
+            const badgesRes = await fetch(`/api/badges/user/${author.id}`);
+            if (badgesRes.ok) {
+              const badges = await badgesRes.json();
+              setAuthorBadges(Array.isArray(badges) ? badges : []);
+            }
+          }
+
+          // Fetch comments for this post
+          const commentsRes = await fetch(`/api/comments/post/${postId}`);
+          if (commentsRes.ok) {
+            const commentsData = await commentsRes.json();
+            setComments(Array.isArray(commentsData) ? commentsData : []);
           }
         }
       } catch (error) {
@@ -55,12 +72,18 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
   return (
     <PostDetail
       postId={postId}
-      author={{ username: postAuthor?.username || "creator" }}
+      author={{ 
+        username: postAuthor?.username || "creator",
+        avatar: postAuthor?.avatar || "",
+        displayName: postAuthor?.displayName || postAuthor?.username || "creator",
+        badges: authorBadges
+      } as any}
       imageUrl={postData.image}
       caption={postData.caption}
-      likes={postData.likes}
+      likes={postData.likes || 0}
       timeAgo={postData.createdAt ? new Date(postData.createdAt).toLocaleString() : "now"}
-      comments={[]}
+      comments={comments}
+      genre={postData.category}
       onClose={onClose}
     />
   );
