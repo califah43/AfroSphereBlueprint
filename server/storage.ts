@@ -97,6 +97,7 @@ export class MemStorage implements IStorage {
       profession: "",
       isPrivate: false,
       firebaseUid: null,
+      fcmToken: null,
       followerCount: 0,
       followingCount: 0,
       postCount: 0,

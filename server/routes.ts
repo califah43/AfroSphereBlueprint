@@ -7,6 +7,7 @@ import { eq, and, inArray } from "drizzle-orm";
 import multer from "multer";
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge } from "@shared/schema";
+import { sendPushNotification } from "./firebase-admin";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
