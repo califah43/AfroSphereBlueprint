@@ -106,13 +106,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         allUsers.forEach((u: any) => {
           userMap.set(u.id, u);
         });
-        
-        // If no posts, return mock posts as fallback
-        if (!posts || posts.length === 0) {
-          return mockPosts;
-        }
 
-        // Batch check likes for all posts
+        // Batch check likes for real posts
         let likedPostIds: string[] = [];
         if (userId && posts.length > 0) {
           try {
@@ -130,8 +125,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
           }
         }
         
-        // Transform posts using pre-fetched user data and likes
-        return posts.map((p: any) => {
+        // Transform real posts using pre-fetched user data and likes
+        const transformedRealPosts = (posts || []).map((p: any) => {
           const user = userMap.get(p.userId);
           const username = user?.username || (user?.displayName ? user.displayName.split(' ')[0] : "creator");
           return {
@@ -150,6 +145,9 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             isLiked: likedPostIds.includes(p.id),
           };
         });
+        
+        // Combine real posts (at top) with mock posts (below) - always show both
+        return [...transformedRealPosts, ...mockPosts];
       } catch {
         return mockPosts;
       }
