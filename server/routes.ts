@@ -502,6 +502,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             postId: parsed.postId,
             message: `${commenterUser?.displayName || commenterUser?.username || 'Someone'} commented on your post`,
           });
+          
+          // Send FCM push notification to post owner
+          const fcmToken = await storage.getFCMToken(post.userId);
+          if (fcmToken) {
+            await sendPushNotification(
+              fcmToken,
+              `New comment from ${commenterUser?.displayName || commenterUser?.username || 'Someone'}`,
+              'Someone just commented on your post',
+              { type: 'comment', postId: parsed.postId, commentId: comment.id }
+            );
+          }
         }
       } catch (e) {
         console.error('Failed to create comment notification:', e);
@@ -581,6 +592,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const post = await storage.getPost(postId);
           if (post && post.userId !== userId) {
             const likerUser = await storage.getUser(userId);
+            const postOwner = await storage.getUser(post.userId);
+            
             await storage.createNotification({
               userId: post.userId,
               type: 'like',
@@ -588,6 +601,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
               postId: postId,
               message: `${likerUser?.displayName || likerUser?.username || 'Someone'} liked your post`,
             });
+            
+            // Send FCM push notification to post owner
+            const fcmToken = await storage.getFCMToken(post.userId);
+            if (fcmToken) {
+              await sendPushNotification(
+                fcmToken,
+                `Like from ${likerUser?.displayName || likerUser?.username || 'Someone'}`,
+                'Someone just liked your post',
+                { type: 'like', postId, userId }
+              );
+            }
           }
         } catch (e) {
           console.error('Failed to create like notification:', e);
@@ -678,6 +702,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fromUserId: followerId,
             message: `${followerUser?.displayName || followerUser?.username || 'Someone'} started following you`,
           });
+          
+          // Send FCM push notification to followed user
+          const fcmToken = await storage.getFCMToken(followingId);
+          if (fcmToken) {
+            await sendPushNotification(
+              fcmToken,
+              `New follower: ${followerUser?.displayName || followerUser?.username || 'Someone'}`,
+              'Someone just started following you',
+              { type: 'follow', userId: followerId }
+            );
+          }
         } catch (e) {
           console.error('Failed to create follow notification:', e);
         }
