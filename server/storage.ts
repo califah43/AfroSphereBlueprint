@@ -78,6 +78,8 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      email: "",
+      phone: "",
       displayName: "",
       bio: "",
       location: "",
@@ -130,6 +132,7 @@ export class MemStorage implements IStorage {
     const newPost: Post = {
       ...post,
       caption: post.caption || null,
+      images: post.images || null,
       id,
       likes: 0,
       commentCount: 0,
