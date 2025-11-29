@@ -26,6 +26,8 @@ interface PostDetailProps {
   author: {
     username: string;
     avatar?: string;
+    displayName?: string;
+    badges?: any[];
   };
   imageUrl: string;
   caption: string;
@@ -217,17 +219,30 @@ export default function PostDetail({
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3 flex-1">
               <Avatar className="w-10 h-10">
+                {author.avatar && <img src={author.avatar} alt={author.username} className="w-full h-full object-cover rounded-full" />}
                 <AvatarFallback>{author.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <p className="font-semibold text-sm" data-testid="text-detail-username">
-                  {author.username}
-                </p>
-                <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="font-semibold text-sm truncate" data-testid="text-detail-username">
+                    {author.displayName || author.username}
+                  </p>
+                  {author.badges && author.badges.length > 0 && (
+                    <div className="flex gap-1 shrink-0">
+                      {author.badges.slice(0, 2).map((badge) => (
+                        <Badge key={badge.id} variant="outline" className="text-xs px-1.5 py-0">
+                          {badge.badgeType}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">@{author.username}</p>
+                <div className="flex items-center gap-2 mt-1">
                   <p className="text-xs text-muted-foreground">{timeAgo}</p>
                   {genreData && (
                     <Badge variant="outline" className="text-xs">
-                      {genreData.emoji} {genreData.name}
+                      {genreData.name}
                     </Badge>
                   )}
                 </div>
