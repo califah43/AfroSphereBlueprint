@@ -56,15 +56,51 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   const [showBannerCropper, setShowBannerCropper] = useState(false);
   const [bannerToEdit, setBannerToEdit] = useState("");
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (base64: string, maxSize = 500000): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const maxWidth = 800;
+        const maxHeight = 800;
+        
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) ctx.drawImage(img, 0, 0, width, height);
+        
+        let quality = 0.9;
+        let result = canvas.toDataURL("image/jpeg", quality);
+        
+        while (result.length > maxSize && quality > 0.1) {
+          quality -= 0.1;
+          result = canvas.toDataURL("image/jpeg", quality);
+        }
+        
+        resolve(result);
+      };
+      img.src = base64;
+    });
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       console.log("Avatar file selected:", file.name, file.size);
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        console.log("Avatar base64 length:", base64.length);
-        setFormData({ ...formData, avatar: base64 });
+        const compressed = await compressImage(base64, 300000);
+        console.log("Avatar compressed from", base64.length, "to", compressed.length);
+        setFormData({ ...formData, avatar: compressed });
         toast({ title: "Profile photo updated", description: "Your new profile photo is ready to save" });
       };
       reader.onerror = () => {
@@ -75,15 +111,16 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
     }
   };
 
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       console.log("Banner file selected:", file.name, file.size);
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        console.log("Banner base64 length:", base64.length);
-        setBannerToEdit(base64);
+        const compressed = await compressImage(base64, 200000);
+        console.log("Banner compressed from", base64.length, "to", compressed.length);
+        setBannerToEdit(compressed);
         setShowBannerCropper(true);
       };
       reader.onerror = () => {
@@ -122,8 +159,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         location: formData.location,
         website: formData.website,
         profession: formData.profession,
-        ...(formData.avatar && { avatar: formData.avatar }),
-        ...(formData.banner && { banner: formData.banner }),
+        ...(formData.avatar && formData.avatar !== JSON.parse(localStorage.getItem("currentUserData") || "{}").avatar && { avatar: formData.avatar }),
+        ...(formData.banner && formData.banner !== JSON.parse(localStorage.getItem("currentUserData") || "{}").banner && { banner: formData.banner }),
       };
 
       console.log("Sending profile update with payload size:", JSON.stringify(payload).length);
