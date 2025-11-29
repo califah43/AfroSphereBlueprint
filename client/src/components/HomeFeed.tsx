@@ -82,6 +82,9 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
     queryKey: ['/api/posts', refreshKey],
+    staleTime: 30000, // Data stays fresh for 30s, then silently refetch in background
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    refetchInterval: 45000, // Auto-refetch every 45s for seamless updates
     placeholderData: keepPreviousData, // Keep showing old data while refetching - no skeleton flash!
     queryFn: async () => {
       try {
@@ -224,12 +227,13 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     if (pullDistance > 80 && !isRefreshing) {
       setIsRefreshing(true);
       setHasNewPosts(false);
-      // Invalidate query to force refetch of real posts
-      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      // Force refetch in background - no artificial delay
+      queryClient.refetchQueries({ queryKey: ['/api/posts'] });
+      // End refresh animation after smooth completion
       setTimeout(() => {
         setIsRefreshing(false);
         setPullDistance(0);
-      }, 1200);
+      }, 800);
     } else {
       setPullDistance(0);
     }
@@ -294,13 +298,15 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         isVisible={isHeaderVisible}
       />
 
-      {/* Pull-to-Refresh Indicator - Subtle */}
-      {pullDistance > 0 && !isRefreshing && (
+      {/* Pull-to-Refresh Indicator - Subtle and smooth */}
+      {pullDistance > 0 && (
         <div 
-          className="flex justify-center items-center transition-all duration-300"
+          className="flex justify-center items-center"
           style={{ 
             height: `${pullDistance}px`,
-            opacity: Math.min(pullDistance / 80, 0.6)
+            opacity: Math.min(pullDistance / 80, 0.4),
+            transform: `scale(${Math.min(pullDistance / 80, 1)})`,
+            transition: isRefreshing ? 'none' : 'all 150ms ease-out'
           }}
         >
           <RefreshCw 
