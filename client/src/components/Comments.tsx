@@ -415,10 +415,14 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                 <div className="flex-1 min-w-0">
                   {/* Comment Bubble */}
                   <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 group-hover:border-primary/30 transition-all duration-200">
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <p className="font-semibold text-sm text-foreground" data-testid={`text-comment-author-${comment.id}`}>
-                        {comment.author || "Anonymous"}
-                      </p>
+                    <div className="flex items-baseline gap-2 mb-1 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <p className="font-semibold text-sm text-foreground" data-testid={`text-comment-author-${comment.id}`}>
+                          {comment.author || "Anonymous"}
+                        </p>
+                        <BadgeDisplay userId={comment.id} className="inline-flex" />
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">@{comment.author || "user"}</p>
                       <span className="text-xs text-muted-foreground font-medium" data-testid={`text-comment-time-${comment.id}`}>
                         {comment.timeAgo}
                       </span>

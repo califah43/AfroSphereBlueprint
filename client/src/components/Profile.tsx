@@ -291,16 +291,16 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Name & Username - Left Aligned */}
         <div className="mb-4">
-          {/* Name Only */}
-          <h1 className="text-lg font-black tracking-tight mb-0.5" data-testid="text-profile-displayname">
-            {userProfile?.displayName || "Loading..."}
-          </h1>
-          
-          {/* Username with Badges */}
-          <div className="flex items-center gap-1 mb-2">
-            <p className="text-xs text-muted-foreground font-medium" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+          {/* Display Name with Badges */}
+          <div className="flex items-center gap-1 mb-1">
+            <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
+              {userProfile?.displayName || "Loading..."}
+            </h1>
             {userId && <BadgeDisplay userId={userId} className="inline-flex" />}
           </div>
+          
+          {/* Unique Username Handle */}
+          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
 
           {/* Bio - Compact elegance */}
           <p className="text-xs text-foreground leading-tight mb-2" data-testid="text-profile-bio">
