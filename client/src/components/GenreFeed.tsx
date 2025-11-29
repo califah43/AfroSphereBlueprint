@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import PostCard from "./PostCard";
 import { GENRES } from "@shared/genres";
-import { type Post } from "@shared/schema";
 
 interface GenreFeedProps {
   genreId: string;
@@ -13,7 +12,7 @@ interface GenreFeedProps {
 }
 
 export default function GenreFeed({ genreId, onClose, onPostClick }: GenreFeedProps) {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const genre = GENRES[genreId.toUpperCase()];
   
   const { data, isLoading } = useQuery({

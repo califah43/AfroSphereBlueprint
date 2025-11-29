@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import PostCard from "./PostCard";
-import { type Post } from "@shared/schema";
 
 interface CategoryFeedProps {
   category: string;
@@ -12,7 +11,7 @@ interface CategoryFeedProps {
 }
 
 export default function CategoryFeed({ category, onClose, onPostClick }: CategoryFeedProps) {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
   
   const { data, isLoading } = useQuery({
     queryKey: [`/api/posts/category/${category}`],
