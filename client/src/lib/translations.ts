@@ -251,6 +251,94 @@ export const translations: Record<Language, Record<string, string>> = {
     "feed.noPost": "Hakuna posts bado",
     "feed.beFirst": "Kuwa wa kwanza kushiriki kitu kizuri!",
     "feed.newPosts": "Angalia posts mpya",
+    "feed.noComments": "Hakuna maoni bado",
+    "feed.noPosts": "Hakuna posts bado",
+    "feed.liked": "alikupenda post yako",
+    "feed.startedFollowing": "alizuia kuanzia kufuatilia wewe",
+    "feed.commented": "alilingana na post yako",
+    "feed.trending": "Post yako inatrendia katika",
+    "settings.loading": "Inajaza mipango...",
+    "notifications.youllSeeUpdates": "Utaona updates hapa",
+    "notifications.today": "Leo",
+    "notifications.earlier": "Hapo Awali",
+    "notifications.follow": "Fuatilia",
+    
+    // Profile
+    "profile.posts": "Posts",
+    "profile.followers": "Wafuasi",
+    "profile.following": "Inafuatilia",
+    "profile.editProfile": "Hariri Wasifu",
+    "profile.follow": "Fuatilia",
+    "profile.unfollow": "Sita Kuanzia Kufuatilia",
+    "profile.privateAccount": "Akaunti hii ni ya haraka",
+    "profile.sendFollowRequest": "Tuma Ombi la Kufuatilia",
+    "profile.followRequestSent": "Ombi la kufuatilia limetumwa",
+    "profile.followRequestPending": "Ombi la kufuatilia linangoja",
+    "profile.viewFollowRequests": "Angalia Maombi",
+    "profile.acceptFollowRequest": "Kubali",
+    "profile.declineFollowRequest": "Kata",
+    "profile.missingUserInfo": "Taarifa za mtumiaji zinakosekana",
+    "profile.userNotFound": "Mtumiaji hajapatikana",
+    "profile.failedToToggleFollow": "Imeshindwa kuanzia au kusita",
+    "profile.connectionError": "Kosa la muunganisho",
+    "profile.failedToProcess": "Imeshindwa kukanisha ombi",
+    "profile.saveChanges": "Hifadhi Mabadiliko",
+    "profile.nameRequired": "Jina linaloonekana linahitajika",
+    
+    // Explore
+    "explore.title": "Tukuza",
+    "explore.searchPlaceholder": "Tafuta waendezeaji, hashtags...",
+    "explore.searchCreators": "Tafuta waendezeaji",
+    "explore.trendingCreators": "Waendezeaji Wanaoendea",
+    "explore.trendingHashtags": "Hashtags Zinazoendelea",
+    "explore.popularPosts": "Posts Maajabu",
+    "explore.featured": "Featured African Creators",
+    "explore.trending": "Inendea",
+    "explore.popular": "Maajabu",
+    
+    // Notifications
+    "notifications.title": "Arifa",
+    "notifications.noNotifications": "Hakuna arifa bado",
+    
+    // Comments
+    "comments.title": "Maoni",
+    "comments.noComments": "Hakuna maoni bado",
+    
+    // CreatePost
+    "create.title": "Tengeneza Post",
+    "create.caption": "Menene katika akili yako?",
+    "create.category": "Chagua Aina",
+    "create.post": "Chapisha",
+    "create.cancel": "Ghairi",
+    "create.hashtags": "Hashtags",
+    "create.hashtagPlaceholder": "#mitindo #sanaa",
+    "create.brightness": "Mwangaza",
+    "create.contrast": "Tofauti",
+    "create.saturation": "Saturation",
+    "create.proTipLabel": "Kidogo cha ushauri:",
+    "create.proTip": "Posts zinazoingilia utamaduni wa Kiafrika hufanya vizuri!",
+    "create.missingFields": "Sehemu zinazokosekana",
+    "create.missingFieldsDesc": "Tafadhali ongeza maoni na angalau picha moja",
+    "create.notAuthenticated": "Mtumiaji hajasomekeza. Tafadhali ingia tena.",
+    
+    // Admin
+    "admin.dashboard": "Admin Dashboard",
+    "admin.superAdmin": "Super Admin",
+    "admin.systemAdmin": "Msimamizi wa Mfumo",
+    "admin.totalUsers": "Jumla ya Watumiaji",
+    "admin.totalPosts": "Jumla ya Posts",
+    "admin.dailyActiveUsers": "Watumiaji Wenye Shughuli Kila Siku",
+    "admin.reportsToday": "Ripoti Leo",
+    "admin.newSignupsToday": "Ujitaji Mpya Leo",
+    
+    // Follow
+    "follow.notLoggedIn": "Haujaingia",
+    "follow.unfollowed": "Usifuatilianaje",
+    "follow.failed": "Imeshindwa kusita",
+    
+    // Guidelines
+    "guidelines.title": "Mwongozo wa Jamii",
+    "guidelines.subtitle": "Weka AfroSphere salama na muhimu",
     
     // Settings
     "settings.title": "Mipango",
@@ -521,6 +609,18 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.bio": "Ìtàn-àrùn",
     "profile.location": "Ibílẹ̀",
     "profile.profession": "Iṣẹ́",
+    "profile.follow": "Tẹ̀ní",
+    "profile.unfollow": "Tán Tẹ̀ní",
+    "profile.followers": "Àwọn Ọ̀dọ̀mọ̀",
+    "profile.following": "Ń tẹ̀ní",
+    "profile.posts": "Àwọn Àkọsílẹ̀",
+    "profile.saveChanges": "Tó Pé Àwọn Àwọn",
+    "profile.nameRequired": "Jina la Difunga Linahitajika",
+    "create.title": "Yenza Ipost",
+    "create.post": "Chapisha",
+    "create.cancel": "Ghairi",
+    "notifications.title": "Ìkilo",
+    "notifications.noNotifications": "Hakuna Arifa Bado",
   },
   ha: {
     // Navigation
