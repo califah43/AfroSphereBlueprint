@@ -210,25 +210,25 @@ export default function App() {
     const userId = localStorage.getItem("currentUserId");
     const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
     
-    // Only send text fields to backend (avatar/banner can be added later via edit profile)
+    // Send all profile data including avatar and banner to backend
     const profileData = {
       displayName: signupUsername,
       bio: signupProfileData.bio || "",
       profession: signupProfileData.profession || "",
+      avatar: signupProfileData.avatar || "",
+      banner: signupProfileData.banner || "",
     };
     
     // Save to localStorage with all data including images
     const updated = {
       ...currentUserData,
       ...profileData,
-      avatar: signupProfileData.avatar || "",
-      banner: signupProfileData.banner || "",
       username: signupUsername,
       interests: interests,
     };
     localStorage.setItem("currentUserData", JSON.stringify(updated));
 
-    // Save to backend (without large image data to avoid quota issues)
+    // Save to backend with avatar and banner
     if (userId) {
       try {
         const response = await fetch(`/api/users/${userId}`, {
@@ -239,7 +239,7 @@ export default function App() {
         
         if (response.ok) {
           const savedUser = await response.json();
-          // Preserve locally-stored images
+          // Update localStorage with saved data including images
           localStorage.setItem("currentUserData", JSON.stringify({
             ...savedUser,
             avatar: signupProfileData.avatar || "",
