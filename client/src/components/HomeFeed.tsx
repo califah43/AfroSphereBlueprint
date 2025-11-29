@@ -249,17 +249,20 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     const handleScroll = () => {
       const currentScrollY = container.scrollTop;
       const { scrollHeight, clientHeight } = container;
+      const scrollDelta = currentScrollY - lastScrollTop;
       
-      // Facebook-style header hide/show logic
+      // Facebook-style header hide/show logic with threshold to prevent jitter
       if (!isRefreshing) {
-        // scroll down → hide header
-        if (currentScrollY > lastScrollTop) {
+        // Only toggle on significant scroll (15px threshold)
+        // scroll down significantly → hide header
+        if (scrollDelta > 15) {
           setIsHeaderVisible(false);
         }
-        // scroll up → show header
-        else {
+        // scroll up significantly → show header
+        else if (scrollDelta < -15) {
           setIsHeaderVisible(true);
         }
+        // small scrolls don't change header state
       } else {
         // Always show header during refresh
         setIsHeaderVisible(true);
