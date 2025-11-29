@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   followingCount: integer("following_count").default(0),
   postCount: integer("post_count").default(0),
   firebaseUid: text("firebase_uid"), // Firebase UID for auth mapping (optional)
+  fcmToken: text("fcm_token"), // Firebase Cloud Messaging token for push notifications
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
