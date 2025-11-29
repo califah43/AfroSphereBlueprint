@@ -27,6 +27,7 @@ export interface Post {
   author: {
     id: string;
     username: string;
+    uniqueUsername?: string;
     avatar?: string;
   };
   imageUrl: string;
@@ -189,8 +190,8 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1">
-              <p className="text-xs text-muted-foreground/60" data-testid={`text-username-${post.id}`}>
-                @{post.author.username}
+              <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
+                {post.author.username}
               </p>
               {post.badges && post.badges.length > 0 ? (
                 <div className="flex items-center gap-1">
@@ -208,6 +209,9 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 <BadgeDisplay userId={post.author.id} className="inline-flex" />
               )}
             </div>
+            <p className="text-xs text-muted-foreground/60" data-testid={`text-handle-${post.id}`}>
+              @{post.author.uniqueUsername}
+            </p>
             <p className="text-sm text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
