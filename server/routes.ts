@@ -869,7 +869,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/settings/:userId", async (req, res) => {
     try {
+      const { privateAccount, ...otherSettings } = req.body;
       const settings = await storage.saveUserSettings(req.params.userId, req.body);
+      
+      // Sync privateAccount to users table isPrivate field
+      if (privateAccount !== undefined) {
+        await storage.updateUser(req.params.userId, { isPrivate: privateAccount });
+      }
+      
       res.json(settings);
     } catch (error) {
       res.status(400).json({ error: "Failed to save settings" });
