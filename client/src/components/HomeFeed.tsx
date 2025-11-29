@@ -96,8 +96,9 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         }
 
         // Fetch posts, all users, and all badges in parallel
+        const viewerIdParam = userId ? `&viewerId=${userId}` : '';
         const [postsRes, usersRes, badgesRes] = await Promise.all([
-          fetch('/api/posts?limit=50'),
+          fetch(`/api/posts?limit=50${viewerIdParam}`),
           fetch('/api/users/all'),
           fetch('/api/badges/all'),
         ]);

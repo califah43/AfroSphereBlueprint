@@ -28,6 +28,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowRequestPending, setIsFollowRequestPending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -334,46 +335,59 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       
       if (res.ok) {
         const data = await res.json();
-        setIsFollowing(data.following);
         
-        // Optimistically update counts immediately
-        if (data.following) {
-          // When following: increase target's follower count and our following count
+        // Handle follow request for private accounts
+        if (data.followRequest) {
+          setIsFollowRequestPending(true);
+          toast({
+            title: t("profile.followRequestSent"),
+            description: `Follow request sent to @${targetUsername}`,
+            className: "border-primary/20 bg-card",
+          });
+        } else if (data.following) {
+          setIsFollowing(true);
           setUserProfile((prev: any) => ({
             ...prev,
             followers: (parseInt(prev.followers || "0") + 1).toString(),
           }));
-          // Update current user's following count in localStorage
           const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
           if (currentUserData && currentUserData.id) {
             currentUserData.followingCount = (currentUserData.followingCount || 0) + 1;
             localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
           }
+          toast({
+            title: t("profile.following"),
+            description: `You're now following @${targetUsername}`,
+            className: "border-primary/20 bg-card",
+          });
         } else {
-          // When unfollowing: decrease target's follower count and our following count
+          setIsFollowing(false);
           setUserProfile((prev: any) => ({
             ...prev,
             followers: Math.max(0, parseInt(prev.followers || "1") - 1).toString(),
           }));
-          // Update current user's following count in localStorage
           const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
           if (currentUserData && currentUserData.id) {
             currentUserData.followingCount = Math.max(0, (currentUserData.followingCount || 1) - 1);
             localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
           }
+          toast({
+            title: t("profile.unfollowed"),
+            description: `You unfollowed @${targetUsername}`,
+            className: "border-primary/20 bg-card",
+          });
         }
-        
-        toast({
-          title: data.following ? t("profile.following") : t("profile.unfollowed"),
-          description: data.following ? `You're now following @${targetUsername}` : `You unfollowed @${targetUsername}`,
-          className: "border-primary/20 bg-card",
-        });
       } else {
-        toast({
-          title: t("common.error"),
-          description: t("profile.failedToToggleFollow"),
-          variant: "destructive",
-        });
+        const errorData = await res.json();
+        if (errorData.error?.includes("already sent")) {
+          setIsFollowRequestPending(true);
+        } else {
+          toast({
+            title: t("common.error"),
+            description: t("profile.failedToToggleFollow"),
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
@@ -562,12 +576,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             </Button>
           ) : (
             <Button 
-              className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm ${isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
+              className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm ${isFollowRequestPending ? 'bg-card border border-border text-foreground hover:bg-card/80' : isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
               onClick={toggleFollow}
-              disabled={isLoading}
+              disabled={isLoading || isFollowRequestPending}
               data-testid="button-follow"
             >
-              {isLoading ? "..." : (isFollowing ? "Following" : "Follow")}
+              {isLoading ? "..." : (isFollowRequestPending ? t("profile.followRequestPending") : isFollowing ? t("profile.unfollow") : (isAccountPrivate ? t("profile.sendFollowRequest") : t("profile.follow")))}
             </Button>
           )}
         </div>
