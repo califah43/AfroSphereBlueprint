@@ -172,18 +172,24 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     setShowDeleteDialog(false);
   };
 
+  // Safe author fallback values
+  const authorUsername = post.author?.username || "Anonymous";
+  const authorHandle = post.author?.uniqueUsername || post.author?.username || "unknown";
+  const authorId = post.author?.id || "";
+  const authorAvatar = post.author?.avatar;
+
   return (
     <div className="bg-background overflow-hidden mb-0 border-b border-border/20" data-testid={`card-post-${post.id}`}>
       {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style */}
       <div className="flex items-start justify-between gap-3 px-4 py-3">
         <button 
-          onClick={() => onAuthorClick?.(post.author.uniqueUsername || post.author.username)}
+          onClick={() => onAuthorClick?.(post.author?.uniqueUsername || post.author?.username)}
           className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
           <Avatar className="w-12 h-12">
-            <AvatarImage src={post.author.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{post.author.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarImage src={authorAvatar} />
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{authorUsername[0]?.toUpperCase() || "A"}</AvatarFallback>
           </Avatar>
         </button>
 
@@ -191,7 +197,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1">
               <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
-                {post.author.username}
+                {authorUsername}
               </p>
               {post.badges && post.badges.length > 0 ? (
                 <div className="flex items-center gap-1">
@@ -206,11 +212,11 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                   ))}
                 </div>
               ) : (
-                <BadgeDisplay userId={post.author.id} className="inline-flex" />
+                authorId && <BadgeDisplay userId={authorId} className="inline-flex" />
               )}
             </div>
             <p className="text-xs text-muted-foreground/60" data-testid={`text-handle-${post.id}`}>
-              @{post.author.uniqueUsername}
+              @{authorHandle}
             </p>
             <span className="text-xs text-muted-foreground/60">·</span>
             <p className="text-xs text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
