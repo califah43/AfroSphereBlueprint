@@ -92,19 +92,30 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
           userId = userData.id;
         }
 
-        // Fetch posts and all users in parallel
-        const [postsRes, usersRes] = await Promise.all([
+        // Fetch posts, all users, and all badges in parallel
+        const [postsRes, usersRes, badgesRes] = await Promise.all([
           fetch('/api/posts?limit=50'),
           fetch('/api/users/all'),
+          fetch('/api/badges/all'),
         ]);
         
         const posts = await postsRes.json();
         const allUsers = usersRes.ok ? await usersRes.json() : [];
+        const allBadges = badgesRes.ok ? await badgesRes.json() : [];
         
         // Create a map for fast user lookup
         const userMap = new Map();
         allUsers.forEach((u: any) => {
           userMap.set(u.id, u);
+        });
+
+        // Create a map for fast badge lookup by userId
+        const badgeMap = new Map();
+        (allBadges || []).forEach((badgeAssignment: any) => {
+          if (!badgeMap.has(badgeAssignment.userId)) {
+            badgeMap.set(badgeAssignment.userId, []);
+          }
+          badgeMap.get(badgeAssignment.userId).push(badgeAssignment);
         });
 
         // Batch check likes for real posts
@@ -125,7 +136,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
           }
         }
         
-        // Transform real posts using pre-fetched user data and likes
+        // Transform real posts using pre-fetched user data, likes, and badges
         const transformedRealPosts = (posts || []).map((p: any) => {
           const user = userMap.get(p.userId);
           const username = user?.username || (user?.displayName ? user.displayName.split(' ')[0] : "creator");
@@ -144,6 +155,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             timeAgo: formatTimeAgo(p.createdAt),
             category: p.category || "for-you",
             isLiked: likedPostIds.includes(p.id),
+            badges: badgeMap.get(p.userId) || [],
           };
         });
         

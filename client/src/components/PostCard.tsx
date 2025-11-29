@@ -37,6 +37,7 @@ export interface Post {
   timeAgo: string;
   isLiked?: boolean;
   isBookmarked?: boolean;
+  badges?: any[];
 }
 
 interface PostCardProps {
@@ -191,7 +192,21 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
                 {post.author.username}
               </p>
-              <BadgeDisplay userId={post.author.id} className="inline-flex" />
+              {post.badges && post.badges.length > 0 ? (
+                <div className="flex items-center gap-1">
+                  {post.badges.map((badge) => (
+                    <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                      <img 
+                        src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                        alt={badge.name}
+                        className="w-full h-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <BadgeDisplay userId={post.author.id} className="inline-flex" />
+              )}
             </div>
             <p className="text-sm text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
