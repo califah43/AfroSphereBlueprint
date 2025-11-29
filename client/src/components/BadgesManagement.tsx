@@ -114,6 +114,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const [newBadgeIcon, setNewBadgeIcon] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [assigningBadgeId, setAssigningBadgeId] = useState<string | null>(null);
   const [assignUsername, setAssignUsername] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -130,8 +131,19 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
       setIsLoading(true);
       const response = await fetch("/api/admin/badges");
       if (response.ok) {
-        const data = await response.json();
-        setBadges(data || DEFAULT_BADGES);
+        const badgesData = await response.json();
+        // Count users per badge
+        const badgesWithCounts = await Promise.all((badgesData || []).map(async (badge: any) => {
+          try {
+            const userBadgesRes = await fetch(`/api/badges/user/${badge.id}`);
+            if (userBadgesRes.ok) {
+              const userBadges = await userBadgesRes.json();
+              return { ...badge, usersCount: Array.isArray(userBadges) ? userBadges.length : 0 };
+            }
+          } catch (e) {}
+          return badge;
+        }));
+        setBadges(badgesWithCounts || DEFAULT_BADGES);
       }
     } catch (error) {
       console.error("Failed to fetch badges:", error);
@@ -269,9 +281,13 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
         const badgeName = badges.find(b => b.id === assigningBadgeId)?.name;
         const selectedUser = usersList.find(u => u.id === selectedUserId);
         toast({ title: "Success", description: `Badge "${badgeName}" assigned to @${selectedUser?.username}` });
-        setAssigningBadgeId(null);
-        setSelectedUserId("");
         await fetchBadges();
+        // Delay dialog close to let toast show
+        setTimeout(() => {
+          setShowAssignDialog(false);
+          setAssigningBadgeId(null);
+          setSelectedUserId("");
+        }, 1500);
       } else {
         toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
       }
@@ -447,7 +463,13 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <span data-testid={`text-badge-users-${badge.id}`}>{badge.usersCount} users</span>
                 </div>
-                <Dialog>
+                <Dialog open={showAssignDialog && assigningBadgeId === badge.id} onOpenChange={(open) => {
+                  if (!open) {
+                    setShowAssignDialog(false);
+                    setAssigningBadgeId(null);
+                    setSelectedUserId("");
+                  }
+                }}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -455,6 +477,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                       className="w-full"
                       onClick={() => {
                         setAssigningBadgeId(badge.id);
+                        setShowAssignDialog(true);
                         fetchUsers();
                       }}
                       data-testid={`button-assign-badge-${badge.id}`}
@@ -462,12 +485,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                       Assign to User
                     </Button>
                   </DialogTrigger>
-                  <DialogContent data-testid={`dialog-assign-badge-${badge.id}`} onOpenChange={(open) => {
-                    if (!open) {
-                      setAssigningBadgeId(null);
-                      setSelectedUserId("");
-                    }
-                  }}>
+                  <DialogContent data-testid={`dialog-assign-badge-${badge.id}`}>
                     <DialogHeader>
                       <DialogTitle>Assign Badge: {badge.name}</DialogTitle>
                       <DialogDescription>Select a user to assign this badge to</DialogDescription>
