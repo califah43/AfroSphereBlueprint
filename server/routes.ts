@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate engagement score for each post
       const postsWithEngagement = allPosts.map(post => ({
         ...post,
-        engagementScore: (post.likes * 1) + (post.commentCount * 2),
+        engagementScore: ((post.likes || 0) * 1) + ((post.commentCount || 0) * 2),
       }));
 
       // Fetch following list and user data
@@ -347,7 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Sort each category by engagement/recency
       followingPosts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
-      trendingPosts.sort((a, b) => b.engagementScore - a.engagementScore);
+      trendingPosts.sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0));
       recentPosts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
 
       // Mix posts using weighted algorithm
