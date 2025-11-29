@@ -55,16 +55,11 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
       {badges.map((badge) => (
         <div
           key={badge.badgeId}
-          className="w-4 h-4 flex items-center justify-center flex-shrink-0 overflow-hidden"
+          className="w-4 h-4 flex items-center justify-center flex-shrink-0"
           title={badge.name}
           data-testid={`badge-${badge.name}-${userId}`}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="w-full h-full"
-            dangerouslySetInnerHTML={{ __html: badge.icon.replace('<svg', '').replace('</svg>', '') }}
-          />
-        </div>
+          dangerouslySetInnerHTML={{ __html: badge.icon }}
+        />
       ))}
     </div>
   );
