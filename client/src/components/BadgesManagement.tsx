@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Plus, Edit2, Trash2, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ChevronLeft, Plus, Edit2, Trash2, Users, Wand2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -93,6 +94,7 @@ interface BadgesManagementProps {
 }
 
 export default function BadgesManagement({ onBack }: BadgesManagementProps) {
+  const { toast } = useToast();
   const [badges, setBadges] = useState<BadgeItem[]>(DEFAULT_BADGES);
   const [editingBadge, setEditingBadge] = useState<BadgeItem | null>(null);
   const [newBadgeName, setNewBadgeName] = useState("");
@@ -103,6 +105,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const [assigningBadgeId, setAssigningBadgeId] = useState<string | null>(null);
   const [assignUsername, setAssignUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSeedingBadges, setIsSeedingBadges] = useState(false);
 
   useEffect(() => {
     fetchBadges();
@@ -123,26 +126,59 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
     }
   };
 
-  const handleCreateBadge = () => {
-    if (newBadgeName && newBadgeDesc && newBadgeIcon) {
-      const newBadge: BadgeItem = {
-        id: newBadgeName.toLowerCase().replace(/\s+/g, "-"),
-        name: newBadgeName,
-        description: newBadgeDesc,
-        icon: newBadgeIcon,
-        color: "text-gray-500",
-        usersCount: 0,
-      };
-      setBadges([...badges, newBadge]);
-      setNewBadgeName("");
-      setNewBadgeDesc("");
-      setNewBadgeIcon("");
-      setShowCreateDialog(false);
+  const handleCreateBadge = async () => {
+    if (!newBadgeName || !newBadgeDesc || !newBadgeIcon) {
+      toast({ title: "Error", description: "All fields are required", variant: "destructive" });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/badges", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newBadgeName,
+          type: "custom",
+          description: newBadgeDesc,
+          iconSvg: newBadgeIcon,
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const newBadge: BadgeItem = {
+          id: data.id || newBadgeName.toLowerCase().replace(/\s+/g, "-"),
+          name: newBadgeName,
+          description: newBadgeDesc,
+          icon: newBadgeIcon,
+          color: "text-gray-500",
+          usersCount: 0,
+        };
+        setBadges([...badges, newBadge]);
+        setNewBadgeName("");
+        setNewBadgeDesc("");
+        setNewBadgeIcon("");
+        setShowCreateDialog(false);
+        toast({ title: "Success", description: "Badge created successfully" });
+      } else {
+        toast({ title: "Error", description: "Failed to create badge", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create badge", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleUpdateBadge = () => {
-    if (editingBadge && newBadgeName && newBadgeDesc && newBadgeIcon) {
+  const handleUpdateBadge = async () => {
+    if (!editingBadge || !newBadgeName || !newBadgeDesc || !newBadgeIcon) {
+      toast({ title: "Error", description: "All fields are required", variant: "destructive" });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
       setBadges(
         badges.map((b) =>
           b.id === editingBadge.id
@@ -155,20 +191,100 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
       setNewBadgeDesc("");
       setNewBadgeIcon("");
       setShowEditDialog(false);
+      toast({ title: "Success", description: "Badge updated successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update badge", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteBadge = (badgeId: string) => {
-    if (confirm("Are you sure you want to delete this badge?")) {
-      setBadges(badges.filter((b) => b.id !== badgeId));
+  const handleDeleteBadge = async (badgeId: string) => {
+    if (!confirm("Are you sure you want to delete this badge?")) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/admin/badges/${badgeId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      if (response.ok) {
+        setBadges(badges.filter((b) => b.id !== badgeId));
+        toast({ title: "Success", description: "Badge deleted successfully" });
+      } else {
+        toast({ title: "Error", description: "Failed to delete badge", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete badge", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleAssignBadge = () => {
-    if (assigningBadgeId && assignUsername) {
-      alert(`Badge "${badges.find(b => b.id === assigningBadgeId)?.name}" assigned to @${assignUsername}`);
-      setAssigningBadgeId(null);
-      setAssignUsername("");
+  const handleAssignBadge = async () => {
+    if (!assigningBadgeId || !assignUsername) {
+      toast({ title: "Error", description: "Badge and username required", variant: "destructive" });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      // First, find the user by username
+      const userRes = await fetch(`/api/users/username/${assignUsername}`);
+      if (!userRes.ok) {
+        toast({ title: "Error", description: "User not found", variant: "destructive" });
+        setIsLoading(false);
+        return;
+      }
+      
+      const user = await userRes.json();
+      const userId = user.id;
+      
+      // Now assign the badge
+      const response = await fetch("/api/admin/badges/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          badgeId: assigningBadgeId,
+        }),
+      });
+      
+      if (response.ok) {
+        const badgeName = badges.find(b => b.id === assigningBadgeId)?.name;
+        toast({ title: "Success", description: `Badge "${badgeName}" assigned to @${assignUsername}` });
+        setAssigningBadgeId(null);
+        setAssignUsername("");
+        await fetchBadges();
+      } else {
+        toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSeedBadges = async () => {
+    try {
+      setIsSeedingBadges(true);
+      const response = await fetch("/api/admin/badges/seed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      if (response.ok) {
+        toast({ title: "Success", description: "10 default badges seeded successfully" });
+        await fetchBadges();
+      } else {
+        toast({ title: "Error", description: "Failed to seed badges", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to seed badges", variant: "destructive" });
+    } finally {
+      setIsSeedingBadges(false);
     }
   };
 
@@ -205,13 +321,24 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
               Create and manage user badges
             </p>
           </div>
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button className="gap-2" data-testid="button-create-badge">
-                <Plus className="h-4 w-4" />
-                Create Badge
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleSeedBadges}
+              variant="outline"
+              className="gap-2"
+              disabled={isSeedingBadges}
+              data-testid="button-seed-badges"
+            >
+              <Wand2 className="h-4 w-4" />
+              {isSeedingBadges ? "Seeding..." : "Seed Default Badges"}
+            </Button>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button className="gap-2" data-testid="button-create-badge">
+                  <Plus className="h-4 w-4" />
+                  Create Badge
+                </Button>
+              </DialogTrigger>
             <DialogContent data-testid="dialog-create-badge">
               <DialogHeader>
                 <DialogTitle>Create New Badge</DialogTitle>
