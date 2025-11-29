@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,26 @@ export default function PostManagement({ onBack }: PostManagementProps) {
   const [posts, setPosts] = useState<AdminPost[]>(MOCK_ADMIN_POSTS);
   const [selectedPost, setSelectedPost] = useState<AdminPost | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/posts");
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data || MOCK_ADMIN_POSTS);
+      }
+    } catch (error) {
+      console.error("Failed to fetch posts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredPosts = posts.filter(
     (post) =>
@@ -75,10 +95,21 @@ export default function PostManagement({ onBack }: PostManagementProps) {
     }
   };
 
-  const handleDelete = (postId: string) => {
+  const handleDelete = async (postId: string) => {
     if (confirm("Are you sure you want to permanently delete this post?")) {
-      setPosts(posts.filter((p) => p.id !== postId));
-      setSelectedPost(null);
+      try {
+        const response = await fetch(`/api/admin/posts/${postId}`, { method: "DELETE" });
+        if (response.ok) {
+          setPosts(posts.filter((p) => p.id !== postId));
+          setSelectedPost(null);
+          alert("Post deleted successfully");
+        } else {
+          alert("Failed to delete post");
+        }
+      } catch (error) {
+        console.error("Failed to delete post:", error);
+        alert("Error deleting post");
+      }
     }
   };
 

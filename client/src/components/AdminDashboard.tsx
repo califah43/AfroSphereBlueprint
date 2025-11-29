@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, TrendingUp, AlertCircle, UserPlus, RotateCw, UserCog, FileCog, Badge, Bell, FileJson, Settings, Users2, LogOut } from "lucide-react";
@@ -30,7 +30,7 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
     newSignupsToday: 0,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchStats();
   }, []);
 

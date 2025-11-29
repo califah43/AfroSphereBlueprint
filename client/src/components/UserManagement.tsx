@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -168,6 +168,26 @@ export default function UserManagement({ onBack }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/users");
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data || MOCK_USERS);
+      }
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -190,10 +210,21 @@ export default function UserManagement({ onBack }: UserManagementProps) {
     }
   };
 
-  const handleDelete = (userId: string) => {
-    if (confirm("Are you sure you want to permanently delete this user?")) {
-      setUsers(users.filter((u) => u.id !== userId));
-      setSelectedUser(null);
+  const handleDelete = async (userId: string) => {
+    if (confirm("Are you sure you want to permanently delete this user and all their posts?")) {
+      try {
+        const response = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+        if (response.ok) {
+          setUsers(users.filter((u) => u.id !== userId));
+          setSelectedUser(null);
+          alert("User deleted successfully");
+        } else {
+          alert("Failed to delete user");
+        }
+      } catch (error) {
+        console.error("Failed to delete user:", error);
+        alert("Error deleting user");
+      }
     }
   };
 
