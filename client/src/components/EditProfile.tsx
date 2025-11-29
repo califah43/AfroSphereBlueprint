@@ -200,6 +200,10 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       
       toast({ title: "Profile saved!", description: "Your profile updates have been saved" });
       onSave?.(formData);
+      
+      // Trigger comment refetch for username/badge updates
+      window.dispatchEvent(new Event('profileUpdated'));
+      
       onClose();
     } catch (error) {
       console.error("Save error:", error);
