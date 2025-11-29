@@ -21,6 +21,8 @@ interface ExploreProps {
   onSearchClick?: () => void;
   onPostClick?: (postId: string) => void;
   onHashtagClick?: (tag: string) => void;
+  onCategoryClick?: (category: string) => void;
+  onGenreClick?: (genreId: string) => void;
 }
 
 const trendingCreators = [
@@ -55,7 +57,7 @@ const mockAllPosts = Array.from({ length: 18 }, (_, i) => ({
 interface TrendingHashtag { tag: string; count: number; posts: number; }
 interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
 
-export default function Explore({ onSearchClick, onPostClick, onHashtagClick }: ExploreProps) {
+export default function Explore({ onSearchClick, onPostClick, onHashtagClick, onCategoryClick, onGenreClick }: ExploreProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
@@ -136,7 +138,12 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick }: 
           <h2 className="text-lg font-semibold mb-4">Explore Genres</h2>
           <div className="grid grid-cols-2 gap-3">
             {GENRE_LIST.map((genre) => (
-              <GenreCard key={genre.id} genreId={genre.id.toUpperCase()} postsCount={Math.floor(Math.random() * 50) + 10} />
+              <GenreCard 
+                key={genre.id} 
+                genreId={genre.id.toUpperCase()} 
+                postsCount={Math.floor(Math.random() * 50) + 10}
+                onClick={() => onGenreClick?.(genre.id)}
+              />
             ))}
           </div>
         </div>
@@ -152,7 +159,8 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick }: 
             {categories.map((category) => (
               <button
                 key={category.name}
-                className="relative h-40 rounded-lg overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
+                onClick={() => onCategoryClick?.(category.name.toLowerCase())}
+                className="relative h-40 rounded-lg overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 hover-elevate"
                 data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
               >
                 <img

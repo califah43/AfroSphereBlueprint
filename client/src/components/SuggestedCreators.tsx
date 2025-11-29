@@ -46,16 +46,50 @@ export default function SuggestedCreators() {
   const toggleFollow = async (username: string) => {
     setLoading((prev) => ({ ...prev, [username]: true }));
     try {
-      const isFollowing = followStates[username];
-      const endpoint = isFollowing ? `/api/follows/unfollow/${username}` : `/api/follows/${username}`;
-      const method = isFollowing ? 'DELETE' : 'POST';
+      const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      const currentUserId = currentUserData?.id;
       
-      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' } });
-      if (res.ok) {
-        setFollowStates((prev) => ({ ...prev, [username]: !prev[username] }));
+      if (!currentUserId) {
         toast({
-          title: isFollowing ? "Unfollowed" : "Following",
-          description: isFollowing ? `You unfollowed @${username}` : `You're now following @${username}`,
+          title: "Error",
+          description: "Not logged in",
+          variant: "destructive",
+        });
+        setLoading((prev) => ({ ...prev, [username]: false }));
+        return;
+      }
+      
+      // Fetch target user by username to get their ID
+      const userRes = await fetch(`/api/users/username/${username}`);
+      if (!userRes.ok) {
+        toast({
+          title: "Error",
+          description: "User not found",
+          variant: "destructive",
+        });
+        setLoading((prev) => ({ ...prev, [username]: false }));
+        return;
+      }
+      
+      const targetUser = await userRes.json();
+      const targetUserId = targetUser.id;
+      
+      const isFollowing = followStates[username];
+      const res = await fetch('/api/follows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          followerId: currentUserId, 
+          followingId: targetUserId 
+        })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setFollowStates((prev) => ({ ...prev, [username]: data.following }));
+        toast({
+          title: data.following ? "Following" : "Unfollowed",
+          description: data.following ? `You're now following @${username}` : `You unfollowed @${username}`,
           className: "border-primary/20 bg-card",
         });
       } else {
