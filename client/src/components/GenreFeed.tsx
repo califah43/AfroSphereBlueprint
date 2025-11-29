@@ -56,7 +56,7 @@ export default function GenreFeed({ genreId, onClose, onPostClick }: GenreFeedPr
               <PostCard
                 key={post.id}
                 post={post}
-                onClick={() => onPostClick?.(post.id)}
+                onComment={() => onPostClick?.(post.id)}
               />
             ))
           )}

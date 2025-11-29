@@ -54,7 +54,7 @@ export default function CategoryFeed({ category, onClose, onPostClick }: Categor
               <PostCard
                 key={post.id}
                 post={post}
-                onClick={() => onPostClick?.(post.id)}
+                onComment={() => onPostClick?.(post.id)}
               />
             ))
           )}
