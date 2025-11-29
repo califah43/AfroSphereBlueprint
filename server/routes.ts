@@ -1174,6 +1174,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get users with a specific badge
+  app.get("/api/admin/badges/:badgeId/users", async (req, res) => {
+    try {
+      const badgeUsers = await storage.getBadgeUsers(req.params.badgeId);
+      res.json(badgeUsers);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch badge users" });
+    }
+  });
+
   // Admin: Assign badge to user
   app.post("/api/admin/badges/assign", async (req, res) => {
     try {

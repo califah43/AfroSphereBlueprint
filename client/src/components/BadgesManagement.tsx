@@ -135,10 +135,10 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
         // Count users per badge
         const badgesWithCounts = await Promise.all((badgesData || []).map(async (badge: any) => {
           try {
-            const userBadgesRes = await fetch(`/api/badges/user/${badge.id}`);
-            if (userBadgesRes.ok) {
-              const userBadges = await userBadgesRes.json();
-              return { ...badge, usersCount: Array.isArray(userBadges) ? userBadges.length : 0 };
+            const badgeUsersRes = await fetch(`/api/admin/badges/${badge.id}/users`);
+            if (badgeUsersRes.ok) {
+              const badgeUsers = await badgeUsersRes.json();
+              return { ...badge, usersCount: Array.isArray(badgeUsers) ? badgeUsers.length : 0 };
             }
           } catch (e) {}
           return badge;

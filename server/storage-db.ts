@@ -34,6 +34,7 @@ export interface IStorage {
   createBadge(badge: InsertBadge): Promise<Badge>;
   deleteBadge(badgeId: string): Promise<void>;
   getUserBadges(userId: string): Promise<Badge[]>;
+  getBadgeUsers(badgeId: string): Promise<User[]>;
   assignBadge(userId: string, badgeId: string): Promise<UserBadge>;
   removeBadge(userId: string, badgeId: string): Promise<void>;
   createNotification(notification: any): Promise<Notification>;
@@ -304,6 +305,13 @@ export class DbStorage implements IStorage {
     const badgeIds = userBadgeRecords.map(ub => ub.badgeId);
     if (badgeIds.length === 0) return [];
     return db.query.badges.findMany({ where: inArray(badges.id, badgeIds) });
+  }
+
+  async getBadgeUsers(badgeId: string): Promise<User[]> {
+    const userBadgeRecords = await db.query.userBadges.findMany({ where: eq(userBadges.badgeId, badgeId) });
+    const userIds = userBadgeRecords.map(ub => ub.userId);
+    if (userIds.length === 0) return [];
+    return db.query.users.findMany({ where: inArray(users.id, userIds) });
   }
 
   async assignBadge(userId: string, badgeId: string): Promise<UserBadge> {
