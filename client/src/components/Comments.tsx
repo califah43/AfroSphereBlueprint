@@ -52,6 +52,15 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
     setCurrentUser(userData);
+    
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      const updatedData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      setCurrentUser(updatedData);
+    };
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
   }, []);
 
   useEffect(() => {
@@ -107,7 +116,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
       }
     };
     fetchComments();
-  }, [postId]);
+  }, [postId, currentUser?.username]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
