@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Plus, Edit2, Trash2, Users, Wand2 } from "lucide-react";
+import { ChevronLeft, Plus, Edit2, Trash2, Users, Wand2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,11 @@ interface BadgeItem {
 }
 
 interface UserOption {
+  id: string;
+  username: string;
+}
+
+interface UserWithBadge {
   id: string;
   username: string;
 }
@@ -122,6 +127,8 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSeedingBadges, setIsSeedingBadges] = useState(false);
   const [assignSuccess, setAssignSuccess] = useState(false);
+  const [badgeUsersMap, setBadgeUsersMap] = useState<Map<string, UserWithBadge[]>>(new Map());
+  const [expandedBadgeId, setExpandedBadgeId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBadges();
@@ -139,7 +146,9 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
             const badgeUsersRes = await fetch(`/api/admin/badges/${badge.id}/users`);
             if (badgeUsersRes.ok) {
               const badgeUsers = await badgeUsersRes.json();
-              const count = Array.isArray(badgeUsers) ? badgeUsers.length : (badgeUsers?.users?.length || 0);
+              const usersList = Array.isArray(badgeUsers) ? badgeUsers : (badgeUsers?.users || []);
+              const count = usersList.length;
+              setBadgeUsersMap(prev => new Map(prev).set(badge.id, usersList));
               return { ...badge, usersCount: count };
             }
           } catch (e) {
@@ -295,6 +304,28 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
       }
     } catch (error) {
       toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUnassignBadge = async (userId: string, badgeId: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/badges/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, badgeId }),
+      });
+
+      if (response.ok) {
+        toast({ title: "Success", description: "Badge removed successfully" });
+        await fetchBadges();
+      } else {
+        toast({ title: "Error", description: "Failed to remove badge", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to remove badge", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -463,8 +494,37 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span data-testid={`text-badge-users-${badge.id}`}>{badge.usersCount} users</span>
+                  <button
+                    className="text-blue-500 hover:text-blue-600 font-medium cursor-pointer"
+                    onClick={() => setExpandedBadgeId(expandedBadgeId === badge.id ? null : badge.id)}
+                    data-testid={`button-toggle-badge-users-${badge.id}`}
+                  >
+                    {badge.usersCount} users {expandedBadgeId === badge.id ? "▼" : "▶"}
+                  </button>
                 </div>
+                {expandedBadgeId === badge.id && badgeUsersMap.get(badge.id) && (
+                  <div className="mt-2 space-y-2 pl-4 border-l border-border/50">
+                    {badgeUsersMap.get(badge.id)!.map((user) => (
+                      <div key={user.id} className="flex items-center justify-between py-1">
+                        <span className="text-sm text-foreground" data-testid={`text-badge-user-${badge.id}-${user.id}`}>
+                          {user.username}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 hover:bg-destructive/10"
+                          onClick={() => handleUnassignBadge(user.id, badge.id)}
+                          data-testid={`button-unassign-badge-${badge.id}-${user.id}`}
+                        >
+                          <X className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                    {badgeUsersMap.get(badge.id)!.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No users assigned</p>
+                    )}
+                  </div>
+                )}
                 <Dialog open={showAssignDialog && assigningBadgeId === badge.id} onOpenChange={(open) => {
                   if (!open) {
                     setShowAssignDialog(false);
