@@ -315,16 +315,16 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             className="text-center py-1.5 hover-elevate transition-all rounded"
             data-testid="button-view-followers"
           >
-            <p className="text-lg font-black text-foreground" data-testid="text-followers-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Following</p>
+            <p className="text-lg font-black text-foreground" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
             className="text-center py-1.5 hover-elevate transition-all rounded border-l border-border/50"
             data-testid="button-view-following"
           >
-            <p className="text-lg font-black text-foreground" data-testid="text-following-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Followers</p>
+            <p className="text-lg font-black text-foreground" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Following</p>
           </button>
         </div>
         )}
