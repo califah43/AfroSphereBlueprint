@@ -324,14 +324,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============ COMMENT ROUTES ============
   app.get("/api/comments/post/:postId", async (req, res) => {
+    const { userId } = req.query;
     const comments = await storage.listComments(req.params.postId);
     
     // Get all users once to avoid repeated queries
     const allUsers = await db.query.users.findMany();
     
-    // Enrich comments with username and replies
+    // Get user's liked comments if userId provided
+    let likedCommentIds = new Set<string>();
+    if (userId) {
+      try {
+        const userLikes = await db.query.likes.findMany({
+          where: (likes) => likes.commentId !== null && likes.userId === userId as any,
+        });
+        likedCommentIds = new Set(userLikes.filter(l => l.commentId).map(l => l.commentId!));
+      } catch (e) {
+        // If query fails, just proceed without like data
+      }
+    }
+    
+    // Enrich comments with username, avatar, and replies
     const enrichedComments = await Promise.all(comments.map(async (comment) => {
       let author = "creator";
+      let avatar = "";
       
       // Try to get user by database UUID first
       let user = allUsers.find(u => u.id === comment.userId);
@@ -341,15 +356,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user = allUsers.find(u => u.firebaseUid === comment.userId);
       }
       
-      if (user?.username) {
+      if (user) {
         author = user.username;
+        avatar = user.avatar || "";
       }
       
       const replies = await storage.getCommentReplies(comment.id);
       
-      // Enrich replies with usernames and all fields
+      // Enrich replies with usernames, avatars, and isLiked status
       const enrichedReplies = await Promise.all(replies.map(async (reply) => {
         let replyAuthor = "creator";
+        let replyAvatar = "";
         
         // Try by database UUID first
         let replyUser = allUsers.find(u => u.id === reply.userId);
@@ -359,8 +376,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           replyUser = allUsers.find(u => u.firebaseUid === reply.userId);
         }
         
-        if (replyUser?.username) {
+        if (replyUser) {
           replyAuthor = replyUser.username;
+          replyAvatar = replyUser.avatar || "";
         }
         
         return {
@@ -372,9 +390,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: reply.createdAt,
           replyTo: reply.replyTo,
           author: replyAuthor,
+          avatar: replyAvatar,
           timeAgo: formatTimeAgo(reply.createdAt),
           replies: [],
-          isLiked: false,
+          isLiked: likedCommentIds.has(reply.id),
         };
       }));
       
@@ -387,9 +406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: comment.createdAt,
         replyTo: comment.replyTo,
         author: author,
+        avatar: avatar,
         timeAgo: formatTimeAgo(comment.createdAt),
         replies: enrichedReplies,
-        isLiked: false,
+        isLiked: likedCommentIds.has(comment.id),
       };
     }));
     
@@ -529,12 +549,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/likes/comments", async (req, res) => {
     try {
       const { userId, commentId } = req.body;
-      const comment = await storage.getComment(commentId);
-      const hasLiked = comment && (comment.likes || 0) > 0; // Simple check
+      
+      // Check if user has already liked this comment
+      const existingLike = await db.query.likes.findFirst({
+        where: (likes) => likes.userId === userId && likes.commentId === commentId,
+      });
+      
+      const hasLiked = !!existingLike;
       
       if (hasLiked) {
+        // Remove like
         await storage.unlikeComment(userId, commentId);
       } else {
+        // Add like
         await storage.likeComment(userId, commentId);
       }
       

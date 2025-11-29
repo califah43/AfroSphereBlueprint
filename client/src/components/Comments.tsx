@@ -58,7 +58,15 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
     
     const fetchComments = async () => {
       try {
-        const res = await fetch(`/api/comments/post/${postId}`);
+        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        const userId = userData?.id || "";
+        
+        // Pass userId as query param to get proper isLiked status
+        const url = userId 
+          ? `/api/comments/post/${postId}?userId=${userId}`
+          : `/api/comments/post/${postId}`;
+        
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           // Filter to only top-level comments (replyTo is null)
@@ -71,17 +79,17 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
               text: c.text,
               likes: c.likes || 0,
               timeAgo: c.timeAgo || "now",
-              isLiked: c.isLiked || false,
+              isLiked: c.isLiked === true,
               replies: (c.replies || []).map((r: any) => ({
                 id: r.id,
                 author: r.author || "creator",
                 text: r.text,
                 likes: r.likes || 0,
                 timeAgo: r.timeAgo || "now",
-                isLiked: r.isLiked || false,
-                avatar: r.avatar,
+                isLiked: r.isLiked === true,
+                avatar: r.avatar || "",
               })),
-              avatar: c.avatar,
+              avatar: c.avatar || "",
             }));
           setComments(mappedComments);
         }
