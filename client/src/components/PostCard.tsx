@@ -189,8 +189,8 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1">
-              <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
-                {post.author.username}
+              <p className="text-xs text-muted-foreground/60" data-testid={`text-username-${post.id}`}>
+                @{post.author.username}
               </p>
               {post.badges && post.badges.length > 0 ? (
                 <div className="flex items-center gap-1">

@@ -146,12 +146,11 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         // Transform real posts using pre-fetched user data, likes, and badges
         const transformedRealPosts = (posts || []).map((p: any) => {
           const user = userMap.get(p.userId);
-          const username = user?.username || (user?.displayName ? user.displayName.split(' ')[0] : "creator");
           return {
             id: p.id,
             author: { 
               id: p.userId,
-              username: username, 
+              username: user?.username || "creator", 
               avatar: user?.avatar || "" 
             },
             imageUrl: p.image,
