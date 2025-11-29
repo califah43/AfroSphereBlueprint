@@ -23,11 +23,11 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
       
       try {
         setIsLoading(true);
-        const res = await fetch(`/api/admin/badges/user/${userId}`);
+        const res = await fetch(`/api/badges/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
-          // Map badges to display format
-          const badgeList = (data.badges || []).map((b: any) => ({
+          // data is already the badges array
+          const badgeList = (Array.isArray(data) ? data : (data.badges || [])).map((b: any) => ({
             userId,
             badgeId: b.id,
             name: b.name,
