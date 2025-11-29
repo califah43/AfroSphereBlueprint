@@ -335,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (userId) {
       try {
         const userLikes = await db.query.likes.findMany({
-          where: (likes: any) => likes.userId === (userId as any) && likes.commentId !== null,
+          where: and(eq(likes.userId, userId as string), likes.commentId !== null as any),
         });
         likedCommentIds = new Set(userLikes.filter(l => l.commentId).map(l => l.commentId!));
       } catch (e) {
@@ -552,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if user has already liked this comment
       const existingLike = await db.query.likes.findFirst({
-        where: (likes: any) => likes.userId === (userId as any) && likes.commentId !== null && likes.commentId === (commentId as any),
+        where: and(eq(likes.userId, userId as string), eq(likes.commentId, commentId as string)),
       });
       
       const hasLiked = !!existingLike;

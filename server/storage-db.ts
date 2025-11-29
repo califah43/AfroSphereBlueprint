@@ -220,15 +220,6 @@ export class DbStorage implements IStorage {
     return db.query.users.findMany();
   }
 
-  async getBadges(userId: string): Promise<CreatorBadge | undefined> {
-    return db.query.creatorBadges.findFirst({ where: eq(creatorBadges.userId, userId) });
-  }
-
-  async addBadge(userId: string, badge: string): Promise<CreatorBadge> {
-    const [newBadge] = await db.insert(creatorBadges).values({ userId, badges: [badge] }).returning();
-    return newBadge;
-  }
-
   async createNotification(notification: any): Promise<Notification> {
     const [notif] = await db.insert(notifications).values(notification).returning();
     return notif;
