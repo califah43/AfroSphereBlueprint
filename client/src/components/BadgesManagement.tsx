@@ -463,10 +463,12 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                           data-testid="input-search-user"
                         />
                       </div>
-                      <div className="p-3 bg-muted/50 rounded-md">
-                        <p className="text-sm text-muted-foreground">
-                          Badge: <span className="font-medium text-foreground flex items-center gap-2"><div className="w-5 h-5" dangerouslySetInnerHTML={{ __html: badge.icon }} /> {badge.name}</span>
-                        </p>
+                      <div className="p-3 bg-muted/50 rounded-md flex items-center gap-2">
+                        <div className="w-5 h-5" dangerouslySetInnerHTML={{ __html: badge.icon }} />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Badge</p>
+                          <p className="text-sm font-medium text-foreground">{badge.name}</p>
+                        </div>
                       </div>
                       <Button
                         onClick={handleAssignBadge}
