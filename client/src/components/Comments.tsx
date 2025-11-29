@@ -85,6 +85,8 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
               likes: c.likes || 0,
               timeAgo: c.timeAgo || "now",
               isLiked: c.isLiked === true,
+              userId: c.userId,
+              badges: c.badges || [],
               replies: (c.replies || []).map((r: any) => ({
                 id: r.id,
                 author: r.author || "creator",
@@ -93,6 +95,8 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                 timeAgo: r.timeAgo || "now",
                 isLiked: r.isLiked === true,
                 avatar: r.avatar || "",
+                userId: r.userId,
+                badges: r.badges || [],
               })),
               avatar: c.avatar || "",
             }));
