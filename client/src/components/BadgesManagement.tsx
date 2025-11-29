@@ -400,7 +400,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
             <Card key={badge.id} className="border-border/50 hover-elevate" data-testid={`card-badge-${badge.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="text-3xl">{badge.icon}</div>
+                  <div className="w-8 h-8" dangerouslySetInnerHTML={{ __html: badge.icon }} />
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
@@ -465,7 +465,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                       </div>
                       <div className="p-3 bg-muted/50 rounded-md">
                         <p className="text-sm text-muted-foreground">
-                          Badge: <span className="font-medium text-foreground">{badge.icon} {badge.name}</span>
+                          Badge: <span className="font-medium text-foreground flex items-center gap-2"><div className="w-5 h-5" dangerouslySetInnerHTML={{ __html: badge.icon }} /> {badge.name}</span>
                         </p>
                       </div>
                       <Button
