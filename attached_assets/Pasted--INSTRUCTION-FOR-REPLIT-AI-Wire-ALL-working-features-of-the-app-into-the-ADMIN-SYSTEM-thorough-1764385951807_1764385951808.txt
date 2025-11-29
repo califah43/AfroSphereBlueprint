@@ -1,0 +1,75 @@
+// INSTRUCTION FOR REPLIT AI:
+// Wire ALL working features of the app into the ADMIN SYSTEM thoroughly.
+// The admin dashboard should control, monitor, and override every part of the app.
+
+// ADMIN SYSTEM REQUIREMENTS:
+
+// 1. FULL USER MANAGEMENT
+// - Admin should see the full list of all users.
+// - Admin should see each user's email, UID, account status, and activity.
+// - Admin should be able to edit user balances, delete users, and reset passwords.
+// - Admin should be able to see each user's liked posts, comments, and orders.
+
+// 2. PRODUCT MANAGEMENT (for apps with products)
+// - Admin can add new products.
+// - Admin can edit product name, description, image, and price.
+// - Admin can delete products.
+// - Admin can toggle product "active / inactive".
+
+// 3. POSTS MANAGEMENT (for social features)
+// - Admin can view all posts created by all users.
+// - Admin can delete any post.
+// - Admin can reset like counts.
+// - Admin can view comments under each post.
+// - Admin can delete inappropriate comments.
+
+// 4. LIKE + COMMENT SYSTEM CONTROL
+// - Admin should see total likes and comments on every post.
+// - Admin should be able to modify like counts if needed.
+// - Admin should be able to remove spam comments.
+// - All real-time functionality should also be visible to admin.
+
+// 5. ORDER MANAGEMENT (if app has ordering)
+// - Admin can see all orders: Pending, Dispatched, Delivered.
+// - Admin can manually change order status.
+// - Admin can update user delivery address if required.
+
+// 6. WALLET / COIN SYSTEM (if app uses coins)
+// - Admin can top up coins to any user.
+// - Admin can deduct coins.
+// - Admin can see coin transaction history per user.
+
+// 7. REAL-TIME DASHBOARD
+// The admin dashboard should update in real-time with Firestore listeners:
+// - User activities
+// - Orders
+// - Product updates
+// - Likes and comments
+// - Wallet top-ups
+
+// 8. SECURITY & PERMISSIONS
+// Only the admin email should have access to admin routes.
+// Example admin: "califahtradingservice@gmail.com"
+// Use role-based access or Firestore custom claims.
+
+// 9. CLEAN UI CONNECTIONS
+// Every section must be fully wired:
+// - Users page
+// - Posts page
+// - Products page
+// - Orders page
+// - Wallet page
+// - Settings page
+// Make sure buttons work, forms validate, and every action updates Firestore.
+
+// 10. BACKEND INTEGRATION
+// Replit AI should connect all above features to:
+// - Firestore collections
+// - Firebase Auth
+// - Realtime listeners
+// - Secure admin-only API routes where required.
+
+// FINAL NOTE:
+// The admin system is the central control panel.
+// Everything that works in the main app MUST also be visible,
+// controllable, and editable in the admin dashboard.
