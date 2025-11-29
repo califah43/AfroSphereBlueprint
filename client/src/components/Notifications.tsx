@@ -1,13 +1,15 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, UserPlus, TrendingUp, Bell } from "lucide-react";
+import { Heart, MessageCircle, UserPlus, TrendingUp, Bell, Zap, Gift, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, onSnapshot, Query, Unsubscribe } from "firebase/firestore";
 
 interface Notification {
   id: string;
-  type: "like" | "comment" | "follow" | "trending";
+  type: "like" | "comment" | "follow" | "trending" | "badge" | "system" | "followRequest" | "followAccepted";
   user: string;
   text: string;
   timeAgo: string;
@@ -18,13 +20,27 @@ interface Notification {
 const getNotificationIcon = (type: string) => {
   switch (type) {
     case "like":
+    case "LIKE_POST":
       return <Heart className="h-4 w-4 text-red-500" />;
     case "comment":
+    case "COMMENT_POST":
+    case "REPLY_COMMENT":
       return <MessageCircle className="h-4 w-4 text-blue-500" />;
     case "follow":
+    case "FOLLOW_USER":
+    case "followRequest":
+    case "followAccepted":
       return <UserPlus className="h-4 w-4 text-green-500" />;
     case "trending":
       return <TrendingUp className="h-4 w-4 text-orange-500" />;
+    case "badge":
+    case "BADGE_GRANTED":
+      return <Gift className="h-4 w-4 text-yellow-500" />;
+    case "system":
+    case "SYSTEM_MESSAGE":
+      return <Zap className="h-4 w-4 text-purple-500" />;
+    case "NEW_FEATURE_ALERT":
+      return <AlertCircle className="h-4 w-4 text-cyan-500" />;
     default:
       return <Bell className="h-4 w-4 text-muted-foreground" />;
   }
@@ -33,13 +49,27 @@ const getNotificationIcon = (type: string) => {
 const getNotificationColor = (type: string) => {
   switch (type) {
     case "like":
+    case "LIKE_POST":
       return "bg-red-500/10 border-red-500/20";
     case "comment":
+    case "COMMENT_POST":
+    case "REPLY_COMMENT":
       return "bg-blue-500/10 border-blue-500/20";
     case "follow":
+    case "FOLLOW_USER":
+    case "followRequest":
+    case "followAccepted":
       return "bg-green-500/10 border-green-500/20";
     case "trending":
       return "bg-orange-500/10 border-orange-500/20";
+    case "badge":
+    case "BADGE_GRANTED":
+      return "bg-yellow-500/10 border-yellow-500/20";
+    case "system":
+    case "SYSTEM_MESSAGE":
+      return "bg-purple-500/10 border-purple-500/20";
+    case "NEW_FEATURE_ALERT":
+      return "bg-cyan-500/10 border-cyan-500/20";
     default:
       return "bg-muted/50 border-border";
   }
@@ -101,7 +131,9 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    let unsubscribe: Unsubscribe | null = null;
+
+    const setupNotificationListener = async () => {
       try {
         // Get current user ID from localStorage
         let userId = localStorage.getItem("currentUserId");
@@ -116,25 +148,19 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
           return;
         }
 
-        // Fetch notifications for current user
+        // First, fetch from PostgreSQL for backwards compatibility
         const res = await fetch(`/api/notifications/${userId}`);
         if (res.ok) {
           const dbNotifications = await res.json();
-          
-          // Transform database notifications to UI format with enriched data
           const transformedNotifications = await Promise.all(
             (Array.isArray(dbNotifications) ? dbNotifications : []).map(async (notif: any) => {
               try {
-                // Fetch the user who took the action
                 const fromUser = notif.fromUserId ? await fetch(`/api/users/${notif.fromUserId}`).then(r => r.json()) : null;
-                
-                // Fetch post thumbnail if applicable
                 let postThumbnail = undefined;
                 if (notif.postId && (notif.type === 'like' || notif.type === 'comment')) {
                   const post = await fetch(`/api/posts/${notif.postId}`).then(r => r.json());
                   postThumbnail = post?.image;
                 }
-
                 return {
                   id: notif.id,
                   type: notif.type,
@@ -145,7 +171,6 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
                   isUnread: !notif.read,
                 };
               } catch (e) {
-                // Return basic notification if enrichment fails
                 return {
                   id: notif.id,
                   type: notif.type,
@@ -157,19 +182,59 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
               }
             })
           );
-
           setNotifications(transformedNotifications.length > 0 ? transformedNotifications : getMockNotifications());
-        } else {
-          setNotifications(getMockNotifications());
         }
+
+        // Set up real-time Firestore listener
+        const notificationsRef = collection(db, "notifications", userId, "items");
+        const q = query(notificationsRef, orderBy("timestamp", "desc"));
+
+        unsubscribe = onSnapshot(q, async (snapshot) => {
+          const firestoreNotifications = await Promise.all(
+            snapshot.docs.map(async (doc) => {
+              const data = doc.data();
+              try {
+                const fromUser = data.senderId ? await fetch(`/api/users/${data.senderId}`).then(r => r.json()) : null;
+                let postThumbnail = undefined;
+                if (data.postId && (data.type === 'LIKE_POST' || data.type === 'COMMENT_POST' || data.type === 'like' || data.type === 'comment')) {
+                  const post = await fetch(`/api/posts/${data.postId}`).then(r => r.json());
+                  postThumbnail = post?.image;
+                }
+                return {
+                  id: doc.id,
+                  type: data.type,
+                  user: fromUser?.username || fromUser?.displayName || "Creator",
+                  text: data.message,
+                  timeAgo: data.timestamp ? formatTimeAgo(new Date(data.timestamp.toDate()).toISOString()) : "now",
+                  postThumbnail,
+                  isUnread: !data.seen,
+                };
+              } catch (e) {
+                return {
+                  id: doc.id,
+                  type: data.type,
+                  user: "Creator",
+                  text: data.message,
+                  timeAgo: "now",
+                  isUnread: !data.seen,
+                };
+              }
+            })
+          );
+          setNotifications(firestoreNotifications.length > 0 ? firestoreNotifications : getMockNotifications());
+          setIsLoading(false);
+        });
       } catch (error) {
         console.log("Using mock notifications:", error);
         setNotifications(getMockNotifications());
-      } finally {
         setIsLoading(false);
       }
     };
-    fetchNotifications();
+
+    setupNotificationListener();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [t]);
 
   // Helper function to format time ago
