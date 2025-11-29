@@ -432,11 +432,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         {/* Header for Own Profile (Settings) */}
         {isOwnProfile && (
           <div className="flex items-center justify-between mb-4 -mt-14">
-            <div className="flex-1 flex items-center gap-2">
-              {isAccountPrivate && (
-                <Lock className="h-4 w-4 text-muted-foreground" data-testid="icon-private-indicator" />
-              )}
-            </div>
+            <div className="flex-1" />
             <Button
               variant="ghost"
               size="icon"
@@ -475,6 +471,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
+            {isAccountPrivate && (
+              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" title="Private account" />
+            )}
             {userBadges && userBadges.length > 0 && (
               <div className="flex items-center gap-1">
                 {userBadges.map((badge: any) => (
