@@ -7,6 +7,7 @@ export type PostCategory = "fashion" | "music" | "art" | "culture" | "lifestyle"
 export interface Post {
   id: string;
   author: {
+    id: string;
     username: string;
     avatar?: string;
   };
@@ -99,7 +100,7 @@ function createPost(
 ): Post {
   return {
     id,
-    author: { username: author },
+    author: { id: `mock-${author}`, username: author },
     imageUrl: images[imageIndex % images.length],
     caption,
     likes,

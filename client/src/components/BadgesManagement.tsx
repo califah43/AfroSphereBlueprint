@@ -462,7 +462,12 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                       Assign to User
                     </Button>
                   </DialogTrigger>
-                  <DialogContent data-testid={`dialog-assign-badge-${badge.id}`}>
+                  <DialogContent data-testid={`dialog-assign-badge-${badge.id}`} onOpenChange={(open) => {
+                    if (!open) {
+                      setAssigningBadgeId(null);
+                      setSelectedUserId("");
+                    }
+                  }}>
                     <DialogHeader>
                       <DialogTitle>Assign Badge: {badge.name}</DialogTitle>
                       <DialogDescription>Select a user to assign this badge to</DialogDescription>
