@@ -396,6 +396,7 @@ export default function App() {
                 onSearchClick={() => setModalView("search")}
                 onPostClick={handleOpenPostDetail}
                 onHashtagClick={handleOpenHashtagFeed}
+                onUserProfileClick={handleOpenUserProfile}
                 onCategoryClick={(category) => {
                   // Navigate to category filter view
                   console.log("Category clicked:", category);

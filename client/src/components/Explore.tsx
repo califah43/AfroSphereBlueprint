@@ -21,6 +21,7 @@ interface ExploreProps {
   onSearchClick?: () => void;
   onPostClick?: (postId: string) => void;
   onHashtagClick?: (tag: string) => void;
+  onUserProfileClick?: (username: string) => void;
   onCategoryClick?: (category: string) => void;
   onGenreClick?: (genreId: string) => void;
 }
@@ -57,7 +58,7 @@ const mockAllPosts = Array.from({ length: 18 }, (_, i) => ({
 interface TrendingHashtag { tag: string; count: number; posts: number; }
 interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
 
-export default function Explore({ onSearchClick, onPostClick, onHashtagClick, onCategoryClick, onGenreClick }: ExploreProps) {
+export default function Explore({ onSearchClick, onPostClick, onHashtagClick, onUserProfileClick, onCategoryClick, onGenreClick }: ExploreProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
@@ -131,7 +132,7 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
           </div>
         )}
 
-        <FeaturedAfrican onCreatorClick={onHashtagClick} />
+        <FeaturedAfrican onCreatorClick={onUserProfileClick} />
         <TrendingAfrican onHashtagClick={onHashtagClick} />
         
         <div>
