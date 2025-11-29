@@ -668,6 +668,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (following) {
           await db.update(users).set({ followerCount: (following.followerCount || 0) + 1 }).where(eq(users.id, followingId));
         }
+        
+        // Create notification for followed user
+        try {
+          const followerUser = await storage.getUser(followerId);
+          await storage.createNotification({
+            userId: followingId,
+            type: 'follow',
+            fromUserId: followerId,
+            message: `${followerUser?.displayName || followerUser?.username || 'Someone'} started following you`,
+          });
+        } catch (e) {
+          console.error('Failed to create follow notification:', e);
+        }
+        
         res.json({ following: true });
       }
     } catch (error) {

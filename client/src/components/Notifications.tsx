@@ -99,15 +99,67 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await fetch("/api/notifications/current-user");
+        // Get current user ID from localStorage
+        let userId = localStorage.getItem("currentUserId");
+        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+        if (userData && userData.id && userData.id !== userId) {
+          userId = userData.id;
+        }
+
+        if (!userId) {
+          setNotifications(mockNotifications);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch notifications for current user
+        const res = await fetch(`/api/notifications/${userId}`);
         if (res.ok) {
-          const data = await res.json();
-          setNotifications(data.length > 0 ? data : mockNotifications);
+          const dbNotifications = await res.json();
+          
+          // Transform database notifications to UI format with enriched data
+          const transformedNotifications = await Promise.all(
+            (Array.isArray(dbNotifications) ? dbNotifications : []).map(async (notif: any) => {
+              try {
+                // Fetch the user who took the action
+                const fromUser = notif.fromUserId ? await fetch(`/api/users/${notif.fromUserId}`).then(r => r.json()) : null;
+                
+                // Fetch post thumbnail if applicable
+                let postThumbnail = undefined;
+                if (notif.postId && (notif.type === 'like' || notif.type === 'comment')) {
+                  const post = await fetch(`/api/posts/${notif.postId}`).then(r => r.json());
+                  postThumbnail = post?.image;
+                }
+
+                return {
+                  id: notif.id,
+                  type: notif.type,
+                  user: fromUser?.username || fromUser?.displayName || "Creator",
+                  text: notif.message,
+                  timeAgo: notif.createdAt ? formatTimeAgo(notif.createdAt) : "now",
+                  postThumbnail,
+                  isUnread: !notif.read,
+                };
+              } catch (e) {
+                // Return basic notification if enrichment fails
+                return {
+                  id: notif.id,
+                  type: notif.type,
+                  user: "Creator",
+                  text: notif.message,
+                  timeAgo: "now",
+                  isUnread: !notif.read,
+                };
+              }
+            })
+          );
+
+          setNotifications(transformedNotifications.length > 0 ? transformedNotifications : mockNotifications);
         } else {
           setNotifications(mockNotifications);
         }
       } catch (error) {
-        console.log("Using mock notifications");
+        console.log("Using mock notifications:", error);
         setNotifications(mockNotifications);
       } finally {
         setIsLoading(false);
@@ -115,6 +167,25 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
     };
     fetchNotifications();
   }, []);
+
+  // Helper function to format time ago
+  const formatTimeAgo = (dateString: string | null | undefined): string => {
+    if (!dateString) return "now";
+    const date = new Date(dateString);
+    const now = Date.now();
+    const diff = now - date.getTime();
+    
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (seconds < 60) return "now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return "1d ago";
+    return `${days}d ago`;
+  };
 
   return (
     <div className="pb-20" data-testid="container-notifications">
@@ -135,7 +206,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         </div>
 
         <div className="space-y-2">
-          {mockNotifications.slice(0, 2).map((notif) => (
+          {notifications.slice(0, 2).map((notif) => (
             <div
               key={notif.id}
               className={`group p-3 rounded-lg border-2 transition-all duration-300 hover-elevate ${
@@ -196,7 +267,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         </div>
 
         <div className="space-y-2">
-          {mockNotifications.slice(2).map((notif) => (
+          {notifications.slice(2).map((notif) => (
             <div
               key={notif.id}
               className={`group p-3 rounded-lg border-2 transition-all duration-300 hover-elevate ${
@@ -237,7 +308,7 @@ export default function Notifications({ onUserClick }: NotificationsProps) {
         </div>
 
         {/* Empty State */}
-        {mockNotifications.length === 0 && (
+        {notifications.length === 0 && (
           <div className="py-16 text-center">
             <Bell className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
             <p className="text-muted-foreground font-medium">No notifications yet</p>
