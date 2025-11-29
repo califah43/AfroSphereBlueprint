@@ -15,6 +15,7 @@ export interface IStorage {
   listPostsByCategory(category: string, limit?: number): Promise<Post[]>;
   createPost(post: InsertPost): Promise<Post>;
   deletePost(id: string): Promise<void>;
+  getUserLikedPosts(userId: string): Promise<Post[]>;
   
   // Comments
   getComment(id: string): Promise<Comment | undefined>;
@@ -169,6 +170,16 @@ export class MemStorage implements IStorage {
       }
     }
     this.posts.delete(id);
+  }
+
+  async getUserLikedPosts(userId: string): Promise<Post[]> {
+    const likedPostIds = Array.from(this.likes.values())
+      .filter(like => like.userId === userId && like.postId)
+      .map(like => like.postId!);
+    
+    return Array.from(this.posts.values())
+      .filter(p => likedPostIds.includes(p.id))
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
   }
 
   // ============ COMMENTS ============
