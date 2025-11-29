@@ -809,6 +809,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ ADMIN ROUTES ============
+  
+  // Get dashboard statistics
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const allUsers = await db.query.users.findMany();
+      const allPosts = await db.query.posts.findMany();
+      const allComments = await db.query.comments.findMany();
+      const allLikes = await db.query.likes.findMany();
+      
+      const now = new Date();
+      const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const todayUsers = allUsers.filter(u => new Date(u.firebaseUid || "") > dayAgo).length;
+      const todayPosts = allPosts.filter(p => new Date(p.createdAt || "") > dayAgo).length;
+      
+      res.json({
+        totalUsers: allUsers.length,
+        totalPosts: allPosts.length,
+        totalComments: allComments.length,
+        totalLikes: allLikes.length,
+        dailyActiveUsers: todayUsers,
+        newSignupsToday: todayUsers,
+        reportsToday: 0,
+      });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // Get all users
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const allUsers = await db.query.users.findMany();
+      const enrichedUsers = await Promise.all(
+        allUsers.map(async (user) => ({
+          id: user.id,
+          username: user.username,
+          email: user.email || "",
+          displayName: user.displayName || "",
+          avatar: user.avatar || "",
+          joinDate: user.firebaseUid || new Date().toISOString(),
+          verified: false,
+          status: "active" as const,
+          posts: user.postCount || 0,
+          followers: user.followerCount || 0,
+          following: user.followingCount || 0,
+          phone: user.phone || "",
+          lastActivity: new Date().toISOString(),
+          badges: [],
+          reports: 0,
+        }))
+      );
+      res.json(enrichedUsers);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Delete user and their posts
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+      const userId = req.params.id;
+      
+      // Delete all posts by user
+      const userPosts = await db.query.posts.findMany({ where: eq(posts.userId, userId) });
+      for (const post of userPosts) {
+        await storage.deletePost(post.id);
+      }
+      
+      // Delete user
+      await storage.deleteUser(userId);
+      res.json({ success: true, message: "User and their posts deleted" });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete user" });
+    }
+  });
+
+  // Edit user details
+  app.patch("/api/admin/users/:id", async (req, res) => {
+    try {
+      const { username, displayName, email, bio, phone, profession, location } = req.body;
+      const updates: any = {};
+      if (username) updates.username = username;
+      if (displayName) updates.displayName = displayName;
+      if (email) updates.email = email;
+      if (bio) updates.bio = bio;
+      if (phone) updates.phone = phone;
+      if (profession) updates.profession = profession;
+      if (location) updates.location = location;
+      
+      const user = await storage.updateUser(req.params.id, updates);
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update user" });
+    }
+  });
+
+  // Get all posts
+  app.get("/api/admin/posts", async (req, res) => {
+    try {
+      const allPosts = await db.query.posts.findMany();
+      const enrichedPosts = await Promise.all(
+        allPosts.map(async (post) => {
+          const user = await storage.getUser(post.userId);
+          return {
+            id: post.id,
+            username: user?.username || "Unknown",
+            caption: post.caption || "",
+            imageUrl: post.image || "",
+            images: post.images || [],
+            likes: post.likes || 0,
+            comments: post.commentCount || 0,
+            timeAgo: formatTimeAgo(post.createdAt),
+            datePosted: new Date(post.createdAt || "").toISOString().split("T")[0],
+            status: "visible" as const,
+            reports: 0,
+          };
+        })
+      );
+      res.json(enrichedPosts);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch posts" });
+    }
+  });
+
+  // Delete post
+  app.delete("/api/admin/posts/:id", async (req, res) => {
+    try {
+      await storage.deletePost(req.params.id);
+      res.json({ success: true, message: "Post deleted" });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete post" });
+    }
+  });
+
+  // Modify post likes
+  app.patch("/api/admin/posts/:id/likes", async (req, res) => {
+    try {
+      const { likes } = req.body;
+      if (typeof likes !== "number") {
+        return res.status(400).json({ error: "Invalid likes value" });
+      }
+      await db.update(posts).set({ likes }).where(eq(posts.id, req.params.id));
+      res.json({ success: true, likes });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update likes" });
+    }
+  });
+
+  // Delete comment
+  app.delete("/api/admin/comments/:id", async (req, res) => {
+    try {
+      await storage.deleteComment(req.params.id);
+      res.json({ success: true, message: "Comment deleted" });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete comment" });
+    }
+  });
+
+  // Get system logs
+  app.get("/api/admin/logs", async (req, res) => {
+    try {
+      // Return recent system activities as logs
+      const recentPosts = await db.query.posts.findMany({ limit: 10 });
+      const recentComments = await db.query.comments.findMany({ limit: 10 });
+      
+      const logs = [
+        ...recentPosts.map(p => ({
+          id: p.id,
+          timestamp: new Date(p.createdAt || "").toISOString(),
+          level: "info" as const,
+          action: "Post Created",
+          userId: p.userId,
+          details: `Post: ${p.caption?.substring(0, 50)}...`,
+        })),
+        ...recentComments.map(c => ({
+          id: c.id,
+          timestamp: new Date(c.createdAt || "").toISOString(),
+          level: "info" as const,
+          action: "Comment Added",
+          userId: c.userId,
+          details: `Comment: ${c.text.substring(0, 50)}...`,
+        })),
+      ];
+      
+      res.json(logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch logs" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {

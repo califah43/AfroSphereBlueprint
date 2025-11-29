@@ -22,18 +22,42 @@ export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardP
   const [currentSection, setCurrentSection] = useState<string>("dashboard");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOwner] = useState(true);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalPosts: 0,
+    dailyActiveUsers: 0,
+    reportsToday: 0,
+    newSignupsToday: 0,
+  });
+
+  React.useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch("/api/admin/stats");
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    }
+  };
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+    fetchStats();
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
   const metrics = [
-    { label: "Total Users", value: "12,847", icon: Users, color: "text-blue-500" },
-    { label: "Total Posts", value: "45,293", icon: FileText, color: "text-orange-500" },
-    { label: "Daily Active Users", value: "3,214", icon: TrendingUp, color: "text-green-500" },
-    { label: "Reports Today", value: "23", icon: AlertCircle, color: "text-red-500" },
-    { label: "New Sign-Ups Today", value: "157", icon: UserPlus, color: "text-purple-500" },
+    { label: "Total Users", value: stats.totalUsers.toLocaleString(), icon: Users, color: "text-blue-500" },
+    { label: "Total Posts", value: stats.totalPosts.toLocaleString(), icon: FileText, color: "text-orange-500" },
+    { label: "Daily Active Users", value: stats.dailyActiveUsers.toLocaleString(), icon: TrendingUp, color: "text-green-500" },
+    { label: "Reports Today", value: stats.reportsToday.toLocaleString(), icon: AlertCircle, color: "text-red-500" },
+    { label: "New Sign-Ups Today", value: stats.newSignupsToday.toLocaleString(), icon: UserPlus, color: "text-purple-500" },
   ];
 
   const actions = [
