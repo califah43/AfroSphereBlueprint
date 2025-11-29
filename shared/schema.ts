@@ -24,6 +24,10 @@ export const users = pgTable("users", {
   postCount: integer("post_count").default(0),
   firebaseUid: text("firebase_uid"), // Firebase UID for auth mapping (optional)
   fcmToken: text("fcm_token"), // Firebase Cloud Messaging token for push notifications
+  status: text("status").default("active"), // "active" | "suspended" | "banned" | "disabled"
+  suspensionReason: text("suspension_reason").default(""),
+  bannedReason: text("banned_reason").default(""),
+  disabledReason: text("disabled_reason").default(""),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

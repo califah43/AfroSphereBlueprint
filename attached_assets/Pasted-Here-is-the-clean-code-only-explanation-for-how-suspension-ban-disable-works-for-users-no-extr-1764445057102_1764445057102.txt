@@ -1,0 +1,154 @@
+Here is the clean code-only explanation for how suspension / ban / disable works for users — no extra talk, exactly what Replit AI can understand and build.
+
+⸻
+
+✅ ACCOUNT SUSPENSION / BAN / DISABLE — CODE ONLY
+
+// FIRESTORE USER DOCUMENT SHAPE
+// Each user has a "status" field that controls access.
+
+{
+  uid: "USER_ID",
+  username: "califah",
+  status: "active",     // "active" | "suspended" | "banned" | "disabled"
+  suspensionReason: "",
+  bannedReason: "",
+  disabledReason: "",
+  updatedAt: Timestamp,
+}
+
+
+⸻
+
+✅ CHECK USER STATUS ON LOGIN
+
+// After Firebase Auth signs the user in
+const userDoc = await getDoc(doc(db, "users", user.uid));
+
+if (userDoc.data().status === "suspended") {
+    throw new Error("SUSPENDED_ACCOUNT");
+}
+
+if (userDoc.data().status === "banned") {
+    throw new Error("BANNED_ACCOUNT");
+}
+
+if (userDoc.data().status === "disabled") {
+    throw new Error("DISABLED_ACCOUNT");
+}
+
+
+⸻
+
+✅ APP RESPONSE SCREENS
+
+// When error is caught:
+switch(error.code) {
+
+  case "SUSPENDED_ACCOUNT":
+    showBlockScreen({
+      title: "Account Suspended",
+      message: userDoc.data().suspensionReason,
+      action: "Contact Support"
+    });
+    break;
+
+  case "BANNED_ACCOUNT":
+    showBlockScreen({
+      title: "Account Banned",
+      message: userDoc.data().bannedReason,
+      action: "You can no longer use this app."
+    });
+    break;
+
+  case "DISABLED_ACCOUNT":
+    showBlockScreen({
+      title: "Account Disabled",
+      message: userDoc.data().disabledReason,
+      action: "Contact Admin for review."
+    });
+    break;
+}
+
+
+⸻
+
+✅ ADMIN ACTION (SUSPEND / BAN / DISABLE)
+
+// Admin presses “Suspend”
+await updateDoc(doc(db, "users", targetUserId), {
+  status: "suspended",
+  suspensionReason: "Violation of community rules.",
+  updatedAt: serverTimestamp()
+});
+
+// Admin presses “Ban”
+await updateDoc(doc(db, "users", targetUserId), {
+  status: "banned",
+  bannedReason: "Severe violation. Access permanently revoked.",
+  updatedAt: serverTimestamp()
+});
+
+// Admin presses “Disable”
+await updateDoc(doc(db, "users", targetUserId), {
+  status: "disabled",
+  disabledReason: "Your account is temporarily disabled by the admin.",
+  updatedAt: serverTimestamp()
+});
+
+
+⸻
+
+✅ BLOCK SCREEN COMPONENT
+
+// Simple UI that replaces the entire app for suspended/banned users
+const BlockScreen = ({ title, message, action }) => (
+  <View style={styles.container}>
+    <Text style={styles.title}>{title}</Text>
+    <Text style={styles.reason}>{message}</Text>
+    <Button title={action} onPress={() => openSupportEmail()} />
+  </View>
+);
+
+
+⸻
+
+✅ PROTECT ALL ROUTES
+
+// Root app wrapper
+if (userStatus !== "active") {
+  return <BlockScreen  
+           title={blockTitle}    
+           message={blockMessage}
+           action={blockAction}  
+         />;
+}
+
+
+⸻
+
+🔥 WHAT THE USER SEES (APP VIEW)
+
+Account Suspended  
+Reason: You violated our community guidelines.  
+Button: Contact Support
+
+Account Banned  
+Reason: Severe violation of AfroSphere policies.  
+Button: Learn More (opens static page)
+
+Account Disabled  
+Reason: Your account has been disabled temporarily.  
+Button: Contact Admin
+
+
+⸻
+
+If you want, I can also send:
+
+✅ admin panel code for suspend/ban buttons
+✅ real-time force-logout when user gets banned
+✅ auto-detect banned accounts and hide their posts
+✅ auto-restore when admin reactivates
+
+Just tell me “Ejeh give me the full suspension system.”

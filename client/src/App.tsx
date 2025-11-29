@@ -11,6 +11,7 @@ import OnboardingSlides from "./components/OnboardingSlides";
 import AuthScreen from "./components/AuthScreen";
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
+import BlockScreen from "./components/BlockScreen";
 import HomeFeed from "./components/HomeFeed";
 import Explore from "./components/Explore";
 import Notifications from "./components/Notifications";
@@ -33,7 +34,7 @@ import PostSignupProfile from "./components/PostSignupProfile";
 import PostSignupPreferences from "./components/PostSignupPreferences";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
-type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin";
+type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
 type MainView = "home" | "explore" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre";
 
@@ -97,6 +98,41 @@ export default function App() {
           const response = await fetch(`/api/users/${userId}`);
           if (response.ok) {
             const freshData = await response.json();
+            // Check account status
+            const userStatus = freshData.status || "active";
+            if (userStatus === "suspended") {
+              localStorage.removeItem("currentUserId");
+              localStorage.removeItem("currentUserData");
+              setAppState("blocked");
+              (window as any).blockScreenData = {
+                title: "Account Suspended",
+                message: freshData.suspensionReason || "Your account has been suspended.",
+                action: "Contact Support"
+              };
+              return;
+            }
+            if (userStatus === "banned") {
+              localStorage.removeItem("currentUserId");
+              localStorage.removeItem("currentUserData");
+              setAppState("blocked");
+              (window as any).blockScreenData = {
+                title: "Account Banned",
+                message: freshData.bannedReason || "Your account has been permanently banned.",
+                action: "Learn More"
+              };
+              return;
+            }
+            if (userStatus === "disabled") {
+              localStorage.removeItem("currentUserId");
+              localStorage.removeItem("currentUserData");
+              setAppState("blocked");
+              (window as any).blockScreenData = {
+                title: "Account Disabled",
+                message: freshData.disabledReason || "Your account has been disabled by admin.",
+                action: "Contact Admin"
+              };
+              return;
+            }
             localStorage.setItem("currentUserData", JSON.stringify(freshData));
           } else {
             // If user ID not found, clear session and go to auth
@@ -376,6 +412,15 @@ export default function App() {
         }}
       />
     );
+  }
+
+  if (appState === "blocked") {
+    const blockData = (window as any).blockScreenData || {
+      title: "Account Blocked",
+      message: "Your account has been blocked.",
+      action: "Contact Support"
+    };
+    return <BlockScreen {...blockData} />;
   }
 
   return (

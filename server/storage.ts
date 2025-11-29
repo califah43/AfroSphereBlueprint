@@ -7,6 +7,10 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: any): Promise<User | undefined>;
+  suspendUser(userId: string, reason: string): Promise<User | undefined>;
+  banUser(userId: string, reason: string): Promise<User | undefined>;
+  disableUser(userId: string, reason: string): Promise<User | undefined>;
+  restoreUser(userId: string): Promise<User | undefined>;
   
   // Posts
   getPost(id: string): Promise<Post | undefined>;
@@ -112,6 +116,38 @@ export class MemStorage implements IStorage {
     if (!user) return undefined;
     const updated = { ...user, ...updates };
     this.users.set(id, updated);
+    return updated;
+  }
+
+  async suspendUser(userId: string, reason: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, status: "suspended", suspensionReason: reason };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async banUser(userId: string, reason: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, status: "banned", bannedReason: reason };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async disableUser(userId: string, reason: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, status: "disabled", disabledReason: reason };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async restoreUser(userId: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, status: "active", suspensionReason: "", bannedReason: "", disabledReason: "" };
+    this.users.set(userId, updated);
     return updated;
   }
 
