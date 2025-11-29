@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, X, Send, ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,6 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 interface Comment {
   id: string;
   author: string;
+  authorId?: string;
+  avatar?: string;
+  displayName?: string;
   text: string;
   likes: number;
   timeAgo: string;
@@ -219,26 +222,26 @@ export default function PostDetail({
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3 flex-1">
               <Avatar className="w-10 h-10">
-                {author.avatar && <img src={author.avatar} alt={author.username} className="w-full h-full object-cover rounded-full" />}
-                <AvatarFallback>{author.username[0].toUpperCase()}</AvatarFallback>
+                {author.avatar && <AvatarImage src={author.avatar} alt={author.username} />}
+                <AvatarFallback>{author.username?.[0]?.toUpperCase() || "?"}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <p className="font-semibold text-sm truncate" data-testid="text-detail-username">
                     {author.displayName || author.username}
                   </p>
                   {author.badges && author.badges.length > 0 && (
-                    <div className="flex gap-1 shrink-0">
-                      {author.badges.slice(0, 2).map((badge) => (
-                        <Badge key={badge.id} variant="outline" className="text-xs px-1.5 py-0">
-                          {badge.badgeType}
+                    <div className="flex gap-1 flex-wrap">
+                      {author.badges.slice(0, 1).map((badge, idx) => (
+                        <Badge key={`${badge.id}-${idx}`} variant="outline" className="text-xs px-1.5 py-0 shrink-0">
+                          {badge.badgeName || badge.badgeType || "Verified"}
                         </Badge>
                       ))}
                     </div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">@{author.username}</p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <p className="text-xs text-muted-foreground">{timeAgo}</p>
                   {genreData && (
                     <Badge variant="outline" className="text-xs">
@@ -332,11 +335,14 @@ export default function PostDetail({
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex gap-3" data-testid={`detail-comment-${comment.id}`}>
                     <Avatar className="w-8 h-8 flex-shrink-0">
-                      <AvatarFallback>{comment.author[0].toUpperCase()}</AvatarFallback>
+                      {comment.avatar && <AvatarImage src={comment.avatar} alt={comment.author} />}
+                      <AvatarFallback>{comment.author?.[0]?.toUpperCase() || "?"}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-semibold">{comment.author}</span>{" "}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm break-words">
+                        <span className="font-semibold">{comment.displayName || comment.author}</span>{" "}
+                        <span className="text-muted-foreground">@{comment.author}</span>
+                        <br />
                         {comment.text}
                       </p>
                       <div className="flex items-center gap-3 mt-1">

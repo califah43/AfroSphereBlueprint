@@ -36,11 +36,30 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
             }
           }
 
-          // Fetch comments for this post
+          // Fetch comments for this post (enriched with user data)
           const commentsRes = await fetch(`/api/comments/post/${postId}`);
           if (commentsRes.ok) {
             const commentsData = await commentsRes.json();
-            setComments(Array.isArray(commentsData) ? commentsData : []);
+            // Enrich comments with user data
+            const enrichedComments = await Promise.all(
+              (Array.isArray(commentsData) ? commentsData : []).map(async (comment: any) => {
+                try {
+                  const userRes = await fetch(`/api/users/${comment.userId}`);
+                  if (userRes.ok) {
+                    const userData = await userRes.json();
+                    return {
+                      ...comment,
+                      avatar: userData.avatar || "",
+                      displayName: userData.displayName || userData.username || comment.author,
+                    };
+                  }
+                } catch (e) {
+                  // Keep original comment if user fetch fails
+                }
+                return comment;
+              })
+            );
+            setComments(enrichedComments);
           }
         }
       } catch (error) {
