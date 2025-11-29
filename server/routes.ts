@@ -975,6 +975,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search users
+  app.get("/api/search/users", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 1) {
+        return res.json([]);
+      }
+      const users = await storage.searchUsers(query, 20);
+      res.json(users);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to search users" });
+    }
+  });
+
+  // Search hashtags
+  app.get("/api/search/hashtags", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 1) {
+        return res.json([]);
+      }
+      const hashtags = await storage.searchHashtags(query, 20);
+      res.json(hashtags);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to search hashtags" });
+    }
+  });
+
+  // Search posts
+  app.get("/api/search/posts", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 1) {
+        return res.json([]);
+      }
+      const posts = await storage.searchPosts(query, 20);
+      
+      // Enrich posts with user data
+      const enrichedPosts = await Promise.all(
+        posts.map(async (post) => {
+          const user = await storage.getUser(post.userId);
+          return {
+            ...post,
+            username: user?.username || "creator",
+          };
+        })
+      );
+      
+      res.json(enrichedPosts);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to search posts" });
+    }
+  });
+
   app.get("/api/search/hashtag/:tag", async (req, res) => {
     try {
       const tag = req.params.tag.toLowerCase();
@@ -998,6 +1052,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ HASHTAG FOLLOW ROUTES ============
+  app.post("/api/hashtags/:tagId/follow", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "Missing userId" });
+      }
+      const follow = await storage.followHashtag(userId, req.params.tagId);
+      res.json(follow);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to follow hashtag" });
+    }
+  });
+
+  app.post("/api/hashtags/:tagId/unfollow", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "Missing userId" });
+      }
+      await storage.unfollowHashtag(userId, req.params.tagId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to unfollow hashtag" });
+    }
+  });
+
+  app.get("/api/hashtags/:tagId/is-following", async (req, res) => {
+    try {
+      const userId = req.query.userId as string;
+      if (!userId) {
+        return res.status(400).json({ error: "Missing userId" });
+      }
+      const isFollowing = await storage.isFollowingHashtag(userId, req.params.tagId);
+      res.json({ isFollowing });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to check hashtag follow status" });
+    }
+  });
 
   // ============ SETTINGS ROUTES ============
   app.get("/api/settings/:userId", async (req, res) => {
