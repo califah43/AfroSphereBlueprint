@@ -27,9 +27,10 @@ interface Comment {
 interface PostDetailProps {
   postId: string;
   author: {
+    id: string;
     username: string;
+    uniqueUsername?: string;
     avatar?: string;
-    displayName?: string;
     badges?: any[];
   };
   imageUrl: string;
@@ -223,32 +224,47 @@ export default function PostDetail({
             <div className="flex items-center gap-3 flex-1">
               <Avatar className="w-10 h-10">
                 {author.avatar && <AvatarImage src={author.avatar} alt={author.username} />}
-                <AvatarFallback>{author.username?.[0]?.toUpperCase() || "?"}</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{author.username?.[0]?.toUpperCase() || "?"}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <p className="font-semibold text-sm truncate" data-testid="text-detail-username">
-                    {author.displayName || author.username}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1">
+                    <p className="font-bold text-sm text-foreground" data-testid="text-detail-username">
+                      {author.username}
+                    </p>
+                    {author.badges && author.badges.length > 0 ? (
+                      <div className="flex items-center gap-1">
+                        {author.badges.map((badge) => (
+                          <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                            <img 
+                              src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                              alt={badge.name}
+                              className="w-full h-full"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                  <p className="text-xs text-muted-foreground/60" data-testid="text-handle">
+                    @{author.uniqueUsername || author.username}
                   </p>
-                  {author.badges && author.badges.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                      {author.badges.slice(0, 1).map((badge, idx) => (
-                        <Badge key={`${badge.id}-${idx}`} variant="outline" className="text-xs px-1.5 py-0 shrink-0">
-                          {badge.name || badge.badgeName || badge.badgeType || "Badge"}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">@{author.username}</p>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <p className="text-xs text-muted-foreground">{timeAgo}</p>
+                  <span className="text-xs text-muted-foreground/60">·</span>
+                  <p className="text-xs text-muted-foreground/60" data-testid="text-time">
+                    {timeAgo}
+                  </p>
                   {genreData && (
-                    <Badge variant="outline" className="text-xs">
-                      {genreData.name}
-                    </Badge>
+                    <>
+                      <span className="text-xs text-muted-foreground/60">·</span>
+                      <p className="text-xs text-muted-foreground/60">
+                        {genreData.name}
+                      </p>
+                    </>
                   )}
                 </div>
+                <p className="text-sm leading-relaxed mt-2 text-foreground" data-testid="text-detail-caption">
+                  {caption}
+                </p>
               </div>
             </div>
             <DropdownMenu>
@@ -320,12 +336,8 @@ export default function PostDetail({
             </div>
 
             <div>
-              <p className="font-semibold text-sm mb-2" data-testid="text-detail-likes">
+              <p className="font-semibold text-sm" data-testid="text-detail-likes">
                 {likes.toLocaleString()} likes
-              </p>
-              <p className="text-sm">
-                <span className="font-semibold">{author.username}</span>{" "}
-                <span data-testid="text-detail-caption">{caption}</span>
               </p>
             </div>
 

@@ -92,9 +92,10 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
     <PostDetail
       postId={postId}
       author={{ 
-        username: postAuthor?.username || "creator",
+        id: postAuthor?.id || "",
+        username: postAuthor?.displayName || "creator",
+        uniqueUsername: postAuthor?.username || "creator",
         avatar: postAuthor?.avatar || "",
-        displayName: postAuthor?.displayName || postAuthor?.username || "creator",
         badges: authorBadges
       } as any}
       imageUrl={postData.image}
