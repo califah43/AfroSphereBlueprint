@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -136,6 +136,28 @@ export default function ReportsCenter({ onBack }: ReportsCenterProps) {
   const [userReports, setUserReports] = useState<UserReport[]>(MOCK_USER_REPORTS);
   const [postReports, setPostReports] = useState<PostReport[]>(MOCK_POST_REPORTS);
   const [commentReports, setCommentReports] = useState<CommentReport[]>(MOCK_COMMENT_REPORTS);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/reports");
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          setUserReports(data);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch reports:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleIgnore = (reportId: string, type: "user" | "post" | "comment") => {
     if (type === "user") {

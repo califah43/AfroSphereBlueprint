@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -102,6 +102,26 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [assigningBadgeId, setAssigningBadgeId] = useState<string | null>(null);
   const [assignUsername, setAssignUsername] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchBadges();
+  }, []);
+
+  const fetchBadges = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/badges");
+      if (response.ok) {
+        const data = await response.json();
+        setBadges(data || DEFAULT_BADGES);
+      }
+    } catch (error) {
+      console.error("Failed to fetch badges:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateBadge = () => {
     if (newBadgeName && newBadgeDesc && newBadgeIcon) {

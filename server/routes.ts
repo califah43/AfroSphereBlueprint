@@ -1000,6 +1000,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all notifications for admin
+  app.get("/api/admin/notifications", async (req, res) => {
+    try {
+      const allNotifications = await db.query.notifications.findMany({ limit: 100 });
+      res.json(allNotifications.map(n => ({
+        id: n.id,
+        title: n.type.charAt(0).toUpperCase() + n.type.slice(1),
+        message: n.message,
+        type: "app" as const,
+        targetAudience: n.userId,
+        priority: "medium" as const,
+        status: n.read ? "sent" : "pending" as const,
+        sentAt: new Date(n.createdAt || "").toISOString(),
+        recipientCount: 1,
+      })));
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // Get all reports for admin
+  app.get("/api/admin/reports", async (req, res) => {
+    try {
+      const allReports = await db.query.userReports.findMany({ limit: 100 });
+      res.json(allReports.map(r => ({
+        id: r.id,
+        reporter: r.userId,
+        reason: r.reportType,
+        date: new Date(r.createdAt || "").toISOString(),
+        status: "pending" as const,
+        description: r.description,
+      })));
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch reports" });
+    }
+  });
+
+  // Get all badges
+  app.get("/api/admin/badges", async (req, res) => {
+    try {
+      const allBadges = await db.query.creatorBadges.findMany();
+      res.json(allBadges.map(b => ({
+        id: b.id,
+        name: b.tier,
+        description: `Badge tier: ${b.tier}`,
+        icon: "✨",
+        color: "text-yellow-500",
+        usersCount: 1,
+      })));
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch badges" });
+    }
+  });
+
+  // Assign badge to user
+  app.post("/api/admin/badges/:userId/assign", async (req, res) => {
+    try {
+      const { badge } = req.body;
+      const userId = req.params.userId;
+      if (!badge) return res.status(400).json({ error: "Badge required" });
+      const result = await storage.addBadge(userId, badge);
+      res.json({ success: true, badge: result });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to assign badge" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {

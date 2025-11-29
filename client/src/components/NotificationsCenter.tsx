@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -94,6 +94,26 @@ interface NotificationsCenterProps {
 export default function NotificationsCenter({ onBack }: NotificationsCenterProps) {
   const [history, setHistory] = useState<Notification[]>(MOCK_HISTORY);
   const [showCreator, setShowCreator] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/notifications");
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data || MOCK_HISTORY);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Form state
   const [title, setTitle] = useState("");
