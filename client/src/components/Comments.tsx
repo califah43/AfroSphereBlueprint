@@ -491,7 +491,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                         <p className="font-semibold text-sm text-foreground" data-testid={`text-comment-author-${comment.id}`}>
                           {comment.author || "Anonymous"}
                         </p>
-                        {comment.badges && comment.badges.length > 0 && (
+                        {comment.badges && comment.badges.length > 0 ? (
                           <div className="flex items-center gap-1">
                             {comment.badges.map((badge: any) => (
                               <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
@@ -503,6 +503,8 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                               </div>
                             ))}
                           </div>
+                        ) : (
+                          comment.userId && <BadgeDisplay userId={comment.userId} className="inline-flex" />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground font-medium">@{comment.author || "user"}</p>
@@ -607,7 +609,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                   <p className="font-semibold text-xs text-foreground/90" data-testid={`text-reply-author-${reply.id}`}>
                                     {reply.author || "Anonymous"}
                                   </p>
-                                  {reply.badges && reply.badges.length > 0 && (
+                                  {reply.badges && reply.badges.length > 0 ? (
                                     <div className="flex items-center gap-1">
                                       {reply.badges.map((badge: any) => (
                                         <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
@@ -619,6 +621,8 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                         </div>
                                       ))}
                                     </div>
+                                  ) : (
+                                    reply.userId && <BadgeDisplay userId={reply.userId} className="inline-flex" />
                                   )}
                                 </div>
                                 <p className="text-xs text-muted-foreground/70">@{reply.author || "user"}</p>
