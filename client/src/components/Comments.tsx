@@ -84,7 +84,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
               timeAgo: c.timeAgo || "now",
               isLiked: c.isLiked === true,
               userId: c.userId,
-              badges: c.badges || [],
+              badges: Array.isArray(c.badges) && c.badges.length > 0 ? c.badges : [],
               replies: (c.replies || []).map((r: any) => ({
                 id: r.id,
                 author: r.author || "creator",
@@ -94,7 +94,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                 isLiked: r.isLiked === true,
                 avatar: r.avatar || "",
                 userId: r.userId,
-                badges: r.badges || [],
+                badges: Array.isArray(r.badges) && r.badges.length > 0 ? r.badges : [],
               })),
               avatar: c.avatar || "",
             }));
@@ -141,7 +141,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
               timeAgo: c.timeAgo || "now",
               isLiked: c.isLiked === true,
               userId: c.userId,
-              badges: c.badges || [],
+              badges: Array.isArray(c.badges) && c.badges.length > 0 ? c.badges : [],
               replies: (c.replies || []).map((r: any) => ({
                 id: r.id,
                 author: r.author || "creator",
@@ -151,7 +151,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                 isLiked: r.isLiked === true,
                 avatar: r.avatar || "",
                 userId: r.userId,
-                badges: r.badges || [],
+                badges: Array.isArray(r.badges) && r.badges.length > 0 ? r.badges : [],
               })),
               avatar: c.avatar || "",
             }));
@@ -452,7 +452,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
         <div className="flex gap-3 items-start">
           <div className="relative w-14 h-14 flex-shrink-0">
             <img
-              src={currentImage}
+              src={typeof currentImage === 'string' ? currentImage : ''}
               alt="Post"
               className="w-14 h-14 object-cover rounded-lg border border-border"
               data-testid="img-post-thumbnail"
