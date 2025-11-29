@@ -51,11 +51,11 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
   if (badges.length === 0) return null;
 
   return (
-    <div className={`flex items-center gap-0.5 ${className}`} data-testid={`badge-container-${userId}`}>
+    <div className={`flex items-center gap-1 ${className}`} data-testid={`badge-container-${userId}`}>
       {badges.map((badge) => (
         <div
           key={badge.badgeId}
-          className="w-4 h-4 flex items-center justify-center flex-shrink-0"
+          className="w-4 h-4 inline-flex items-center justify-center"
           title={badge.name}
           data-testid={`badge-${badge.name}-${userId}`}
           dangerouslySetInnerHTML={{ __html: badge.icon }}

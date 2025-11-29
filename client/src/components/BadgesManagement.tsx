@@ -107,7 +107,7 @@ interface BadgesManagementProps {
 
 export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const { toast } = useToast();
-  const [badges, setBadges] = useState<BadgeItem[]>(DEFAULT_BADGES);
+  const [badges, setBadges] = useState<BadgeItem[]>([]);
   const [editingBadge, setEditingBadge] = useState<BadgeItem | null>(null);
   const [newBadgeName, setNewBadgeName] = useState("");
   const [newBadgeDesc, setNewBadgeDesc] = useState("");
@@ -121,6 +121,7 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
   const [usersList, setUsersList] = useState<UserOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSeedingBadges, setIsSeedingBadges] = useState(false);
+  const [assignSuccess, setAssignSuccess] = useState(false);
 
   useEffect(() => {
     fetchBadges();
@@ -138,10 +139,13 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
             const badgeUsersRes = await fetch(`/api/admin/badges/${badge.id}/users`);
             if (badgeUsersRes.ok) {
               const badgeUsers = await badgeUsersRes.json();
-              return { ...badge, usersCount: Array.isArray(badgeUsers) ? badgeUsers.length : 0 };
+              const count = Array.isArray(badgeUsers) ? badgeUsers.length : (badgeUsers?.users?.length || 0);
+              return { ...badge, usersCount: count };
             }
-          } catch (e) {}
-          return badge;
+          } catch (e) {
+            console.error("Error fetching badge users:", e);
+          }
+          return { ...badge, usersCount: 0 };
         }));
         setBadges(badgesWithCounts || DEFAULT_BADGES);
       }
@@ -278,15 +282,14 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
       });
       
       if (response.ok) {
-        const badgeName = badges.find(b => b.id === assigningBadgeId)?.name;
-        const selectedUser = usersList.find(u => u.id === selectedUserId);
-        toast({ title: "Success", description: `Badge "${badgeName}" assigned to @${selectedUser?.username}` });
-        await new Promise(resolve => setTimeout(resolve, 500));
+        setAssignSuccess(true);
         await fetchBadges();
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setShowAssignDialog(false);
-        setAssigningBadgeId(null);
-        setSelectedUserId("");
+        setTimeout(() => {
+          setShowAssignDialog(false);
+          setAssignSuccess(false);
+          setAssigningBadgeId(null);
+          setSelectedUserId("");
+        }, 2000);
       } else {
         toast({ title: "Error", description: "Failed to assign badge", variant: "destructive" });
       }
@@ -514,13 +517,21 @@ export default function BadgesManagement({ onBack }: BadgesManagementProps) {
                           <p className="text-sm font-medium text-foreground">{badge.name}</p>
                         </div>
                       </div>
-                      <Button
-                        onClick={handleAssignBadge}
-                        className="w-full"
-                        data-testid={`button-confirm-assign-${badge.id}`}
-                      >
-                        Assign Badge
-                      </Button>
+                      <div className="space-y-2">
+                        {assignSuccess && (
+                          <div className="p-2 bg-green-500/20 text-green-700 dark:text-green-400 rounded text-sm text-center font-medium" data-testid="success-assign-badge">
+                            Badge assigned successfully!
+                          </div>
+                        )}
+                        <Button
+                          onClick={handleAssignBadge}
+                          className="w-full"
+                          disabled={isLoading || assignSuccess}
+                          data-testid={`button-confirm-assign-${badge.id}`}
+                        >
+                          {assignSuccess ? "Assigned!" : isLoading ? "Assigning..." : "Assign Badge"}
+                        </Button>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>
