@@ -60,7 +60,6 @@ interface SettingsSections {
 }
 
 export default function Settings({ onClose, onLogout, onEditProfile, userId, onTextSizeChange }: SettingsProps) {
-  console.log("Settings component rendering! userId:", userId);
   const { toast } = useToast();
   const { t, language, setLanguage } = useLanguage();
   const [settings, setSettings] = useState<SettingsSections>({

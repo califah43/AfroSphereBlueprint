@@ -455,7 +455,6 @@ export default function App() {
           )}
 
           {modalView === "settings" && (() => {
-            console.log("Rendering Settings modal - modalView is:", modalView);
             const currentUserId = localStorage.getItem("currentUserId");
             return (
               <Settings

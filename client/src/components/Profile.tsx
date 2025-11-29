@@ -460,9 +460,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               variant="ghost"
               size="icon"
               onClick={() => {
-                console.log("Settings button clicked! onSettings exists:", !!onSettings);
                 if (onSettings) {
-                  console.log("Calling onSettings handler");
                   onSettings();
                 }
               }}
