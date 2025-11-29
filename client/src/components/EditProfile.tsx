@@ -1,12 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { X, Camera, MapPin, Link as LinkIcon, Briefcase } from "lucide-react";
+import { X, Camera, MapPin, Link as LinkIcon, Briefcase, Check, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { checkUsernameAvailability, validateUsernameFormat } from "@/lib/usernameService";
 import BannerCropper from "./BannerCropper";
 import bannerImage from "@assets/generated_images/Sunset_gradient_profile_banner_7206e8a3.png";
 
@@ -57,6 +58,8 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   const [charCount, setCharCount] = useState(formData.bio.length);
   const [showBannerCropper, setShowBannerCropper] = useState(false);
   const [bannerToEdit, setBannerToEdit] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<"checking" | "available" | "taken" | "invalid" | null>(null);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
 
   const compressImage = (base64: string, maxSize = 500000): Promise<string> => {
     return new Promise((resolve) => {
@@ -145,6 +148,24 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       setFormData({ ...formData, bio: value });
       setCharCount(value.length);
     }
+  };
+
+  const handleUsernameChange = (newUsername: string) => {
+    setFormData({ ...formData, username: newUsername });
+    setIsEditingUsername(true);
+    
+    // Check format
+    const validation = validateUsernameFormat(newUsername);
+    if (!validation.valid) {
+      setUsernameStatus("invalid");
+      return;
+    }
+    
+    // Check availability
+    setUsernameStatus("checking");
+    checkUsernameAvailability(newUsername).then((result) => {
+      setUsernameStatus(result.available ? "available" : "taken");
+    });
   };
 
   const handleSave = async () => {
