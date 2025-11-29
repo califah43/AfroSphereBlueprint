@@ -1055,15 +1055,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all badges
   app.get("/api/admin/badges", async (req, res) => {
     try {
-      const allBadges = await db.query.creatorBadges.findMany();
-      res.json(allBadges.map(b => ({
+      const allBadges = await storage.getBadges();
+      const transformed = (allBadges || []).map((b: any) => ({
         id: b.id,
-        name: b.tier,
-        description: `Badge tier: ${b.tier}`,
-        icon: "✨",
+        name: b.name,
+        description: b.description,
+        icon: b.iconSvg || "✨",
         color: "text-yellow-500",
-        usersCount: 1,
-      })));
+        usersCount: 0,
+      }));
+      res.json(transformed);
     } catch (error) {
       res.status(400).json({ error: "Failed to fetch badges" });
     }
