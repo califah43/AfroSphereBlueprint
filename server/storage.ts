@@ -37,9 +37,6 @@ export interface IStorage {
   getFollowers(userId: string): Promise<User[]>;
   getFollowing(userId: string): Promise<User[]>;
   
-  // Creator Badges
-  getBadges(userId: string): Promise<CreatorBadge | undefined>;
-  addBadge(userId: string, badge: string): Promise<CreatorBadge>;
   
   // Notifications
   createNotification(notification: any): Promise<Notification>;
@@ -67,7 +64,9 @@ export class MemStorage implements IStorage {
   private comments: Map<string, Comment> = new Map();
   private likes: Map<string, Like> = new Map();
   private follows: Map<string, Follow> = new Map();
-  private badges: Map<string, CreatorBadge> = new Map();
+  private creatorBadges: Map<string, CreatorBadge> = new Map();
+  private badges: Map<string, Badge> = new Map();
+  private userBadges: Map<string, UserBadge[]> = new Map(); // userId -> badges
   private notifications: Map<string, Notification> = new Map();
   private settings: Map<string, UserSettings> = new Map();
   private fcmTokens: Map<string, string> = new Map(); // userId -> fcmToken
@@ -340,31 +339,56 @@ export class MemStorage implements IStorage {
     return followingIds.map(id => this.users.get(id)).filter((u): u is User => !!u);
   }
 
-  // ============ BADGES ============
-  async getBadges(userId: string): Promise<CreatorBadge | undefined> {
-    return Array.from(this.badges.values()).find(b => b.userId === userId);
+  // ============ NEW BADGES SYSTEM ============
+  async getBadges(): Promise<Badge[]> {
+    return Array.from(this.badges.values());
   }
 
-  async addBadge(userId: string, badge: string): Promise<CreatorBadge> {
-    let badgeRecord = Array.from(this.badges.values()).find(b => b.userId === userId);
-    if (!badgeRecord) {
-      const id = randomUUID();
-      badgeRecord = {
-        id,
-        userId,
-        badges: [badge],
-        tier: "bronze",
-        createdAt: new Date(),
-      };
-      this.badges.set(id, badgeRecord);
-    } else {
-      const badges = Array.isArray(badgeRecord.badges) ? badgeRecord.badges : [];
-      if (!badges.includes(badge)) {
-        badgeRecord.badges = [...badges, badge];
-        this.badges.set(badgeRecord.id, badgeRecord);
-      }
+  async createBadge(badge: InsertBadge): Promise<Badge> {
+    const id = randomUUID();
+    const newBadge: Badge = {
+      id,
+      ...badge,
+      createdAt: new Date(),
+    };
+    this.badges.set(id, newBadge);
+    return newBadge;
+  }
+
+  async deleteBadge(badgeId: string): Promise<void> {
+    this.badges.delete(badgeId);
+  }
+
+  async getUserBadges(userId: string): Promise<Badge[]> {
+    const userBadgeIds = this.userBadges.get(userId) || [];
+    return userBadgeIds
+      .map(ub => this.badges.get(ub.badgeId))
+      .filter((b): b is Badge => !!b);
+  }
+
+  async assignBadge(userId: string, badgeId: string): Promise<UserBadge> {
+    const id = randomUUID();
+    const userBadge: UserBadge = {
+      id,
+      userId,
+      badgeId,
+      assignedAt: new Date(),
+    };
+    const existing = this.userBadges.get(userId) || [];
+    if (!existing.find(ub => ub.badgeId === badgeId)) {
+      this.userBadges.set(userId, [...existing, userBadge]);
     }
-    return badgeRecord;
+    return userBadge;
+  }
+
+  async removeBadge(userId: string, badgeId: string): Promise<void> {
+    const existing = this.userBadges.get(userId) || [];
+    const updated = existing.filter(ub => ub.badgeId !== badgeId);
+    if (updated.length > 0) {
+      this.userBadges.set(userId, updated);
+    } else {
+      this.userBadges.delete(userId);
+    }
   }
 
   // ============ NOTIFICATIONS ============

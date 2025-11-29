@@ -1150,6 +1150,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ BADGE ROUTES ============
+  // Get all badges
+  app.get("/api/badges", async (req, res) => {
+    try {
+      const badges = await storage.getBadges();
+      res.json(badges);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch badges" });
+    }
+  });
+
+  // Get user badges
+  app.get("/api/badges/user/:userId", async (req, res) => {
+    try {
+      const badges = await storage.getUserBadges(req.params.userId);
+      res.json(badges);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch user badges" });
+    }
+  });
+
+  // Admin: Create badge
+  app.post("/api/admin/badges", async (req, res) => {
+    try {
+      const { name, type, iconSvg, description } = req.body;
+      if (!name || !type || !iconSvg || !description) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      const badge = await storage.createBadge({ name, type, iconSvg, description });
+      res.status(201).json(badge);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to create badge" });
+    }
+  });
+
+  // Admin: Delete badge
+  app.delete("/api/admin/badges/:badgeId", async (req, res) => {
+    try {
+      await storage.deleteBadge(req.params.badgeId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete badge" });
+    }
+  });
+
+  // Admin: Assign badge to user
+  app.post("/api/admin/badges/assign", async (req, res) => {
+    try {
+      const { userId, badgeId } = req.body;
+      if (!userId || !badgeId) {
+        return res.status(400).json({ error: "Missing userId or badgeId" });
+      }
+      const userBadge = await storage.assignBadge(userId, badgeId);
+      res.json(userBadge);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to assign badge" });
+    }
+  });
+
+  // Admin: Remove badge from user
+  app.post("/api/admin/badges/remove", async (req, res) => {
+    try {
+      const { userId, badgeId } = req.body;
+      if (!userId || !badgeId) {
+        return res.status(400).json({ error: "Missing userId or badgeId" });
+      }
+      await storage.removeBadge(userId, badgeId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to remove badge" });
+    }
+  });
+
+  // Seed default badges
+  app.post("/api/admin/badges/seed", async (req, res) => {
+    try {
+      const defaultBadges = [
+        { name: "Verified", type: "verified", description: "Verified creator account", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1E3A8A"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' },
+        { name: "King", type: "cultural", description: "Cultural royalty", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#D4AF37"><path d="M12 2l3 6h6l-5 3 2 7-7-5-7 5 2-7-5-3h6zm0 2.5L9.5 8h5L12 4.5z"/></svg>' },
+        { name: "Queen", type: "cultural", description: "Cultural excellence", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#9333EA"><path d="M12 2l3 6h6l-5 3 2 7-7-5-7 5 2-7-5-3h6zm0 2.5L9.5 8h5L12 4.5z"/></svg>' },
+        { name: "Creator", type: "creator", description: "Original content creator", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EC4899"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>' },
+        { name: "Influencer", type: "creator", description: "Influential voice", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' },
+        { name: "Cultural Icon", type: "cultural", description: "Representative of cultural heritage", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#8B5A3C"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>' },
+        { name: "Spiritual Figure", type: "cultural", description: "Spiritual guide and wisdom", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6B21A8"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg>' },
+        { name: "Hero", type: "achievement", description: "Community hero", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#DC2626"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+        { name: "Popular Creator", type: "achievement", description: "Top trending creator", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FF6B6B"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+        { name: "Pioneer", type: "achievement", description: "Early adopter and innovator", iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#06B6D4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+      ];
+
+      for (const badge of defaultBadges) {
+        const existing = (await storage.getBadges()).find(b => b.name === badge.name);
+        if (!existing) {
+          await storage.createBadge(badge);
+        }
+      }
+      res.json({ success: true, message: "Default badges seeded" });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to seed badges" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {
