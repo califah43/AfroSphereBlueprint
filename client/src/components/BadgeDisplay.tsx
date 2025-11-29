@@ -31,7 +31,7 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
             userId,
             badgeId: b.id,
             name: b.name,
-            icon: b.icon,
+            icon: b.iconSvg,
             color: b.color,
           }));
           setBadges(badgeList);
