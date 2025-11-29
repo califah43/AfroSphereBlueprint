@@ -312,46 +312,36 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
       {/* Feed Content */}
       <div className="max-w-md mx-auto px-0 pt-0">
-          {isInitialLoading ? (
-            <div className="animate-in fade-in duration-500">
-              <PostSkeleton />
-              <PostSkeleton />
-              <PostSkeleton />
-            </div>
-          ) : (
+          {filteredPosts.length > 0 ? (
             <>
-              {filteredPosts.length > 0 ? (
-                <>
-                  {filteredPosts.map((post) => (
-                    <div key={post.id} className="animate-in fade-in duration-500">
-                      <PostCard
-                        post={post}
-                        isOwnPost={post.author.username === "adikeafrica"}
-                        onLike={(id) => console.log("Liked:", id)}
-                        onComment={(id) => onCommentClick?.(id, post.imageUrl, post.caption)}
-                        onShare={(id) => onOpenShare?.()}
-                        onBookmark={(id) => console.log("Bookmark:", id)}
-                        onAuthorClick={(username) => onUserProfileClick?.(username)}
-                        onHashtagClick={(tag) => onHashtagClick?.(tag)}
-                      />
-                    </div>
-                  ))}
-                  
-                  {/* Loading More Indicator */}
-                  {isLoadingMore && (
-                    <>
-                      <PostSkeleton />
-                      <PostSkeleton />
-                    </>
-                  )}
-                </>
-              ) : (
-                <div className="py-16 text-center">
-                  <p className="text-muted-foreground font-medium">{t("feed.noPost")}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t("feed.beFirst")}</p>
+              {filteredPosts.map((post) => (
+                <div key={post.id} className="animate-in fade-in duration-500">
+                  <PostCard
+                    post={post}
+                    isOwnPost={post.author.username === "adikeafrica"}
+                    onLike={(id) => console.log("Liked:", id)}
+                    onComment={(id) => onCommentClick?.(id, post.imageUrl, post.caption)}
+                    onShare={(id) => onOpenShare?.()}
+                    onBookmark={(id) => console.log("Bookmark:", id)}
+                    onAuthorClick={(username) => onUserProfileClick?.(username)}
+                    onHashtagClick={(tag) => onHashtagClick?.(tag)}
+                  />
                 </div>
+              ))}
+              
+              {/* Loading More Indicator */}
+              {isLoadingMore && (
+                <>
+                  <PostSkeleton />
+                  <PostSkeleton />
+                </>
               )}
             </>
+          ) : (
+            <div className="py-16 text-center">
+              <p className="text-muted-foreground font-medium">{t("feed.noPost")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("feed.beFirst")}</p>
+            </div>
           )}
       </div>
     </div>
