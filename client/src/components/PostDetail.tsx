@@ -234,7 +234,7 @@ export default function PostDetail({
                     <div className="flex gap-1 flex-wrap">
                       {author.badges.slice(0, 1).map((badge, idx) => (
                         <Badge key={`${badge.id}-${idx}`} variant="outline" className="text-xs px-1.5 py-0 shrink-0">
-                          {badge.badgeName || badge.badgeType || "Verified"}
+                          {badge.name || badge.badgeName || badge.badgeType || "Badge"}
                         </Badge>
                       ))}
                     </div>
