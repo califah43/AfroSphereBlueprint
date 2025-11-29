@@ -307,7 +307,19 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
-            {userId && <BadgeDisplay userId={userId} preloadedBadges={userBadges} className="inline-flex" />}
+            {userBadges && userBadges.length > 0 && (
+              <div className="flex items-center gap-1">
+                {userBadges.map((badge: any) => (
+                  <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                    <img 
+                      src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                      alt={badge.name}
+                      className="w-full h-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* Unique Username Handle */}
