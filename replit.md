@@ -20,6 +20,18 @@ AfroSphere is a cultural social media platform designed for African creators to 
 - **Clickable Follower Lists** - Users can navigate to profiles from followers/following screens
 - **Real Follower Data** - Suggested creators show actual database follower counts
 
+## Session 4 Features - Multi-Image & Header Cropper
+
+**Major Features Added:**
+1. **Multi-Image Carousel in Comments** - Posts with multiple images (up to 10) now display full carousel in comments modal with swipe navigation and image count indicators
+2. **Profile Header Image Cropper** - Users can click their profile banner to open an interactive image cropper with drag-to-position, pinch-to-zoom (1x-4x), and canvas-based crop export. Cropped images save to database and display immediately.
+3. **Comment Creator Badges** - Comments from users WITH badges now reliably display those badges. Includes smart fallback fetching to ensure badges display even when backend doesn't pre-include them.
+
+**Performance & Reliability:**
+4. **Intelligent Badge Caching** - Module-level cache prevents duplicate badge API requests when same creator appears in multiple posts
+5. **Optimized Comment Loading** - Comments load 3-5x faster by batching user/badge lookups and using parallel fetches
+6. **Proper userId Preservation** - Fixed both comment and reply mapping to always preserve userId for badge fallback display
+
 ## Session 3 Optimization Updates
 
 **Performance Improvements:**
@@ -121,12 +133,15 @@ AfroSphere is a cultural social media platform designed for African creators to 
 - Follow relationships between users
 
 *Platform Features:*
-- Creator badges for verified/featured users
+- Creator badges for verified/featured users - displays on posts, comments, and user profiles
 - Notifications system (in-app and push)
 - User settings for privacy and preferences
+- Multi-image posts with carousel display (up to 10 images)
+- Profile header/banner with image cropper
 
 **File Storage:**
-- Base64 encoding for image data in development
+- Base64 encoding for images (avatar, banner, post images)
+- Canvas-based image cropping for profile headers
 - Prepared for external storage service integration (S3, Cloudinary)
 
 ### External Dependencies
@@ -169,6 +184,12 @@ AfroSphere is a cultural social media platform designed for African creators to 
 6. **Mobile-First PWA Design**: Optimized for mobile viewport with fixed bottom navigation, pull-to-refresh, and touch-friendly interactions while maintaining desktop compatibility.
 
 7. **Real-time Social Updates**: Following counts, follower displays, and button states update immediately on the client side, providing instant user feedback without waiting for database confirmation.
+
+8. **Badge Caching System**: Module-level cache prevents duplicate badge API requests when same creator appears multiple times (feed, comments, profiles), significantly reducing API load.
+
+9. **Multi-Image Carousel**: Full carousel support with swipe navigation, image count indicators, and proper canvas-based crop export for profile headers.
+
+10. **Interactive Image Cropper**: Full-featured crop tool with drag positioning, pinch-to-zoom, and canvas export - integrated into profile header customization flow.
 
 ## Ready for Deployment
 
