@@ -59,11 +59,17 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("Avatar file selected:", file.name, file.size);
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
+        console.log("Avatar base64 length:", base64.length);
         setFormData({ ...formData, avatar: base64 });
         toast({ title: "Profile photo updated", description: "Your new profile photo is ready to save" });
+      };
+      reader.onerror = () => {
+        console.error("Failed to read avatar file");
+        toast({ title: "Error", description: "Failed to read profile photo", variant: "destructive" });
       };
       reader.readAsDataURL(file);
     }
@@ -72,11 +78,17 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("Banner file selected:", file.name, file.size);
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
+        console.log("Banner base64 length:", base64.length);
         setBannerToEdit(base64);
         setShowBannerCropper(true);
+      };
+      reader.onerror = () => {
+        console.error("Failed to read banner file");
+        toast({ title: "Error", description: "Failed to read banner image", variant: "destructive" });
       };
       reader.readAsDataURL(file);
     }
@@ -104,25 +116,36 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         return;
       }
 
+      const payload = {
+        displayName: formData.displayName,
+        bio: formData.bio,
+        location: formData.location,
+        website: formData.website,
+        profession: formData.profession,
+        ...(formData.avatar && { avatar: formData.avatar }),
+        ...(formData.banner && { banner: formData.banner }),
+      };
+
+      console.log("Sending profile update with payload size:", JSON.stringify(payload).length);
+
       // Save to backend (text fields + images as base64)
       const response = await fetch(`/api/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName: formData.displayName,
-          bio: formData.bio,
-          location: formData.location,
-          website: formData.website,
-          profession: formData.profession,
-          avatar: formData.avatar,
-          banner: formData.banner,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error("Failed to save");
+      console.log("Save response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Save error response:", errorData);
+        throw new Error(`Failed to save: ${response.statusText}`);
+      }
 
       // Get updated user from response
       const updatedUser = await response.json();
+      console.log("Updated user received:", updatedUser);
 
       // Update localStorage with complete data including images from server
       const updated = {
@@ -143,7 +166,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       onClose();
     } catch (error) {
       console.error("Save error:", error);
-      toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
+      toast({ title: "Error", description: String(error) || "Failed to save profile", variant: "destructive" });
     }
   };
 
@@ -206,7 +229,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               type="file"
               accept="image/*"
               onChange={handleBannerUpload}
-              className="hidden"
+              className="absolute opacity-0 w-0 h-0"
               data-testid="input-banner-file"
             />
           </div>
@@ -231,7 +254,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
               type="file"
               accept="image/*"
               onChange={handleAvatarUpload}
-              className="hidden"
+              className="absolute opacity-0 w-0 h-0"
               data-testid="input-avatar-file"
             />
           </div>
