@@ -1,0 +1,64 @@
+import { useState, useEffect } from "react";
+
+interface BadgeIcon {
+  userId: string;
+  badgeId: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
+interface BadgeDisplayProps {
+  userId: string;
+  className?: string;
+}
+
+export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayProps) {
+  const [badges, setBadges] = useState<BadgeIcon[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchBadges = async () => {
+      if (!userId) return;
+      
+      try {
+        setIsLoading(true);
+        const res = await fetch(`/api/admin/badges/user/${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Map badges to display format
+          const badgeList = (data.badges || []).map((b: any) => ({
+            userId,
+            badgeId: b.id,
+            name: b.name,
+            icon: b.icon,
+            color: b.color,
+          }));
+          setBadges(badgeList);
+        }
+      } catch (error) {
+        console.log("Error fetching badges:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBadges();
+  }, [userId]);
+
+  if (isLoading || badges.length === 0) return null;
+
+  return (
+    <div className={`flex items-center gap-1 ${className}`} data-testid={`badge-container-${userId}`}>
+      {badges.map((badge) => (
+        <div
+          key={badge.badgeId}
+          className="w-5 h-5 flex items-center justify-center"
+          title={badge.name}
+          data-testid={`badge-${badge.name}-${userId}`}
+          dangerouslySetInnerHTML={{ __html: badge.icon }}
+        />
+      ))}
+    </div>
+  );
+}

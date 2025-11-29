@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import BadgeDisplay from "./BadgeDisplay";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -184,10 +185,13 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         </button>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 flex-wrap">
-            <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
-              {post.author.username}
-            </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1">
+              <p className="font-bold text-sm text-foreground" data-testid={`text-username-${post.id}`}>
+                {post.author.username}
+              </p>
+              <BadgeDisplay userId={post.author.username} className="inline-flex" />
+            </div>
             <p className="text-sm text-muted-foreground/60" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>

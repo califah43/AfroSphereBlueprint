@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import BadgeDisplay from "./BadgeDisplay";
 import { X, Send, Heart, ChevronDown } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
