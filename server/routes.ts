@@ -381,6 +381,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           replyAvatar = replyUser.avatar || "";
         }
         
+        // Get badges for reply author
+        let replyBadges = [];
+        if (replyUser) {
+          try {
+            replyBadges = await storage.getUserBadges(replyUser.id);
+          } catch (e) {
+            // No badges, proceed
+          }
+        }
+
         return {
           id: reply.id,
           userId: reply.userId,
@@ -394,9 +404,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timeAgo: formatTimeAgo(reply.createdAt),
           replies: [],
           isLiked: likedCommentIds.has(reply.id),
+          badges: replyBadges,
         };
       }));
       
+      // Get badges for comment author
+      let authorBadges = [];
+      if (user) {
+        try {
+          authorBadges = await storage.getUserBadges(user.id);
+        } catch (e) {
+          // No badges, proceed
+        }
+      }
+
       return {
         id: comment.id,
         userId: comment.userId,
@@ -410,6 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeAgo: formatTimeAgo(comment.createdAt),
         replies: enrichedReplies,
         isLiked: likedCommentIds.has(comment.id),
+        badges: authorBadges,
       };
     }));
     

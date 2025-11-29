@@ -14,6 +14,8 @@ interface Reply {
   timeAgo: string;
   isLiked?: boolean;
   avatar?: string;
+  userId?: string;
+  badges?: any[];
 }
 
 interface Comment {
@@ -25,6 +27,8 @@ interface Comment {
   isLiked?: boolean;
   replies: Reply[];
   avatar?: string;
+  userId?: string;
+  badges?: any[];
 }
 
 interface CommentsProps {
@@ -141,6 +145,8 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
             isLiked: false,
             replies: [],
             avatar: newCommentObj.avatar || userData.avatar,
+            userId: currentUserId,
+            badges: newCommentObj.badges || [],
           };
           setComments([...comments, mappedComment]);
           setNewComment("");
