@@ -103,15 +103,33 @@ export const uploadToStorage = async (
   }
 };
 
-// Push notifications (optional)
+// Push notifications (FCM)
 export const sendPushNotification = async (
   fcmToken: string,
   title: string,
   body: string,
   data?: Record<string, string>
 ): Promise<boolean> => {
-  console.log("📱 Push notification queued:", { title, body, token: fcmToken?.substring(0, 20) + "..." });
-  return true;
+  if (!firebaseAdminApp) {
+    console.log("⚠️ Firebase Admin not available for FCM");
+    return false;
+  }
+
+  try {
+    const messaging = admin.messaging(firebaseAdminApp);
+    const message = {
+      notification: { title, body },
+      data: data || {},
+      token: fcmToken,
+    };
+
+    const result = await messaging.send(message as any);
+    console.log(`📱 Push notification sent (${result}): ${title}`);
+    return true;
+  } catch (error: any) {
+    console.error("FCM send error:", error.message);
+    return false;
+  }
 };
 
 export const sendMulticastNotification = async (
@@ -120,6 +138,27 @@ export const sendMulticastNotification = async (
   body: string,
   data?: Record<string, string>
 ): Promise<{ successCount: number; failureCount: number }> => {
-  console.log("📱 Multicast notification queued:", { title, body, tokenCount: fcmTokens.length });
-  return { successCount: fcmTokens.length, failureCount: 0 };
+  if (!firebaseAdminApp || fcmTokens.length === 0) {
+    console.log("⚠️ Firebase Admin not available or no tokens");
+    return { successCount: 0, failureCount: 0 };
+  }
+
+  try {
+    const messaging = admin.messaging(firebaseAdminApp);
+    const message = {
+      notification: { title, body },
+      data: data || {},
+    };
+
+    const result = await messaging.sendMulticast({
+      ...message,
+      tokens: fcmTokens,
+    } as any);
+    
+    console.log(`📱 Multicast sent: ${result.successCount} success, ${result.failureCount} failed`);
+    return { successCount: result.successCount, failureCount: result.failureCount };
+  } catch (error: any) {
+    console.error("Multicast send error:", error.message);
+    return { successCount: 0, failureCount: fcmTokens.length };
+  }
 };
