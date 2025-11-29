@@ -93,12 +93,34 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         if (currentUserId) {
           setPostsLoading(true);
           
-          // Load cached badges immediately from localStorage
+          // Load cached data immediately from localStorage
           const cachedBadgesKey = `badges_${currentUserId}`;
+          const cachedPostsKey = `posts_${currentUserId}`;
+          const cachedLikedKey = `liked_${currentUserId}`;
+          
           const cachedBadges = localStorage.getItem(cachedBadgesKey);
+          const cachedPosts = localStorage.getItem(cachedPostsKey);
+          const cachedLiked = localStorage.getItem(cachedLikedKey);
+          
           if (cachedBadges) {
             try {
               setUserBadges(JSON.parse(cachedBadges));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
+          if (cachedPosts) {
+            try {
+              setUserPosts(JSON.parse(cachedPosts));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
+          if (cachedLiked) {
+            try {
+              setLikedPosts(JSON.parse(cachedLiked));
             } catch (e) {
               // Invalid cache, ignore
             }
@@ -129,18 +151,19 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
+            localStorage.setItem(cachedPostsKey, JSON.stringify(posts || []));
           }
           
           if (likedRes.ok) {
             const liked = await likedRes.json();
             setLikedPosts(liked || []);
+            localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
           }
           
           if (badgesRes.ok) {
             const badges = await badgesRes.json();
             const badgesArray = Array.isArray(badges) ? badges : [];
             setUserBadges(badgesArray);
-            // Cache badges for instant load next time
             localStorage.setItem(cachedBadgesKey, JSON.stringify(badgesArray));
           }
           
@@ -177,6 +200,29 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
 
         if (userId) {
+          // Load cached data immediately
+          const cachedPostsKey = `posts_${userId}`;
+          const cachedLikedKey = `liked_${userId}`;
+          
+          const cachedPosts = localStorage.getItem(cachedPostsKey);
+          const cachedLiked = localStorage.getItem(cachedLikedKey);
+          
+          if (cachedPosts) {
+            try {
+              setUserPosts(JSON.parse(cachedPosts));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
+          if (cachedLiked) {
+            try {
+              setLikedPosts(JSON.parse(cachedLiked));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
           const [postsRes, likedRes] = await Promise.all([
             fetch(`/api/posts/user/${userId}`),
             fetch(`/api/posts/user/${userId}/liked`)
@@ -184,10 +230,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
+            localStorage.setItem(cachedPostsKey, JSON.stringify(posts || []));
           }
           if (likedRes.ok) {
             const liked = await likedRes.json();
             setLikedPosts(liked || []);
+            localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
           }
         }
       } catch (error) {
