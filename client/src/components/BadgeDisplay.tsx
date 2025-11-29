@@ -9,8 +9,9 @@ interface BadgeIcon {
 }
 
 interface BadgeDisplayProps {
-  userId: string;
+  userId?: string;
   className?: string;
+  preloadedBadges?: any[];
 }
 
 function BadgeIcon({ icon, name }: { icon: string; name: string }) {
@@ -26,11 +27,25 @@ function BadgeIcon({ icon, name }: { icon: string; name: string }) {
   );
 }
 
-export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayProps) {
+export default function BadgeDisplay({ userId, className = "", preloadedBadges }: BadgeDisplayProps) {
   const [badges, setBadges] = useState<BadgeIcon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Use preloaded badges if provided
+    if (preloadedBadges && preloadedBadges.length > 0) {
+      const badgeList = preloadedBadges.map((b: any) => ({
+        userId: userId || "",
+        badgeId: b.id,
+        name: b.name,
+        icon: b.iconSvg || b.icon,
+        color: b.color || "#000",
+      }));
+      setBadges(badgeList);
+      return;
+    }
+    
+    // Otherwise fetch badges
     const fetchBadges = async () => {
       if (!userId) return;
       
@@ -56,7 +71,7 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
     };
 
     fetchBadges();
-  }, [userId]);
+  }, [userId, preloadedBadges]);
 
   if (badges.length === 0) return null;
 

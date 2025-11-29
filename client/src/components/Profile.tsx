@@ -35,6 +35,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isAccountPrivate, setIsAccountPrivate] = useState(false);
+  const [userBadges, setUserBadges] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Fetch user data and posts from backend
@@ -87,14 +88,24 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           }
         }
 
-        // Fetch user's posts
+        // Fetch user's posts and badges in parallel
         if (currentUserId) {
           setPostsLoading(true);
-          const postsRes = await fetch(`/api/posts/user/${currentUserId}`);
+          const [postsRes, badgesRes] = await Promise.all([
+            fetch(`/api/posts/user/${currentUserId}`),
+            fetch(`/api/badges/user/${currentUserId}`)
+          ]);
+          
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
           }
+          
+          if (badgesRes.ok) {
+            const badges = await badgesRes.json();
+            setUserBadges(Array.isArray(badges) ? badges : []);
+          }
+          
           setPostsLoading(false);
         }
       } catch (error) {
@@ -296,7 +307,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
-            {userId && <BadgeDisplay userId={userId} className="inline-flex" />}
+            {userId && <BadgeDisplay userId={userId} preloadedBadges={userBadges} className="inline-flex" />}
           </div>
           
           {/* Unique Username Handle */}
