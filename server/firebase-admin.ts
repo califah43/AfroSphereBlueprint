@@ -145,18 +145,25 @@ export const sendMulticastNotification = async (
 
   try {
     const messaging = admin.messaging(firebaseAdminApp);
-    const message = {
-      notification: { title, body },
-      data: data || {},
-    };
+    let successCount = 0;
+    let failureCount = 0;
 
-    const result = await messaging.sendMulticast({
-      ...message,
-      tokens: fcmTokens,
-    } as any);
+    // Send notifications to each token individually
+    for (const token of fcmTokens) {
+      try {
+        await messaging.send({
+          notification: { title, body },
+          data: data || {},
+          token,
+        });
+        successCount++;
+      } catch (error) {
+        failureCount++;
+      }
+    }
     
-    console.log(`📱 Multicast sent: ${result.successCount} success, ${result.failureCount} failed`);
-    return { successCount: result.successCount, failureCount: result.failureCount };
+    console.log(`📱 Multicast sent: ${successCount} success, ${failureCount} failed`);
+    return { successCount, failureCount };
   } catch (error: any) {
     console.error("Multicast send error:", error.message);
     return { successCount: 0, failureCount: fcmTokens.length };
