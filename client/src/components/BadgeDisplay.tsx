@@ -48,7 +48,7 @@ export default function BadgeDisplay({ userId, className = "" }: BadgeDisplayPro
     fetchBadges();
   }, [userId]);
 
-  if (isLoading || badges.length === 0) return null;
+  if (badges.length === 0) return null;
 
   return (
     <div className={`flex items-center gap-1 ${className}`} data-testid={`badge-container-${userId}`}>
