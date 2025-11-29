@@ -518,10 +518,14 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                           <div className="flex-1 min-w-0">
                             {/* Reply Bubble - Subtler */}
                             <div className="bg-background border border-border/30 rounded-xl px-3 py-2">
-                              <div className="flex items-baseline gap-2 mb-0.5">
-                                <p className="font-semibold text-xs text-foreground/90" data-testid={`text-reply-author-${reply.id}`}>
-                                  {reply.author || "Anonymous"}
-                                </p>
+                              <div className="flex items-baseline gap-2 mb-0.5 flex-wrap">
+                                <div className="flex items-center gap-1">
+                                  <p className="font-semibold text-xs text-foreground/90" data-testid={`text-reply-author-${reply.id}`}>
+                                    {reply.author || "Anonymous"}
+                                  </p>
+                                  <BadgeDisplay userId={reply.id} className="inline-flex" />
+                                </div>
+                                <p className="text-xs text-muted-foreground/70">@{reply.author || "user"}</p>
                                 <span className="text-xs text-muted-foreground/70" data-testid={`text-reply-time-${reply.id}`}>
                                   {reply.timeAgo}
                                 </span>
