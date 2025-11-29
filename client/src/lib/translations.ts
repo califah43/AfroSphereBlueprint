@@ -232,13 +232,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "feed.commented": "commented on your post",
     "feed.trending": "Your post is trending in",
     "settings.loading": "Loading settings...",
-    "settings.emailPhone": "Email & Phone",
-    "settings.emailPhoneDesc": "Manage your contact information",
-    "settings.passwordDesc": "Change your password",
-    "settings.allowCommentsDesc": "Let others comment on your posts",
-    "settings.notificationsSection": "Notifications",
-    "settings.aboutAfroSphere": "About AfroSphere",
-    "settings.aboutAfroSphereDesc": "Learn more about our mission",
     
     // Additional Notifications
     "notifications.youllSeeUpdates": "You'll see updates here",
