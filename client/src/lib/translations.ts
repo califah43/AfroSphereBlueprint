@@ -188,6 +188,30 @@ export const translations: Record<Language, Record<string, string>> = {
     "guidelines.rule10": "Cultural Respect",
     "guidelines.rule10Desc": "Respect sacred traditions, rites, and leaders. Avoid mocking or demeaning cultural practices.",
     "guidelines.agree": "I understand and agree to follow these guidelines",
+    
+    // Admin & Follow
+    "admin.dashboard": "Admin Dashboard",
+    "admin.superAdmin": "Super Admin",
+    "admin.systemAdmin": "System Administrator",
+    "admin.totalUsers": "Total Users",
+    "admin.totalPosts": "Total Posts",
+    "admin.dailyActiveUsers": "Daily Active Users",
+    "admin.reportsToday": "Reports Today",
+    "admin.newSignupsToday": "New Sign-Ups Today",
+    "admin.refreshStats": "Refresh Stats",
+    "admin.userManagement": "User Management",
+    "admin.postManagement": "Post Management",
+    "admin.badgesManager": "Badges Manager",
+    "admin.notificationsCenter": "Notifications Center",
+    "admin.systemLogs": "System Logs",
+    "admin.systemSettings": "System Settings",
+    "admin.teamManagement": "Team Management",
+    
+    // Follow
+    "follow.notLoggedIn": "Not logged in",
+    "follow.unfollowed": "Unfollowed",
+    "follow.failed": "Failed to unfollow",
+    "follow.connectionError": "Connection Error",
   },
   sw: {
     // Navigation

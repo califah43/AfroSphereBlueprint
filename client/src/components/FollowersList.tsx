@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { X, Heart, Users, Lightbulb, Sparkles } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/LanguageContext";
 import { useState, useEffect } from "react";
 
 interface User {
@@ -33,6 +34,7 @@ export default function FollowersList({
   const [following, setFollowing] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleUnfollow = async (targetUsername: string) => {
     try {
@@ -41,8 +43,8 @@ export default function FollowersList({
       
       if (!currentUserId) {
         toast({
-          title: "Error",
-          description: "Not logged in",
+          title: t("common.error"),
+          description: t("follow.notLoggedIn"),
           variant: "destructive",
         });
         return;
@@ -52,8 +54,8 @@ export default function FollowersList({
       const userRes = await fetch(`/api/users/username/${targetUsername}`);
       if (!userRes.ok) {
         toast({
-          title: "Error",
-          description: "User not found",
+          title: t("common.error"),
+          description: t("profile.userNotFound"),
           variant: "destructive",
         });
         return;
@@ -84,22 +86,22 @@ export default function FollowersList({
         window.dispatchEvent(new CustomEvent('followingCountUpdated', { detail: { followingCount: currentUserData.followingCount } }));
         
         toast({
-          title: "Unfollowed",
+          title: t("follow.unfollowed"),
           description: `You unfollowed @${targetUsername}`,
           className: "border-primary/20 bg-card",
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to unfollow",
+          title: t("common.error"),
+          description: t("follow.failed"),
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Failed to unfollow:', error);
       toast({
-        title: "Connection Error",
-        description: "Unable to process your request. Please try again.",
+        title: t("profile.connectionError"),
+        description: t("profile.failedToProcess"),
         variant: "destructive",
       });
     }
