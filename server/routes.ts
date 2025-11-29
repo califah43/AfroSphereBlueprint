@@ -335,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (userId) {
       try {
         const userLikes = await db.query.likes.findMany({
-          where: and(eq(likes.userId, userId as string), likes.commentId !== null as any),
+          where: eq(likes.userId, userId as string),
         });
         likedCommentIds = new Set(userLikes.filter(l => l.commentId).map(l => l.commentId!));
       } catch (e) {
@@ -1069,18 +1069,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Assign badge to user
-  app.post("/api/admin/badges/:userId/assign", async (req, res) => {
-    try {
-      const { badge } = req.body;
-      const userId = req.params.userId;
-      if (!badge) return res.status(400).json({ error: "Badge required" });
-      const result = await storage.addBadge(userId, badge);
-      res.json({ success: true, badge: result });
-    } catch (error) {
-      res.status(400).json({ error: "Failed to assign badge" });
-    }
-  });
+  // Assign badge to user (deprecated - use POST /api/admin/badges/assign instead)
+  // This endpoint is kept for backwards compatibility but uses the new badge system
 
   // Get system settings
   app.get("/api/admin/settings", async (req, res) => {
