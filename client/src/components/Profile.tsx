@@ -178,6 +178,21 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     fetchUserData();
   }, [username, isOwnProfile]);
 
+  // Listen for following count updates from FollowersList
+  useEffect(() => {
+    const handleFollowingCountUpdate = (event: any) => {
+      if (isOwnProfile) {
+        setUserProfile((prev: any) => ({
+          ...prev,
+          following: event.detail.followingCount.toString(),
+        }));
+      }
+    };
+
+    window.addEventListener('followingCountUpdated', handleFollowingCountUpdate);
+    return () => window.removeEventListener('followingCountUpdated', handleFollowingCountUpdate);
+  }, [isOwnProfile]);
+
   // Listen for post refresh events to refetch user's posts
   useEffect(() => {
     const handleRefresh = async () => {

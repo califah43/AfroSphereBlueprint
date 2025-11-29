@@ -34,6 +34,77 @@ export default function FollowersList({
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  const handleUnfollow = async (targetUsername: string) => {
+    try {
+      const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      const currentUserId = currentUserData?.id;
+      
+      if (!currentUserId) {
+        toast({
+          title: "Error",
+          description: "Not logged in",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Fetch target user by username to get their ID
+      const userRes = await fetch(`/api/users/username/${targetUsername}`);
+      if (!userRes.ok) {
+        toast({
+          title: "Error",
+          description: "User not found",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const targetUser = await userRes.json();
+      const targetUserId = targetUser.id;
+      
+      const res = await fetch('/api/follows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          followerId: currentUserId, 
+          followingId: targetUserId 
+        })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        // Remove user from following list immediately
+        setFollowing(prev => prev.filter(user => user.username !== targetUsername));
+        
+        // Update current user's following count
+        currentUserData.followingCount = Math.max(0, (currentUserData.followingCount || 1) - 1);
+        localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
+        
+        // Dispatch event to notify Profile component
+        window.dispatchEvent(new CustomEvent('followingCountUpdated', { detail: { followingCount: currentUserData.followingCount } }));
+        
+        toast({
+          title: "Unfollowed",
+          description: `You unfollowed @${targetUsername}`,
+          className: "border-primary/20 bg-card",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to unfollow",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to unfollow:', error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to process your request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchFollowData = async () => {
       try {
@@ -181,20 +252,36 @@ export default function FollowersList({
                 ) : (
                   <div className="space-y-0.5 divide-y divide-border/30">
                     {following.map((user) => (
-                      <button
+                      <div
                         key={user.id}
-                        onClick={() => onUserClick?.(user.username)}
-                        className="w-full flex items-center gap-3 p-4 hover-elevate transition-all text-left"
+                        className="flex items-center gap-3 p-4 justify-between"
                         data-testid={`following-${user.username}`}
                       >
-                        <Avatar className="w-12 h-12 ring-2 ring-primary/20">
-                          <AvatarFallback className="font-bold">{user.username[0].toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm">@{user.username}</p>
-                          <p className="text-xs text-muted-foreground">{user.displayName}</p>
-                        </div>
-                      </button>
+                        <button
+                          onClick={() => onUserClick?.(user.username)}
+                          className="flex-1 flex items-center gap-3 hover-elevate transition-all text-left"
+                        >
+                          <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                            <AvatarFallback className="font-bold">{user.username[0].toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm">@{user.username}</p>
+                            <p className="text-xs text-muted-foreground">{user.displayName}</p>
+                          </div>
+                        </button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnfollow(user.username);
+                          }}
+                          className="shrink-0"
+                          data-testid={`button-unfollow-${user.username}`}
+                        >
+                          Unfollow
+                        </Button>
+                      </div>
                     ))}
                   </div>
                 )}
