@@ -305,6 +305,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/users/header", async (req, res) => {
+    try {
+      const { userId, banner } = req.body;
+      
+      if (!userId || !banner) {
+        return res.status(400).json({ error: "Missing userId or banner" });
+      }
+      
+      const user = await storage.updateUser(userId, { banner });
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error: any) {
+      console.error("Header update error:", error);
+      res.status(400).json({ error: error.message || "Failed to update header" });
+    }
+  });
+
   // ============ POST ROUTES ============
   app.get("/api/posts", async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 40, 100);

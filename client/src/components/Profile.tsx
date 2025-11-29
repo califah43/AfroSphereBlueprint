@@ -838,6 +838,46 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           onClose={() => setShowPictureModal(false)}
         />
       )}
+      
+      {showHeaderCropper && (
+        <HeaderCropper
+          onClose={() => setShowHeaderCropper(false)}
+          onCropComplete={async (croppedImage: string) => {
+            try {
+              const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+              const response = await fetch("/api/users/header", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userId: currentUserData.id,
+                  banner: croppedImage,
+                }),
+              });
+              
+              if (response.ok) {
+                setUserProfile((prev: any) => ({
+                  ...prev,
+                  banner: croppedImage,
+                }));
+                localStorage.setItem("currentUserData", JSON.stringify({
+                  ...currentUserData,
+                  banner: croppedImage,
+                }));
+                toast({
+                  description: "Header image updated successfully",
+                  className: "border-primary/20 bg-card",
+                });
+              }
+            } catch (error) {
+              console.error("Failed to update header:", error);
+              toast({
+                description: "Failed to update header image",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
