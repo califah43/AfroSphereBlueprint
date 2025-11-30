@@ -596,24 +596,24 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         )}
 
-        {/* Stats - Clean & Simple */}
+        {/* Stats - Spacious & Clean */}
         {userProfile && (
-        <div className="grid grid-cols-2 gap-0 mb-6 p-2 bg-card rounded-lg border border-border">
+        <div className="grid grid-cols-2 gap-2 mb-6 p-4 bg-card rounded-lg border border-border">
           <button
             onClick={onFollowersClick}
-            className="text-center py-1.5 border-r border-border"
+            className="text-center py-4"
             data-testid="button-view-followers"
           >
-            <p className="text-base font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Followers</p>
+            <p className="text-2xl font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-2">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-1.5"
+            className="text-center py-4"
             data-testid="button-view-following"
           >
-            <p className="text-base font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Following</p>
+            <p className="text-2xl font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-2">Following</p>
           </button>
         </div>
         )}
