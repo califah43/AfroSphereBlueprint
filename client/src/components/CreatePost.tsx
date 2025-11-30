@@ -18,6 +18,22 @@ interface CreatePostProps {
   onNavigateHome?: () => void;
 }
 
+const CATEGORY_ICONS: { [key: string]: { icon: string; color: string } } = {
+  fashion: { icon: "👗", color: "from-pink-500/20 to-pink-600/20" },
+  music: { icon: "🎵", color: "from-purple-500/20 to-purple-600/20" },
+  art: { icon: "🎨", color: "from-blue-500/20 to-blue-600/20" },
+  culture: { icon: "🌍", color: "from-green-500/20 to-green-600/20" },
+  lifestyle: { icon: "✨", color: "from-yellow-500/20 to-yellow-600/20" },
+};
+
+const SUGGESTED_TAGS: { [key: string]: string[] } = {
+  fashion: ["style", "ootd", "fashionista", "designer"],
+  music: ["musician", "beats", "producer", "artist"],
+  art: ["artwork", "artist", "creative", "masterpiece"],
+  culture: ["tradition", "heritage", "community", "african"],
+  lifestyle: ["vibes", "inspire", "daily", "creative"],
+};
+
 export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePostProps) {
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState("");
@@ -31,6 +47,7 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
   const [showFilters, setShowFilters] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -177,12 +194,21 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
     ((caption ? 20 : 0) + (mediaPreviews.length > 0 ? 20 : 0) + (category ? 20 : 0) + (tags.length > 0 ? 20 : 0) + (hashtags ? 20 : 0)) / 5
   );
 
+  const suggestedTags = category && SUGGESTED_TAGS[category] ? SUGGESTED_TAGS[category] : [];
+  const categoryColor = category && CATEGORY_ICONS[category] ? CATEGORY_ICONS[category].color : "";
+  const categoryEmoji = category && CATEGORY_ICONS[category] ? CATEGORY_ICONS[category].icon : "";
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-end justify-center p-0 sm:p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-[430px] h-[90vh] sm:h-auto sm:max-h-[90vh] bg-background rounded-t-3xl sm:rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-400">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-[430px] h-[95vh] sm:h-auto sm:max-h-[90vh] bg-background rounded-3xl overflow-hidden flex flex-col shadow-2xl border border-primary/20 animate-in slide-in-from-bottom duration-400">
+        {/* Floating Gradient Background */}
+        <div className="absolute inset-0 opacity-30 pointer-events-none">
+          <div className="absolute top-0 right-0 h-40 w-40 bg-primary/30 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 h-40 w-40 bg-orange-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        </div>
         
         {/* Premium Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-background via-primary/10 to-background border-b border-primary/20 px-6 py-4 flex items-center justify-between backdrop-blur-xl">
+        <div className="relative sticky top-0 z-10 bg-gradient-to-r from-background via-primary/10 to-background border-b border-primary/20 px-6 py-4 flex items-center justify-between backdrop-blur-xl">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -409,17 +435,29 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
               />
             </div>
 
-            {/* Caption Section */}
+            {/* Caption Section with Live Preview */}
             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "100ms" }}>
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
-                  <Sparkles className="h-5 w-5 text-primary" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Caption</p>
+                    <p className="text-xs text-muted-foreground">Tell your story</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">Caption</p>
-                  <p className="text-xs text-muted-foreground">Tell your story</p>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="text-xs font-semibold text-primary hover:bg-primary/10"
+                  data-testid="button-toggle-preview"
+                >
+                  {showPreview ? "Hide" : "Show"} Preview
+                </Button>
               </div>
+              
               <Textarea
                 id="caption"
                 placeholder="What's on your mind? Share your creative vision..."
@@ -428,13 +466,25 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                 className="min-h-24 resize-none text-base rounded-xl bg-card border-primary/20 focus:border-primary/50 focus:ring-primary/30 placeholder:text-muted-foreground/60"
                 data-testid="input-caption"
               />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-semibold">{caption.length} characters</span>
-                <span className="text-xs text-primary font-bold">Max 500</span>
+              
+              {/* Character Counter with Progress Bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-semibold">{caption.length} / 500</span>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${caption.length > 400 ? "text-orange-600 bg-orange-100 dark:bg-orange-900/30" : "text-primary bg-primary/10"}`}>
+                    {Math.round((caption.length / 500) * 100)}%
+                  </span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-300 ${caption.length > 400 ? "bg-gradient-to-r from-orange-500 to-red-600" : "bg-gradient-to-r from-primary to-orange-500"}`}
+                    style={{ width: `${(caption.length / 500) * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Category Section */}
+            {/* Category Section with Visual Indicators */}
             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "200ms" }}>
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
@@ -445,8 +495,29 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   <p className="text-xs text-muted-foreground">Choose your creative domain</p>
                 </div>
               </div>
+              
+              {/* Category Quick Buttons */}
+              <div className="grid grid-cols-5 gap-2">
+                {Object.entries(CATEGORY_ICONS).map(([key, { icon }]) => (
+                  <button
+                    key={key}
+                    onClick={() => setCategory(key)}
+                    className={`py-3 px-2 rounded-xl transition-all duration-200 flex flex-col items-center gap-1 text-xs font-bold ${
+                      category === key 
+                        ? "bg-gradient-to-br " + categoryColor + " border-2 border-primary scale-110" 
+                        : "bg-muted hover:bg-muted/80 border-2 border-transparent hover-elevate"
+                    }`}
+                    data-testid={`button-category-${key}`}
+                  >
+                    <span className="text-2xl">{icon}</span>
+                    <span className="capitalize leading-none">{key.slice(0, 5)}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Fallback Select */}
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger data-testid="select-category" className="text-base rounded-xl border-primary/20 focus:border-primary/50 focus:ring-primary/30 bg-card h-12">
+                <SelectTrigger data-testid="select-category" className="text-base rounded-xl border-primary/20 focus:border-primary/50 focus:ring-primary/30 bg-card h-12 text-xs sm:text-base">
                   <SelectValue placeholder="Select a category..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -459,7 +530,7 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
               </Select>
             </div>
 
-            {/* Tags Section - Premium */}
+            {/* Tags Section - Premium with Suggestions */}
             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "300ms" }}>
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
@@ -492,6 +563,35 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   <Plus className="h-5 w-5" />
                 </Button>
               </div>
+
+              {/* Suggested Tags */}
+              {suggestedTags.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground">Suggested for {category}:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {suggestedTags.map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => {
+                          if (!tags.includes(tag) && tags.length < 10) {
+                            setTags([...tags, tag]);
+                          }
+                        }}
+                        disabled={tags.includes(tag) || tags.length >= 10}
+                        className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-all ${
+                          tags.includes(tag)
+                            ? "bg-primary/20 text-primary/50 cursor-not-allowed"
+                            : "bg-muted hover:bg-primary/20 text-muted-foreground hover:text-primary hover-elevate"
+                        }`}
+                        data-testid={`button-suggest-tag-${tag}`}
+                      >
+                        #{tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {tags.map((tag, idx) => (
@@ -530,6 +630,37 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                 data-testid="input-hashtags"
               />
             </div>
+
+            {/* Post Preview Card */}
+            {showPreview && mediaPreviews.length > 0 && (
+              <div className="relative overflow-hidden rounded-2xl bg-card border border-primary/20 p-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Live Preview</p>
+                <div className="space-y-3">
+                  <img 
+                    src={mediaPreviews[0]} 
+                    alt="Preview" 
+                    className="w-full h-40 object-cover rounded-lg" 
+                  />
+                  <div className="space-y-2">
+                    {caption && <p className="text-sm text-foreground line-clamp-3">{caption}</p>}
+                    {category && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{categoryEmoji}</span>
+                        <span className="text-xs font-bold text-primary capitalize">{category}</span>
+                      </div>
+                    )}
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {tags.slice(0, 3).map(tag => (
+                          <span key={tag} className="text-xs text-primary font-semibold">#{tag}</span>
+                        ))}
+                        {tags.length > 3 && <span className="text-xs text-muted-foreground">+{tags.length - 3}</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Pro Tip Card */}
             <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-orange-500/5 to-red-600/10 border border-primary/30 animate-in fade-in duration-500" style={{ animationDelay: "500ms" }}>
