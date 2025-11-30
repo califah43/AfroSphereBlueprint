@@ -81,14 +81,32 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     setCurrentUserId(userId);
   }, []);
 
-  // Listen for post refresh events (triggered when comments are added)
+  // Listen for post refresh events (triggered when comments are added) and real-time updates
   useEffect(() => {
     const handleRefresh = () => {
       setRefreshKey(prev => prev + 1);
     };
     
+    const handleCommentCreated = (event: CustomEvent) => {
+      handleRefresh();
+    };
+
+    const handlePostLiked = (event: CustomEvent) => {
+      const { postId, liked, likes } = event.detail;
+      setDisplayedPosts(prev => 
+        prev.map(p => p.id === postId ? { ...p, likes: likes || 0 } : p)
+      );
+    };
+    
     window.addEventListener('refreshPosts', handleRefresh);
-    return () => window.removeEventListener('refreshPosts', handleRefresh);
+    window.addEventListener('comment:created' as any, handleCommentCreated as EventListener);
+    window.addEventListener('post:liked' as any, handlePostLiked as EventListener);
+    
+    return () => {
+      window.removeEventListener('refreshPosts', handleRefresh);
+      window.removeEventListener('comment:created' as any, handleCommentCreated as EventListener);
+      window.removeEventListener('post:liked' as any, handlePostLiked as EventListener);
+    };
   }, []);
 
   // Fetch posts from API with like status
