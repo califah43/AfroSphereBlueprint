@@ -432,8 +432,12 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <Heart 
-              className="w-28 h-28 text-crimson fill-crimson drop-shadow-lg" 
-              style={{ animation: 'instagramHeartBurst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }} 
+              className="w-28 h-28 drop-shadow-lg" 
+              style={{ 
+                color: 'hsl(25 95% 50%)',
+                fill: 'hsl(25 95% 50%)',
+                animation: 'instagramHeartBurst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' 
+              }} 
             />
           </div>
         )}
