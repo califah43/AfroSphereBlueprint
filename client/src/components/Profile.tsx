@@ -598,30 +598,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Stats - Clean & Simple */}
         {userProfile && (
-        <div className="grid grid-cols-3 gap-0 mb-6 p-3 bg-card rounded-lg border border-border">
-          <button
-            onClick={() => onPostClick?.('')}
-            className="text-center py-2"
-            data-testid="button-view-posts"
-          >
-            <p className="text-lg font-black text-primary" data-testid="text-posts-count">{userProfile.posts}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Posts</p>
-          </button>
+        <div className="grid grid-cols-2 gap-0 mb-6 p-2 bg-card rounded-lg border border-border">
           <button
             onClick={onFollowersClick}
-            className="text-center py-2 border-l border-r border-border"
+            className="text-center py-1.5 border-r border-border"
             data-testid="button-view-followers"
           >
-            <p className="text-lg font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Followers</p>
+            <p className="text-base font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-2"
+            className="text-center py-1.5"
             data-testid="button-view-following"
           >
-            <p className="text-lg font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Following</p>
+            <p className="text-base font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Following</p>
           </button>
         </div>
         )}
