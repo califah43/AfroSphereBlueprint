@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Cop
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import BadgeDisplay from "./BadgeDisplay";
+import EngagementBar from "./EngagementBar";
 import { queryClient } from "@/lib/queryClient";
 import { FontSizes } from "@/lib/fontSizes";
 import {
@@ -438,6 +439,20 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         )}
       </div>
 
+      {/* Premium Engagement Bar */}
+      <EngagementBar
+        postId={post.id}
+        likes={likes}
+        comments={post.comments}
+        views={0}
+        isLiked={isLiked}
+        isBookmarked={isBookmarked}
+        onLike={handleLike}
+        onComment={() => onComment?.(post.id)}
+        onBookmark={handleBookmark}
+        onShare={() => onShare?.(post.id)}
+        data-testid={`bar-engagement-${post.id}`}
+      />
     </div>
   );
 }
