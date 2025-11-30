@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { X, Upload, ImageIcon, Sparkles, Sun, Contrast, Camera, Video } from "lucide-react";
+import { X, Upload, ImageIcon, Sparkles, Sun, Contrast, CheckCircle2, Tag, Palette, Plus, Hash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { GENRE_LIST } from "@shared/genres";
@@ -98,11 +98,9 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
 
     setIsSubmitting(true);
     try {
-      // Get the REAL database UUID, not Firebase UID
       let userId = localStorage.getItem("currentUserId");
       const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
       
-      // If currentUserId looks like a Firebase UID, use the database ID from userData
       if (userData && userData.id && userData.id !== userId) {
         userId = userData.id;
       }
@@ -111,7 +109,6 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
         throw new Error("User not authenticated. Please sign in again.");
       }
 
-      // Combine hashtags and tags
       const allHashtags = [
         ...hashtags.split(/\s+/).filter(h => h.startsWith("#") || h.length > 0),
         ...tags.map(t => t.startsWith("#") ? t : `#${t}`)
@@ -122,12 +119,12 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
         caption,
         category: category || "lifestyle",
         hashtags: allHashtags || "",
-        image: mediaPreviews[0], // Primary image (first one)
-        images: mediaPreviews, // All images for carousel
+        image: mediaPreviews[0],
+        images: mediaPreviews,
       };
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       const res = await fetch('/api/posts', {
         method: 'POST',
@@ -142,18 +139,16 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
 
       const createdPost = await res.json();
 
-      // Optimistically add the post to cache instead of full refetch
       const previousPosts = (queryClient.getQueryData(['/api/posts']) || []) as any[];
       queryClient.setQueryData(['/api/posts'], [createdPost, ...previousPosts]);
       
-      // Also update user's post count
       if (userData && userData.id) {
         const previousUserPosts = (queryClient.getQueryData(['/api/posts/user', userData.id]) || []) as any[];
         queryClient.setQueryData(['/api/posts/user', userData.id], [createdPost, ...previousUserPosts]);
       }
       
       onPost?.(createdPost);
-      onNavigateHome?.(); // Navigate home immediately
+      onNavigateHome?.();
       onClose();
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -178,165 +173,231 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
     filter: `brightness(${brightness[0]}%) contrast(${contrast[0]}%) saturate(${saturation[0]}%)`,
   };
 
+  const completionPercentage = Math.round(
+    ((caption ? 20 : 0) + (mediaPreviews.length > 0 ? 20 : 0) + (category ? 20 : 0) + (tags.length > 0 ? 20 : 0) + (hashtags ? 20 : 0)) / 5
+  );
+
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end">
-      <div className="w-full max-w-[430px] mx-auto bg-background rounded-t-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom">
-        {/* Header with Warm African Design */}
-        <div className="sticky top-0 bg-gradient-to-r from-background via-primary/5 to-background border-b border-primary/20 px-4 py-3 flex items-center justify-between">
-          <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-create" className="hover-elevate transition-all">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-end justify-center p-0 sm:p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-[430px] h-[90vh] sm:h-auto sm:max-h-[90vh] bg-background rounded-t-3xl sm:rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-400">
+        
+        {/* Premium Header */}
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-background via-primary/10 to-background border-b border-primary/20 px-6 py-4 flex items-center justify-between backdrop-blur-xl">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            data-testid="button-close-create" 
+            className="hover-elevate h-10 w-10 rounded-full transition-all"
+          >
             <X className="h-5 w-5" />
           </Button>
-          <h2 className="text-base font-black bg-gradient-to-r from-primary via-orange-500 to-red-600 bg-clip-text text-transparent" data-testid="text-create-title">
-            Create Post
-          </h2>
+          
+          <div className="flex flex-col items-center gap-1">
+            <h2 className="text-lg font-black bg-gradient-to-r from-primary via-orange-500 to-red-600 bg-clip-text text-transparent" data-testid="text-create-title">
+              Share Your Story
+            </h2>
+            <div className="flex items-center gap-2">
+              <div className="h-1 bg-muted rounded-full flex-1" style={{ width: `${completionPercentage}px` }}>
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-orange-500 rounded-full transition-all duration-300"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
+              <span className="text-xs font-semibold text-primary">{completionPercentage}%</span>
+            </div>
+          </div>
+
           <Button
             onClick={handlePost}
             disabled={!caption || mediaPreviews.length === 0 || isSubmitting}
-            className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold text-sm gold-glow transition-all shadow-md"
-            size="sm"
+            className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold text-sm gold-glow transition-all shadow-lg h-10 px-6 rounded-full"
             data-testid="button-submit-post"
           >
-            {isSubmitting ? "Sharing..." : "Share"}
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Posting...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Share
+              </span>
+            )}
           </Button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 space-y-4">
-            {/* Media Upload */}
-            <div className="space-y-2">
+        {/* Content with Premium Spacing */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
+          <div className="p-6 space-y-8">
+            
+            {/* Media Section - Premium Showcase */}
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Visual Content</p>
+                  <p className="text-xs text-muted-foreground">{mediaPreviews.length}/10 media</p>
+                </div>
+              </div>
+
               {mediaPreviews.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-2">
-                    {mediaPreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full aspect-square object-cover rounded-lg"
-                          style={imageStyle}
-                          data-testid={`img-preview-${index}`}
-                        />
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeMedia(index)}
-                          data-testid={`button-remove-image-${index}`}
+                <div className="space-y-4">
+                  {/* Premium Grid Preview */}
+                  <div className="relative">
+                    <div className="grid grid-cols-4 gap-3">
+                      {mediaPreviews.map((preview, index) => (
+                        <div 
+                          key={index} 
+                          className="group relative rounded-xl overflow-hidden aspect-square animate-in fade-in duration-300"
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                    {mediaPreviews.length < 10 && (
-                      <label
-                        htmlFor="image-upload"
-                        className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-primary to-orange-500 cursor-pointer hover-elevate transition-all shadow-lg hover:shadow-xl hover:scale-110 mx-auto"
-                        data-testid="button-add-image"
-                      >
-                        <Upload className="h-5 w-5 text-white" />
-                      </label>
-                    )}
+                          <img
+                            src={preview}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            style={imageStyle}
+                            data-testid={`img-preview-${index}`}
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeMedia(index)}
+                              data-testid={`button-remove-image-${index}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="absolute top-2 right-2 bg-primary/90 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                            {index + 1}
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {mediaPreviews.length < 10 && (
+                        <label
+                          htmlFor="image-upload"
+                          className="rounded-xl border-2 border-dashed border-primary/40 hover:border-primary/80 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-all duration-200 flex items-center justify-center hover-elevate group animate-in fade-in duration-300"
+                          data-testid="button-add-image"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2 py-8">
+                            <div className="p-2 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                              <Plus className="h-5 w-5 text-primary" />
+                            </div>
+                            <span className="text-xs font-semibold text-primary text-center">Add</span>
+                          </div>
+                        </label>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Filters Toggle */}
+                  {/* Advanced Filters - Premium Toggle */}
                   {mediaPreviews.length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs"
-                      onClick={() => setShowFilters(!showFilters)}
-                      data-testid="button-toggle-filters"
-                    >
-                      <Sparkles className="h-3 w-3 mr-1" />
-                      {showFilters ? "Hide" : "Show"} Filters
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs gap-2 hover-elevate border-primary/30 text-primary"
+                        onClick={() => setShowFilters(!showFilters)}
+                        data-testid="button-toggle-filters"
+                      >
+                        <Palette className="h-4 w-4" />
+                        {showFilters ? "Hide" : "Show"} Advanced Filters
+                      </Button>
+
+                      {showFilters && (
+                        <div className="bg-gradient-to-br from-primary/5 to-orange-500/5 border border-primary/20 rounded-2xl p-5 space-y-5 animate-in fade-in duration-300">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Sun className="h-4 w-4 text-primary" />
+                                <Label className="text-sm font-semibold">Brightness</Label>
+                              </div>
+                              <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">{brightness[0]}%</span>
+                            </div>
+                            <Slider
+                              value={brightness}
+                              onValueChange={setBrightness}
+                              min={50}
+                              max={150}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Contrast className="h-4 w-4 text-primary" />
+                                <Label className="text-sm font-semibold">Contrast</Label>
+                              </div>
+                              <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">{contrast[0]}%</span>
+                            </div>
+                            <Slider
+                              value={contrast}
+                              onValueChange={setContrast}
+                              min={50}
+                              max={150}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="h-4 w-4 text-primary" />
+                                <Label className="text-sm font-semibold">Saturation</Label>
+                              </div>
+                              <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">{saturation[0]}%</span>
+                            </div>
+                            <Slider
+                              value={saturation}
+                              onValueChange={setSaturation}
+                              min={0}
+                              max={200}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {/* Filters */}
-                  {showFilters && (
-                    <div className="bg-muted/40 rounded-lg p-3 space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Sun className="h-3 w-3 text-muted-foreground" />
-                            <Label className="text-xs">Brightness</Label>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{brightness[0]}%</span>
-                        </div>
-                        <Slider
-                          value={brightness}
-                          onValueChange={setBrightness}
-                          min={50}
-                          max={150}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Contrast className="h-3 w-3 text-muted-foreground" />
-                            <Label className="text-xs">Contrast</Label>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{contrast[0]}%</span>
-                        </div>
-                        <Slider
-                          value={contrast}
-                          onValueChange={setContrast}
-                          min={50}
-                          max={150}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Sparkles className="h-3 w-3 text-muted-foreground" />
-                            <Label className="text-xs">Saturation</Label>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{saturation[0]}%</span>
-                        </div>
-                        <Slider
-                          value={saturation}
-                          onValueChange={setSaturation}
-                          min={0}
-                          max={200}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-orange-500 to-red-600 rounded-full transition-all duration-300 shadow-lg shadow-primary/50"
+                        style={{ width: `${uploadProgress}%` }}
+                        data-testid="progress-upload"
+                      />
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-4 py-8 border-2 border-dashed border-primary/30 rounded-lg">
-                  <label
-                    htmlFor="image-upload"
-                    className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-orange-500 cursor-pointer hover-elevate transition-all shadow-lg hover:shadow-xl hover:scale-110"
-                    data-testid="label-upload-zone"
-                  >
-                    <ImageIcon className="h-6 w-6 text-white" />
-                  </label>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">{t("create.addPhoto")}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Up to 10 images or videos</p>
+                <label
+                  htmlFor="image-upload"
+                  className="block p-8 border-2 border-dashed border-primary/40 hover:border-primary/80 bg-gradient-to-br from-primary/5 to-orange-500/5 hover:from-primary/10 hover:to-orange-500/10 rounded-2xl cursor-pointer transition-all duration-200 hover-elevate group"
+                  data-testid="label-upload-zone"
+                >
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <div className="p-4 rounded-full bg-gradient-to-br from-primary/20 to-orange-500/20 group-hover:from-primary/30 group-hover:to-orange-500/30 transition-all">
+                      <Upload className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-base font-bold text-foreground">Upload Your Masterpiece</p>
+                      <p className="text-sm text-muted-foreground mt-2">Images or videos • Up to 10 files • Drag and drop or click</p>
+                    </div>
                   </div>
-                </div>
+                </label>
               )}
-              
-              {uploadProgress > 0 && uploadProgress < 100 && (
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-primary to-orange-500 h-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                    data-testid="progress-upload"
-                  />
-                </div>
-              )}
+
               <Input
                 id="image-upload"
                 type="file"
@@ -348,99 +409,144 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
               />
             </div>
 
-            {/* Caption */}
-            <div className="space-y-1">
-              <Label htmlFor="caption" className="text-xs font-semibold">{t("create.caption")}</Label>
+            {/* Caption Section */}
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "100ms" }}>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Caption</p>
+                  <p className="text-xs text-muted-foreground">Tell your story</p>
+                </div>
+              </div>
               <Textarea
                 id="caption"
-                placeholder={t("create.shareCaption")}
+                placeholder="What's on your mind? Share your creative vision..."
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                className="min-h-16 resize-none text-sm"
+                className="min-h-24 resize-none text-base rounded-xl bg-card border-primary/20 focus:border-primary/50 focus:ring-primary/30 placeholder:text-muted-foreground/60"
                 data-testid="input-caption"
               />
-              <p className="text-xs text-muted-foreground">{caption.length}/500</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-semibold">{caption.length} characters</span>
+                <span className="text-xs text-primary font-bold">Max 500</span>
+              </div>
             </div>
 
-            {/* Category */}
-            <div className="space-y-1">
-              <Label htmlFor="category" className="text-xs font-semibold">{t("create.category")}</Label>
+            {/* Category Section */}
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "200ms" }}>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <Palette className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Category</p>
+                  <p className="text-xs text-muted-foreground">Choose your creative domain</p>
+                </div>
+              </div>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger data-testid="select-category" className="text-sm">
-                  <SelectValue placeholder={t("create.selectCategory")} />
+                <SelectTrigger data-testid="select-category" className="text-base rounded-xl border-primary/20 focus:border-primary/50 focus:ring-primary/30 bg-card h-12">
+                  <SelectValue placeholder="Select a category..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fashion">Fashion</SelectItem>
-                  <SelectItem value="music">Music</SelectItem>
-                  <SelectItem value="art">Art</SelectItem>
-                  <SelectItem value="culture">Culture</SelectItem>
-                  <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                  <SelectItem value="fashion">👗 Fashion</SelectItem>
+                  <SelectItem value="music">🎵 Music</SelectItem>
+                  <SelectItem value="art">🎨 Art</SelectItem>
+                  <SelectItem value="culture">🌍 Culture</SelectItem>
+                  <SelectItem value="lifestyle">✨ Lifestyle</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Tags Management */}
-            <div className="space-y-2">
-              <Label htmlFor="tags" className="text-xs font-semibold">Tags (Up to 10)</Label>
+            {/* Tags Section - Premium */}
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "300ms" }}>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <Tag className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Tags</p>
+                  <p className="text-xs text-muted-foreground">{tags.length}/10 tags</p>
+                </div>
+              </div>
               <div className="flex gap-2">
                 <Input
                   id="tags"
-                  placeholder="Add tag and press Enter or Space..."
+                  placeholder="Type and press Enter..."
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagInputKeyDown}
-                  className="text-sm flex-1"
+                  className="text-base rounded-xl bg-card border-primary/20 focus:border-primary/50 focus:ring-primary/30 flex-1 h-11"
                   data-testid="input-tags"
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => addTag(tagInput)}
                   disabled={!tagInput.trim() || tags.length >= 10}
                   data-testid="button-add-tag"
-                  className="px-3"
+                  className="h-11 w-11 rounded-xl border-primary/20 hover:border-primary/50 hover-elevate"
                 >
-                  <span className="text-lg">+</span>
+                  <Plus className="h-5 w-5" />
                 </Button>
               </div>
               {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pt-2">
                   {tags.map((tag, idx) => (
                     <Badge
                       key={idx}
                       variant="secondary"
-                      className="bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer text-xs"
+                      className="bg-gradient-to-r from-primary/20 to-orange-500/20 text-primary hover:from-primary/30 hover:to-orange-500/30 cursor-pointer text-xs font-semibold rounded-full px-4 py-2 gap-2 animate-in fade-in duration-200"
                       onClick={() => removeTag(idx)}
                       data-testid={`badge-tag-${tag}`}
                     >
                       #{tag}
-                      <X className="h-2.5 w-2.5 ml-1" />
+                      <X className="h-3 w-3" />
                     </Badge>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Hashtags */}
-            <div className="space-y-1">
-              <Label htmlFor="hashtags" className="text-xs font-semibold">Additional Hashtags</Label>
+            {/* Hashtags Section */}
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "400ms" }}>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/20">
+                  <Hash className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Additional Hashtags</p>
+                  <p className="text-xs text-muted-foreground">Boost discoverability</p>
+                </div>
+              </div>
               <Input
                 id="hashtags"
-                placeholder="e.g. #photography #art #creative"
+                placeholder="#photography #art #creative #africancreators..."
                 value={hashtags}
                 onChange={(e) => setHashtags(e.target.value)}
-                className="text-sm"
+                className="text-base rounded-xl bg-card border-primary/20 focus:border-primary/50 focus:ring-primary/30 h-11"
                 data-testid="input-hashtags"
               />
             </div>
 
-            {/* Tip */}
-            <div className="bg-gradient-to-r from-primary/10 to-orange-500/10 border border-primary/20 rounded-lg p-3">
-              <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{t("create.proTipLabel")}</span> {t("create.proTip")}
-              </p>
+            {/* Pro Tip Card */}
+            <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-orange-500/5 to-red-600/10 border border-primary/30 animate-in fade-in duration-500" style={{ animationDelay: "500ms" }}>
+              <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-3xl" />
+              <div className="relative flex items-start gap-4">
+                <Sparkles className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                <div>
+                  <p className="text-sm font-bold text-foreground mb-1">Pro Tip</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Use descriptive captions and relevant tags to reach more creators. Mix popular and niche tags for maximum visibility. Engage authentically with the community!
+                  </p>
+                </div>
+              </div>
             </div>
+
+            {/* Spacing for bottom button */}
+            <div className="h-4" />
           </div>
         </div>
       </div>
