@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock, Loader2, Flag, Ban, Calendar } from "lucide-react";
+import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock, Loader2, Flag, Ban, Calendar, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { FontSizes } from "@/lib/fontSizes";
@@ -883,9 +883,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                     </div>
                   ) : savedPosts.length === 0 ? (
                     <div className="py-16 text-center">
-                      <Share2 className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                      <Bookmark className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                       <p className="text-muted-foreground font-medium">No saved posts yet</p>
-                      <p className="text-sm text-muted-foreground mt-1">Save posts to view them later</p>
+                      <p className="text-sm text-muted-foreground mt-1">Posts you save will appear here</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-1 mt-4">
