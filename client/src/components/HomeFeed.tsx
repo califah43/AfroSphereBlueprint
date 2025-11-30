@@ -94,9 +94,9 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
     queryKey: ['/api/posts', refreshKey],
-    staleTime: 30000, // Data stays fresh for 30s, then silently refetch in background
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
-    refetchInterval: 45000, // Auto-refetch every 45s for seamless updates
+    staleTime: 10 * 60 * 1000, // Data stays fresh for 10 minutes
+    gcTime: 30 * 60 * 1000, // Keep cache for 30 minutes
+    refetchInterval: false, // Don't auto-refetch - let user manually refresh
     placeholderData: keepPreviousData, // Keep showing old data while refetching - no skeleton flash!
     queryFn: async () => {
       try {

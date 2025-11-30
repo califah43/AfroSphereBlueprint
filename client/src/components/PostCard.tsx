@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import BadgeDisplay from "./BadgeDisplay";
 import EngagementBar from "./EngagementBar";
 import { queryClient } from "@/lib/queryClient";
+import { preloadImage } from "@/lib/imageCache";
 import { FontSizes } from "@/lib/fontSizes";
 import {
   DropdownMenu,
@@ -67,8 +68,14 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const [touchStartX, setTouchStartX] = useState(0);
   const { toast } = useToast();
   
-  // Get all images for carousel
-  const allImages = post.images && post.images.length > 0 ? post.images : [post.imageUrl];
+  // Get all images for carousel and preload them for fast navigation
+  const allImages = useMemo(() => {
+    const images = post.images && post.images.length > 0 ? post.images : [post.imageUrl];
+    // Preload all images into cache
+    images.forEach(img => preloadImage(img));
+    return images;
+  }, [post.images, post.imageUrl]);
+  
   const currentImage = allImages[currentImageIndex] || post.imageUrl;
   
   // Handle swipe for carousel
