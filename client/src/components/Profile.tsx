@@ -168,12 +168,21 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
-          const [postsRes, badgesRes, likedRes, savedRes] = await Promise.all([
+          // Build fetch requests - only fetch saved posts for own profile
+          const fetchRequests = [
             fetch(`/api/posts/user/${currentUserId}`),
             fetch(`/api/badges/user/${currentUserId}`),
             fetch(`/api/posts/user/${currentUserId}/liked`),
-            fetch(`/api/posts/user/${currentUserId}/saved`)
-          ]);
+          ];
+          
+          // Only fetch saved posts if viewing own profile
+          if (isOwnProfile) {
+            fetchRequests.push(fetch(`/api/posts/user/${currentUserId}/saved`));
+          }
+          
+          const responses = await Promise.all(fetchRequests);
+          const [postsRes, badgesRes, likedRes, ...restRes] = responses;
+          const savedRes = isOwnProfile ? restRes[0] : null;
           
           if (postsRes.ok) {
             const posts = await postsRes.json();
@@ -187,7 +196,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
           }
           
-          if (savedRes.ok) {
+          if (isOwnProfile && savedRes && savedRes.ok) {
             const saved = await savedRes.json();
             setSavedPosts(saved || []);
             localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
@@ -292,7 +301,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
-          if (cachedSaved) {
+          if (cachedSaved && isOwnProfile) {
             try {
               setSavedPosts(JSON.parse(cachedSaved));
             } catch (e) {
@@ -300,11 +309,20 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
-          const [postsRes, likedRes, savedRes] = await Promise.all([
+          // Build fetch requests - only fetch saved posts for own profile
+          const fetchRequests = [
             fetch(`/api/posts/user/${userId}`),
             fetch(`/api/posts/user/${userId}/liked`),
-            fetch(`/api/posts/user/${userId}/saved`)
-          ]);
+          ];
+          
+          if (isOwnProfile) {
+            fetchRequests.push(fetch(`/api/posts/user/${userId}/saved`));
+          }
+          
+          const responses = await Promise.all(fetchRequests);
+          const [postsRes, likedRes, ...savedArray] = responses;
+          const savedRes = isOwnProfile ? savedArray[0] : null;
+          
           if (postsRes.ok) {
             const posts = await postsRes.json();
             setUserPosts(posts || []);
@@ -315,7 +333,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             setLikedPosts(liked || []);
             localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
           }
-          if (savedRes.ok) {
+          if (isOwnProfile && savedRes && savedRes.ok) {
             const saved = await savedRes.json();
             setSavedPosts(saved || []);
             localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
