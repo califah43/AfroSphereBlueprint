@@ -210,6 +210,11 @@
       hsl(45 85% 55%) 100%
     );
   }
+
+  /* Feed image aspect ratio: 1080x1350 (4:5) */
+  .aspect-feed {
+    aspect-ratio: 4 / 5;
+  }
 }
 
 /* Smooth double-tap like animation */

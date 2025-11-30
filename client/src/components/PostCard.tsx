@@ -388,7 +388,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         <img
           src={currentImage}
           alt="Post content"
-          className="w-full aspect-square object-cover cursor-pointer select-none"
+          className="w-full aspect-feed object-cover cursor-pointer select-none"
           data-testid={`img-post-${post.id}`}
           draggable={false}
         />
