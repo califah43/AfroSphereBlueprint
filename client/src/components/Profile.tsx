@@ -460,16 +460,19 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Avatar - Overlaps Banner from Bottom */}
         <div style={{ position: 'absolute', bottom: -40, left: 15, zIndex: 20 }}>
-          <ProfilePicture
-            src={userProfile?.profileImageUrl || userProfile?.avatar}
-            alt="Profile picture"
-            size="xl"
-            onClick={() => setShowImageViewer(true)}
-            editable={isOwnProfile}
-            onEditClick={() => fileInputRef.current?.click()}
-            className="shadow-sm"
-            style={{ border: '4px solid #000' }}
-          />
+          <div className="relative inline-block">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary via-orange-400 to-pink-500 -m-1" style={{ zIndex: -1 }}></div>
+            <ProfilePicture
+              src={userProfile?.profileImageUrl || userProfile?.avatar}
+              alt="Profile picture"
+              size="xl"
+              onClick={() => setShowImageViewer(true)}
+              editable={isOwnProfile}
+              onEditClick={() => fileInputRef.current?.click()}
+              className="shadow-lg"
+              style={{ border: '4px solid #000' }}
+            />
+          </div>
           
           {/* Hidden file input for profile picture upload */}
           <input
@@ -516,6 +519,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           )}
         </div>
 
+        {/* Kente Accent Strip - Premium Design Element */}
+        <div className="flex gap-0 mt-0" style={{ height: '12px' }}>
+          <div className="flex-1 bg-gradient-to-r from-primary to-orange-400" style={{ height: '4px', marginTop: '8px' }}></div>
+          <div className="flex-1 bg-gradient-to-r from-red-500 to-pink-500" style={{ height: '4px', marginTop: '8px' }}></div>
+          <div className="flex-1 bg-gradient-to-r from-orange-600 to-amber-600" style={{ height: '4px', marginTop: '8px' }}></div>
+        </div>
+
         {/* Full-screen Image Viewer */}
         <ImageViewer
           src={userProfile?.profileImageUrl || userProfile?.avatar || ""}
@@ -524,8 +534,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           onClose={() => setShowImageViewer(false)}
         />
 
-        {/* Name & Username - Left Aligned */}
-        <div className="mb-4">
+        {/* Name & Username - Left Aligned - Premium Spacing */}
+        <div className="mb-6 pt-3">
           {/* Display Name with Badges */}
           <div className="flex items-center gap-1 mb-1">
             <h1 className="font-black tracking-tight" style={{ fontSize: FontSizes.h2 }} data-testid="text-profile-displayname">
@@ -593,32 +603,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         )}
 
-        {/* Stats - Elegant Compact Cards with Warm Accents */}
+        {/* Stats - Premium Cards with Enhanced Design */}
         {userProfile && (
-        <div className="grid grid-cols-3 gap-2 mb-4 p-2 bg-gradient-to-r from-card via-primary/5 to-card rounded-md border border-primary/20">
+        <div className="grid grid-cols-3 gap-3 mb-6 p-4 bg-gradient-to-br from-primary/10 via-card to-orange-500/5 rounded-xl border border-primary/30 backdrop-blur-sm">
           <button
             onClick={() => onPostClick?.('')}
-            className="text-center py-2 hover-elevate transition-all rounded group"
+            className="text-center py-3 hover-elevate transition-all rounded-lg group"
             data-testid="button-view-posts"
           >
-            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-posts-count">{userProfile.posts}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Posts</p>
+            <p className="text-2xl font-black bg-gradient-to-r from-primary via-orange-400 to-red-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-primary" data-testid="text-posts-count">{userProfile.posts}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-2">Posts</p>
           </button>
           <button
             onClick={onFollowersClick}
-            className="text-center py-2 hover-elevate transition-all rounded border-l border-primary/20 group"
+            className="text-center py-3 hover-elevate transition-all rounded-lg border-l border-r border-primary/20 group"
             data-testid="button-view-followers"
           >
-            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Followers</p>
+            <p className="text-2xl font-black bg-gradient-to-r from-primary via-orange-400 to-red-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-primary" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-2">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-2 hover-elevate transition-all rounded border-l border-primary/20 group"
+            className="text-center py-3 hover-elevate transition-all rounded-lg group"
             data-testid="button-view-following"
           >
-            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Following</p>
+            <p className="text-2xl font-black bg-gradient-to-r from-primary via-orange-400 to-red-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:to-primary" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-2">Following</p>
           </button>
         </div>
         )}
