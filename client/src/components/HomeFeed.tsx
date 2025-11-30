@@ -5,6 +5,7 @@ import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
 import CollapsibleHeader from "./CollapsibleHeader";
+import CreatorRecommendations from "./CreatorRecommendations";
 import { useLanguage } from "@/context/LanguageContext";
 
 const PostSkeleton = () => (
@@ -371,6 +372,15 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
       {/* Feed Content */}
       <div className="max-w-md mx-auto px-0 pt-0">
+          {/* Creator Recommendations - Show on for-you tab */}
+          {activeCategory === "for-you" && currentUserId && (
+            <CreatorRecommendations 
+              userId={currentUserId} 
+              onCreatorClick={onUserProfileClick}
+              limit={6}
+            />
+          )}
+
           {filteredPosts.length > 0 ? (
             <>
               {filteredPosts.map((post) => (
