@@ -319,7 +319,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
           <div className="relative flex-shrink-0">
             <Avatar className="w-16 h-16 ring-3 ring-background rounded-lg" data-testid="avatar-edit">
               {formData.avatar && <AvatarImage src={formData.avatar} alt="Profile" />}
-              <AvatarFallback className="text-lg font-black rounded-lg">{formData.username[0].toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="text-lg font-black rounded-lg">{formData.username?.[0]?.toUpperCase() || "A"}</AvatarFallback>
             </Avatar>
             <button
               onClick={() => avatarInputRef.current?.click()}

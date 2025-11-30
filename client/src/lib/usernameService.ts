@@ -53,7 +53,7 @@ export async function checkUsernameAvailability(username: string): Promise<Check
 
   try {
     // Check availability with backend
-    const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(formatted)}`);
+    const response = await fetch(`/api/auth/check-username/${encodeURIComponent(formatted)}`);
     const data = await response.json();
 
     if (data.available) {
