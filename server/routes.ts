@@ -291,6 +291,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(user);
   });
 
+  app.get("/api/users/recommended", async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 8, 50);
+      const viewerId = req.query.viewerId as string;
+      
+      const allUsers = await db.query.users.findMany();
+      
+      let recommendedUsers = allUsers.filter(u => {
+        if (!u.displayName || u.status !== "active") return false;
+        if (viewerId && u.id === viewerId) return false;
+        return true;
+      });
+      
+      if (viewerId) {
+        const followingData = await db.query.follows.findMany({
+          where: eq(follows.followerId, viewerId),
+        });
+        const followingIds = new Set(followingData.map(f => f.followingId));
+        recommendedUsers = recommendedUsers.filter(u => !followingIds.has(u.id));
+      }
+      
+      recommendedUsers.sort((a, b) => (b.followerCount || 0) - (a.followerCount || 0));
+      
+      const topRecommended = recommendedUsers.slice(0, limit).map(u => ({
+        id: u.id,
+        username: u.username,
+        displayName: u.displayName,
+        avatar: u.avatar,
+        followers: u.followerCount || 0,
+        bio: u.bio,
+      }));
+      
+      res.json(topRecommended);
+    } catch (error) {
+      console.error("Recommendations fetch error:", error);
+      res.status(400).json({ error: "Failed to fetch recommendations" });
+    }
+  });
+
+  app.get("/api/users/:userId/weekly-stats", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      
+      const weeklyPosts = await db.query.posts.findMany({
+        where: and(eq(posts.userId, userId)),
+      });
+      
+      const postsThisWeek = weeklyPosts.filter(p => p.createdAt && new Date(p.createdAt) > sevenDaysAgo);
+      
+      const weeklyEngagement = postsThisWeek.reduce((acc, p) => ({
+        likes: acc.likes + (p.likes || 0),
+        comments: acc.comments + (p.commentCount || 0),
+      }), { likes: 0, comments: 0 });
+      
+      res.json({
+        postsThisWeek: postsThisWeek.length,
+        likesThisWeek: weeklyEngagement.likes,
+        commentsThisWeek: weeklyEngagement.comments,
+        totalEngagementThisWeek: weeklyEngagement.likes + (weeklyEngagement.comments * 2),
+        followers: user.followerCount || 0,
+      });
+    } catch (error) {
+      console.error("Weekly stats error:", error);
+      res.status(400).json({ error: "Failed to fetch weekly stats" });
+    }
+  });
+
   app.patch("/api/users/:id", async (req, res) => {
     try {
       // Allow firebaseUid to be updated even if not in updateUserSchema
