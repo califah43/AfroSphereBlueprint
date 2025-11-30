@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Cop
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import BadgeDisplay from "./BadgeDisplay";
+import { queryClient } from "@/lib/queryClient";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,9 +52,10 @@ interface PostCardProps {
   onOpenShare?: (postId: string) => void;
   onAuthorClick?: (username: string) => void;
   onHashtagClick?: (hashtag: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
-export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick, onHashtagClick }: PostCardProps) {
+export default function PostCard({ post, isOwnPost = false, onLike, onComment, onShare, onBookmark, onOpenShare, onAuthorClick, onHashtagClick, onDelete }: PostCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likes, setLikes] = useState(post.likes);
@@ -163,13 +165,37 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     });
   };
 
-  const handleDelete = () => {
-    toast({
-      title: "Post deleted",
-      description: "Your post has been removed",
-      variant: "destructive",
-    });
-    setShowDeleteDialog(false);
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete post");
+      }
+
+      // Invalidate all posts queries to refresh the feed
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+
+      // Close dialog and show success toast
+      setShowDeleteDialog(false);
+      toast({
+        title: "Post deleted",
+        description: "Your post has been removed",
+        variant: "destructive",
+      });
+
+      // Call callback if provided
+      onDelete?.(post.id);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Safe author fallback values
