@@ -2,16 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { 
   ChevronRight, X, LogOut, Bell, Lock, Shield, Palette, Users, Eye, 
   Heart, Share2, Volume2, Smartphone, Mail, AlertCircle,
@@ -112,9 +102,6 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
     reportText: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -937,7 +924,18 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
             <Button
               variant="outline"
               className="w-full justify-start gap-3 h-auto py-4 px-4 border-destructive/50 hover:bg-destructive/5"
-              onClick={() => setShowLogoutDialog(true)}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to sign out?\n\nYou can sign back in anytime.")) {
+                  localStorage.removeItem("currentUserId");
+                  localStorage.removeItem("currentUserData");
+                  localStorage.removeItem("selectedLanguage");
+                  if (onLogout) {
+                    onLogout();
+                  } else {
+                    window.location.href = "/";
+                  }
+                }
+              }}
               data-testid="button-logout"
             >
               <LogOut className="h-5 w-5 text-destructive flex-shrink-0" />
@@ -951,7 +949,29 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
             <Button
               variant="outline"
               className="w-full justify-start gap-3 h-auto py-4 px-4 border-destructive/50 hover:bg-destructive/5"
-              onClick={() => setShowDeleteAccountDialog(true)}
+              onClick={async () => {
+                if (window.confirm("Are you sure you want to permanently delete your account?\n\nThis action cannot be undone. All your posts, comments, and data will be deleted.")) {
+                  try {
+                    const response = await fetch(`/api/users/${userId}/delete`, { method: "POST" });
+                    if (response.ok) {
+                      localStorage.removeItem("currentUserId");
+                      localStorage.removeItem("currentUserData");
+                      localStorage.removeItem("selectedLanguage");
+                      toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
+                      if (onLogout) {
+                        onLogout();
+                      } else {
+                        window.location.href = "/";
+                      }
+                    } else {
+                      toast({ title: "Error", description: "Failed to delete account. Please try again." });
+                    }
+                  } catch (e) {
+                    console.error("Failed to delete account:", e);
+                    toast({ title: "Error", description: "Failed to delete account. Please try again." });
+                  }
+                }
+              }}
               data-testid="button-delete-account"
             >
               <Trash2 className="h-5 w-5 text-destructive flex-shrink-0" />
@@ -964,84 +984,6 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
           </div>
         </div>
 
-        {/* Logout Confirmation Dialog */}
-        <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-          <AlertDialogContent className="max-w-sm">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg">Sign out?</AlertDialogTitle>
-              <AlertDialogDescription className="text-sm">
-                You will be signed out from this device. You can sign back in anytime with your credentials.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="gap-3">
-              <AlertDialogCancel data-testid="button-cancel-logout">Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={() => {
-                  localStorage.removeItem("currentUserId");
-                  localStorage.removeItem("currentUserData");
-                  localStorage.removeItem("selectedLanguage");
-                  setShowLogoutDialog(false);
-                  if (onLogout) {
-                    onLogout();
-                  } else {
-                    window.location.href = "/";
-                  }
-                }}
-                className="bg-destructive text-destructive-foreground"
-                data-testid="button-confirm-logout"
-              >
-                Sign Out
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Delete Account Confirmation Dialog */}
-        <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
-          <AlertDialogContent className="max-w-sm">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg text-destructive">Delete account permanently?</AlertDialogTitle>
-              <AlertDialogDescription className="text-sm">
-                This action cannot be undone. Your account, all posts, comments, and data will be permanently deleted from AfroSphere. This is irreversible.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="gap-3">
-              <AlertDialogCancel data-testid="button-cancel-delete-account">Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={async () => {
-                  setIsDeleting(true);
-                  try {
-                    const response = await fetch(`/api/users/${userId}/delete`, { method: "POST" });
-                    if (response.ok) {
-                      localStorage.removeItem("currentUserId");
-                      localStorage.removeItem("currentUserData");
-                      localStorage.removeItem("selectedLanguage");
-                      toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
-                      setShowDeleteAccountDialog(false);
-                      if (onLogout) {
-                        onLogout();
-                      } else {
-                        window.location.href = "/";
-                      }
-                    } else {
-                      toast({ title: "Error", description: "Failed to delete account. Please try again." });
-                      setIsDeleting(false);
-                    }
-                  } catch (e) {
-                    console.error("Failed to delete account:", e);
-                    toast({ title: "Error", description: "Failed to delete account. Please try again." });
-                    setIsDeleting(false);
-                  }
-                }}
-                disabled={isDeleting}
-                className="bg-destructive text-destructive-foreground"
-                data-testid="button-confirm-delete-account"
-              >
-                {isDeleting ? "Deleting..." : "Delete Permanently"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-6 border-t border-border">
