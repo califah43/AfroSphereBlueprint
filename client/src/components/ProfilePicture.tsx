@@ -86,10 +86,11 @@ export default function ProfilePicture({
         <button
           onClick={handleEditClick}
           className={cn(
-            "absolute -bottom-1 -right-1 bg-primary rounded-full shadow-lg hover-elevate active-elevate-2",
+            "bg-primary rounded-full shadow-lg hover-elevate active-elevate-2",
             "flex items-center justify-center text-white border-2 border-background",
             buttonSizeMap[size]
           )}
+          style={{ position: 'absolute', bottom: 0, right: 0 }}
           data-testid="button-edit-profile-picture"
           title="Change profile picture"
         >
