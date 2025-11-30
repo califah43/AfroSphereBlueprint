@@ -120,7 +120,9 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
-      imageRef.current = img;
+      if (imageRef) {
+        (imageRef as any).current = img;
+      }
       drawPreview(img, offsetY);
     };
     img.src = imageUrl;

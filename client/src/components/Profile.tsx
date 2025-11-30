@@ -490,7 +490,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             onClick={() => setShowImageViewer(true)}
             editable={isOwnProfile}
             onEditClick={() => fileInputRef.current?.click()}
-            className="ring-3 ring-background shadow-sm"
+            className="shadow-sm"
+            style={{ border: '4px solid #000' }}
           />
           
           {/* Hidden file input for profile picture upload */}

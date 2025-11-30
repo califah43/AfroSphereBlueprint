@@ -8,6 +8,7 @@ interface ProfilePictureProps {
   size?: "sm" | "md" | "lg" | "xl";
   onClick?: () => void;
   className?: string;
+  style?: React.CSSProperties;
   editable?: boolean;
   onEditClick?: () => void;
 }
@@ -46,6 +47,7 @@ export default function ProfilePicture({
   size = "md",
   onClick,
   className,
+  style,
   editable = false,
   onEditClick,
 }: ProfilePictureProps) {
@@ -59,11 +61,12 @@ export default function ProfilePicture({
   return (
     <div
       className={cn(
-        "relative rounded-full overflow-visible bg-muted/20 border border-border/20 flex-shrink-0",
+        "relative rounded-full overflow-visible bg-muted/20 flex-shrink-0",
         "flex items-center justify-center cursor-pointer transition-transform hover:scale-105",
         sizeMap[size],
         className
       )}
+      style={style}
       onClick={onClick}
       data-testid={`profile-picture-${size}`}
     >
