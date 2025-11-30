@@ -434,35 +434,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner & Avatar Container */}
-      <div className="relative" style={{ marginBottom: '40px' }}>
-        {/* Elegant Banner - Extends to Top */}
-        <div 
-          className="relative overflow-hidden -mt-0 cursor-pointer group"
-          style={{ height: '150px' }}
-          onClick={() => setShowHeaderViewer(true)}
-          data-testid="div-profile-banner"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
-            {userProfile?.banner ? (
-              <img
-                src={userProfile.banner}
-                alt="Profile banner"
-                className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
-              />
-            ) : (
-              <img
-                src={bannerImage}
-                alt="Profile banner"
-                className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+      {/* Banner - Extends to Top */}
+      <div 
+        className="relative overflow-hidden -mt-0 cursor-pointer group"
+        style={{ height: '150px' }}
+        onClick={() => setShowHeaderViewer(true)}
+        data-testid="div-profile-banner"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
+          {userProfile?.banner ? (
+            <img
+              src={userProfile.banner}
+              alt="Profile banner"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+            />
+          ) : (
+            <img
+              src={bannerImage}
+              alt="Profile banner"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+            />
+          )}
         </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
-        {/* Avatar - Overlaps Banner */}
-        <div style={{ position: 'absolute', bottom: -40, left: 15 }}>
+        {/* Avatar - Overlaps Banner from Bottom */}
+        <div style={{ position: 'absolute', bottom: -40, left: 15, zIndex: 20 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
