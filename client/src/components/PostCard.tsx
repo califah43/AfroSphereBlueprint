@@ -319,7 +319,8 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={() => {
-                navigator.clipboard.writeText(`https://afrosphere.app/post/${post.id}`);
+                const postUrl = `${window.location.origin}/post/${post.id}`;
+                navigator.clipboard.writeText(postUrl);
                 toast({
                   title: "Link copied!",
                   description: "Post link copied to clipboard",
