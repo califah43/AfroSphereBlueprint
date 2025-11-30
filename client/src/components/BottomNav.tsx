@@ -1,4 +1,4 @@
-import { Home, Compass, PlusCircle, Bell, User, Flame } from "lucide-react";
+import { Home, Compass, PlusCircle, Bell, User, Flame, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -14,6 +14,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     { id: "explore", icon: Compass, label: t("nav.explore") },
     { id: "trending", icon: Flame, label: "Trending" },
     { id: "create", icon: PlusCircle, label: t("nav.create") },
+    { id: "hashtags", icon: Bookmark, label: "Hashtags" },
     { id: "notifications", icon: Bell, label: t("nav.notifications") },
     { id: "profile", icon: User, label: t("nav.profile") },
   ];

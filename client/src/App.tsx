@@ -467,6 +467,20 @@ export default function App() {
               />
             </div>
           )}
+          {activeTab === "hashtags" && (() => {
+            const currentUserId = localStorage.getItem("currentUserId");
+            return (
+              <div className="flex-1 overflow-y-auto">
+                <FollowedHashtagsFeed
+                  userId={currentUserId || ""}
+                  onAuthorClick={handleOpenUserProfile}
+                  onHashtagClick={handleOpenHashtagFeed}
+                  onCommentClick={handleOpenComments}
+                  onPostClick={handleOpenPostDetail}
+                />
+              </div>
+            );
+          })()}
           {activeTab === "notifications" && (
             <div className="flex-1 overflow-y-auto">
               <Notifications onUserClick={handleOpenUserProfile} />
