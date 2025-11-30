@@ -1,7 +1,7 @@
 import { db } from './db';
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows, admins, adminPermissions } from '@shared/schema';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows, admins, adminPermissions, saves } from '@shared/schema';
 import { eq, and, inArray, like, desc } from 'drizzle-orm';
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow, type Admin, type InsertAdmin, type AdminPermission } from '@shared/schema';
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow, type Admin, type InsertAdmin, type AdminPermission, type Save } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
 export interface IStorage {

@@ -254,6 +254,16 @@ export const hashtagFollows = pgTable("hashtag_follows", {
 
 export type HashtagFollow = typeof hashtagFollows.$inferSelect;
 
+// ============ SAVED POSTS ============
+export const saves = pgTable("saves", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  postId: varchar("post_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Save = typeof saves.$inferSelect;
+
 // ============ ADMIN PERMISSIONS ============
 export const adminPermissions = pgTable("admin_permissions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
