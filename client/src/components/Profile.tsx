@@ -38,6 +38,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
+  const [showHeaderViewer, setShowHeaderViewer] = useState(false);
   const [showHeaderCropper, setShowHeaderCropper] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string>("");
@@ -435,7 +436,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
       {/* Elegant Banner - Extends to Top */}
       <div 
-        className="relative h-32 overflow-hidden -mt-0"
+        className="relative h-32 overflow-hidden -mt-0 cursor-pointer group"
+        onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
@@ -443,13 +445,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <img
               src={userProfile.banner}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-85"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
             />
           ) : (
             <img
               src={bannerImage}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-85"
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
             />
           )}
         </div>
@@ -834,6 +836,15 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         />
       )}
       
+      {showHeaderViewer && (
+        <ImageViewer
+          src={userProfile?.banner || bannerImage}
+          alt="Cover photo"
+          isOpen={showHeaderViewer}
+          onClose={() => setShowHeaderViewer(false)}
+        />
+      )}
+
       {showHeaderCropper && (
         <HeaderCropper
           onClose={() => setShowHeaderCropper(false)}
