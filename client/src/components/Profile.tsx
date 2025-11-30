@@ -44,6 +44,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [userId, setUserId] = useState<string>("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [likedPosts, setLikedPosts] = useState<any[]>([]);
+  const [savedPosts, setSavedPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [isAccountPrivate, setIsAccountPrivate] = useState(false);
   const [userBadges, setUserBadges] = useState<any[]>([]);
@@ -112,10 +113,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           const cachedBadgesKey = `badges_${currentUserId}`;
           const cachedPostsKey = `posts_${currentUserId}`;
           const cachedLikedKey = `liked_${currentUserId}`;
+          const cachedSavedKey = `saved_${currentUserId}`;
           
           const cachedBadges = localStorage.getItem(cachedBadgesKey);
           const cachedPosts = localStorage.getItem(cachedPostsKey);
           const cachedLiked = localStorage.getItem(cachedLikedKey);
+          const cachedSaved = localStorage.getItem(cachedSavedKey);
           
           if (cachedBadges) {
             try {
@@ -141,6 +144,14 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
+          if (cachedSaved) {
+            try {
+              setSavedPosts(JSON.parse(cachedSaved));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
           // Check if current user is following this user (only for other profiles)
           if (!isOwnProfile) {
             try {
@@ -157,10 +168,11 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
-          const [postsRes, badgesRes, likedRes] = await Promise.all([
+          const [postsRes, badgesRes, likedRes, savedRes] = await Promise.all([
             fetch(`/api/posts/user/${currentUserId}`),
             fetch(`/api/badges/user/${currentUserId}`),
-            fetch(`/api/posts/user/${currentUserId}/liked`)
+            fetch(`/api/posts/user/${currentUserId}/liked`),
+            fetch(`/api/posts/user/${currentUserId}/saved`)
           ]);
           
           if (postsRes.ok) {
@@ -173,6 +185,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             const liked = await likedRes.json();
             setLikedPosts(liked || []);
             localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
+          }
+          
+          if (savedRes.ok) {
+            const saved = await savedRes.json();
+            setSavedPosts(saved || []);
+            localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
           }
           
           if (badgesRes.ok) {
@@ -252,9 +270,11 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           // Load cached data immediately
           const cachedPostsKey = `posts_${userId}`;
           const cachedLikedKey = `liked_${userId}`;
+          const cachedSavedKey = `saved_${userId}`;
           
           const cachedPosts = localStorage.getItem(cachedPostsKey);
           const cachedLiked = localStorage.getItem(cachedLikedKey);
+          const cachedSaved = localStorage.getItem(cachedSavedKey);
           
           if (cachedPosts) {
             try {
@@ -272,9 +292,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             }
           }
           
-          const [postsRes, likedRes] = await Promise.all([
+          if (cachedSaved) {
+            try {
+              setSavedPosts(JSON.parse(cachedSaved));
+            } catch (e) {
+              // Invalid cache, ignore
+            }
+          }
+          
+          const [postsRes, likedRes, savedRes] = await Promise.all([
             fetch(`/api/posts/user/${userId}`),
-            fetch(`/api/posts/user/${userId}/liked`)
+            fetch(`/api/posts/user/${userId}/liked`),
+            fetch(`/api/posts/user/${userId}/saved`)
           ]);
           if (postsRes.ok) {
             const posts = await postsRes.json();
@@ -285,6 +314,11 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             const liked = await likedRes.json();
             setLikedPosts(liked || []);
             localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
+          }
+          if (savedRes.ok) {
+            const saved = await savedRes.json();
+            setSavedPosts(saved || []);
+            localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
           }
         }
       } catch (error) {
@@ -835,11 +869,49 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               )}
               
               {activeTab === "saved" && (
-                <div className="py-16 text-center">
-                  <Share2 className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-muted-foreground font-medium">No saved posts yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">Save posts to view them later</p>
-                </div>
+                <>
+                  {postsLoading ? (
+                    <div className="grid grid-cols-3 gap-1 mt-4">
+                      {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div
+                          key={i}
+                          className="aspect-square overflow-hidden rounded-md bg-muted animate-pulse"
+                        />
+                      ))}
+                    </div>
+                  ) : savedPosts.length === 0 ? (
+                    <div className="py-16 text-center">
+                      <Share2 className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                      <p className="text-muted-foreground font-medium">No saved posts yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">Save posts to view them later</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-1 mt-4">
+                      {savedPosts.map((post) => {
+                        const imageUrl = post.images && post.images.length > 0 ? post.images[0] : (post.imageUrl || post.image);
+                        return (
+                          <button
+                            key={post.id}
+                            onClick={() => onPostClick?.(post.id)}
+                            className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate relative"
+                            data-testid={`saved-post-grid-${post.id}`}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt="Saved post"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            {post.images && post.images.length > 1 && (
+                              <div className="absolute top-1 right-1 bg-black/60 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-semibold">
+                                {post.images.length}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

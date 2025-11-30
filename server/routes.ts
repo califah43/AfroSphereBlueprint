@@ -2056,6 +2056,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ SAVED POSTS ROUTES ============
+  app.post("/api/posts/:postId/save", async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const { userId } = req.body;
+      if (!userId || !postId) {
+        return res.status(400).json({ error: "Missing userId or postId" });
+      }
+
+      const isSaved = await storage.isSavedPost(userId, postId);
+      if (isSaved) {
+        await storage.unsavePost(userId, postId);
+        res.json({ saved: false });
+      } else {
+        await storage.savePost(userId, postId);
+        res.json({ saved: true });
+      }
+    } catch (error) {
+      res.status(400).json({ error: "Failed to save post" });
+    }
+  });
+
+  app.delete("/api/posts/:postId/save", async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const userId = req.query.userId as string;
+      if (!userId || !postId) {
+        return res.status(400).json({ error: "Missing userId or postId" });
+      }
+
+      await storage.unsavePost(userId, postId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to unsave post" });
+    }
+  });
+
+  app.get("/api/posts/user/:userId/saved", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      if (!userId) {
+        return res.status(400).json({ error: "Missing userId" });
+      }
+
+      const savedPosts = await storage.getSavedPosts(userId);
+      res.json(savedPosts);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch saved posts" });
+    }
+  });
+
+  app.get("/api/posts/:postId/is-saved", async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const userId = req.query.userId as string;
+      if (!userId || !postId) {
+        return res.status(400).json({ error: "Missing userId or postId" });
+      }
+
+      const isSaved = await storage.isSavedPost(userId, postId);
+      res.json({ isSaved });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to check save status" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {
