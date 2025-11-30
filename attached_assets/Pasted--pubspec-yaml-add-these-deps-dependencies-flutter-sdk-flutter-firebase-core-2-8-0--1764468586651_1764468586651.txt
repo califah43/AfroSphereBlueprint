@@ -1,0 +1,395 @@
+// pubspec.yaml (add these deps)
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.8.0
+  firebase_auth: ^4.4.0
+  cloud_firestore: ^4.5.0
+  firebase_storage: ^11.1.0
+  image_picker: ^0.8.7+4
+  image_cropper: ^3.0.1
+  uuid: ^3.0.7
+  video_player: ^2.5.1
+  flutter_spinkit: ^5.1.0
+  flutter_chips_input: ^1.9.0  # optional for tag entry
+
+// make_post_screen.dart
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:uuid/uuid.dart';
+import 'package:video_player/video_player.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+class MakePostScreen extends StatefulWidget {
+  const MakePostScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MakePostScreen> createState() => _MakePostScreenState();
+}
+
+class _MakePostScreenState extends State<MakePostScreen> with TickerProviderStateMixin {
+  final _captionController = TextEditingController();
+  final _tagController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  File? _mediaFile;
+  bool _isVideo = false;
+  VideoPlayerController? _videoController;
+  String _category = 'Culture';
+  bool _uploading = false;
+  double _uploadProgress = 0;
+  List<String> _tags = [];
+  final _uuid = const Uuid();
+
+  // Categories you decided earlier
+  final List<String> _categories = ['Culture', 'Music', 'Fashion', 'Art', 'Lifestyle'];
+
+  @override
+  void dispose() {
+    _captionController.dispose();
+    _tagController.dispose();
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickMedia(ImageSource source, {bool pickVideo = false}) async {
+    XFile? picked;
+    if (pickVideo) {
+      picked = await _picker.pickVideo(source: source, maxDuration: const Duration(minutes: 3));
+    } else {
+      picked = await _picker.pickImage(source: source, imageQuality: 85);
+    }
+
+    if (picked == null) return;
+
+    // Crop for images (movable rectangle)
+    if (!pickVideo) {
+      final cropped = await ImageCropper().cropImage(
+        sourcePath: picked.path,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Adjust Header',
+            toolbarColor: Colors.black,
+            statusBarColor: Colors.black,
+            backgroundColor: Colors.black,
+            activeControlsWidgetColor: Colors.white,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false,
+          ),
+          IOSUiSettings(
+            title: 'Adjust Header',
+          )
+        ],
+        cropStyle: CropStyle.rectangle,
+      );
+      if (cropped == null) return;
+      setState(() {
+        _mediaFile = File(cropped.path);
+        _isVideo = false;
+      });
+    } else {
+      // Video picked
+      setState(() {
+        _mediaFile = File(picked!.path);
+        _isVideo = true;
+      });
+      _videoController?.dispose();
+      _videoController = VideoPlayerController.file(_mediaFile!)
+        ..initialize().then((_) {
+          setState(() {});
+          _videoController!.setLooping(true);
+          _videoController!.play();
+        });
+    }
+  }
+
+  Widget _mediaPreview() {
+    if (_mediaFile == null) {
+      return Container(
+        height: 260,
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[800]!),
+        ),
+        child: Center(
+          child: Icon(Icons.image, color: Colors.grey[600], size: 48),
+        ),
+      );
+    }
+
+    if (_isVideo) {
+      if (_videoController == null || !_videoController!.value.isInitialized) {
+        return SizedBox(
+          height: 260,
+          child: Center(child: SpinKitPulse(color: Colors.white, size: 48)),
+        );
+      }
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: _videoController!.value.aspectRatio,
+          child: VideoPlayer(_videoController!),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.file(_mediaFile!, height: 260, width: double.infinity, fit: BoxFit.cover),
+    );
+  }
+
+  void _addTagFromField() {
+    final raw = _tagController.text.trim();
+    if (raw.isEmpty) return;
+    final tag = raw.replaceAll(RegExp(r'[^A-Za-z0-9]'), '').toLowerCase();
+    if (tag.isEmpty) return;
+    if (!_tags.contains(tag)) {
+      setState(() {
+        _tags.add(tag);
+      });
+    }
+    _tagController.clear();
+  }
+
+  Future<void> _uploadPost() async {
+    if (_mediaFile == null) return _showSnack('Please add an image or video.');
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return _showSnack('You must be signed in to post.');
+
+    setState(() {
+      _uploading = true;
+      _uploadProgress = 0;
+    });
+
+    final postId = _uuid.v4();
+    final storageRef = FirebaseStorage.instance.ref().child('posts/$postId/media');
+
+    try {
+      // Upload file with progress
+      final uploadTask = storageRef.putFile(_mediaFile!);
+
+      uploadTask.snapshotEvents.listen((snapshot) {
+        final progress = snapshot.bytesTransferred / (snapshot.totalBytes == 0 ? 1 : snapshot.totalBytes);
+        setState(() => _uploadProgress = progress);
+      });
+
+      final snapshot = await uploadTask;
+      final mediaUrl = await snapshot.ref.getDownloadURL();
+
+      final postDoc = {
+        'postId': postId,
+        'authorId': user.uid,
+        'authorName': user.displayName ?? user.email?.split('@').first ?? 'Unknown',
+        'mediaUrl': mediaUrl,
+        'mediaType': _isVideo ? 'video' : 'image',
+        'caption': _captionController.text.trim(),
+        'category': _category,
+        'tags': _tags,
+        'likesCount': 0,
+        'commentsCount': 0,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance.collection('posts').doc(postId).set(postDoc);
+
+      setState(() {
+        _uploading = false;
+        _uploadProgress = 0;
+        _mediaFile = null;
+        _isVideo = false;
+        _tags.clear();
+        _captionController.clear();
+      });
+
+      _showSnack('Post uploaded successfully!');
+      Navigator.of(context).pop(); // return to feed
+    } catch (e) {
+      setState(() => _uploading = false);
+      _showSnack('Upload failed: ${e.toString()}');
+    }
+  }
+
+  void _showSnack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B0B0C),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Create Post', style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.w600)),
+        centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: _uploading ? null : _uploadPost,
+            child: Text(
+              _uploading ? 'Uploading...' : 'Post',
+              style: TextStyle(color: _uploading ? Colors.grey : Colors.greenAccent, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _mediaPreview(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () => _pickMedia(ImageSource.gallery, pickVideo: false),
+                        icon: const Icon(Icons.photo_library),
+                        label: const Text('Image'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[850]),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _pickMedia(ImageSource.camera, pickVideo: false),
+                        icon: const Icon(Icons.camera_alt),
+                        label: const Text('Camera'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[850]),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _pickMedia(ImageSource.gallery, pickVideo: true),
+                        icon: const Icon(Icons.videocam),
+                        label: const Text('Video'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[850]),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _captionController,
+                    maxLines: 3,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Write a caption...',
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      filled: true,
+                      fillColor: const Color(0xFF0E0E10),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _tagController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: 'Add tag (press enter or +)',
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            filled: true,
+                            fillColor: const Color(0xFF0E0E10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              onPressed: _addTagFromField,
+                            ),
+                          ),
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _addTagFromField(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      DropdownButton<String>(
+                        value: _category,
+                        dropdownColor: const Color(0xFF0B0B0C),
+                        underline: const SizedBox(),
+                        items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                        onChanged: (v) => setState(() => _category = v!),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Tag chips
+                  if (_tags.isNotEmpty)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: 8,
+                        children: _tags
+                            .map((t) => Chip(
+                                  backgroundColor: const Color(0xFF151516),
+                                  label: Text('#$t', style: const TextStyle(color: Colors.white)),
+                                  deleteIconColor: Colors.grey,
+                                  onDeleted: () => setState(() => _tags.remove(t)),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  // Preview card
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Preview', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(height: 8),
+                  Card(
+                    color: const Color(0xFF0E0E10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          CircleAvatar(backgroundColor: Colors.grey[800], child: Icon(Icons.person, color: Colors.white)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(FirebaseAuth.instance.currentUser?.displayName ?? 'You', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 6),
+                                Text(_captionController.text.isEmpty ? 'Your caption preview...' : _captionController.text, style: TextStyle(color: Colors.grey[300])),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+            if (_uploading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black54,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SpinKitFadingCircle(color: Colors.white, size: 50),
+                        const SizedBox(height: 16),
+                        Text('Uploading ${( _uploadProgress * 100 ).toStringAsFixed(0)}%', style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
