@@ -385,17 +385,17 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         )}
       </div>
 
-      {/* Engagement Stats - AfroSphere Unique */}
-      <div className="px-4 py-3 flex justify-start gap-6 text-xs text-muted-foreground border-t border-border/10">
-        <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={() => onComment?.(post.id)} data-testid={`button-comments-stat-${post.id}`}>
-          <MessageCircle className="h-4 w-4" />
+      {/* Engagement Stats - Warm African Design */}
+      <div className="px-4 py-3 flex justify-start gap-6 text-xs border-t border-border/10 bg-gradient-to-r from-background via-primary/5 to-background">
+        <button className="flex items-center gap-2 font-medium transition-all hover-elevate text-muted-foreground hover:text-primary" onClick={() => onComment?.(post.id)} data-testid={`button-comments-stat-${post.id}`}>
+          <MessageCircle className="h-4 w-4 text-primary" />
           <span>{post.comments}</span>
         </button>
-        <button className="hover:text-foreground transition-colors flex items-center gap-2" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
-          <Heart className={`h-4 w-4 ${isLiked ? "fill-primary text-primary" : ""}`} />
-          <span>{likes}</span>
+        <button className="flex items-center gap-2 font-medium transition-all hover-elevate" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
+          <Heart className={`h-4 w-4 transition-all ${isLiked ? "fill-red-600 text-red-600" : "text-muted-foreground"}`} />
+          <span className={isLiked ? "text-red-600" : "text-muted-foreground"}>{likes}</span>
         </button>
-        <button className="hover:text-foreground transition-colors flex items-center gap-2" data-testid={`button-views-stat-${post.id}`}>
+        <button className="flex items-center gap-2 font-medium transition-all hover-elevate text-muted-foreground hover:text-foreground" data-testid={`button-views-stat-${post.id}`}>
           <Eye className="h-4 w-4" />
           <span>{Math.floor(post.likes * 0.5)}</span>
         </button>

@@ -430,18 +430,18 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col overflow-hidden rounded-t-3xl md:rounded-2xl">
-      {/* Header with Gradient */}
-      <div className="sticky top-0 bg-gradient-to-b from-background via-background to-transparent border-b border-border/30 px-4 py-4 flex items-center justify-between backdrop-blur-md z-10">
+      {/* Header with Warm Gold Gradient */}
+      <div className="sticky top-0 bg-gradient-to-b from-background via-background to-transparent border-b border-primary/20 px-4 py-4 flex items-center justify-between backdrop-blur-md z-10">
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="hover-elevate h-9 w-9 rounded-full"
+          className="hover-elevate h-9 w-9 rounded-full transition-all"
           data-testid="button-close-comments"
         >
           <X className="h-5 w-5" />
         </Button>
-        <h2 className="text-lg font-black tracking-tight bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent" data-testid="text-comments-title">
+        <h2 className="text-lg font-black tracking-tight bg-gradient-to-r from-primary via-orange-500 to-red-600 bg-clip-text text-transparent" data-testid="text-comments-title">
           Comments
         </h2>
         <div className="w-9" />
@@ -498,10 +498,10 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
 
                 <div className="flex-1 min-w-0">
                   {/* Comment Bubble */}
-                  <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 group-hover:border-primary/30 transition-all duration-200">
+                  <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 group-hover:border-primary/50 group-hover:bg-card/80 transition-all duration-200">
                     <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                       <div className="flex items-center gap-1">
-                        <p className="font-semibold text-sm text-foreground" data-testid={`text-comment-author-${comment.id}`}>
+                        <p className="font-bold text-sm bg-gradient-to-r from-foreground to-foreground bg-clip-text text-transparent" data-testid={`text-comment-author-${comment.id}`}>
                           {comment.author || "Anonymous"}
                         </p>
                         {comment.badges && comment.badges.length > 0 ? (
