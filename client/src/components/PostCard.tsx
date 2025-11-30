@@ -283,73 +283,95 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            {isOwnPost && (
-              <>
+            <DropdownMenuContent align="end" className="w-64 rounded-xl shadow-lg border border-border/50 p-2">
+              {/* Own Post Actions - Premium Section */}
+              {isOwnPost && (
+                <>
+                  <div className="px-2 py-1.5 mb-1">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Post Actions</p>
+                    <DropdownMenuItem 
+                      onClick={() => setShowDeleteDialog(true)} 
+                      className="bg-destructive/5 hover:bg-destructive/10 text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer rounded-lg mb-1"
+                      data-testid={`button-delete-own-${post.id}`}
+                    >
+                      <Trash2 className="mr-3 h-4 w-4 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold">Delete post</p>
+                        <p className="text-xs text-destructive/70">Remove permanently</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </div>
+                  <DropdownMenuSeparator className="my-2" />
+                </>
+              )}
+
+              {/* Other User's Post Actions - Premium Section */}
+              {!isOwnPost && (
+                <>
+                  <div className="px-2 py-1.5 mb-1">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Feedback</p>
+                    <DropdownMenuItem 
+                      onClick={() => {}}
+                      className="hover:bg-muted/50 cursor-pointer rounded-lg mb-1"
+                      data-testid={`button-not-interested-${post.id}`}
+                    >
+                      <Eye className="mr-3 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Not interested</p>
+                        <p className="text-xs text-muted-foreground">See less from this creator</p>
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setShowDeleteDialog(true)} 
+                      className="bg-destructive/5 hover:bg-destructive/10 text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer rounded-lg"
+                      data-testid={`button-report-${post.id}`}
+                    >
+                      <Flag className="mr-3 h-4 w-4 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold">Report post</p>
+                        <p className="text-xs text-destructive/70">Let us know</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </div>
+                  <DropdownMenuSeparator className="my-2" />
+                </>
+              )}
+
+              {/* Common Actions - Premium Section */}
+              <div className="px-2 py-1.5">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Actions</p>
                 <DropdownMenuItem 
-                  onClick={() => setShowDeleteDialog(true)} 
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                  data-testid={`button-delete-own-${post.id}`}
+                  onClick={() => {
+                    const postUrl = `${window.location.origin}/post/${post.id}`;
+                    navigator.clipboard.writeText(postUrl);
+                    toast({
+                      title: "Link copied!",
+                      description: "Post link copied to clipboard",
+                    });
+                  }}
+                  className="hover:bg-muted/50 cursor-pointer rounded-lg mb-1"
+                  data-testid={`button-copy-link-${post.id}`}
                 >
-                  <Trash2 className="mr-3 h-4 w-4" />
-                  <span className="font-medium">Delete post</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-            {!isOwnPost && (
-              <>
-                <DropdownMenuItem 
-                  onClick={() => {}}
-                  className="cursor-pointer"
-                  data-testid={`button-not-interested-${post.id}`}
-                >
-                  <Eye className="mr-3 h-4 w-4" />
-                  <span>Not interested</span>
+                  <Copy className="mr-3 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <span className="font-medium text-sm">Copy link</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => setShowDeleteDialog(true)} 
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                  data-testid={`button-report-${post.id}`}
+                  onClick={handleBookmark}
+                  className="hover:bg-muted/50 cursor-pointer rounded-lg mb-1"
+                  data-testid={`button-bookmark-menu-${post.id}`}
                 >
-                  <Flag className="mr-3 h-4 w-4" />
-                  <span>Report post</span>
+                  <Bookmark className={`mr-3 h-4 w-4 flex-shrink-0 ${isBookmarked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                  <span className={`font-medium text-sm ${isBookmarked ? "text-primary" : ""}`}>{isBookmarked ? "Unsave" : "Save for later"}</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={() => {
-                const postUrl = `${window.location.origin}/post/${post.id}`;
-                navigator.clipboard.writeText(postUrl);
-                toast({
-                  title: "Link copied!",
-                  description: "Post link copied to clipboard",
-                });
-              }}
-              className="cursor-pointer"
-              data-testid={`button-copy-link-${post.id}`}
-            >
-              <Copy className="mr-3 h-4 w-4" />
-              <span>Copy link</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={handleBookmark}
-              className="cursor-pointer"
-              data-testid={`button-bookmark-menu-${post.id}`}
-            >
-              <Bookmark className={`mr-3 h-4 w-4 ${isBookmarked ? "fill-current text-primary" : ""}`} />
-              <span>{isBookmarked ? "Unsave" : "Save"}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="cursor-pointer"
-              data-testid={`button-share-menu-${post.id}`}
-            >
-              <Share2 className="mr-3 h-4 w-4" />
-              <span>Share</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+                <DropdownMenuItem 
+                  className="hover:bg-muted/50 cursor-pointer rounded-lg"
+                  data-testid={`button-share-menu-${post.id}`}
+                >
+                  <Share2 className="mr-3 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <span className="font-medium text-sm">Share</span>
+                </DropdownMenuItem>
+              </div>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
