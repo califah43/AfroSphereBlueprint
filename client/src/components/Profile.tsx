@@ -525,35 +525,120 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         onClose={() => setShowImageViewer(false)}
       />
 
-      {/* Premium Profile Content - Clean & Minimal */}
-      <div className="px-4 pt-5">
-        {/* Name & Username - Centered Clean Typography */}
-        <div className="text-center mb-8">
+      {/* Padding wrapper for content */}
+      <div className="px-4">
+        {/* Kente Accent Strip - Premium Design Element */}
+        <div className="flex gap-0 my-3" style={{ height: '3px' }}>
+          <div className="flex-1 bg-gradient-to-r from-primary to-orange-400"></div>
+          <div className="flex-1 bg-gradient-to-r from-red-500 to-pink-500"></div>
+          <div className="flex-1 bg-gradient-to-r from-orange-600 to-amber-600"></div>
+        </div>
+
+        {/* Name & Username - Left Aligned - Premium Spacing */}
+        <div className="mb-6 pt-3">
           {/* Display Name with Badges */}
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <h1 className="text-3xl font-bold" data-testid="text-profile-displayname">
+          <div className="flex items-center gap-1 mb-1">
+            <h1 className="font-black tracking-tight" style={{ fontSize: FontSizes.h2 }} data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (
-              <Lock className="h-5 w-5 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
+              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
+            )}
+            {userBadges && userBadges.length > 0 && (
+              <div className="flex items-center gap-1">
+                {userBadges.map((badge: any) => (
+                  <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                    <img 
+                      src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                      alt={badge.name}
+                      className="w-full h-full"
+                    />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
           
           {/* Unique Username Handle */}
-          <p className="text-sm text-muted-foreground mb-4" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
 
-          {/* Bio - Clean elegance */}
-          <p className="text-base text-foreground/90 leading-relaxed whitespace-pre-wrap max-w-sm mx-auto" data-testid="text-profile-bio">
+          {/* Bio - Compact elegance */}
+          <p className="text-xs text-foreground leading-tight mb-2 whitespace-pre-wrap" data-testid="text-profile-bio">
             {userProfile?.bio || "Creative on AfroSphere"}
           </p>
+
+          {/* Join Date */}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 mb-2">
+            <Calendar size={12} />
+            <span>Joined {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+          </div>
+
+          {/* Creator Badge */}
+          <div className="flex items-center">
+            <CreatorBadge type="fashion-vanguard" size="sm" />
+          </div>
         </div>
 
-        {/* Glass Morphism Action Buttons */}
+        {/* Professional Info - Compact & Refined */}
+        {userProfile && (userProfile.profession || userProfile.location || userProfile.website) && (
+          <div className="flex flex-col gap-1 mb-4 text-xs">
+            {userProfile.profession && (
+              <div className="flex items-center gap-2 text-foreground">
+                <Briefcase className="h-3 w-3 text-primary/60 flex-shrink-0" />
+                <span className="font-medium truncate">{userProfile.profession}</span>
+              </div>
+            )}
+            {userProfile.location && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-3 w-3 text-primary/60 flex-shrink-0" />
+                <span className="truncate">{userProfile.location}</span>
+              </div>
+            )}
+            {userProfile.website && (
+              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors truncate">
+                <Link className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate text-xs">{userProfile.website}</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Stats - Premium Cards with Enhanced Design */}
         {userProfile && (
-        <div className="flex gap-3 mb-8 justify-center flex-wrap">
+        <div className="grid grid-cols-3 gap-2 mb-4 p-2 bg-gradient-to-r from-card via-primary/5 to-card rounded-md border border-primary/20">
+          <button
+            onClick={() => onPostClick?.('')}
+            className="text-center py-2 hover-elevate transition-all rounded group"
+            data-testid="button-view-posts"
+          >
+            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-posts-count">{userProfile.posts}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Posts</p>
+          </button>
+          <button
+            onClick={onFollowersClick}
+            className="text-center py-2 hover-elevate transition-all rounded border-l border-primary/20 group"
+            data-testid="button-view-followers"
+          >
+            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Followers</p>
+          </button>
+          <button
+            onClick={onFollowingClick}
+            className="text-center py-2 hover-elevate transition-all rounded border-l border-primary/20 group"
+            data-testid="button-view-following"
+          >
+            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Following</p>
+          </button>
+        </div>
+        )}
+
+        {/* Action Buttons - Warm African Design */}
+        {userProfile && (
+        <div className="flex gap-2 mb-6">
           {isOwnProfile ? (
             <Button
-              className="rounded-full px-7 h-11 text-sm font-medium border border-foreground/20 bg-foreground/5 backdrop-blur-xl hover:bg-foreground/10 text-foreground transition-all"
+              className="flex-1 bg-gradient-to-r from-primary via-orange-500 to-red-600 hover:from-primary/90 hover:via-orange-500/90 hover:to-red-600/90 text-white font-bold rounded-lg text-xs h-9 shadow-md gold-glow transition-all"
               onClick={onEditProfile}
               data-testid="button-edit-profile"
             >
@@ -562,7 +647,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           ) : (
             <>
               <Button 
-                className={`rounded-full px-7 h-11 text-sm font-medium border transition-all backdrop-blur-xl ${isFollowing ? 'bg-foreground/5 border-foreground/20 text-foreground hover:bg-foreground/10' : 'bg-primary/20 border-primary/40 text-white hover:bg-primary/30'}`}
+                className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm transition-all ${isFollowRequestPending ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : isFollowing ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 gold-glow'}`}
                 onClick={toggleFollow}
                 disabled={isLoading || isFollowRequestPending}
                 data-testid="button-follow"
@@ -570,20 +655,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                 {isLoading ? "..." : (isFollowRequestPending ? t("profile.followRequestPending") : isFollowing ? t("profile.unfollow") : (isAccountPrivate ? t("profile.sendFollowRequest") : t("profile.follow")))}
               </Button>
               <Button
-                className="rounded-full h-11 w-11 border border-foreground/20 bg-foreground/5 backdrop-blur-xl hover:bg-foreground/10 text-foreground transition-all"
+                variant="ghost"
                 size="icon"
+                className="h-9 w-9 hover-elevate transition-all"
                 data-testid="button-report-user"
                 title="Report user"
               >
-                <Flag size={16} />
+                <Flag size={18} />
               </Button>
               <Button
-                className="rounded-full h-11 w-11 border border-foreground/20 bg-foreground/5 backdrop-blur-xl hover:bg-foreground/10 text-foreground transition-all"
+                variant="ghost"
                 size="icon"
+                className="h-9 w-9 hover-elevate transition-all"
                 data-testid="button-block-user"
                 title="Block user"
               >
-                <Ban size={16} />
+                <Ban size={18} />
               </Button>
             </>
           )}
