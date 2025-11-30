@@ -187,9 +187,9 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={authorAvatar} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold">{authorUsername[0]?.toUpperCase() || "A"}</AvatarFallback>
+          <Avatar className="w-12 h-12 select-none pointer-events-auto">
+            <AvatarImage src={authorAvatar} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} data-testid={`img-avatar-${post.id}`} />
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold select-none">{authorUsername[0]?.toUpperCase() || "A"}</AvatarFallback>
           </Avatar>
         </button>
 
@@ -201,11 +201,14 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             {post.badges && post.badges.length > 0 ? (
               <div className="flex items-center gap-1 flex-shrink-0">
                 {post.badges.map((badge) => (
-                  <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0" title={badge.name}>
+                  <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
                     <img 
                       src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
                       alt={badge.name}
-                      className="w-full h-full"
+                      className="w-full h-full select-none user-select-none"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      data-testid={`img-badge-${badge.id}`}
                     />
                   </div>
                 ))}
