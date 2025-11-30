@@ -102,12 +102,12 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
       const createdPost = await res.json();
 
       // Optimistically add the post to cache instead of full refetch
-      const previousPosts = queryClient.getQueryData(['/api/posts']) || [];
+      const previousPosts = (queryClient.getQueryData(['/api/posts']) || []) as any[];
       queryClient.setQueryData(['/api/posts'], [createdPost, ...previousPosts]);
       
       // Also update user's post count
       if (userData && userData.id) {
-        const previousUserPosts = queryClient.getQueryData(['/api/posts/user', userData.id]) || [];
+        const previousUserPosts = (queryClient.getQueryData(['/api/posts/user', userData.id]) || []) as any[];
         queryClient.setQueryData(['/api/posts/user', userData.id], [createdPost, ...previousUserPosts]);
       }
       
