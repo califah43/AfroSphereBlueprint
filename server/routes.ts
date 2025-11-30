@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { DbStorage } from "./storage-db";
 import { db } from "./db";
-import { posts, likes, users, follows } from "@shared/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { posts, likes, users, follows, hashtags, hashtagFollows } from "@shared/schema";
+import { eq, and, inArray, desc } from "drizzle-orm";
 import multer from "multer";
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge } from "@shared/schema";
@@ -1095,12 +1095,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const hashtags = await db.query.hashtags.findMany({
+      const userHashtags = await db.query.hashtags.findMany({
         where: inArray(hashtags.id, hashtagIds),
         orderBy: desc(hashtags.usageCount),
       });
       
-      res.json(hashtags);
+      res.json(userHashtags);
     } catch (error) {
       res.status(400).json({ error: "Failed to fetch followed hashtags" });
     }
