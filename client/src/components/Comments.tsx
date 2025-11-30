@@ -499,30 +499,28 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                 <div className="flex-1 min-w-0">
                   {/* Comment Bubble */}
                   <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 group-hover:border-primary/50 group-hover:bg-card/80 transition-all duration-200">
-                    <div className="flex items-baseline gap-2 mb-1 flex-nowrap overflow-hidden">
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <p className="font-bold text-sm truncate max-w-xs" data-testid={`text-comment-author-${comment.id}`}>
-                          {comment.author || "Anonymous"}
-                        </p>
-                        {comment.badges && comment.badges.length > 0 ? (
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            {comment.badges.map((badge: any) => (
-                              <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0" title={badge.name}>
-                                <img 
-                                  src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
-                                  alt={badge.name}
-                                  className="w-full h-full"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          comment.userId && <BadgeDisplay userId={comment.userId} className="inline-flex flex-shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground font-medium flex-shrink-0">@{comment.author?.substring(0, 12) || "user"}</p>
+                    <div className="flex items-baseline gap-1.5 mb-1 flex-nowrap">
+                      <p className="font-bold text-sm truncate max-w-[80px]" data-testid={`text-comment-author-${comment.id}`}>
+                        {comment.author || "Anonymous"}
+                      </p>
+                      {comment.badges && comment.badges.length > 0 ? (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {comment.badges.map((badge: any) => (
+                            <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0" title={badge.name}>
+                              <img 
+                                src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                                alt={badge.name}
+                                className="w-full h-full"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        comment.userId && <BadgeDisplay userId={comment.userId} className="inline-flex flex-shrink-0" />
+                      )}
+                      <p className="text-xs text-muted-foreground font-medium truncate max-w-[55px]">@{comment.author || "user"}</p>
                       <span className="text-xs text-muted-foreground font-medium flex-shrink-0">·</span>
-                      <span className="text-xs text-muted-foreground font-medium flex-shrink-0" data-testid={`text-comment-time-${comment.id}`}>
+                      <span className="text-xs text-muted-foreground font-medium flex-shrink-0 whitespace-nowrap" data-testid={`text-comment-time-${comment.id}`}>
                         {comment.timeAgo}
                       </span>
                     </div>

@@ -194,32 +194,30 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         </button>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-nowrap overflow-hidden">
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <p className="font-bold text-sm text-foreground truncate max-w-xs" data-testid={`text-username-${post.id}`}>
-                {authorUsername}
-              </p>
-              {post.badges && post.badges.length > 0 ? (
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {post.badges.map((badge) => (
-                    <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0" title={badge.name}>
-                      <img 
-                        src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
-                        alt={badge.name}
-                        className="w-full h-full"
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                authorId && <BadgeDisplay userId={authorId} className="inline-flex flex-shrink-0" />
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground/60 flex-shrink-0" data-testid={`text-handle-${post.id}`}>
-              @{authorHandle.substring(0, 15)}
+          <div className="flex items-center gap-1.5 flex-nowrap">
+            <p className="font-bold text-sm text-foreground truncate max-w-[80px]" data-testid={`text-username-${post.id}`}>
+              {authorUsername}
+            </p>
+            {post.badges && post.badges.length > 0 ? (
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {post.badges.map((badge) => (
+                  <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0" title={badge.name}>
+                    <img 
+                      src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                      alt={badge.name}
+                      className="w-full h-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              authorId && <BadgeDisplay userId={authorId} className="inline-flex flex-shrink-0" />
+            )}
+            <p className="text-xs text-muted-foreground/60 truncate max-w-[60px]" data-testid={`text-handle-${post.id}`}>
+              @{authorHandle}
             </p>
             <span className="text-xs text-muted-foreground/60 flex-shrink-0">·</span>
-            <p className="text-xs text-muted-foreground/60 flex-shrink-0" data-testid={`text-time-${post.id}`}>
+            <p className="text-xs text-muted-foreground/60 flex-shrink-0 whitespace-nowrap" data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
