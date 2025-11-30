@@ -207,53 +207,54 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
   return (
     <div className="bg-background overflow-hidden mb-0 border-b border-border/20" data-testid={`card-post-${post.id}`}>
-      {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style */}
-      <div className="flex items-start justify-between gap-3 px-4 py-3">
+      {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style (Compact) */}
+      <div className="flex items-start gap-3 px-3 py-2.5">
         <button 
           onClick={() => onAuthorClick?.(post.author?.uniqueUsername || post.author?.username)}
           className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-12 h-12 select-none pointer-events-auto ring-1 ring-border/20">
+          <Avatar className="w-11 h-11 select-none pointer-events-auto ring-1 ring-border/20">
             <AvatarImage src={authorAvatar} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} data-testid={`img-avatar-${post.id}`} />
             <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold select-none">{authorUsername[0]?.toUpperCase() || "A"}</AvatarFallback>
           </Avatar>
         </button>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-nowrap">
-            <p className="font-bold text-foreground truncate max-w-[80px]" style={{ fontSize: FontSizes.bodyM }} data-testid={`text-username-${post.id}`}>
-              {authorUsername}
-            </p>
-            {post.badges && post.badges.length > 0 ? (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {post.badges.map((badge) => (
-                  <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
-                    <img 
-                      src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
-                      alt={badge.name}
-                      className="w-full h-full select-none user-select-none"
-                      draggable={false}
-                      onContextMenu={(e) => e.preventDefault()}
-                      data-testid={`img-badge-${badge.id}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              authorId && <BadgeDisplay userId={authorId} className="inline-flex flex-shrink-0" />
-            )}
-            <p className="text-muted-foreground/60 truncate max-w-[60px]" style={{ fontSize: FontSizes.captionS }} data-testid={`text-handle-${post.id}`}>
-              @{authorHandle}
-            </p>
-            <span className="text-muted-foreground/60 flex-shrink-0" style={{ fontSize: FontSizes.captionS }}>·</span>
-            <p className="text-muted-foreground/60 flex-shrink-0 whitespace-nowrap" style={{ fontSize: FontSizes.captionS }} data-testid={`text-time-${post.id}`}>
-              {post.timeAgo}
-            </p>
-          </div>
+        <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 flex-wrap">
+              <p className="font-bold text-foreground" style={{ fontSize: FontSizes.bodyS }} data-testid={`text-username-${post.id}`}>
+                {authorUsername}
+              </p>
+              {post.badges && post.badges.length > 0 ? (
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  {post.badges.map((badge) => (
+                    <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
+                      <img 
+                        src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
+                        alt={badge.name}
+                        className="w-full h-full select-none user-select-none"
+                        draggable={false}
+                        onContextMenu={(e) => e.preventDefault()}
+                        data-testid={`img-badge-${badge.id}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                authorId && <BadgeDisplay userId={authorId} className="inline-flex flex-shrink-0" />
+              )}
+              <p className="text-muted-foreground/70" style={{ fontSize: FontSizes.captionS }} data-testid={`text-handle-${post.id}`}>
+                @{authorHandle}
+              </p>
+              <span className="text-muted-foreground/60" style={{ fontSize: FontSizes.captionS }}>·</span>
+              <p className="text-muted-foreground/60 flex-shrink-0 whitespace-nowrap" style={{ fontSize: FontSizes.captionS }} data-testid={`text-time-${post.id}`}>
+                {post.timeAgo}
+              </p>
+            </div>
 
-          {/* Caption Text - Right Below Header */}
-          <p className="leading-relaxed mt-2 text-foreground" style={{ fontSize: FontSizes.bodyM }} data-testid={`text-caption-${post.id}`}>
+            {/* Caption Text - Right Below Header */}
+            <p className="leading-relaxed mt-1.5 text-foreground" style={{ fontSize: FontSizes.bodyS }} data-testid={`text-caption-${post.id}`}>
             {post.caption?.split(/(\#\w+)/g).map((part, i) => 
               part.startsWith('#') ? (
                 <button
@@ -268,20 +269,20 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                 part
               )
             )}
-          </p>
-        </div>
+            </p>
+          </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="hover-elevate active-elevate-2 flex-shrink-0"
-              data-testid={`button-menu-${post.id}`}
-            >
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="hover-elevate active-elevate-2 flex-shrink-0 h-8 w-8"
+                data-testid={`button-menu-${post.id}`}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             {isOwnPost && (
               <>
@@ -349,7 +350,8 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               <span>Share</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
 
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent className="max-w-sm">
@@ -376,9 +378,9 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         </AlertDialog>
       </div>
 
-      {/* Image Section - Rounded Corners */}
+      {/* Image Section - Rounded Corners (Twitter/X Style) */}
       <div 
-        className="relative mx-4 mb-3 rounded-2xl overflow-hidden bg-gradient-to-br from-muted/40 to-muted/20" 
+        className="relative mx-3 mb-0 rounded-xl overflow-hidden bg-gradient-to-br from-muted/40 to-muted/20" 
         onDoubleClick={handleDoubleClick}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -414,32 +416,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         )}
       </div>
 
-      {/* Engagement Stats - Warm African Design */}
-      <div className="px-4 py-3 flex justify-start gap-6 text-xs border-t border-border/10 bg-gradient-to-r from-background via-primary/5 to-background">
-        <button className="flex items-center gap-2 font-medium transition-all hover-elevate text-muted-foreground hover:text-primary" onClick={() => onComment?.(post.id)} data-testid={`button-comments-stat-${post.id}`}>
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span>{post.comments}</span>
-        </button>
-        <button className="flex items-center gap-2 font-medium transition-all hover-elevate" onClick={handleLike} data-testid={`button-likes-stat-${post.id}`}>
-          <Heart className={`h-4 w-4 transition-all ${isLiked ? "fill-red-600 text-red-600" : "text-muted-foreground"}`} />
-          <span className={isLiked ? "text-red-600" : "text-muted-foreground"}>{likes}</span>
-        </button>
-        <button className="flex items-center gap-2 font-medium transition-all hover-elevate text-muted-foreground hover:text-foreground" data-testid={`button-views-stat-${post.id}`}>
-          <Eye className="h-4 w-4" />
-          <span>{Math.floor(post.likes * 0.5)}</span>
-        </button>
-      </div>
-
-      {/* Comments Link */}
-      {post.comments > 0 && (
-        <button
-          onClick={() => onComment?.(post.id)}
-          className="px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-          data-testid={`button-view-comments-${post.id}`}
-        >
-          View all {post.comments} {post.comments === 1 ? "comment" : "comments"}
-        </button>
-      )}
     </div>
   );
 }
