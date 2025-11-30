@@ -434,55 +434,35 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Elegant Banner - Extends to Top */}
-      <div 
-        className="relative overflow-hidden -mt-0 cursor-pointer group"
-        style={{ height: '150px' }}
-        onClick={() => setShowHeaderViewer(true)}
-        data-testid="div-profile-banner"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
-          {userProfile?.banner ? (
-            <img
-              src={userProfile.banner}
-              alt="Profile banner"
-              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
-            />
-          ) : (
-            <img
-              src={bannerImage}
-              alt="Profile banner"
-              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
-            />
-          )}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-      </div>
-
-      {/* Profile Content - Compact & Refined for Mobile */}
-      <div className="max-w-md mx-auto px-4 relative z-10 pb-6">
-        {/* Header for Own Profile (Settings) */}
-        {isOwnProfile && (
-          <div className="flex items-center justify-between mb-4 -mt-14 relative z-20">
-            <div className="flex-1" />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                if (onSettings) {
-                  onSettings();
-                }
-              }}
-              data-testid="button-settings"
-              className="hover-elevate z-20"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
+      {/* Banner & Avatar Container */}
+      <div className="relative" style={{ paddingBottom: '40px' }}>
+        {/* Elegant Banner - Extends to Top */}
+        <div 
+          className="relative overflow-hidden -mt-0 cursor-pointer group"
+          style={{ height: '150px' }}
+          onClick={() => setShowHeaderViewer(true)}
+          data-testid="div-profile-banner"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
+            {userProfile?.banner ? (
+              <img
+                src={userProfile.banner}
+                alt="Profile banner"
+                className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+              />
+            ) : (
+              <img
+                src={bannerImage}
+                alt="Profile banner"
+                className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+              />
+            )}
           </div>
-        )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        </div>
 
         {/* Avatar - Overlaps Banner */}
-        <div style={{ position: 'absolute', bottom: -40, left: 15 }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 15, zIndex: 20 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
@@ -498,7 +478,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png"
+            accept="image/jpeg,base64,image/jpg,image/png"
             hidden
             onChange={async (e) => {
               const file = e.target.files?.[0];
