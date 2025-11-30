@@ -1,7 +1,7 @@
 import { db } from './db';
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows } from '@shared/schema';
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows, admins, adminPermissions } from '@shared/schema';
 import { eq, and, inArray, like, desc } from 'drizzle-orm';
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow } from '@shared/schema';
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow, type Admin, type InsertAdmin, type AdminPermission } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
 export interface IStorage {
@@ -57,6 +57,13 @@ export interface IStorage {
   unfollowHashtag(userId: string, hashtagId: string): Promise<void>;
   isFollowingHashtag(userId: string, hashtagId: string): Promise<boolean>;
   updateHashtagUsage(tag: string): Promise<void>;
+
+  // Admin
+  createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin>;
+  getAdmin(userId: string): Promise<Admin | undefined>;
+  getAdminPermissions(adminId: string): Promise<string[]>;
+  removeAdmin(adminId: string): Promise<void>;
+  verifyAdminPermission(adminId: string, permission: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -504,5 +511,41 @@ export class DbStorage implements IStorage {
   async restoreUser(userId: string): Promise<User | undefined> {
     const [user] = await db.update(users).set({ status: "active", suspensionReason: "", bannedReason: "", disabledReason: "" }).where(eq(users.id, userId)).returning();
     return user;
+  }
+
+  // ============ ADMIN ============
+  async createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin> {
+    const [newAdmin] = await db.insert(admins).values(admin).returning();
+    
+    // Insert permissions
+    for (const permission of permissions) {
+      await db.insert(adminPermissions).values({
+        adminId: newAdmin.id,
+        permission,
+      });
+    }
+    
+    return newAdmin;
+  }
+
+  async getAdmin(userId: string): Promise<Admin | undefined> {
+    return await db.query.admins.findFirst({ where: eq(admins.userId, userId) });
+  }
+
+  async getAdminPermissions(adminId: string): Promise<string[]> {
+    const perms = await db.query.adminPermissions.findMany({ where: eq(adminPermissions.adminId, adminId) });
+    return perms.map(p => p.permission);
+  }
+
+  async removeAdmin(adminId: string): Promise<void> {
+    await db.delete(admins).where(eq(admins.id, adminId));
+    await db.delete(adminPermissions).where(eq(adminPermissions.adminId, adminId));
+  }
+
+  async verifyAdminPermission(adminId: string, permission: string): Promise<boolean> {
+    const perm = await db.query.adminPermissions.findFirst({
+      where: and(eq(adminPermissions.adminId, adminId), eq(adminPermissions.permission, permission))
+    });
+    return !!perm;
   }
 }
