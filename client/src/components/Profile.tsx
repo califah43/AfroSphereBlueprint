@@ -526,19 +526,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       />
 
       {/* Padding wrapper for content */}
-      <div className="px-4">
-        {/* Kente Accent Strip - Premium Design Element */}
-        <div className="flex gap-0 my-4" style={{ height: '4px' }}>
-          <div className="flex-1 bg-gradient-to-r from-primary via-orange-400 to-orange-500"></div>
-          <div className="flex-1 bg-gradient-to-r from-red-600 via-pink-500 to-red-500"></div>
-          <div className="flex-1 bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-600"></div>
-        </div>
-
-        {/* Name & Username - Left Aligned - Premium Spacing */}
-        <div className="mb-6 pt-2">
+      <div className="px-4 py-4">
+        {/* Name & Username - Clean & Simple */}
+        <div className="mb-4">
           {/* Display Name with Badges */}
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="font-black tracking-tight" style={{ fontSize: FontSizes.h2, letterSpacing: '-0.5px' }} data-testid="text-profile-displayname">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="font-black tracking-tight text-lg" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (
@@ -603,24 +596,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         )}
 
-        {/* Stats - Premium Compact Design (Followers Only) */}
+        {/* Stats - Clean & Simple */}
         {userProfile && (
-        <div className="grid grid-cols-2 gap-3 mb-6 p-4 bg-gradient-to-br from-primary/20 via-card to-orange-500/10 rounded-lg border border-primary/40 backdrop-blur-sm shadow-lg">
+        <div className="grid grid-cols-3 gap-0 mb-6 p-3 bg-card rounded-lg border border-border">
+          <button
+            onClick={() => onPostClick?.('')}
+            className="text-center py-2"
+            data-testid="button-view-posts"
+          >
+            <p className="text-lg font-black text-primary" data-testid="text-posts-count">{userProfile.posts}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Posts</p>
+          </button>
           <button
             onClick={onFollowersClick}
-            className="text-center py-3 hover-elevate transition-all rounded-lg group"
+            className="text-center py-2 border-l border-r border-border"
             data-testid="button-view-followers"
           >
-            <p className="text-2xl font-black bg-gradient-to-r from-primary via-orange-400 to-red-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:via-red-500 group-hover:to-primary" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-2">Followers</p>
+            <p className="text-lg font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-3 hover-elevate transition-all rounded-lg group"
+            className="text-center py-2"
             data-testid="button-view-following"
           >
-            <p className="text-2xl font-black bg-gradient-to-r from-primary via-orange-400 to-red-500 bg-clip-text text-transparent group-hover:from-orange-400 group-hover:via-red-500 group-hover:to-primary" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mt-2">Following</p>
+            <p className="text-lg font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Following</p>
           </button>
         </div>
         )}
