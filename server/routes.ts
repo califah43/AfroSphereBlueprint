@@ -279,18 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:id", async (req, res) => {
-    const user = await storage.getUser(req.params.id);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
-  });
-
-  app.get("/api/users/username/:username", async (req, res) => {
-    const user = await storage.getUserByUsername(req.params.username);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
-  });
-
+  // Specific routes BEFORE generic :id route (important for routing order)
   app.get("/api/users/recommended", async (req, res) => {
     try {
       const limit = Math.min(parseInt(req.query.limit as string) || 8, 50);
@@ -330,6 +319,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/users/username/:username", async (req, res) => {
+    const user = await storage.getUserByUsername(req.params.username);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  });
+
+  // Generic routes AFTER specific routes
   app.get("/api/users/:userId/weekly-stats", async (req, res) => {
     try {
       const { userId } = req.params;
@@ -360,6 +356,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Weekly stats error:", error);
       res.status(400).json({ error: "Failed to fetch weekly stats" });
     }
+  });
+
+  app.get("/api/users/:id", async (req, res) => {
+    const user = await storage.getUser(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
   });
 
   app.patch("/api/users/:id", async (req, res) => {
