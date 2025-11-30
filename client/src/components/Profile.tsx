@@ -652,45 +652,45 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Stats - Spacious & Clean */}
         {userProfile && (
-        <div className="grid grid-cols-2 gap-2 mb-6 p-3 bg-card rounded-lg border border-border">
+        <div className="grid grid-cols-2 gap-1 mb-4 p-2 bg-card rounded-lg border border-border">
           <button
             onClick={onFollowersClick}
-            className="text-center py-2"
+            className="text-center py-1"
             data-testid="button-view-followers"
           >
-            <p className="text-lg font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Followers</p>
+            <p className="text-sm font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-2"
+            className="text-center py-1"
             data-testid="button-view-following"
           >
-            <p className="text-lg font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-1">Following</p>
+            <p className="text-sm font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Following</p>
           </button>
         </div>
         )}
 
         {/* Weekly Activity Summary - This Week */}
         {isOwnProfile && weeklyStats && (
-          <div className="mb-6 p-3 bg-gradient-to-br from-primary/8 to-primary/5 rounded-lg border border-primary/20">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-primary" />
+          <div className="mb-4 p-2 bg-gradient-to-br from-primary/8 to-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-1 mb-2">
+              <Calendar className="h-3 w-3 text-primary" />
               <h3 className="font-bold text-xs text-foreground">This Week</h3>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="text-center py-2 bg-card/50 rounded-md">
-                <p className="text-base font-bold text-primary" data-testid="text-posts-this-week">{weeklyStats.postsThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Posts</p>
+            <div className="grid grid-cols-3 gap-1">
+              <div className="text-center py-1 bg-card/50 rounded-md">
+                <p className="text-xs font-bold text-primary" data-testid="text-posts-this-week">{weeklyStats.postsThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-0">Posts</p>
               </div>
-              <div className="text-center py-2 bg-card/50 rounded-md">
-                <p className="text-base font-bold text-orange-500" data-testid="text-likes-this-week">{weeklyStats.likesThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Likes</p>
+              <div className="text-center py-1 bg-card/50 rounded-md">
+                <p className="text-xs font-bold text-orange-500" data-testid="text-likes-this-week">{weeklyStats.likesThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-0">Likes</p>
               </div>
-              <div className="text-center py-2 bg-card/50 rounded-md">
-                <p className="text-base font-bold text-red-600" data-testid="text-engagement-this-week">{weeklyStats.totalEngagementThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Engagement</p>
+              <div className="text-center py-1 bg-card/50 rounded-md">
+                <p className="text-xs font-bold text-red-600" data-testid="text-engagement-this-week">{weeklyStats.totalEngagementThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-0">Engagement</p>
               </div>
             </div>
           </div>
