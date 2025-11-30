@@ -519,8 +519,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             alt="Profile picture"
             size="xl"
             onClick={() => setShowImageViewer(true)}
-            editable={isOwnProfile}
-            onEditClick={() => fileInputRef.current?.click()}
+            editable={false}
             className="shadow-sm"
             style={{ border: '4px solid #000' }}
           />
