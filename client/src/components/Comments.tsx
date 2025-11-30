@@ -487,11 +487,11 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
             <div key={comment.id} className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300" data-testid={`comment-${comment.id}`}>
               {/* Main Comment */}
               <div className="flex gap-3 group">
-                <Avatar className="w-9 h-9 border border-border flex-shrink-0 mt-0.5">
+                <Avatar className="w-9 h-9 border border-border flex-shrink-0 mt-0.5 select-none">
                   {comment.avatar ? (
-                    <AvatarImage src={comment.avatar} alt={comment.author || "User"} />
+                    <AvatarImage src={comment.avatar} alt={comment.author || "User"} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   ) : null}
-                  <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-400/30 text-primary text-xs font-bold">
+                  <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-400/30 text-primary text-xs font-bold select-none">
                     {(comment.author || "U")[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -506,11 +506,14 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                       {comment.badges && comment.badges.length > 0 ? (
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {comment.badges.map((badge: any) => (
-                            <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0" title={badge.name}>
+                            <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
                               <img 
                                 src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
                                 alt={badge.name}
-                                className="w-full h-full"
+                                className="w-full h-full select-none user-select-none"
+                                draggable={false}
+                                onContextMenu={(e) => e.preventDefault()}
+                                data-testid={`img-badge-${badge.id}`}
                               />
                             </div>
                           ))}
@@ -556,9 +559,9 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
               {replyingTo === comment.id && (
                 <form onSubmit={(e) => handleAddReply(comment.id, e)} className="ml-12 space-y-2 animate-in slide-in-from-top-2 duration-200">
                   <div className="flex gap-2 items-end">
-                    <Avatar className="w-7 h-7 border border-border/50 flex-shrink-0">
-                      {currentUser?.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.username} />}
-                      <AvatarFallback className="bg-primary/10 text-primary/70 text-xs font-bold">
+                    <Avatar className="w-7 h-7 border border-border/50 flex-shrink-0 select-none">
+                      {currentUser?.avatar && <AvatarImage src={currentUser.avatar} alt={currentUser.username} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />}
+                      <AvatarFallback className="bg-primary/10 text-primary/70 text-xs font-bold select-none">
                         {(currentUser?.username || "U")[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -603,11 +606,11 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                     <div className="space-y-2">
                       {comment.replies.map((reply) => (
                         <div key={reply.id} className="flex gap-2 animate-in fade-in slide-in-from-bottom-1 duration-200" data-testid={`reply-${reply.id}`}>
-                          <Avatar className="w-8 h-8 border border-border/50 flex-shrink-0 mt-0.5">
+                          <Avatar className="w-8 h-8 border border-border/50 flex-shrink-0 mt-0.5 select-none">
                             {reply.avatar ? (
-                              <AvatarImage src={reply.avatar} alt={reply.author || "User"} />
+                              <AvatarImage src={reply.avatar} alt={reply.author || "User"} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                             ) : null}
-                            <AvatarFallback className="bg-primary/10 text-primary/70 text-xs font-bold">
+                            <AvatarFallback className="bg-primary/10 text-primary/70 text-xs font-bold select-none">
                               {(reply.author || "U")[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -623,11 +626,14 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                   {reply.badges && reply.badges.length > 0 ? (
                                     <div className="flex items-center gap-1">
                                       {reply.badges.map((badge: any) => (
-                                        <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
+                                        <div key={badge.id} className="w-4 h-4 inline-block select-none" title={badge.name}>
                                           <img 
                                             src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
                                             alt={badge.name}
-                                            className="w-full h-full"
+                                            className="w-full h-full select-none user-select-none"
+                                            draggable={false}
+                                            onContextMenu={(e) => e.preventDefault()}
+                                            data-testid={`img-badge-${badge.id}`}
                                           />
                                         </div>
                                       ))}

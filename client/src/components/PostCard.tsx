@@ -187,7 +187,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-12 h-12 select-none pointer-events-auto">
+          <Avatar className="w-12 h-12 select-none pointer-events-auto ring-1 ring-border/20">
             <AvatarImage src={authorAvatar} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} data-testid={`img-avatar-${post.id}`} />
             <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold select-none">{authorUsername[0]?.toUpperCase() || "A"}</AvatarFallback>
           </Avatar>
