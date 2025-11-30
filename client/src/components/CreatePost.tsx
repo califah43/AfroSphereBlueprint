@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { X, Upload, ImageIcon, Sparkles, Sun, Contrast } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { X, Upload, ImageIcon, Sparkles, Sun, Contrast, Camera, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { GENRE_LIST } from "@shared/genres";
@@ -21,25 +22,40 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState("");
   const [hashtags, setHashtags] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [brightness, setBrightness] = useState([100]);
   const [contrast, setContrast] = useState([100]);
   const [saturation, setSaturation] = useState([100]);
   const [showFilters, setShowFilters] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
   const { t } = useLanguage();
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
+      if (mediaPreviews.length + files.length > 10) {
+        toast({
+          title: "Too many files",
+          description: "Maximum 10 images/videos allowed",
+          variant: "destructive",
+        });
+        return;
+      }
       const newPreviews: string[] = [];
+      let loaded = 0;
       Array.from(files).forEach((file) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           newPreviews.push(reader.result as string);
-          if (newPreviews.length === files.length) {
+          loaded++;
+          setUploadProgress((loaded / files.length) * 100);
+          if (loaded === files.length) {
             setMediaPreviews([...mediaPreviews, ...newPreviews]);
+            setUploadProgress(0);
           }
         };
         reader.readAsDataURL(file);
@@ -49,6 +65,25 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
 
   const removeMedia = (index: number) => {
     setMediaPreviews(mediaPreviews.filter((_, i) => i !== index));
+  };
+
+  const addTag = (tag: string) => {
+    const cleaned = tag.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (cleaned && !tags.includes(cleaned) && tags.length < 10) {
+      setTags([...tags, cleaned]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (index: number) => {
+    setTags(tags.filter((_, i) => i !== index));
+  };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" || e.key === " ") && tagInput.trim()) {
+      e.preventDefault();
+      addTag(tagInput);
+    }
   };
 
   const handlePost = async () => {
@@ -76,11 +111,17 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
         throw new Error("User not authenticated. Please sign in again.");
       }
 
+      // Combine hashtags and tags
+      const allHashtags = [
+        ...hashtags.split(/\s+/).filter(h => h.startsWith("#") || h.length > 0),
+        ...tags.map(t => t.startsWith("#") ? t : `#${t}`)
+      ].filter(Boolean).join(" ");
+
       const postData = {
         userId,
         caption,
         category: category || "lifestyle",
-        hashtags: hashtags || "",
+        hashtags: allHashtags || "",
         image: mediaPreviews[0], // Primary image (first one)
         images: mediaPreviews, // All images for carousel
       };
@@ -272,7 +313,7 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-4 py-8">
+                <div className="flex flex-col items-center justify-center gap-4 py-8 border-2 border-dashed border-primary/30 rounded-lg">
                   <label
                     htmlFor="image-upload"
                     className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-orange-500 cursor-pointer hover-elevate transition-all shadow-lg hover:shadow-xl hover:scale-110"
@@ -282,8 +323,18 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   </label>
                   <div className="text-center">
                     <p className="text-sm font-semibold text-foreground">{t("create.addPhoto")}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{t("create.maxFiles")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Up to 10 images or videos</p>
                   </div>
+                </div>
+              )}
+              
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-primary to-orange-500 h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                    data-testid="progress-upload"
+                  />
                 </div>
               )}
               <Input
@@ -311,35 +362,77 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
               <p className="text-xs text-muted-foreground">{caption.length}/500</p>
             </div>
 
-            {/* Category & Hashtags */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="category" className="text-xs font-semibold">{t("create.category")}</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger data-testid="select-category" className="text-sm">
-                    <SelectValue placeholder={t("create.selectCategory")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fashion">Fashion</SelectItem>
-                    <SelectItem value="music">Music</SelectItem>
-                    <SelectItem value="art">Art</SelectItem>
-                    <SelectItem value="culture">Culture</SelectItem>
-                    <SelectItem value="lifestyle">Lifestyle</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Category */}
+            <div className="space-y-1">
+              <Label htmlFor="category" className="text-xs font-semibold">{t("create.category")}</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger data-testid="select-category" className="text-sm">
+                  <SelectValue placeholder={t("create.selectCategory")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fashion">Fashion</SelectItem>
+                  <SelectItem value="music">Music</SelectItem>
+                  <SelectItem value="art">Art</SelectItem>
+                  <SelectItem value="culture">Culture</SelectItem>
+                  <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="hashtags" className="text-xs font-semibold">{t("create.hashtags")}</Label>
+            {/* Tags Management */}
+            <div className="space-y-2">
+              <Label htmlFor="tags" className="text-xs font-semibold">Tags (Up to 10)</Label>
+              <div className="flex gap-2">
                 <Input
-                  id="hashtags"
-                  placeholder={t("create.hashtagPlaceholder")}
-                  value={hashtags}
-                  onChange={(e) => setHashtags(e.target.value)}
-                  className="text-sm"
-                  data-testid="input-hashtags"
+                  id="tags"
+                  placeholder="Add tag and press Enter or Space..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagInputKeyDown}
+                  className="text-sm flex-1"
+                  data-testid="input-tags"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addTag(tagInput)}
+                  disabled={!tagInput.trim() || tags.length >= 10}
+                  data-testid="button-add-tag"
+                  className="px-3"
+                >
+                  <span className="text-lg">+</span>
+                </Button>
               </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag, idx) => (
+                    <Badge
+                      key={idx}
+                      variant="secondary"
+                      className="bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer text-xs"
+                      onClick={() => removeTag(idx)}
+                      data-testid={`badge-tag-${tag}`}
+                    >
+                      #{tag}
+                      <X className="h-2.5 w-2.5 ml-1" />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Hashtags */}
+            <div className="space-y-1">
+              <Label htmlFor="hashtags" className="text-xs font-semibold">Additional Hashtags</Label>
+              <Input
+                id="hashtags"
+                placeholder="e.g. #photography #art #creative"
+                value={hashtags}
+                onChange={(e) => setHashtags(e.target.value)}
+                className="text-sm"
+                data-testid="input-hashtags"
+              />
             </div>
 
             {/* Tip */}
