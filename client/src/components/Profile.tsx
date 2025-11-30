@@ -209,7 +209,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     };
 
     fetchUserData();
-  }, [username, isOwnProfile, currentUserId, userId]);
+  }, [username, isOwnProfile, userId]);
 
   // Fetch weekly stats
   useEffect(() => {
