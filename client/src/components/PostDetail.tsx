@@ -198,6 +198,41 @@ export default function PostDetail({
     }
   };
 
+  const handleBookmark = async () => {
+    const userId = getUserId();
+    
+    if (!userId) {
+      toast({ title: "Please sign in to save posts", variant: "destructive" });
+      return;
+    }
+
+    // Optimistic update
+    const previousBookmarked = isBookmarked;
+    setIsBookmarked(!isBookmarked);
+
+    try {
+      const res = await fetch(`/api/posts/${postId}/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsBookmarked(data.saved);
+        toast({ title: data.saved ? "Post saved" : "Post removed from saves" });
+      } else {
+        // Rollback on error
+        setIsBookmarked(previousBookmarked);
+        toast({ title: "Error", description: "Failed to save post", variant: "destructive" });
+      }
+    } catch (error) {
+      // Rollback on error
+      setIsBookmarked(previousBookmarked);
+      toast({ title: "Error", description: "Failed to save post", variant: "destructive" });
+    }
+  };
+
   // Get current user ID
   const getUserId = () => {
     let userId = localStorage.getItem("currentUserId");
@@ -328,7 +363,7 @@ export default function PostDetail({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsBookmarked(!isBookmarked)}
+                onClick={handleBookmark}
                 data-testid="button-detail-bookmark"
               >
                 <Bookmark className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`} />
