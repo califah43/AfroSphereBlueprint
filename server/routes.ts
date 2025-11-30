@@ -153,7 +153,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/check-username/:username", async (req, res) => {
     try {
-      const existingUser = await storage.getUserByUsername(req.params.username);
+      const username = req.params.username.toLowerCase();
+      // Case-insensitive username check
+      const allUsers = await db.query.users.findMany();
+      const existingUser = allUsers.find(u => u.username.toLowerCase() === username);
       if (existingUser) {
         return res.status(409).json({ available: false, error: "Username already taken" });
       }
