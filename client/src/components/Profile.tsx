@@ -617,42 +617,42 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         )}
 
-        {/* Stats - Elegant Compact Cards */}
+        {/* Stats - Elegant Compact Cards with Warm Accents */}
         {userProfile && (
-        <div className="grid grid-cols-3 gap-2 mb-4 p-2 bg-card rounded-md border border-border/50">
+        <div className="grid grid-cols-3 gap-2 mb-4 p-2 bg-gradient-to-r from-card via-primary/5 to-card rounded-md border border-primary/20">
           <button
             onClick={() => onPostClick?.('')}
-            className="text-center py-1.5 hover-elevate transition-all rounded"
+            className="text-center py-2 hover-elevate transition-all rounded group"
             data-testid="button-view-posts"
           >
-            <p className="text-lg font-black text-foreground" data-testid="text-posts-count">{userProfile.posts}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Posts</p>
+            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-posts-count">{userProfile.posts}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Posts</p>
           </button>
           <button
             onClick={onFollowersClick}
-            className="text-center py-1.5 hover-elevate transition-all rounded border-l border-border/50"
+            className="text-center py-2 hover-elevate transition-all rounded border-l border-primary/20 group"
             data-testid="button-view-followers"
           >
-            <p className="text-lg font-black text-foreground" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Followers</p>
+            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-1.5 hover-elevate transition-all rounded border-l border-border/50"
+            className="text-center py-2 hover-elevate transition-all rounded border-l border-primary/20 group"
             data-testid="button-view-following"
           >
-            <p className="text-lg font-black text-foreground" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-0.5">Following</p>
+            <p className="text-lg font-black bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent group-hover:from-primary group-hover:to-orange-500" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mt-1">Following</p>
           </button>
         </div>
         )}
 
-        {/* Action Buttons - Refined */}
+        {/* Action Buttons - Warm African Design */}
         {userProfile && (
         <div className="flex gap-2 mb-6">
           {isOwnProfile ? (
             <Button
-              className="flex-1 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-lg text-xs h-9 shadow-sm"
+              className="flex-1 bg-gradient-to-r from-primary via-orange-500 to-red-600 hover:from-primary/90 hover:via-orange-500/90 hover:to-red-600/90 text-white font-bold rounded-lg text-xs h-9 shadow-md gold-glow transition-all"
               onClick={onEditProfile}
               data-testid="button-edit-profile"
             >
@@ -661,7 +661,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           ) : (
             <>
               <Button 
-                className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm ${isFollowRequestPending ? 'bg-card border border-border text-foreground hover:bg-card/80' : isFollowing ? 'bg-card border border-border text-foreground hover:bg-card/80' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90'}`}
+                className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm transition-all ${isFollowRequestPending ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : isFollowing ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 gold-glow'}`}
                 onClick={toggleFollow}
                 disabled={isLoading || isFollowRequestPending}
                 data-testid="button-follow"
@@ -671,7 +671,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover-elevate"
+                className="h-9 w-9 hover-elevate transition-all"
                 data-testid="button-report-user"
                 title="Report user"
               >
@@ -680,7 +680,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover-elevate"
+                className="h-9 w-9 hover-elevate transition-all"
                 data-testid="button-block-user"
                 title="Block user"
               >

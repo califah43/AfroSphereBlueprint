@@ -140,18 +140,18 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end">
       <div className="w-full max-w-[430px] mx-auto bg-background rounded-t-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom">
-        {/* Header */}
-        <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
-          <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-create" className="hover-elevate">
+        {/* Header with Warm African Design */}
+        <div className="sticky top-0 bg-gradient-to-r from-background via-primary/5 to-background border-b border-primary/20 px-4 py-3 flex items-center justify-between">
+          <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-create" className="hover-elevate transition-all">
             <X className="h-5 w-5" />
           </Button>
-          <h2 className="text-base font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent" data-testid="text-create-title">
+          <h2 className="text-base font-black bg-gradient-to-r from-primary via-orange-500 to-red-600 bg-clip-text text-transparent" data-testid="text-create-title">
             Create Post
           </h2>
           <Button
             onClick={handlePost}
             disabled={!caption || mediaPreviews.length === 0 || isSubmitting}
-            className="bg-gradient-to-r from-primary to-orange-500 text-white font-semibold text-sm"
+            className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold text-sm gold-glow transition-all shadow-md"
             size="sm"
             data-testid="button-submit-post"
           >
