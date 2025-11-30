@@ -18,8 +18,8 @@ export default function BannerCropper({ imageUrl, onApply, onCancel }: BannerCro
   const imageRef = useRef<HTMLImageElement>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
-  const BANNER_HEIGHT = 96;
-  const BANNER_WIDTH = 430;
+  const BANNER_HEIGHT = 150;
+  const BANNER_WIDTH = 450;
 
   useEffect(() => {
     const img = new Image();
