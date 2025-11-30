@@ -472,7 +472,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     <div className="pb-20" data-testid="container-profile">
       {/* Sticky Header - Only show for other profiles */}
       {!isOwnProfile && (
-        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center justify-between z-20">
+        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-between z-20">
           {onClose && (
             <Button
               variant="ghost"
@@ -488,10 +488,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner - Extends to Top - 16:9 Aspect Ratio */}
+      {/* Banner - Extends to Top - 3:2 Aspect Ratio */}
       <div 
         className="relative -mt-0 cursor-pointer group w-full"
-        style={{ aspectRatio: '16/9', overflow: 'visible' }}
+        style={{ aspectRatio: '3/2', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
@@ -513,7 +513,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
         {/* Avatar - Overlaps Banner from Bottom */}
-        <div style={{ position: 'absolute', bottom: -40, left: 15, zIndex: 20 }}>
+        <div style={{ position: 'absolute', bottom: -30, left: 15, zIndex: 20 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
@@ -582,7 +582,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       {/* Padding wrapper for content */}
       <div className="px-4 py-4">
         {/* Name & Username - Clean & Simple */}
-        <div className="mb-4 mt-12">
+        <div className="mb-4 mt-6">
           {/* Display Name with Badges */}
           <div className="flex items-center gap-2 mb-1">
             <h1 className="font-black tracking-tight text-lg" data-testid="text-profile-displayname">
