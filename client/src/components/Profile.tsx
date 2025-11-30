@@ -47,6 +47,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [postsLoading, setPostsLoading] = useState(false);
   const [isAccountPrivate, setIsAccountPrivate] = useState(false);
   const [userBadges, setUserBadges] = useState<any[]>([]);
+  const [weeklyStats, setWeeklyStats] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadProfilePicture, isUploading } = useProfilePictureUpload();
   const { toast } = useToast();
