@@ -434,10 +434,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner - Extends to Top */}
+      {/* Banner - Extends to Top - 16:9 Aspect Ratio */}
       <div 
-        className="relative -mt-0 cursor-pointer group"
-        style={{ height: '150px', overflow: 'visible' }}
+        className="relative -mt-0 cursor-pointer group w-full"
+        style={{ aspectRatio: '16/9', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
