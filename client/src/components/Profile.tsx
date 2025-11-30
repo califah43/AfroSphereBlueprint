@@ -513,7 +513,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
         {/* Avatar - Overlaps Banner from Bottom */}
-        <div style={{ position: 'absolute', bottom: -15, left: 15, zIndex: 20 }}>
+        <div 
+          style={{ position: 'absolute', bottom: -15, left: 15, zIndex: 20 }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
