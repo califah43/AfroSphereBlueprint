@@ -1,0 +1,200 @@
+import 'package:flutter/material.dart';
+
+class PremiumProfileScreen extends StatefulWidget {
+  @override
+  State<PremiumProfileScreen> createState() => _PremiumProfileScreenState();
+}
+
+class _PremiumProfileScreenState extends State<PremiumProfileScreen> {
+  final ScrollController _scrollController = ScrollController();
+  double _offset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      setState(() {
+        _offset = _scrollController.offset;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double headerHeight = 260;
+    final double avatarSize = 120;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // HEADER IMAGE (CINEMATIC)
+          Positioned.fill(
+            top: -_offset * 0.3,
+            child: Image.asset(
+              "assets/header.jpg",
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.25),
+              colorBlendMode: BlendMode.darken,
+            ),
+          ),
+
+          // CONTENT
+          CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverAppBar(
+                expandedHeight: headerHeight,
+                pinned: true,
+                backgroundColor: Colors.black.withOpacity(0.5),
+                elevation: 0,
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.parallax,
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.85),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+
+                    // AVATAR (FLOATING)
+                    Transform.translate(
+                      offset: Offset(0, -avatarSize / 2),
+                      child: Container(
+                        width: avatarSize,
+                        height: avatarSize,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.9),
+                            width: 4,
+                          ),
+                          image: DecorationImage(
+                            image: AssetImage("assets/avatar.jpg"),
+                            fit: BoxFit.cover,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black87,
+                              blurRadius: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 6),
+
+                    // NAME
+                    Text(
+                      "Califah",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+
+                    // BIO
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 22),
+                      child: Text(
+                        "Dreaming in colors. Designing in silence. Building for the world.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 20),
+
+                    // GLASS BUTTON ROW
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _glassButton("Follow"),
+                        SizedBox(width: 10),
+                        _glassButton("Message"),
+                        SizedBox(width: 10),
+                        _glassIconButton(Icons.more_horiz),
+                      ],
+                    ),
+
+                    SizedBox(height: 30),
+
+                    // TABS
+                    _tabs(),
+
+                    SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _glassButton(String label) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white24),
+        color: Colors.white.withOpacity(0.08),
+        backgroundBlendMode: BlendMode.overlay,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: Colors.white, fontSize: 15),
+      ),
+    );
+  }
+
+  Widget _glassIconButton(IconData icon) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white24),
+        color: Colors.white.withOpacity(0.08),
+      ),
+      child: Icon(icon, color: Colors.white),
+    );
+  }
+
+  Widget _tabs() {
+    return DefaultTabController(
+      length: 3,
+      child: TabBar(
+        indicatorColor: Colors.white,
+        indicatorWeight: 3,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white54,
+        tabs: [
+          Tab(text: "Posts"),
+          Tab(text: "Media"),
+          Tab(text: "Tags"),
+        ],
+      ),
+    );
+  }
+}

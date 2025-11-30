@@ -525,20 +525,20 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         onClose={() => setShowImageViewer(false)}
       />
 
-      {/* Padding wrapper for content */}
-      <div className="px-4">
+      {/* Premium Profile Content */}
+      <div className="px-4 pt-0">
         {/* Kente Accent Strip - Premium Design Element */}
-        <div className="flex gap-0 my-3" style={{ height: '3px' }}>
+        <div className="flex gap-0 -mt-0 mb-4" style={{ height: '4px' }}>
           <div className="flex-1 bg-gradient-to-r from-primary to-orange-400"></div>
           <div className="flex-1 bg-gradient-to-r from-red-500 to-pink-500"></div>
           <div className="flex-1 bg-gradient-to-r from-orange-600 to-amber-600"></div>
         </div>
 
-        {/* Name & Username - Left Aligned - Premium Spacing */}
-        <div className="mb-6 pt-3">
+        {/* Name & Username - Centered Premium Typography */}
+        <div className="text-center mb-6 mt-3">
           {/* Display Name with Badges */}
-          <div className="flex items-center gap-1 mb-1">
-            <h1 className="font-black tracking-tight" style={{ fontSize: FontSizes.h2 }} data-testid="text-profile-displayname">
+          <div className="flex items-center justify-center gap-1 mb-2">
+            <h1 className="font-black tracking-tight text-2xl" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (
@@ -560,18 +560,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
           
           {/* Unique Username Handle */}
-          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+          <p className="text-sm text-muted-foreground font-medium mb-3" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
 
-          {/* Bio - Compact elegance */}
-          <p className="text-xs text-foreground leading-tight mb-2 whitespace-pre-wrap" data-testid="text-profile-bio">
+          {/* Bio - Premium elegance */}
+          <p className="text-sm text-foreground leading-relaxed mb-3 whitespace-pre-wrap" data-testid="text-profile-bio">
             {userProfile?.bio || "Creative on AfroSphere"}
           </p>
-
-          {/* Join Date */}
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 mb-2">
-            <Calendar size={12} />
-            <span>Joined {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
-          </div>
 
           {/* Creator Badge */}
           <div className="flex items-center">
@@ -579,25 +573,25 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         </div>
 
-        {/* Professional Info - Compact & Refined */}
+        {/* Professional Info - Centered & Refined */}
         {userProfile && (userProfile.profession || userProfile.location || userProfile.website) && (
-          <div className="flex flex-col gap-1 mb-4 text-xs">
+          <div className="flex flex-col gap-2 mb-6 text-xs justify-center items-center">
             {userProfile.profession && (
               <div className="flex items-center gap-2 text-foreground">
-                <Briefcase className="h-3 w-3 text-primary/60 flex-shrink-0" />
-                <span className="font-medium truncate">{userProfile.profession}</span>
+                <Briefcase className="h-4 w-4 text-primary/60 flex-shrink-0" />
+                <span className="font-medium">{userProfile.profession}</span>
               </div>
             )}
             {userProfile.location && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-3 w-3 text-primary/60 flex-shrink-0" />
-                <span className="truncate">{userProfile.location}</span>
+                <MapPin className="h-4 w-4 text-primary/60 flex-shrink-0" />
+                <span>{userProfile.location}</span>
               </div>
             )}
             {userProfile.website && (
-              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors truncate">
-                <Link className="h-3 w-3 flex-shrink-0" />
-                <span className="truncate text-xs">{userProfile.website}</span>
+              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+                <Link className="h-4 w-4 flex-shrink-0" />
+                <span className="text-xs">{userProfile.website}</span>
               </a>
             )}
           </div>
@@ -633,12 +627,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
         )}
 
-        {/* Action Buttons - Warm African Design */}
+        {/* Action Buttons - Premium Glass Morphism Style */}
         {userProfile && (
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-3 mb-6 justify-center flex-wrap">
           {isOwnProfile ? (
             <Button
-              className="flex-1 bg-gradient-to-r from-primary via-orange-500 to-red-600 hover:from-primary/90 hover:via-orange-500/90 hover:to-red-600/90 text-white font-bold rounded-lg text-xs h-9 shadow-md gold-glow transition-all"
+              className="bg-gradient-to-r from-primary via-orange-500 to-red-600 hover:from-primary/90 hover:via-orange-500/90 hover:to-red-600/90 text-white font-bold rounded-full px-8 h-10 shadow-lg gold-glow transition-all"
               onClick={onEditProfile}
               data-testid="button-edit-profile"
             >
@@ -647,7 +641,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           ) : (
             <>
               <Button 
-                className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm transition-all ${isFollowRequestPending ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : isFollowing ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 gold-glow'}`}
+                className={`font-bold rounded-full px-8 h-10 shadow-lg transition-all ${isFollowRequestPending ? 'bg-white/10 border border-white/20 text-white backdrop-blur-md' : isFollowing ? 'bg-white/10 border border-white/20 text-white backdrop-blur-md' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 gold-glow'}`}
                 onClick={toggleFollow}
                 disabled={isLoading || isFollowRequestPending}
                 data-testid="button-follow"
@@ -655,18 +649,16 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                 {isLoading ? "..." : (isFollowRequestPending ? t("profile.followRequestPending") : isFollowing ? t("profile.unfollow") : (isAccountPrivate ? t("profile.sendFollowRequest") : t("profile.follow")))}
               </Button>
               <Button
-                variant="ghost"
+                className="bg-white/10 border border-white/20 text-foreground backdrop-blur-md hover:bg-white/20 rounded-full h-10 w-10 transition-all"
                 size="icon"
-                className="h-9 w-9 hover-elevate transition-all"
                 data-testid="button-report-user"
                 title="Report user"
               >
                 <Flag size={18} />
               </Button>
               <Button
-                variant="ghost"
+                className="bg-white/10 border border-white/20 text-foreground backdrop-blur-md hover:bg-white/20 rounded-full h-10 w-10 transition-all"
                 size="icon"
-                className="h-9 w-9 hover-elevate transition-all"
                 data-testid="button-block-user"
                 title="Block user"
               >
