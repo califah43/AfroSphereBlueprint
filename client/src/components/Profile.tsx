@@ -488,10 +488,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner - Extends to Top - 3:2 Aspect Ratio */}
+      {/* Banner - Extends to Top - 2:1 Aspect Ratio */}
       <div 
         className="relative -mt-0 cursor-pointer group w-full"
-        style={{ aspectRatio: '3/2', overflow: 'visible' }}
+        style={{ aspectRatio: '2/1', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
@@ -513,7 +513,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
         {/* Avatar - Overlaps Banner from Bottom */}
-        <div style={{ position: 'absolute', bottom: -30, left: 15, zIndex: 20 }}>
+        <div style={{ position: 'absolute', bottom: -20, left: 15, zIndex: 20 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
@@ -580,12 +580,12 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       />
 
       {/* Padding wrapper for content */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-3">
         {/* Name & Username - Clean & Simple */}
-        <div className="mb-4 mt-6">
+        <div className="mb-2 mt-4">
           {/* Display Name with Badges */}
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="font-black tracking-tight text-lg" data-testid="text-profile-displayname">
+          <div className="flex items-center gap-1 mb-0.5">
+            <h1 className="font-black tracking-tight text-base" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (
@@ -607,10 +607,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
           
           {/* Unique Username Handle */}
-          <p className="text-xs text-muted-foreground font-medium mb-2" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+          <p className="text-xs text-muted-foreground font-medium mb-1" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
 
           {/* Bio - Compact elegance */}
-          <p className="text-xs text-foreground leading-tight mb-2 whitespace-pre-wrap" data-testid="text-profile-bio">
+          <p className="text-xs text-foreground leading-tight mb-1 whitespace-pre-wrap" data-testid="text-profile-bio">
             {userProfile?.bio || "Creative on AfroSphere"}
           </p>
 
