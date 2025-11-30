@@ -435,7 +435,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       )}
 
       {/* Banner & Avatar Container */}
-      <div className="relative">
+      <div className="relative" style={{ marginBottom: '40px' }}>
         {/* Elegant Banner - Extends to Top */}
         <div 
           className="relative overflow-hidden -mt-0 cursor-pointer group"
@@ -462,7 +462,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
 
         {/* Avatar - Overlaps Banner */}
-        <div style={{ position: 'absolute', top: '110px', left: 15, zIndex: 20 }}>
+        <div style={{ position: 'absolute', bottom: -40, left: 15 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
