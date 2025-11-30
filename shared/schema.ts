@@ -253,3 +253,30 @@ export const hashtagFollows = pgTable("hashtag_follows", {
 });
 
 export type HashtagFollow = typeof hashtagFollows.$inferSelect;
+
+// ============ ADMIN PERMISSIONS ============
+export const adminPermissions = pgTable("admin_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminId: varchar("admin_id").notNull(),
+  permission: text("permission").notNull(), // "ban_user", "suspend_user", etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AdminPermission = typeof adminPermissions.$inferSelect;
+
+// ============ ADMINS ============
+export const admins = pgTable("admins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  role: text("role").notNull(), // "owner", "super_admin", "moderator"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Admin = typeof admins.$inferSelect;
+
+export const insertAdminSchema = createInsertSchema(admins).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;
