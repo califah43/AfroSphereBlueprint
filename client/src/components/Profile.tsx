@@ -462,7 +462,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
 
         {/* Avatar - Overlaps Banner */}
-        <div style={{ position: 'absolute', bottom: -40, left: 15, zIndex: 20 }}>
+        <div style={{ position: 'absolute', top: '110px', left: 15, zIndex: 20 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
