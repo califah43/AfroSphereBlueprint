@@ -1747,6 +1747,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ ADMIN COMMAND ROUTES ============
+  const ADMIN_PERMISSIONS = {
+    BAN_USER: "ban_user",
+    SUSPEND_USER: "suspend_user",
+    DISABLE_USER: "disable_user",
+    VERIFY_USER: "verify_user",
+    REMOVE_POST: "remove_post",
+    VIEW_REPORTS: "view_reports",
+    CREATE_BADGE: "create_badge",
+    ASSIGN_BADGE: "assign_badge",
+    REMOVE_BADGE: "remove_badge",
+    CREATE_ADMIN: "create_admin",
+    REMOVE_ADMIN: "remove_admin",
+  };
+
+  const ADMIN_ROLES = {
+    OWNER: "owner",
+    SUPER_ADMIN: "super_admin",
+    MODERATOR: "moderator",
+  };
+
+  const getPermissionsForRole = (role: string): string[] => {
+    switch (role) {
+      case ADMIN_ROLES.OWNER:
+        return Object.values(ADMIN_PERMISSIONS);
+      case ADMIN_ROLES.SUPER_ADMIN:
+        return [
+          ADMIN_PERMISSIONS.BAN_USER,
+          ADMIN_PERMISSIONS.SUSPEND_USER,
+          ADMIN_PERMISSIONS.DISABLE_USER,
+          ADMIN_PERMISSIONS.REMOVE_POST,
+          ADMIN_PERMISSIONS.VERIFY_USER,
+          ADMIN_PERMISSIONS.ASSIGN_BADGE,
+          ADMIN_PERMISSIONS.VIEW_REPORTS,
+        ];
+      case ADMIN_ROLES.MODERATOR:
+        return [
+          ADMIN_PERMISSIONS.REMOVE_POST,
+          ADMIN_PERMISSIONS.VIEW_REPORTS,
+        ];
+      default:
+        return [];
+    }
+  };
+
+  // Create admin
+  app.post("/api/admin/create", async (req, res) => {
+    try {
+      const { userId, role } = req.body;
+      if (!userId || !role) {
+        return res.status(400).json({ error: "Missing userId or role" });
+      }
+      const permissions = getPermissionsForRole(role);
+      const admin = await storage.createAdmin({ userId, role }, permissions);
+      res.json({ success: true, admin, permissions });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create admin" });
+    }
+  });
+
+  // Verify admin permission
+  app.post("/api/admin/verify-permission", async (req, res) => {
+    try {
+      const { adminId, permission } = req.body;
+      if (!adminId || !permission) {
+        return res.status(400).json({ error: "Missing adminId or permission" });
+      }
+      const hasPermission = await storage.verifyAdminPermission(adminId, permission);
+      res.json({ hasPermission });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to verify permission" });
+    }
+  });
+
+  // Get admin permissions
+  app.get("/api/admin/:adminId/permissions", async (req, res) => {
+    try {
+      const { adminId } = req.params;
+      const permissions = await storage.getAdminPermissions(adminId);
+      res.json({ permissions });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch permissions" });
+    }
+  });
+
+  // Remove admin
+  app.post("/api/admin/remove/:adminId", async (req, res) => {
+    try {
+      const { adminId } = req.params;
+      await storage.removeAdmin(adminId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove admin" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {

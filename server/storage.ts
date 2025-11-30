@@ -530,6 +530,40 @@ export class MemStorage implements IStorage {
   async getAllFCMTokens(): Promise<Map<string, string>> {
     return this.fcmTokens;
   }
+
+  // ============ ADMIN ============
+  private admins: Map<string, Admin> = new Map();
+  private adminPermissions: Map<string, string[]> = new Map(); // adminId -> permissions[]
+
+  async createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin> {
+    const id = randomUUID();
+    const newAdmin: Admin = {
+      ...admin,
+      id,
+      createdAt: new Date(),
+    };
+    this.admins.set(id, newAdmin);
+    this.adminPermissions.set(id, permissions);
+    return newAdmin;
+  }
+
+  async getAdmin(userId: string): Promise<Admin | undefined> {
+    return Array.from(this.admins.values()).find(a => a.userId === userId);
+  }
+
+  async getAdminPermissions(adminId: string): Promise<string[]> {
+    return this.adminPermissions.get(adminId) || [];
+  }
+
+  async removeAdmin(adminId: string): Promise<void> {
+    this.admins.delete(adminId);
+    this.adminPermissions.delete(adminId);
+  }
+
+  async verifyAdminPermission(adminId: string, permission: string): Promise<boolean> {
+    const permissions = this.adminPermissions.get(adminId) || [];
+    return permissions.includes(permission);
+  }
 }
 
 export const storage = new MemStorage();
