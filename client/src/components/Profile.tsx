@@ -38,7 +38,6 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
-  const [showBannerPreview, setShowBannerPreview] = useState(false);
   const [showHeaderCropper, setShowHeaderCropper] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string>("");
@@ -436,8 +435,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
       {/* Elegant Banner - Extends to Top */}
       <div 
-        className="relative h-32 overflow-hidden -mt-0 cursor-pointer group"
-        onClick={() => isOwnProfile && setShowBannerPreview(true)}
+        className="relative h-32 overflow-hidden -mt-0"
         data-testid="div-profile-banner"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-pink-500">
@@ -445,22 +443,17 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <img
               src={userProfile.banner}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+              className="w-full h-full object-cover opacity-85"
             />
           ) : (
             <img
               src={bannerImage}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
+              className="w-full h-full object-cover opacity-85"
             />
           )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        {isOwnProfile && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors opacity-0 group-hover:opacity-100" data-testid="div-banner-overlay">
-            <span className="text-white text-sm font-semibold" data-testid="text-edit-banner">Edit Header</span>
-          </div>
-        )}
       </div>
 
       {/* Profile Content - Compact & Refined for Mobile */}
@@ -841,53 +834,6 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         />
       )}
       
-      {/* Banner Preview Modal */}
-      {showBannerPreview && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowBannerPreview(false)} data-testid="modal-banner-preview">
-          <div className="relative max-w-2xl w-full bg-background rounded-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Close Button */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute top-3 right-3 z-10 hover-elevate"
-              onClick={() => setShowBannerPreview(false)}
-              data-testid="button-close-banner-preview"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-
-            {/* Banner Image */}
-            <img
-              src={userProfile?.banner || bannerImage}
-              alt="Banner preview"
-              className="w-full h-80 object-cover"
-              data-testid="img-banner-preview"
-            />
-
-            {/* Action Button - Edit */}
-            <div className="p-4 border-t border-border/30 flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowBannerPreview(false)}
-                data-testid="button-close-preview"
-              >
-                Close
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowBannerPreview(false);
-                  setShowHeaderCropper(true);
-                }}
-                className="bg-primary hover:bg-primary/90 text-white hover-elevate"
-                data-testid="button-edit-banner"
-              >
-                Edit
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showHeaderCropper && (
         <HeaderCropper
           onClose={() => setShowHeaderCropper(false)}
