@@ -46,6 +46,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollTop, setLastScrollTop] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [currentUserUsername, setCurrentUserUsername] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
@@ -68,6 +69,14 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     if (days === 1) return "1d ago";
     return `${days}d ago`;
   };
+
+  // Get current user's username on mount
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+    if (userData && userData.username) {
+      setCurrentUserUsername(userData.username);
+    }
+  }, []);
 
   // Listen for post refresh events (triggered when comments are added)
   useEffect(() => {
@@ -366,7 +375,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
                 <div key={post.id} className="animate-in fade-in duration-500">
                   <PostCard
                     post={post}
-                    isOwnPost={post.author.username === "adikeafrica"}
+                    isOwnPost={post.author.username === currentUserUsername}
                     onLike={(id) => console.log("Liked:", id)}
                     onComment={(id) => onCommentClick?.(id, post.images && post.images.length > 0 ? post.images : post.imageUrl, post.caption)}
                     onShare={(id) => onOpenShare?.()}
