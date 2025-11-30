@@ -193,6 +193,25 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     fetchUserData();
   }, [username, isOwnProfile]);
 
+  // Fetch weekly stats
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchWeeklyStats = async () => {
+      try {
+        const res = await fetch(`/api/users/${userId}/weekly-stats`);
+        if (res.ok) {
+          const data = await res.json();
+          setWeeklyStats(data);
+        }
+      } catch (error) {
+        console.error("Error fetching weekly stats:", error);
+      }
+    };
+
+    fetchWeeklyStats();
+  }, [userId]);
+
   // Listen for following count updates from FollowersList
   useEffect(() => {
     const handleFollowingCountUpdate = (event: any) => {
@@ -617,6 +636,30 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <p className="text-xs text-muted-foreground uppercase font-medium mt-2">Following</p>
           </button>
         </div>
+        )}
+
+        {/* Weekly Activity Summary - This Week */}
+        {isOwnProfile && weeklyStats && (
+          <div className="mb-6 p-4 bg-gradient-to-br from-primary/8 to-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="h-4 w-4 text-primary" />
+              <h3 className="font-bold text-sm text-foreground">This Week</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center py-3 bg-card/50 rounded-md">
+                <p className="text-lg font-bold text-primary" data-testid="text-posts-this-week">{weeklyStats.postsThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-1">Posts</p>
+              </div>
+              <div className="text-center py-3 bg-card/50 rounded-md">
+                <p className="text-lg font-bold text-orange-500" data-testid="text-likes-this-week">{weeklyStats.likesThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-1">Likes</p>
+              </div>
+              <div className="text-center py-3 bg-card/50 rounded-md">
+                <p className="text-lg font-bold text-red-600" data-testid="text-engagement-this-week">{weeklyStats.totalEngagementThisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-1">Engagement</p>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Action Buttons - Warm African Design */}
