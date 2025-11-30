@@ -574,14 +574,14 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
 
           {/* Creator Badge */}
-          <div className="flex items-center">
+          <div className="flex items-center mb-2">
             <CreatorBadge type="fashion-vanguard" size="sm" />
           </div>
         </div>
 
         {/* Professional Info - Compact & Refined */}
         {userProfile && (userProfile.profession || userProfile.location || userProfile.website) && (
-          <div className="flex flex-col gap-1 mb-4 text-xs">
+          <div className="flex flex-col gap-1 mb-4 text-xs -mt-1">
             {userProfile.profession && (
               <div className="flex items-center gap-2 text-foreground">
                 <Briefcase className="h-3 w-3 text-primary/60 flex-shrink-0" />
