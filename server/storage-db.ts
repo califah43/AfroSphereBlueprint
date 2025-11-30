@@ -57,6 +57,10 @@ export interface IStorage {
   unfollowHashtag(userId: string, hashtagId: string): Promise<void>;
   isFollowingHashtag(userId: string, hashtagId: string): Promise<boolean>;
   updateHashtagUsage(tag: string): Promise<void>;
+  savePost(userId: string, postId: string): Promise<Save>;
+  unsavePost(userId: string, postId: string): Promise<void>;
+  isSavedPost(userId: string, postId: string): Promise<boolean>;
+  getSavedPosts(userId: string): Promise<Post[]>;
 
   // Admin
   createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin>;
@@ -491,6 +495,37 @@ export class DbStorage implements IStorage {
         lastUsed: new Date()
       });
     }
+  }
+
+  // ============ SAVED POSTS ============
+  async savePost(userId: string, postId: string): Promise<Save> {
+    const [save] = await db.insert(saves).values({ userId, postId }).returning();
+    return save;
+  }
+
+  async unsavePost(userId: string, postId: string): Promise<void> {
+    await db.delete(saves).where(
+      and(eq(saves.userId, userId), eq(saves.postId, postId))
+    );
+  }
+
+  async isSavedPost(userId: string, postId: string): Promise<boolean> {
+    const save = await db.query.saves.findFirst({
+      where: and(eq(saves.userId, userId), eq(saves.postId, postId))
+    });
+    return !!save;
+  }
+
+  async getSavedPosts(userId: string): Promise<Post[]> {
+    const savedPosts = await db.query.saves.findMany({
+      where: eq(saves.userId, userId),
+    });
+    if (savedPosts.length === 0) return [];
+    const postIds = savedPosts.map(s => s.postId);
+    return db.query.posts.findMany({
+      where: inArray(posts.id, postIds),
+      orderBy: desc(posts.createdAt)
+    });
   }
 
   async suspendUser(userId: string, reason: string): Promise<User | undefined> {
