@@ -482,7 +482,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         )}
 
         {/* Avatar - Overlaps Banner */}
-        <div className="flex mb-4 -mt-14 relative">
+        <div style={{ position: 'absolute', bottom: -40, left: 15 }}>
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
