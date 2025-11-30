@@ -1034,6 +1034,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  app.patch("/api/notifications/user/:userId/read-all", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const notifications = await storage.listNotifications(userId);
+      
+      for (const notif of notifications) {
+        if (!notif.read) {
+          await storage.markNotificationAsRead(notif.id);
+        }
+      }
+      
+      res.json({ success: true, markedCount: notifications.length });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to mark notifications as read" });
+    }
+  });
+
+  // ============ HASHTAG FOLLOWING ROUTES ============
+  app.post("/api/hashtags/follow", async (req, res) => {
+    try {
+      const { userId, hashtagId } = req.body;
+      if (!userId || !hashtagId) {
+        return res.status(400).json({ error: "Missing userId or hashtagId" });
+      }
+      
+      const isFollowing = await storage.isFollowingHashtag(userId, hashtagId);
+      
+      if (isFollowing) {
+        await storage.unfollowHashtag(userId, hashtagId);
+        res.json({ following: false });
+      } else {
+        await storage.followHashtag(userId, hashtagId);
+        res.json({ following: true });
+      }
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update hashtag follow status" });
+    }
+  });
+
+  app.get("/api/hashtags/follow/:userId/:hashtagId", async (req, res) => {
+    try {
+      const { userId, hashtagId } = req.params;
+      const isFollowing = await storage.isFollowingHashtag(userId, hashtagId);
+      res.json({ isFollowing });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to check hashtag follow status" });
+    }
+  });
+
+  app.get("/api/users/:userId/followed-hashtags", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const followedHashtags = await db.query.hashtagFollows.findMany({
+        where: eq(hashtagFollows.userId, userId),
+      });
+      
+      const hashtagIds = followedHashtags.map(f => f.hashtagId);
+      if (hashtagIds.length === 0) {
+        return res.json([]);
+      }
+      
+      const hashtags = await db.query.hashtags.findMany({
+        where: inArray(hashtags.id, hashtagIds),
+        orderBy: desc(hashtags.usageCount),
+      });
+      
+      res.json(hashtags);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch followed hashtags" });
+    }
+  });
+
   // ============ HASHTAG/TRENDING ROUTES ============
   app.get("/api/trending/hashtags", async (req, res) => {
     try {
