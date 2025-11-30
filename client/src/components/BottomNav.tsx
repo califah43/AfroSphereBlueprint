@@ -1,4 +1,4 @@
-import { Home, Compass, PlusCircle, Bell, User } from "lucide-react";
+import { Home, Compass, PlusCircle, Bell, User, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -12,6 +12,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const navItems = [
     { id: "home", icon: Home, label: t("nav.home") },
     { id: "explore", icon: Compass, label: t("nav.explore") },
+    { id: "trending", icon: Flame, label: "Trending" },
     { id: "create", icon: PlusCircle, label: t("nav.create") },
     { id: "notifications", icon: Bell, label: t("nav.notifications") },
     { id: "profile", icon: User, label: t("nav.profile") },
@@ -36,11 +37,11 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             >
               <Icon
                 className={`h-6 w-6 transition-colors ${
-                  isActive ? "text-primary fill-primary" : isCreate ? "text-primary" : "text-muted-foreground"
+                  isActive ? item.id === "trending" ? "text-orange-500 fill-orange-500" : "text-primary fill-primary" : isCreate ? "text-primary" : item.id === "trending" ? "text-muted-foreground" : "text-muted-foreground"
                 }`}
               />
               {isActive && !isCreate && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-sm" />
+                <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${item.id === "trending" ? "bg-orange-500" : "bg-primary"} shadow-sm`} />
               )}
             </Button>
           );

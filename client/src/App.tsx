@@ -32,10 +32,11 @@ import BottomNav from "./components/BottomNav";
 import PostSignupUsername from "./components/PostSignupUsername";
 import PostSignupProfile from "./components/PostSignupProfile";
 import PostSignupPreferences from "./components/PostSignupPreferences";
+import TrendingPosts from "./components/TrendingPosts";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
-type MainView = "home" | "explore" | "create" | "notifications" | "profile";
+type MainView = "home" | "explore" | "trending" | "create" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre";
 
 export default function App() {
@@ -454,6 +455,13 @@ export default function App() {
                   setSelectedGenre(genreId);
                   setModalView("genre");
                 }}
+              />
+            </div>
+          )}
+          {activeTab === "trending" && (
+            <div className="flex-1 overflow-y-auto">
+              <TrendingPosts
+                onPostClick={handleOpenPostDetail}
               />
             </div>
           )}
