@@ -485,7 +485,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
-            size="md"
+            size="xl"
             onClick={() => setShowImageViewer(true)}
             editable={isOwnProfile}
             onEditClick={() => fileInputRef.current?.click()}

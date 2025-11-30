@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface ProfilePictureProps {
   src?: string;
   alt?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   onClick?: () => void;
   className?: string;
   editable?: boolean;
@@ -16,24 +16,28 @@ const sizeMap = {
   sm: "h-8 w-8",
   md: "h-12 w-12",
   lg: "h-24 w-24",
+  xl: "h-16 w-16",
 };
 
 const iconSizeMap = {
   sm: 16,
   md: 24,
   lg: 48,
+  xl: 32,
 };
 
 const buttonSizeMap = {
   sm: "h-5 w-5 p-0.5",
   md: "h-6 w-6 p-1",
   lg: "h-8 w-8 p-1.5",
+  xl: "h-7 w-7 p-1",
 };
 
 const cameraIconSizeMap = {
   sm: 12,
   md: 14,
   lg: 18,
+  xl: 16,
 };
 
 export default function ProfilePicture({
