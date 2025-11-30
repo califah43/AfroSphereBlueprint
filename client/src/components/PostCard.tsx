@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import BadgeDisplay from "./BadgeDisplay";
 import { queryClient } from "@/lib/queryClient";
+import { FontSizes } from "@/lib/fontSizes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -221,7 +222,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-nowrap">
-            <p className="font-bold text-sm text-foreground truncate max-w-[80px]" data-testid={`text-username-${post.id}`}>
+            <p className="font-bold text-foreground truncate max-w-[80px]" style={{ fontSize: FontSizes.bodyM }} data-testid={`text-username-${post.id}`}>
               {authorUsername}
             </p>
             {post.badges && post.badges.length > 0 ? (
@@ -242,17 +243,17 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
             ) : (
               authorId && <BadgeDisplay userId={authorId} className="inline-flex flex-shrink-0" />
             )}
-            <p className="text-xs text-muted-foreground/60 truncate max-w-[60px]" data-testid={`text-handle-${post.id}`}>
+            <p className="text-muted-foreground/60 truncate max-w-[60px]" style={{ fontSize: FontSizes.captionS }} data-testid={`text-handle-${post.id}`}>
               @{authorHandle}
             </p>
-            <span className="text-xs text-muted-foreground/60 flex-shrink-0">·</span>
-            <p className="text-xs text-muted-foreground/60 flex-shrink-0 whitespace-nowrap" data-testid={`text-time-${post.id}`}>
+            <span className="text-muted-foreground/60 flex-shrink-0" style={{ fontSize: FontSizes.captionS }}>·</span>
+            <p className="text-muted-foreground/60 flex-shrink-0 whitespace-nowrap" style={{ fontSize: FontSizes.captionS }} data-testid={`text-time-${post.id}`}>
               {post.timeAgo}
             </p>
           </div>
 
           {/* Caption Text - Right Below Header */}
-          <p className="text-sm leading-relaxed mt-2 text-foreground" data-testid={`text-caption-${post.id}`}>
+          <p className="leading-relaxed mt-2 text-foreground" style={{ fontSize: FontSizes.bodyM }} data-testid={`text-caption-${post.id}`}>
             {post.caption?.split(/(\#\w+)/g).map((part, i) => 
               part.startsWith('#') ? (
                 <button

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { GENRE_LIST } from "@shared/genres";
 import { queryClient } from "@/lib/queryClient";
+import { FontSizes } from "@/lib/fontSizes";
 
 interface CreatePostProps {
   onClose: () => void;
@@ -491,8 +492,8 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   <Palette className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">Category</p>
-                  <p className="text-xs text-muted-foreground">Choose your creative domain</p>
+                  <p className="font-bold text-foreground" style={{ fontSize: FontSizes.bodyM }}>Category</p>
+                  <p className="text-muted-foreground" style={{ fontSize: FontSizes.captionM }}>Choose your creative domain</p>
                 </div>
               </div>
               
@@ -537,8 +538,8 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   <Tag className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">Tags</p>
-                  <p className="text-xs text-muted-foreground">{tags.length}/10 tags</p>
+                  <p className="font-bold text-foreground" style={{ fontSize: FontSizes.bodyM }}>Tags</p>
+                  <p className="text-muted-foreground" style={{ fontSize: FontSizes.captionM }}>{tags.length}/10 tags</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -567,7 +568,7 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
               {/* Suggested Tags */}
               {suggestedTags.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground">Suggested for {category}:</p>
+                  <p className="font-semibold text-muted-foreground" style={{ fontSize: FontSizes.captionS }}>Suggested for {category}:</p>
                   <div className="flex flex-wrap gap-2">
                     {suggestedTags.map((tag) => (
                       <button
@@ -617,8 +618,8 @@ export default function CreatePost({ onClose, onPost, onNavigateHome }: CreatePo
                   <Hash className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">Additional Hashtags</p>
-                  <p className="text-xs text-muted-foreground">Boost discoverability</p>
+                  <p className="font-bold text-foreground" style={{ fontSize: FontSizes.bodyM }}>Additional Hashtags</p>
+                  <p className="text-muted-foreground" style={{ fontSize: FontSizes.captionM }}>Boost discoverability</p>
                 </div>
               </div>
               <Input

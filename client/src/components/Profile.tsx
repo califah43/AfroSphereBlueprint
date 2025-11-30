@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lock, Loader2, Flag, Ban, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { FontSizes } from "@/lib/fontSizes";
 import CreatorBadge from "./CreatorBadge";
 import BadgeDisplay from "./BadgeDisplay";
 import ProfilePictureModal from "./ProfilePictureModal";
@@ -552,7 +553,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         <div className="mb-4">
           {/* Display Name with Badges */}
           <div className="flex items-center gap-1 mb-1">
-            <h1 className="text-lg font-black tracking-tight" data-testid="text-profile-displayname">
+            <h1 className="font-black tracking-tight" style={{ fontSize: FontSizes.h2 }} data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (

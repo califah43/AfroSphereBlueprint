@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import BadgeDisplay from "./BadgeDisplay";
 import { X, Send, Heart, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { FontSizes } from "@/lib/fontSizes";
 
 interface Reply {
   id: string;
