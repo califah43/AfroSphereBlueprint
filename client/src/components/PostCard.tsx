@@ -157,14 +157,45 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     setTimeout(() => setShowHeart(false), 1000);
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    onBookmark?.(post.id);
+  const handleBookmark = async () => {
+    const userId = getUserId();
+    
+    if (!userId) {
+      toast({ title: "Please sign in to save posts", variant: "destructive" });
+      return;
+    }
 
-    toast({
-      title: isBookmarked ? "Removed from saved" : "Post saved!",
-      description: isBookmarked ? "Removed from your collection" : "Added to your saved collection",
-    });
+    // Optimistic update
+    const previousBookmarked = isBookmarked;
+    setIsBookmarked(!isBookmarked);
+
+    try {
+      const res = await fetch(`/api/posts/${post.id}/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsBookmarked(data.saved);
+        toast({
+          title: data.saved ? "Post saved!" : "Removed from saved",
+          description: data.saved ? "Added to your saved collection" : "Removed from your collection",
+        });
+        // Invalidate profile saved posts cache
+        queryClient.invalidateQueries({ queryKey: ['/api/posts/user', userId, 'saved'] });
+      } else {
+        // Rollback on error
+        setIsBookmarked(previousBookmarked);
+        toast({ title: "Error", description: "Failed to save post", variant: "destructive" });
+      }
+      onBookmark?.(post.id);
+    } catch (error) {
+      // Rollback on error
+      setIsBookmarked(previousBookmarked);
+      toast({ title: "Error", description: "Failed to save post", variant: "destructive" });
+    }
   };
 
   const handleDelete = async () => {

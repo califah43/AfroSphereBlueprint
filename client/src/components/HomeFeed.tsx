@@ -391,7 +391,10 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
                     onLike={(id) => console.log("Liked:", id)}
                     onComment={(id) => onCommentClick?.(id, post.images && post.images.length > 0 ? post.images : post.imageUrl, post.caption)}
                     onShare={(id) => onOpenShare?.()}
-                    onBookmark={(id) => console.log("Bookmark:", id)}
+                    onBookmark={(id) => {
+                      // Bookmark callback - the actual save happens in PostCard now
+                      queryClient.invalidateQueries({ queryKey: ['/api/posts/user', currentUserId, 'saved'] });
+                    }}
                     onAuthorClick={(username) => onUserProfileClick?.(username)}
                     onHashtagClick={(tag) => onHashtagClick?.(tag)}
                   />
