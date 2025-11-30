@@ -432,9 +432,24 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // EditProfile
     "profile.displayName": "Jina Linaloonekana",
+    "profile.username": "Jina la Mtumiaji",
     "profile.bio": "Wasifu",
     "profile.location": "Mahali",
     "profile.profession": "Kazi",
+    "profile.usernameAvailable": "Jina la mtumiaji linapatikana!",
+    "profile.usernameTaken": "Jina la mtumiaji limechukuliwa",
+    "profile.usernameInvalid": "Tumia herufi, namba, nukta au kuhesabia tu (3-30 vibambo)",
+    "profile.editProfile": "Hariri Wasifu",
+    "profile.profileSaved": "Wasifu Umehifadhiwa",
+    "profile.profileUpdatesSaved": "Sasisho lako la wasifu limehifadhiwa",
+    "profile.userNotFound": "Mtumiaji haipo",
+    "profile.failedToSaveProfile": "Imeshindwa kuhifadhi wasifu",
+    "profile.photoUpdated": "Picha Ilibadilishwa",
+    "profile.photoReadyToSave": "Picha iko tayari kusikiliziwa",
+    "profile.failedReadProfilePhoto": "Imeshindwa kusoma picha ya wasifu",
+    "profile.bannerUpdated": "Kichwa Kibadilishwa",
+    "profile.bannerReadyToSave": "Kichwa kiko tayari kusikiliziwa",
+    "profile.failedReadBannerImage": "Imeshindwa kusoma picha ya kichwa",
   },
   yo: {
     // Navigation

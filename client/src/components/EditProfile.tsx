@@ -176,14 +176,32 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         return;
       }
 
+      // Validate username if it changed
+      const currentData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      if (formData.username !== currentData.username) {
+        // Check format validation
+        const validation = validateUsernameFormat(formData.username);
+        if (!validation.valid) {
+          toast({ title: t("common.error"), description: validation.error || "Invalid username", variant: "destructive" });
+          return;
+        }
+        
+        // Check availability
+        if (usernameStatus !== "available") {
+          toast({ title: t("common.error"), description: "Username is not available or still checking", variant: "destructive" });
+          return;
+        }
+      }
+
       const payload = {
         displayName: formData.displayName,
+        username: formData.username,
         bio: formData.bio,
         location: formData.location,
         website: formData.website,
         profession: formData.profession,
-        ...(formData.avatar && formData.avatar !== JSON.parse(localStorage.getItem("currentUserData") || "{}").avatar && { avatar: formData.avatar }),
-        ...(formData.banner && formData.banner !== JSON.parse(localStorage.getItem("currentUserData") || "{}").banner && { banner: formData.banner }),
+        ...(formData.avatar && formData.avatar !== currentData.avatar && { avatar: formData.avatar }),
+        ...(formData.banner && formData.banner !== currentData.banner && { banner: formData.banner }),
       };
 
       console.log("Sending profile update with payload size:", JSON.stringify(payload).length);
@@ -211,7 +229,7 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
       const updated = {
         ...JSON.parse(localStorage.getItem("currentUserData") || "{}"),
         displayName: updatedUser.displayName || formData.displayName,
-        username: formData.username,
+        username: updatedUser.username || formData.username,
         bio: updatedUser.bio || formData.bio,
         location: updatedUser.location || formData.location,
         website: updatedUser.website || formData.website,
@@ -220,9 +238,6 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
         banner: updatedUser.banner || formData.banner,
       };
       localStorage.setItem("currentUserData", JSON.stringify(updated));
-      
-      toast({ title: "Profile saved!", description: "Your profile updates have been saved" });
-      onSave?.(formData);
       
       // Trigger comment refetch for username/badge updates
       window.dispatchEvent(new Event('profileUpdated'));
@@ -330,20 +345,45 @@ export default function EditProfile({ onClose, onSave }: EditProfileProps) {
 
         {/* Form Fields - Refined & Compact */}
         <div className="space-y-3 mt-4 pt-2 border-t border-border/50">
-          {/* Username - Read Only */}
-          <div className="space-y-1.5 opacity-70">
+          {/* Username - Editable with Availability Check */}
+          <div className="space-y-1.5">
             <Label htmlFor="username" className="text-xs font-semibold uppercase tracking-wider">Username</Label>
-            <div className="flex items-center gap-2 p-2.5 bg-muted/40 rounded-lg border border-border/30">
+            <div className={`flex items-center gap-2 p-2.5 rounded-lg border transition-colors ${
+              usernameStatus === "available" ? "bg-green-500/5 border-green-500/30" :
+              usernameStatus === "taken" ? "bg-red-500/5 border-red-500/30" :
+              usernameStatus === "invalid" ? "bg-red-500/5 border-red-500/30" :
+              "bg-muted/40 border-border/30"
+            }`}>
               <span className="text-primary font-bold text-sm">@</span>
               <Input 
                 id="username"
                 value={formData.username}
-                disabled={true}
+                onChange={(e) => handleUsernameChange(e.target.value)}
                 className="border-0 bg-transparent px-0 text-sm"
-                data-testid="input-username-readonly"
+                data-testid="input-username"
               />
+              {isEditingUsername && usernameStatus === "available" && (
+                <Check className="h-4 w-4 text-green-500 flex-shrink-0" data-testid="icon-username-available" />
+              )}
+              {isEditingUsername && usernameStatus === "taken" && (
+                <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" data-testid="icon-username-taken" />
+              )}
+              {isEditingUsername && usernameStatus === "checking" && (
+                <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin flex-shrink-0" data-testid="icon-username-checking" />
+              )}
             </div>
-            <p className="text-xs text-muted-foreground">Permanent & used for mentions</p>
+            {isEditingUsername && usernameStatus === "taken" && (
+              <p className="text-xs text-red-500">Username already taken</p>
+            )}
+            {isEditingUsername && usernameStatus === "invalid" && (
+              <p className="text-xs text-red-500">Use only letters, numbers, dot or underscore (3-30 chars)</p>
+            )}
+            {isEditingUsername && usernameStatus === "available" && (
+              <p className="text-xs text-green-500">Username available!</p>
+            )}
+            {!isEditingUsername && (
+              <p className="text-xs text-muted-foreground">Used for mentions and profile discovery</p>
+            )}
           </div>
 
           {/* Display Name */}
