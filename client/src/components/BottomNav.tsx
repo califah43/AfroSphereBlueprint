@@ -31,16 +31,16 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               variant="ghost"
               size="icon"
               onClick={() => onTabChange(item.id)}
-              className={`relative ${isCreate ? "scale-110" : ""}`}
+              className={`relative transition-all ${isCreate ? "scale-110" : ""} ${isActive && isCreate ? "gold-glow" : ""}`}
               data-testid={`button-nav-${item.id}`}
             >
               <Icon
-                className={`h-6 w-6 ${
-                  isActive ? "text-primary fill-primary" : isCreate ? "text-primary" : ""
+                className={`h-6 w-6 transition-colors ${
+                  isActive ? "text-primary fill-primary" : isCreate ? "text-primary" : "text-muted-foreground"
                 }`}
               />
               {isActive && !isCreate && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-sm" />
               )}
             </Button>
           );

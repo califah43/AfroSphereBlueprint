@@ -168,7 +168,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             isLiked: likedPostIds.includes(p.id),
             badges: badgeMap.get(p.userId) || [],
           };
-        }).filter(post => post.author.username !== "creator"); // Remove placeholder posts
+        }).filter((post: any) => post.author.username !== "creator"); // Remove placeholder posts
         
         // Combine: real posts (newest first) at top, then mock posts below for demo
         return [...transformedRealPosts, ...mockPosts];
