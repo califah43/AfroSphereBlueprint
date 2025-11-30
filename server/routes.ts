@@ -1916,6 +1916,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ SEARCH ROUTES ============
+  app.get("/api/search/users", async (req, res) => {
+    try {
+      const q = req.query.q as string;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      
+      if (!q || q.length < 1) {
+        return res.json([]);
+      }
+      
+      const results = await storage.searchUsers(q, limit);
+      res.json(results);
+    } catch (error) {
+      console.error("User search error:", error);
+      res.status(400).json({ error: "Failed to search users" });
+    }
+  });
+
+  app.get("/api/search/hashtags", async (req, res) => {
+    try {
+      const q = req.query.q as string;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      
+      if (!q || q.length < 1) {
+        return res.json([]);
+      }
+      
+      const results = await storage.searchHashtags(q, limit);
+      res.json(results);
+    } catch (error) {
+      console.error("Hashtag search error:", error);
+      res.status(400).json({ error: "Failed to search hashtags" });
+    }
+  });
+
+  app.get("/api/search/posts", async (req, res) => {
+    try {
+      const q = req.query.q as string;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      
+      if (!q || q.length < 1) {
+        return res.json([]);
+      }
+      
+      const results = await storage.searchPosts(q, limit);
+      res.json(results);
+    } catch (error) {
+      console.error("Post search error:", error);
+      res.status(400).json({ error: "Failed to search posts" });
+    }
+  });
+
+  app.get("/api/trending/hashtags", async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      
+      const allHashtags = await db.query.hashtags.findMany({
+        orderBy: desc(hashtags.usageCount),
+        limit,
+      });
+      
+      res.json(allHashtags);
+    } catch (error) {
+      console.error("Trending hashtags error:", error);
+      res.status(400).json({ error: "Failed to fetch trending hashtags" });
+    }
+  });
+
   // ============ FCM TOKEN ROUTES ============
   app.post("/api/notifications/fcm-token", async (req, res) => {
     try {
