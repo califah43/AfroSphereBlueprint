@@ -2,178 +2,191 @@
 
 ## Design Approach
 
-**Reference-Based Approach** drawing from Instagram's clean content presentation, TikTok's engaging feed mechanics, and Pinterest's discovery patterns, adapted for African cultural expression.
+**Reference-Based:** Instagram's content presentation + TikTok's engaging mechanics + Pinterest's discovery, elevated with African cultural celebration.
 
 **Core Principles:**
-- Content-first: Let creator work shine
-- Cultural vibrancy: Bold, warm, celebratory
-- Smooth interactions: Seamless, rewarding
-- Dark elegance: Premium feel, content pops
+- Content reigns supreme
+- Cultural patterns as accents, not clutter
+- Premium creator celebration
+- Warm, welcoming dark theme
+
+---
+
+## Color Palette
+
+**Primary Colors:**
+- Gold/Amber: #D4AF37 (accents, highlights, active states)
+- Warm Orange: #E67E22 (CTA buttons, notifications)
+- Deep Crimson: #C0392B (likes, favorites, alerts)
+- Terracotta: #CD7F32 (badges, secondary accents)
+
+**Backgrounds:**
+- Primary: #1C1814 (dark charcoal with warm undertone)
+- Secondary: #2A2420 (cards, elevated surfaces)
+- Tertiary: #332B24 (modals, overlays)
+
+**Functional:**
+- Success: #27AE60 (warm green)
+- Text Primary: #F5F5F5 (off-white)
+- Text Secondary: #B8B0A8 (warm gray)
+- Borders: #3F362D (warm charcoal)
 
 ---
 
 ## Typography
 
-**Font Families:**
-- Primary: Inter (clean, modern readability)
-- Accent: DM Sans (headings, usernames)
+**Fonts:** Inter (body), DM Sans (headings)
 
-**Hierarchy:**
-- App Title/Logo: 32px, bold
-- Screen Headers: 24px, semibold
-- Usernames: 15px, semibold
-- Captions/Body: 14px, regular
-- Timestamps/Meta: 12px, regular
-- Buttons: 15px, medium
+**Scale:**
+- H1: 28px/bold (screen titles)
+- H2: 20px/semibold (usernames, sections)
+- Body: 14px/regular (captions, content)
+- Small: 12px/regular (timestamps, counts)
+- Button: 15px/medium
 
 ---
 
 ## Layout System
 
-**Spacing Units:** Tailwind 2, 3, 4, 6, 8, 12, 16, 24
-- Card padding: p-4
-- Screen padding: px-4 py-6
-- Component gaps: gap-3, gap-4
-- Section spacing: mt-8, mb-12
+**Spacing:** Tailwind units 2, 3, 4, 6, 8, 12, 16, 24
 
-**Mobile-First Grid:**
-- Feed: Single column, full-width cards
-- Explore: 2-column grid (md:3-column)
-- Profile Posts: 3-column grid
+**Containers:**
+- Screen padding: px-4 py-6
+- Card padding: p-4
+- Component gaps: gap-3, gap-4
+- Section breaks: mt-8, mb-12
+
+**Grids:**
+- Feed: Single column
+- Explore: grid-cols-2 (gap-2)
+- Profile: grid-cols-3 (gap-1)
+
+---
+
+## Cultural Elements
+
+**Kente-Inspired Patterns:**
+- Subtle geometric borders on premium badges
+- Profile banner accent strips (horizontal bands, 4px height, gold/crimson/terracotta)
+- Creator tier indicators: Bronze → Silver → Gold badges with traditional geometric frames
+
+**Pattern Usage:**
+- Profile headers: Thin accent line with repeating diamond motif
+- Premium badges: Circular frames with triangular edge details
+- Section dividers: Subtle woven pattern (10% opacity)
+- Loading states: Animated kente stripe pattern
+
+**Application:**
+- Use sparingly as accents, never overwhelming content
+- Always at reduced opacity (10-20%) in backgrounds
+- Full opacity only on badges and deliberate decorative elements
 
 ---
 
 ## Component Library
 
-### Navigation
-**Bottom Tab Bar (Fixed):**
-- 5 icons: Home, Explore, Create (centered, elevated), Notifications, Profile
-- Active state: vibrant accent glow
-- Icons: 24px, stroke-width 2
-- Background: Dark with subtle blur
+### Bottom Navigation
+- 5 icons (24px): Home, Explore, Create (center, elevated circle), Notifications, Profile
+- Active: Gold glow effect
+- Background: #2A2420 with 80% backdrop blur
+- Create button: Gradient (gold → orange), shadow-lg
 
 ### Feed Cards
-**Structure:**
-- User header: Avatar (40px) + Username + Time + Menu (3-dot)
-- Media: Full-width, 4:5 aspect ratio (Instagram style)
-- Caption: Max 3 lines, "see more" expansion
-- Action bar: Like, Comment, Share, Bookmark (right-aligned)
-- Engagement counts below actions
-- Rounded corners: 12px
-- Card spacing: gap-4
+- User header: Avatar (40px, gold ring for verified) + Username + Time + Menu
+- Media: Full-width, 4:5 ratio, rounded-xl
+- Caption: 3 lines, expandable
+- Actions: Like (crimson), Comment, Share, Bookmark
+- Card background: #2A2420, rounded-2xl, subtle border (#3F362D)
+- Engagement bar: Warm gray text, gold highlights for interaction
 
-**Interactions:**
-- Double-tap anywhere on image for like
-- Heart animation from tap point (scale + fade)
-- Like count increments with smooth number transition
+### Profile Header
+- Banner: 180px, gradient overlay (charcoal → transparent)
+- Kente accent strip: 3 horizontal bands below banner (gold/crimson/terracotta, 3px each)
+- Avatar: 88px, gold border (3px), overlapping banner
+- Creator badge: Premium users get geometric-framed badge (terracotta circle with triangle accents)
+- Stats: Followers/Following in grid, warm orange numbers
+- Bio: 2 lines max, warm gray text
+- Edit button: Outlined gold, full-width
 
-### Create Post Screen
-**Layout:**
-- Media preview: Top half of screen
-- Upload zone: Dashed border, icon + "Upload Image/Video"
-- Caption: Multi-line textarea, placeholder: "Share your culture..."
-- Category pills: Horizontal scroll, rounded-full
-- Hashtag input: Separate field with # prefix
-- Post button: Bottom, full-width, glowing green gradient
+### Explore Discovery
+- Search: Rounded-full, #2A2420 background, gold focus ring
+- Trending creators: Horizontal scroll, 72px avatars with gold rings
+- Category cards: Image + gradient overlay (charcoal 60%) + title (20px, gold)
+- Masonry grid: Staggered posts, gap-2
 
-### Comments
-**Chat-Style Interface:**
-- Post thumbnail + caption at top (sticky)
-- Comments: Speech bubble style
-- User avatar left (32px)
-- Comment text: Dark bubble, 12px radius
-- Like heart: Right side of each comment
-- Input bar: Fixed bottom, rounded-full, send icon
+### Comments Interface
+- Sticky header: Post thumbnail + caption
+- Bubbles: #2A2420 background, rounded-2xl
+- Avatar: 32px, left-aligned
+- Like icon: Small crimson heart (right side)
+- Input: Fixed bottom, rounded-full, gold send icon
 
-### Profile Screen
-**Header Section:**
-- Banner image: 200px height, gradient overlay
-- Avatar: 96px, white border, overlapping banner
-- Username: 20px, bold
-- Bio: 14px, 2-line max
-- Stats row: Followers, Following (centered)
-- Edit Profile button: Full-width, outlined
-
-**Content Tabs:**
-- Posts, Liked, Saved (underline indicator)
-- Grid below: 3 columns, square aspect, gap-1
-
-### Explore/Discovery
-**Sections:**
-- Search bar: Top, rounded-full, dark background
-- "Trending Creators": Horizontal scroll, circular avatars (80px) + names
-- Category cards: 2-column grid
-- Each card: Image + overlay gradient + category name
-- "Popular Posts": Pinterest-style masonry grid
+### Create Post
+- Media preview: Top half, rounded-xl
+- Upload area: Dashed border (gold), centered icon
+- Caption: Multiline textarea, warm gray placeholder
+- Category pills: Horizontal scroll, #332B24 background, active: gold
+- Hashtag field: # prefix (gold)
+- Post button: Full-width gradient (gold → orange), rounded-xl
 
 ### Notifications
-**List Items:**
-- Avatar (40px) + Action text + Time
-- "liked your post" → post thumbnail (right)
-- "followed you" → Follow button (right, small)
-- Unread: Subtle accent background
-- Grouping: "Today", "This Week"
-
-### Onboarding Slides
-**Full-Screen Slides:**
-- Large visual: Top 60% of screen
-- Headline: 28px, bold, centered
-- Subtext: 16px, centered, max-width-sm
-- Pagination dots: Bottom, 8px circles
-- Skip button: Top right, ghost style
-- Navigation: Swipe or "Next" button
+- List items: Avatar + action text + time
+- Post thumbnails: Right-aligned (48px)
+- Follow button: Small, gold outlined
+- Unread: Subtle gold background (10% opacity)
+- Grouping: "Today" / "This Week" headers (warm orange)
 
 ---
 
 ## Animations
 
-**Strategic Use Only:**
-- Like heart: Scale 0 → 1.2 → 1, fade in/out (300ms)
-- Post upload: Progress bar + success checkmark
-- Pull-to-refresh: Subtle spinner
-- Tab transitions: Fade (200ms)
-- Card entry: Stagger on scroll (100ms delay each)
+**Micro-interactions:**
+- Like: Heart scales (0 → 1.3 → 1), crimson pulse (400ms)
+- Button press: Scale 0.98, subtle glow
+- Pull-to-refresh: Gold spinner
+- Tab switch: Fade (150ms)
+- Card appearance: Fade + slide up (200ms, stagger 80ms)
 
-**NO complex scroll-triggered animations**
+No complex scroll animations.
 
 ---
 
 ## Images
 
-### Required Images:
+### Required Visuals:
 
-1. **Splash Screen**: AfroSphere logo (glowing effect) on dark gradient background
-2. **Onboarding Slide 1**: Collage of diverse African creators (musicians, artists, fashion)
-3. **Onboarding Slide 2**: Screenshots of content examples (art, music, fashion)
-4. **Onboarding Slide 3**: Community gathering visual
-5. **Feed Posts**: 20-40 seed posts showing African fashion, art, music, lifestyle
-6. **Explore Categories**: Hero images for Fashion, Music, Visual Art, Culture, Lifestyle sections
-7. **Profile Banners**: Default gradient options for users
+**Splash Screen:**
+AfroSphere logo with kente-pattern frame on warm gradient (#1C1814 → #2A2420)
 
-### Image Treatment:
-- Rounded corners: 12px for all media
-- Aspect ratios: 4:5 (feed), 16:9 (banners), 1:1 (explore grid)
-- Compression: Optimize for mobile
-- Placeholder: Gradient shimmer effect while loading
+**Onboarding (3 slides):**
+1. Collage: African creators (fashion, music, art) with gold accent overlays
+2. Content showcase: Screenshots of posts with kente-inspired borders
+3. Community: Vibrant gathering scene with warm lighting
+
+**Feed Content (30+ posts):**
+African fashion, traditional art, Afrobeats artists, cultural celebrations, contemporary African lifestyle - all high-quality, vibrant imagery
+
+**Explore Categories (6 hero images):**
+Fashion, Music, Visual Art, Food, Traditions, Lifestyle - each with cultural relevance
+
+**Profile Banners (5 defaults):**
+Warm gradients with subtle kente patterns: Gold/Orange, Crimson/Terracotta, Earthy tones
+
+**Treatment:** All media rounded-xl, shimmer placeholder (gold), 4:5 (feed), 16:9 (banners), 1:1 (grid)
 
 ---
 
 ## Accessibility
 
-- Touch targets: Minimum 44px
-- Icon buttons: Visible focus rings
-- Form labels: Always visible (not just placeholders)
-- Contrast: WCAG AA minimum
-- Captions: Support for media content
-- Screen reader: Proper ARIA labels on all interactive elements
+- Touch targets: 44px minimum
+- Focus rings: Gold, visible on all interactive elements
+- Labels: Always visible, not placeholder-only
+- Contrast: WCAG AA on all text
+- ARIA labels: Comprehensive coverage
+- Media captions: Supported throughout
 
 ---
 
 ## Platform Notes
 
-**Mobile-First, Dark Theme Default:**
-- Designed for vertical mobile experience
-- Tablet: Adapt to 2-column feed
-- Desktop: Max-width container (768px) centered
-- Dark UI lets content colors pop
-- Vibrant accent colors inspired by African textiles and sunsets
+Mobile-first (430px), tablet adapts to 2-column feed, desktop centered (max-w-2xl). Dark warm theme showcases vibrant African content. Cultural patterns enhance, never distract.
