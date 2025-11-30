@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 interface FollowedHashtagsFeedProps {
   userId: string;
-  onUserProfileClick?: (username: string) => void;
+  onAuthorClick?: (username: string) => void;
   onHashtagClick?: (hashtag: string) => void;
   onCommentClick?: (postId: string, imageUrl: string | string[], caption: string) => void;
   onPostClick?: (postId: string) => void;
@@ -14,7 +14,7 @@ interface FollowedHashtagsFeedProps {
 
 export default function FollowedHashtagsFeed({
   userId,
-  onUserProfileClick,
+  onAuthorClick,
   onHashtagClick,
   onCommentClick,
   onPostClick,
@@ -121,10 +121,9 @@ export default function FollowedHashtagsFeed({
             <PostCard
               key={post.id}
               post={post}
-              onUserProfileClick={onUserProfileClick}
+              onAuthorClick={onAuthorClick}
               onHashtagClick={onHashtagClick}
-              onCommentClick={onCommentClick}
-              onPostClick={onPostClick}
+              onComment={() => onCommentClick?.(post.id, post.images || [post.imageUrl], post.caption)}
             />
           ))}
         </div>

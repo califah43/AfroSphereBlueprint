@@ -2139,6 +2139,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ HASHTAG POSTS ROUTE ============
+  app.get("/api/posts/hashtags", async (req, res) => {
+    try {
+      const tagsParam = req.query.tags as string;
+      if (!tagsParam) {
+        return res.json([]);
+      }
+
+      const tags = tagsParam.split(',').map(t => t.trim().toLowerCase());
+      if (tags.length === 0) {
+        return res.json([]);
+      }
+
+      const allPosts = await db.query.posts.findMany();
+      const matchingPosts = allPosts.filter(post => {
+        if (!post.hashtags) return false;
+        const postTags = post.hashtags.split(',').map(t => t.trim().toLowerCase());
+        return postTags.some(pt => tags.includes(pt));
+      });
+
+      res.json(matchingPosts);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch posts by hashtags" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

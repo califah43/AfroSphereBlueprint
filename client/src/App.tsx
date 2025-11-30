@@ -33,11 +33,13 @@ import PostSignupUsername from "./components/PostSignupUsername";
 import PostSignupProfile from "./components/PostSignupProfile";
 import PostSignupPreferences from "./components/PostSignupPreferences";
 import TrendingPosts from "./components/TrendingPosts";
+import FollowedHashtagsFeed from "./components/FollowedHashtagsFeed";
+import HashtagExplore from "./components/HashtagExplore";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
-type MainView = "home" | "explore" | "trending" | "create" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre";
+type MainView = "home" | "explore" | "trending" | "create" | "notifications" | "profile" | "hashtags";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre" | "hashtag-explore";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
