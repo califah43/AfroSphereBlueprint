@@ -206,6 +206,8 @@ export default function PostDetail({
       return;
     }
 
+    console.log("Bookmark clicked for post:", postId, "user:", userId);
+
     // Optimistic update
     const previousBookmarked = isBookmarked;
     setIsBookmarked(!isBookmarked);
@@ -217,8 +219,11 @@ export default function PostDetail({
         body: JSON.stringify({ userId }),
       });
 
+      console.log("Bookmark API response:", res.status);
+
       if (res.ok) {
         const data = await res.json();
+        console.log("Bookmark data:", data);
         setIsBookmarked(data.saved);
         toast({ title: data.saved ? "Post saved" : "Post removed from saves" });
       } else {
@@ -227,6 +232,7 @@ export default function PostDetail({
         toast({ title: "Error", description: "Failed to save post", variant: "destructive" });
       }
     } catch (error) {
+      console.error("Bookmark error:", error);
       // Rollback on error
       setIsBookmarked(previousBookmarked);
       toast({ title: "Error", description: "Failed to save post", variant: "destructive" });
