@@ -528,7 +528,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       {/* Padding wrapper for content */}
       <div className="px-4 py-4">
         {/* Name & Username - Clean & Simple */}
-        <div className="mb-4">
+        <div className="mb-4 mt-12">
           {/* Display Name with Badges */}
           <div className="flex items-center gap-2 mb-1">
             <h1 className="font-black tracking-tight text-lg" data-testid="text-profile-displayname">
