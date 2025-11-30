@@ -187,6 +187,14 @@
 }
 
 @layer utilities {
+  .text-crimson {
+    color: hsl(var(--crimson));
+  }
+
+  .fill-crimson {
+    fill: hsl(var(--crimson));
+  }
+
   .gold-glow {
     @apply shadow-lg;
     box-shadow: 0 0 12px hsl(45 85% 55% / 0.4);
