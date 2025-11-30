@@ -436,8 +436,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
       {/* Banner - Extends to Top */}
       <div 
-        className="relative overflow-hidden -mt-0 cursor-pointer group"
-        style={{ height: '150px' }}
+        className="relative -mt-0 cursor-pointer group"
+        style={{ height: '150px', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
