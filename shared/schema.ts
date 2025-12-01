@@ -173,8 +173,8 @@ export type UserSettings = typeof userSettings.$inferSelect;
 // ============ BLOCKED USERS ============
 export const blockedUsers = pgTable("blocked_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(), // The user doing the blocking
-  blockedUserId: varchar("blocked_user_id").notNull(), // The user being blocked
+  userId: varchar("user_id").notNull(),
+  blockedUserId: varchar("blocked_user_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -183,15 +183,13 @@ export type BlockedUser = typeof blockedUsers.$inferSelect;
 // ============ USER REPORTS ============
 export const userReports = pgTable("user_reports", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(), // The user submitting the report
-  reportType: text("report_type").notNull(), // "problem", "content", "user", etc.
+  userId: varchar("user_id").notNull(),
+  reportType: text("report_type").notNull(), // "spam", "abuse", "inappropriate", "other"
   description: text("description").notNull(),
-  postId: varchar("post_id"), // Optional: post being reported
-  reportedUserId: varchar("reported_user_id"), // Optional: user being reported
+  postId: varchar("post_id"), // Optional: for post-specific reports
+  reportedUserId: varchar("reported_user_id"), // Optional: for user-specific reports
   status: text("status").default("pending"), // "pending", "reviewed", "resolved"
-  adminNotes: text("admin_notes"), // Admin notes on the report
   createdAt: timestamp("created_at").defaultNow(),
-  reviewedAt: timestamp("reviewed_at"),
 });
 
 export type UserReport = typeof userReports.$inferSelect;
@@ -200,21 +198,11 @@ export type UserReport = typeof userReports.$inferSelect;
 export const badges = pgTable("badges", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  type: text("type").notNull(), // "verified", "cultural", "creator", "achievement"
-  iconSvg: text("icon_svg").notNull(), // SVG markup stored as text
   description: text("description").notNull(),
+  iconSvg: text("icon_svg").notNull(), // Stored as SVG string
+  color: text("color").notNull(), // CSS color value
   createdAt: timestamp("created_at").defaultNow(),
 });
-
-export const userBadges = pgTable("user_badges", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
-  badgeId: varchar("badge_id").notNull(),
-  assignedAt: timestamp("assigned_at").defaultNow(),
-});
-
-export type Badge = typeof badges.$inferSelect;
-export type UserBadge = typeof userBadges.$inferSelect;
 
 export const insertBadgeSchema = createInsertSchema(badges).omit({
   id: true,
@@ -222,12 +210,24 @@ export const insertBadgeSchema = createInsertSchema(badges).omit({
 });
 
 export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+export type Badge = typeof badges.$inferSelect;
+
+// ============ USER BADGES ============
+export const userBadges = pgTable("user_badges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  badgeId: varchar("badge_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type UserBadge = typeof userBadges.$inferSelect;
 
 // ============ FOLLOW REQUESTS ============
 export const followRequests = pgTable("follow_requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  requesterUserId: varchar("requester_user_id").notNull(),
-  targetUserId: varchar("target_user_id").notNull(),
+  followerId: varchar("follower_id").notNull(),
+  followingId: varchar("following_id").notNull(),
+  status: text("status").default("pending"), // "pending", "accepted", "rejected"
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -238,7 +238,7 @@ export const hashtags = pgTable("hashtags", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tag: text("tag").notNull().unique(),
   usageCount: integer("usage_count").default(0),
-  lastUsed: timestamp("last_used").defaultNow(),
+  trendingRank: integer("trending_rank"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -263,6 +263,35 @@ export const saves = pgTable("saves", {
 });
 
 export type Save = typeof saves.$inferSelect;
+
+// ============ STORIES ============
+export const stories = pgTable("stories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  image: text("image").notNull(), // Base64 image
+  caption: text("caption").default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(), // 24 hours from creation
+});
+
+export const insertStorySchema = createInsertSchema(stories).omit({
+  id: true,
+  createdAt: true,
+  expiresAt: true,
+});
+
+export type InsertStory = z.infer<typeof insertStorySchema>;
+export type Story = typeof stories.$inferSelect;
+
+// ============ STORY VIEWS ============
+export const storyViews = pgTable("story_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull(),
+  viewerId: varchar("viewer_id").notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow(),
+});
+
+export type StoryView = typeof storyViews.$inferSelect;
 
 // ============ ADMIN PERMISSIONS ============
 export const adminPermissions = pgTable("admin_permissions", {
