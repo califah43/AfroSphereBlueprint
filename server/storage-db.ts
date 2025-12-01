@@ -409,17 +409,17 @@ export class DbStorage implements IStorage {
 
   // ============ FOLLOW REQUESTS ============
   async createFollowRequest(requesterUserId: string, targetUserId: string): Promise<any> {
-    const [request] = await db.insert(followRequests).values({ requesterUserId, targetUserId }).returning();
+    const [request] = await db.insert(followRequests).values({ followerId: requesterUserId, followingId: targetUserId }).returning();
     return request;
   }
 
   async getFollowRequests(userId: string): Promise<any[]> {
-    return db.query.followRequests.findMany({ where: eq(followRequests.targetUserId, userId) });
+    return db.query.followRequests.findMany({ where: eq(followRequests.followingId, userId) });
   }
 
   async hasFollowRequest(requesterUserId: string, targetUserId: string): Promise<boolean> {
     const request = await db.query.followRequests.findFirst({ 
-      where: and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId))
+      where: and(eq(followRequests.followerId, requesterUserId), eq(followRequests.followingId, targetUserId))
     });
     return !!request;
   }
@@ -428,7 +428,7 @@ export class DbStorage implements IStorage {
     // Create follow relationship
     await db.insert(follows).values({ followerId: requesterUserId, followingId: targetUserId });
     // Delete follow request
-    await db.delete(followRequests).where(and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId)));
+    await db.delete(followRequests).where(and(eq(followRequests.followerId, requesterUserId), eq(followRequests.followingId, targetUserId)));
     // Update counts
     const requester = await db.query.users.findFirst({ where: eq(users.id, requesterUserId) });
     const target = await db.query.users.findFirst({ where: eq(users.id, targetUserId) });
@@ -441,7 +441,7 @@ export class DbStorage implements IStorage {
   }
 
   async declineFollowRequest(requesterUserId: string, targetUserId: string): Promise<void> {
-    await db.delete(followRequests).where(and(eq(followRequests.requesterUserId, requesterUserId), eq(followRequests.targetUserId, targetUserId)));
+    await db.delete(followRequests).where(and(eq(followRequests.followerId, requesterUserId), eq(followRequests.followingId, targetUserId)));
   }
 
   // ============ SEARCH ============
@@ -500,13 +500,12 @@ export class DbStorage implements IStorage {
 
     if (existing) {
       await db.update(hashtags)
-        .set({ usageCount: (existing.usageCount || 0) + 1, lastUsed: new Date() })
+        .set({ usageCount: (existing.usageCount || 0) + 1 })
         .where(eq(hashtags.id, existing.id));
     } else {
       await db.insert(hashtags).values({
         tag: tag.toLowerCase(),
-        usageCount: 1,
-        lastUsed: new Date()
+        usageCount: 1
       });
     }
   }
