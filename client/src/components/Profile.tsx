@@ -118,24 +118,15 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         if (currentUserId) {
           setPostsLoading(true);
           
-          // Load cached data immediately from localStorage
+          // Load cached data immediately from localStorage (except badges - always fetch fresh)
           const cachedBadgesKey = `badges_${currentUserId}`;
           const cachedPostsKey = `posts_${currentUserId}`;
           const cachedLikedKey = `liked_${currentUserId}`;
           const cachedSavedKey = `saved_${currentUserId}`;
           
-          const cachedBadges = localStorage.getItem(cachedBadgesKey);
           const cachedPosts = localStorage.getItem(cachedPostsKey);
           const cachedLiked = localStorage.getItem(cachedLikedKey);
           const cachedSaved = localStorage.getItem(cachedSavedKey);
-          
-          if (cachedBadges) {
-            try {
-              setUserBadges(JSON.parse(cachedBadges));
-            } catch (e) {
-              // Invalid cache, ignore
-            }
-          }
           
           if (cachedPosts) {
             try {
@@ -215,7 +206,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             const badges = await badgesRes.json();
             const badgesArray = Array.isArray(badges) ? badges : [];
             setUserBadges(badgesArray);
-            localStorage.setItem(cachedBadgesKey, JSON.stringify(badgesArray));
+            // Don't cache badges - always fetch fresh to ensure latest assignments show
           }
           
           setPostsLoading(false);
