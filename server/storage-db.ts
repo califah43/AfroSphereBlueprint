@@ -336,10 +336,20 @@ export class DbStorage implements IStorage {
   }
 
   async getUserBadges(userId: string): Promise<Badge[]> {
-    const userBadgeRecords = await db.query.userBadges.findMany({ where: eq(userBadges.userId, userId) });
-    const badgeIds = userBadgeRecords.map(ub => ub.badgeId);
-    if (badgeIds.length === 0) return [];
-    return db.query.badges.findMany({ where: inArray(badges.id, badgeIds) });
+    try {
+      const userBadgeRecords = await db.query.userBadges.findMany({ where: eq(userBadges.userId, userId) });
+      const badgeIds = userBadgeRecords.map(ub => ub.badgeId);
+      if (badgeIds.length === 0) {
+        console.log(`[Badges] User ${userId} has no badges`);
+        return [];
+      }
+      const badgesList = await db.query.badges.findMany({ where: inArray(badges.id, badgeIds) });
+      console.log(`[Badges] Fetched ${badgesList.length} badges for user ${userId}`);
+      return badgesList;
+    } catch (error) {
+      console.error(`[Badges] Error fetching badges for user ${userId}:`, error);
+      return [];
+    }
   }
 
   async getBadgeUsers(badgeId: string): Promise<User[]> {

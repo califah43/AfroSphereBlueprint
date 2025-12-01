@@ -496,8 +496,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (user) {
           try {
             badges = await storage.getUserBadges(user.id);
+            console.log(`[Feed] Post ${post.id} (user ${user.username}): ${badges.length} badges`);
           } catch (e) {
-            // No badges, proceed
+            console.error(`[Feed] Badge fetch error for user ${user.username}:`, e);
           }
         }
         return { ...post, badges };
