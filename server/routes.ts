@@ -2295,7 +2295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const message = JSON.parse(data);
         
         if (message.action === 'subscribe' && message.postId) {
-          subscribedPostId = message.postId;
+          subscribedPostId = message.postId as string;
           
           if (!postSubscriptions.has(subscribedPostId)) {
             postSubscriptions.set(subscribedPostId, new Set());
