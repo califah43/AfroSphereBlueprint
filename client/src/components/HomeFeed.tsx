@@ -223,7 +223,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         const currentLength = scrollContainerRef.current?.querySelector('[data-testid="container-home-feed"]')?.childElementCount || 0;
         if (currentLength < 50) {
           const offset = currentLength;
-          fetch(`/api/posts?limit=20&offset=${offset}`)
+          const viewerIdParam = currentUserId ? `&viewerId=${currentUserId}` : '';
+          fetch(`/api/posts?limit=20&offset=${offset}${viewerIdParam}`)
             .then(res => res.json())
             .then(newPosts => {
               if (newPosts && newPosts.length > 0) {
