@@ -621,7 +621,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                   <p className="font-semibold text-xs text-foreground/90" data-testid={`text-reply-author-${reply.id}`}>
                                     {reply.author || "Anonymous"}
                                   </p>
-                                  {reply.badges && reply.badges.length > 0 ? (
+                                  {reply.badges && reply.badges.length > 0 && (
                                     <div className="flex items-center gap-1">
                                       {reply.badges.map((badge: any) => (
                                         <div key={badge.id} className="w-4 h-4 inline-block select-none" title={badge.name}>
@@ -636,8 +636,6 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                                         </div>
                                       ))}
                                     </div>
-                                  ) : (
-                                    reply.userId && <BadgeDisplay userId={reply.userId} className="inline-flex" />
                                   )}
                                 </div>
                                 <p className="text-xs text-muted-foreground/70">@{reply.author || "user"}</p>
