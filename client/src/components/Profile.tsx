@@ -205,14 +205,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (badgesRes.ok) {
             const badges = await badgesRes.json();
             const badgesArray = Array.isArray(badges) ? badges : [];
+            console.log("[Profile] Setting user badges:", badgesArray);
             setUserBadges(badgesArray);
             // Don't cache badges - always fetch fresh to ensure latest assignments show
+          } else {
+            console.log("[Profile] Badges fetch failed with status:", badgesRes.status);
+            setUserBadges([]);
           }
           
           setPostsLoading(false);
         }
       } catch (error) {
         console.log("Error fetching user data:", error);
+        // Even if there's an error, try to fetch badges separately
+        try {
+          if (currentUserId) {
+            const badgesRes = await fetch(`/api/badges/user/${currentUserId}`);
+            if (badgesRes.ok) {
+              const badges = await badgesRes.json();
+              const badgesArray = Array.isArray(badges) ? badges : [];
+              console.log("[Profile] Fallback badge fetch successful:", badgesArray);
+              setUserBadges(badgesArray);
+            }
+          }
+        } catch (badgeError) {
+          console.log("[Profile] Fallback badge fetch failed:", badgeError);
+        }
         setPostsLoading(false);
       }
     };
@@ -612,7 +630,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
             )}
             {userBadges && userBadges.length > 0 && (
-              <BadgeDisplay preloadedBadges={userBadges} />
+              <>
+                {console.log("[Profile Render] Showing badges, count:", userBadges.length)}
+                <BadgeDisplay preloadedBadges={userBadges} />
+              </>
             )}
           </div>
           
