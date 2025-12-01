@@ -38,7 +38,7 @@ import HashtagExplore from "./components/HashtagExplore";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
-type MainView = "home" | "explore" | "trending" | "create" | "notifications" | "profile" | "hashtags";
+type MainView = "home" | "explore" | "notifications" | "profile";
 type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre" | "hashtag-explore";
 
 export default function App() {
@@ -439,6 +439,7 @@ export default function App() {
                 onUserProfileClick={handleOpenUserProfile}
                 onHashtagClick={handleOpenHashtagFeed}
                 onCommentClick={handleOpenComments}
+                onCreateClick={() => setModalView("create")}
               />
             </div>
           )}
@@ -457,30 +458,10 @@ export default function App() {
                   setSelectedGenre(genreId);
                   setModalView("genre");
                 }}
+                onCreateClick={() => setModalView("create")}
               />
             </div>
           )}
-          {activeTab === "trending" && (
-            <div className="flex-1 overflow-y-auto">
-              <TrendingPosts
-                onPostClick={handleOpenPostDetail}
-              />
-            </div>
-          )}
-          {activeTab === "hashtags" && (() => {
-            const currentUserId = localStorage.getItem("currentUserId");
-            return (
-              <div className="flex-1 overflow-y-auto">
-                <FollowedHashtagsFeed
-                  userId={currentUserId || ""}
-                  onAuthorClick={handleOpenUserProfile}
-                  onHashtagClick={handleOpenHashtagFeed}
-                  onCommentClick={handleOpenComments}
-                  onPostClick={handleOpenPostDetail}
-                />
-              </div>
-            );
-          })()}
           {activeTab === "notifications" && (
             <div className="flex-1 overflow-y-auto">
               <Notifications onUserClick={handleOpenUserProfile} />

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import PostCard, { type Post } from "./PostCard";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { mockPosts } from "@/data/mockData";
@@ -34,9 +35,10 @@ interface HomeFeedProps {
   onUserProfileClick?: (username: string) => void;
   onHashtagClick?: (hashtag: string) => void;
   onCommentClick?: (postId: string, imageUrl: string | string[], caption: string) => void;
+  onCreateClick?: () => void;
 }
 
-export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagClick, onCommentClick }: HomeFeedProps) {
+export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagClick, onCommentClick, onCreateClick }: HomeFeedProps) {
   const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [pullDistance, setPullDistance] = useState(0);
@@ -434,6 +436,16 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
             </div>
           )}
       </div>
+
+      {/* Floating Create Button */}
+      <Button
+        onClick={onCreateClick}
+        size="icon"
+        className="fixed right-4 bottom-24 h-14 w-14 rounded-full gold-glow shadow-lg transition-all hover:scale-110"
+        data-testid="button-create-post-floating"
+      >
+        <Plus className="h-7 w-7" />
+      </Button>
     </div>
   );
 }

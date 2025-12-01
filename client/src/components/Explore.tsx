@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Sparkles, Flame, Bookmark } from "lucide-react";
+import { Search, Sparkles, Flame, Bookmark, Plus } from "lucide-react";
 import { GridSkeleton } from "@/components/SkeletonLoader";
 import SuggestedCreators from "./SuggestedCreators";
 import FeaturedAfrican from "./FeaturedAfrican";
@@ -26,6 +26,7 @@ interface ExploreProps {
   onUserProfileClick?: (username: string) => void;
   onCategoryClick?: (category: string) => void;
   onGenreClick?: (genreId: string) => void;
+  onCreateClick?: () => void;
 }
 
 const trendingCreators = [
@@ -53,7 +54,7 @@ const popularPosts = [
 interface TrendingHashtag { tag: string; count: number; posts: number; }
 interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
 
-export default function Explore({ onSearchClick, onPostClick, onHashtagClick, onUserProfileClick, onCategoryClick, onGenreClick }: ExploreProps) {
+export default function Explore({ onSearchClick, onPostClick, onHashtagClick, onUserProfileClick, onCategoryClick, onGenreClick, onCreateClick }: ExploreProps) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("featured");
   const [isLoading, setIsLoading] = useState(true);
@@ -275,9 +276,24 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
       {/* Hashtags Tab */}
       {activeTab === "hashtags" && (
         <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-          <HashtagExplore onHashtagClick={onHashtagClick} />
+          {(() => {
+            const userId = localStorage.getItem("currentUserId") || "";
+            return (
+              <HashtagExplore userId={userId} onHashtagClick={onHashtagClick} />
+            );
+          })()}
         </div>
       )}
+
+      {/* Floating Create Button */}
+      <Button
+        onClick={onCreateClick}
+        size="icon"
+        className="fixed right-4 bottom-24 h-14 w-14 rounded-full gold-glow shadow-lg transition-all hover:scale-110"
+        data-testid="button-create-post-floating-explore"
+      >
+        <Plus className="h-7 w-7" />
+      </Button>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Home, Compass, PlusCircle, Bell, User } from "lucide-react";
+import { Home, Compass, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -12,7 +12,6 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const navItems = [
     { id: "home", icon: Home, label: t("nav.home") },
     { id: "explore", icon: Compass, label: t("nav.explore") },
-    { id: "create", icon: PlusCircle, label: t("nav.create") },
     { id: "notifications", icon: Bell, label: t("nav.notifications") },
     { id: "profile", icon: User, label: t("nav.profile") },
   ];
@@ -23,7 +22,6 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
-          const isCreate = item.id === "create";
 
           return (
             <Button
@@ -31,16 +29,16 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               variant="ghost"
               size="icon"
               onClick={() => onTabChange(item.id)}
-              className={`relative transition-all ${isCreate ? "scale-110" : ""} ${isActive && isCreate ? "gold-glow" : ""}`}
+              className="relative transition-all"
               data-testid={`button-nav-${item.id}`}
             >
               <Icon
                 className={`h-6 w-6 transition-colors ${
-                  isActive ? "text-primary fill-primary" : isCreate ? "text-primary" : "text-muted-foreground"
+                  isActive ? "text-primary fill-primary" : "text-muted-foreground"
                 }`}
               />
-              {isActive && !isCreate && (
-                <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-sm`} />
+              {isActive && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-sm" />
               )}
             </Button>
           );
