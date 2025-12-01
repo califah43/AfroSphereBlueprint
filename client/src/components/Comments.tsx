@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import BadgeDisplay from "./BadgeDisplay";
 import { X, Send, Heart, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { FontSizes } from "@/lib/fontSizes";
@@ -504,7 +503,7 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                       <p className="font-bold text-sm truncate max-w-[80px]" data-testid={`text-comment-author-${comment.id}`}>
                         {comment.author || "Anonymous"}
                       </p>
-                      {comment.badges && comment.badges.length > 0 ? (
+                      {comment.badges && comment.badges.length > 0 && (
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {comment.badges.map((badge: any) => (
                             <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
@@ -519,8 +518,6 @@ export default function Comments({ postId, postImage, postCaption, onClose, onCo
                             </div>
                           ))}
                         </div>
-                      ) : (
-                        comment.userId && <BadgeDisplay userId={comment.userId} className="inline-flex flex-shrink-0" />
                       )}
                       <p className="text-xs text-muted-foreground font-medium truncate max-w-[55px]">@{comment.author || "user"}</p>
                       <span className="text-xs text-muted-foreground font-medium flex-shrink-0">·</span>

@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import BadgeDisplay from "./BadgeDisplay";
 import EngagementBar from "./EngagementBar";
 import { queryClient } from "@/lib/queryClient";
 import { preloadImage } from "@/lib/imageCache";
@@ -265,7 +264,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               <p className="font-bold text-foreground" style={{ fontSize: FontSizes.bodyS }} data-testid={`text-username-${post.id}`}>
                 {authorUsername}
               </p>
-              {post.badges && post.badges.length > 0 ? (
+              {post.badges && post.badges.length > 0 && (
                 <div className="flex items-center gap-0.5 flex-shrink-0">
                   {post.badges.map((badge) => (
                     <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
@@ -280,8 +279,6 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                     </div>
                   ))}
                 </div>
-              ) : (
-                authorId && <BadgeDisplay userId={authorId} className="inline-flex flex-shrink-0" />
               )}
               <p className="text-muted-foreground/70" style={{ fontSize: FontSizes.captionS }} data-testid={`text-handle-${post.id}`}>
                 @{authorHandle}
