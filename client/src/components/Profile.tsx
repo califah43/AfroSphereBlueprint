@@ -567,10 +567,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner - Original 4:1 Aspect Ratio */}
+      {/* Banner - Increased Size */}
       <div 
         className="relative -mt-0 cursor-pointer group w-full"
-        style={{ aspectRatio: '4/1', overflow: 'visible' }}
+        style={{ aspectRatio: '3/1', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
