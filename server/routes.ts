@@ -492,8 +492,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Feed fetch error:", error);
       // Fallback to simple recent posts
-      const posts = await storage.listPosts(limit, offset);
-      res.json(posts);
+      try {
+        const posts = await storage.listPosts(limit, offset);
+        const allUsers = await db.query.users.findMany();
+        
+        // Add badges to each post
+        const postsWithBadges = await Promise.all(posts.map(async (post) => {
+          const user = allUsers.find(u => u.id === post.userId);
+          let badges: any[] = [];
+          if (user) {
+            try {
+              badges = await storage.getUserBadges(user.id);
+            } catch (e) {
+              // No badges, proceed
+            }
+          }
+          return { ...post, badges };
+        }));
+        
+        res.json(postsWithBadges);
+      } catch (e) {
+        res.status(400).json({ error: "Failed to fetch posts" });
+      }
     }
   });
 
@@ -504,13 +524,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/posts/user/:userId", async (req, res) => {
-    const posts = await storage.listPostsByUser(req.params.userId);
-    res.json(posts);
+    try {
+      const posts = await storage.listPostsByUser(req.params.userId);
+      const allUsers = await db.query.users.findMany();
+      
+      // Add badges to each post
+      const postsWithBadges = await Promise.all(posts.map(async (post) => {
+        const user = allUsers.find(u => u.id === post.userId);
+        let badges: any[] = [];
+        if (user) {
+          try {
+            badges = await storage.getUserBadges(user.id);
+          } catch (e) {
+            // No badges, proceed
+          }
+        }
+        return { ...post, badges };
+      }));
+      
+      res.json(postsWithBadges);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch posts" });
+    }
   });
 
   app.get("/api/posts/user/:userId/liked", async (req, res) => {
-    const posts = await storage.getUserLikedPosts(req.params.userId);
-    res.json(posts);
+    try {
+      const posts = await storage.getUserLikedPosts(req.params.userId);
+      const allUsers = await db.query.users.findMany();
+      
+      // Add badges to each post
+      const postsWithBadges = await Promise.all(posts.map(async (post) => {
+        const user = allUsers.find(u => u.id === post.userId);
+        let badges: any[] = [];
+        if (user) {
+          try {
+            badges = await storage.getUserBadges(user.id);
+          } catch (e) {
+            // No badges, proceed
+          }
+        }
+        return { ...post, badges };
+      }));
+      
+      res.json(postsWithBadges);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch liked posts" });
+    }
   });
 
   app.get("/api/posts/:id", async (req, res) => {
@@ -2101,7 +2161,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const savedPosts = await storage.getSavedPosts(userId);
-      res.json(savedPosts);
+      const allUsers = await db.query.users.findMany();
+      
+      // Add badges to each post
+      const postsWithBadges = await Promise.all(savedPosts.map(async (post) => {
+        const user = allUsers.find(u => u.id === post.userId);
+        let badges: any[] = [];
+        if (user) {
+          try {
+            badges = await storage.getUserBadges(user.id);
+          } catch (e) {
+            // No badges, proceed
+          }
+        }
+        return { ...post, badges };
+      }));
+      
+      res.json(postsWithBadges);
     } catch (error) {
       res.status(400).json({ error: "Failed to fetch saved posts" });
     }
