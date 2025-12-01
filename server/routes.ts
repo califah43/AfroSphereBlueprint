@@ -887,6 +887,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/likes/posts", async (req, res) => {
     try {
       const { userId, postId } = req.body;
+      if (!userId || !postId) {
+        return res.status(400).json({ error: "Missing userId or postId" });
+      }
+
       const hasLiked = await storage.hasUserLikedPost(userId, postId);
       
       let newLikeCount = 0;
@@ -935,6 +939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ liked: !hasLiked, likes: newLikeCount });
     } catch (error) {
+      console.error('Like post error:', error);
       res.status(400).json({ error: "Invalid request" });
     }
   });
