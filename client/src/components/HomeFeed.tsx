@@ -54,8 +54,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
 
-  // Helper to format time - MUST be defined before query
-  const formatTimeAgo = (dateString: string | null | undefined): string => {
+  // Helper to format time - Memoized to prevent recreation on each render
+  const formatTimeAgo = useCallback((dateString: string | null | undefined): string => {
     if (!dateString) return "now";
     const date = new Date(dateString);
     const now = Date.now();
@@ -71,7 +71,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     if (hours < 24) return `${hours}h ago`;
     if (days === 1) return "1d ago";
     return `${days}d ago`;
-  };
+  }, []);
 
   // Get current user ID on mount - compare by ID instead of username
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   }, []);
 
   // Memoize the queryFn to prevent recreation on every render
-  const stableQueryFn = useCallback(() => fetchHomeFeedPosts(formatTimeAgo), []);
+  const stableQueryFn = useCallback(() => fetchHomeFeedPosts(formatTimeAgo), [formatTimeAgo]);
 
   // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
