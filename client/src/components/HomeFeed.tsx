@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import PostCard, { type Post } from "./PostCard";
 import { Loader2, RefreshCw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { mockPosts } from "@/data/mockData";
 import CollapsibleHeader from "./CollapsibleHeader";
 import CreatorRecommendations from "./CreatorRecommendations";
 import { useLanguage } from "@/context/LanguageContext";
+import { fetchHomeFeedPosts } from "@/lib/feedQueryFn";
 
 const PostSkeleton = () => (
   <div className="mb-6 animate-pulse space-y-3 bg-gradient-to-b from-muted/20 to-muted/10 rounded-2xl p-5 border border-border/20 opacity-50">
@@ -105,6 +106,9 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     };
   }, []);
 
+  // Memoize the queryFn to prevent recreation on every render
+  const stableQueryFn = useCallback(() => fetchHomeFeedPosts(formatTimeAgo), []);
+
   // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
     queryKey: ['/api/posts'],
@@ -112,96 +116,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     gcTime: 30 * 60 * 1000, // Keep cache for 30 minutes
     refetchInterval: false, // Don't auto-refetch - let user manually refresh
     placeholderData: keepPreviousData, // Keep showing old data while refetching - no skeleton flash!
-    queryFn: async () => {
-      try {
-        // Get current user ID
-        let userId = localStorage.getItem("currentUserId");
-        const userData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-        if (userData && userData.id && userData.id !== userId) {
-          userId = userData.id;
-        }
-
-        // Fetch posts, all users, and all badges in parallel
-        const viewerIdParam = userId ? `&viewerId=${userId}` : '';
-        const [postsRes, usersRes, badgesRes] = await Promise.all([
-          fetch(`/api/posts?limit=50${viewerIdParam}`),
-          fetch('/api/users/all'),
-          fetch('/api/badges/all'),
-        ]);
-        
-        const posts = await postsRes.json();
-        const allUsers = usersRes.ok ? await usersRes.json() : [];
-        const allBadges = badgesRes.ok ? await badgesRes.json() : [];
-        
-        // Create a map for fast user lookup
-        const userMap = new Map();
-        allUsers.forEach((u: any) => {
-          userMap.set(u.id, u);
-        });
-
-        // Create a map for fast badge lookup by userId (allBadges is already assignment objects)
-        const badgeMap = new Map();
-        if (Array.isArray(allBadges)) {
-          allBadges.forEach((badgeAssignment: any) => {
-            if (!badgeMap.has(badgeAssignment.userId)) {
-              badgeMap.set(badgeAssignment.userId, []);
-            }
-            badgeMap.get(badgeAssignment.userId).push({
-              id: badgeAssignment.badgeId || badgeAssignment.id,
-              name: badgeAssignment.name,
-              iconSvg: badgeAssignment.iconSvg,
-              type: badgeAssignment.type,
-            });
-          });
-        }
-
-        // Batch check likes for real posts
-        let likedPostIds: string[] = [];
-        if (userId && posts.length > 0) {
-          try {
-            const likeRes = await fetch('/api/likes/posts/batch-check', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, postIds: posts.map((p: any) => p.id) }),
-            });
-            if (likeRes.ok) {
-              const likeData = await likeRes.json();
-              likedPostIds = likeData.likedPostIds || [];
-            }
-          } catch (e) {
-            console.error('Failed to fetch likes:', e);
-          }
-        }
-        
-        // Transform real posts using pre-fetched user data, likes, and badges
-        const transformedRealPosts = (posts || []).map((p: any) => {
-          const user = userMap.get(p.userId);
-          return {
-            id: p.id,
-            author: { 
-              id: p.userId,
-              username: user?.displayName || "creator",
-              uniqueUsername: user?.username || "creator",
-              avatar: user?.avatar || "" 
-            },
-            imageUrl: p.image,
-            images: p.images && p.images.length > 0 ? p.images : [p.image],
-            caption: p.caption,
-            likes: p.likes !== undefined ? p.likes : 0,
-            comments: p.commentCount !== undefined ? p.commentCount : 0,
-            timeAgo: formatTimeAgo(p.createdAt),
-            category: p.category || "for-you",
-            isLiked: likedPostIds.includes(p.id),
-            badges: badgeMap.get(p.userId) || [],
-          };
-        }).filter((post: any) => post.author.username !== "creator"); // Remove placeholder posts
-        
-        // Combine: real posts (newest first) at top, then mock posts below for demo
-        return [...transformedRealPosts, ...mockPosts];
-      } catch {
-        return mockPosts;
-      }
-    },
+    queryFn: stableQueryFn,
   });
 
   // Update displayed posts from API, always use provided data (real posts + mock posts below)
@@ -268,6 +183,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   };
 
   // Facebook-style header hide/show on scroll + infinite scroll
+  // IMPORTANT: Only depend on refs and simple booleans, NOT on displayedPosts to prevent constant re-attachment
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -301,23 +217,26 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
       setLastScrollTop(currentScrollY);
       
-      // Load more when near bottom
-      if (scrollHeight - currentScrollY - clientHeight < 500 && displayedPosts.length < 50) {
-        const offset = displayedPosts.length;
-        fetch(`/api/posts?limit=20&offset=${offset}`)
-          .then(res => res.json())
-          .then(newPosts => {
-            if (newPosts && newPosts.length > 0) {
-              setDisplayedPosts([...displayedPosts, ...newPosts]);
-            }
-          })
-          .catch(() => {});
+      // Load more when near bottom - use closures to access current displayedPosts length
+      if (scrollHeight - currentScrollY - clientHeight < 500) {
+        const currentLength = scrollContainerRef.current?.querySelector('[data-testid="container-home-feed"]')?.childElementCount || 0;
+        if (currentLength < 50) {
+          const offset = currentLength;
+          fetch(`/api/posts?limit=20&offset=${offset}`)
+            .then(res => res.json())
+            .then(newPosts => {
+              if (newPosts && newPosts.length > 0) {
+                setDisplayedPosts(prev => [...prev, ...newPosts]);
+              }
+            })
+            .catch(() => {});
+        }
       }
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [displayedPosts, lastScrollTop, isRefreshing]);
+  }, [isRefreshing, pullDistance]);
 
   return (
     <div
