@@ -321,7 +321,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
                 <div key={post.id} className="animate-in fade-in duration-500">
                   <PostCard
                     post={post}
-                    isOwnPost={post.author.id === currentUserId}
+                    isOwnPost={post.author?.id === currentUserId}
                     onLike={(id) => console.log("Liked:", id)}
                     onComment={(id) => onCommentClick?.(id, post.images && post.images.length > 0 ? post.images : post.imageUrl, post.caption)}
                     onShare={(id) => onOpenShare?.()}
