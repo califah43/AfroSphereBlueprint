@@ -1,11 +1,13 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Sparkles, Flame } from "lucide-react";
+import { Search, Sparkles, Flame, Bookmark } from "lucide-react";
 import { GridSkeleton } from "@/components/SkeletonLoader";
 import SuggestedCreators from "./SuggestedCreators";
 import FeaturedAfrican from "./FeaturedAfrican";
 import TrendingAfrican from "./TrendingAfrican";
+import FollowedHashtagsFeed from "./FollowedHashtagsFeed";
+import HashtagExplore from "./HashtagExplore";
 import { useLanguage } from "@/context/LanguageContext";
 import GenreCard from "./GenreCard";
 import { GENRE_LIST } from "@shared/genres";
@@ -48,18 +50,12 @@ const popularPosts = [
   { id: "6", image: musicImage },
 ];
 
-// Mock posts for the 'all' tab, simulating a larger dataset
-const mockAllPosts = Array.from({ length: 18 }, (_, i) => ({
-  id: `mock-${i + 1}`,
-  image: [fashionImage, artImage, musicImage][i % 3],
-}));
-
-
 interface TrendingHashtag { tag: string; count: number; posts: number; }
 interface TrendingPostData { id: string; image: string; likes: number; caption: string; }
 
 export default function Explore({ onSearchClick, onPostClick, onHashtagClick, onUserProfileClick, onCategoryClick, onGenreClick }: ExploreProps) {
   const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState("featured");
   const [isLoading, setIsLoading] = useState(true);
   const [trendingHashtags, setTrendingHashtags] = useState<TrendingHashtag[]>([]);
   const [trendingPosts, setTrendingPosts] = useState<TrendingPostData[]>([]);
@@ -109,98 +105,179 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
               Search creators, hashtags...
             </div>
           </button>
+          
+          {/* Tabs for Featured, Trending, Hashtags */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full grid grid-cols-3 h-9">
+              <TabsTrigger value="featured" className="text-xs">
+                Featured
+              </TabsTrigger>
+              <TabsTrigger value="trending" className="text-xs flex items-center gap-1">
+                <Flame className="h-3 w-3" />
+                Trending
+              </TabsTrigger>
+              <TabsTrigger value="hashtags" className="text-xs flex items-center gap-1">
+                <Bookmark className="h-3 w-3" />
+                Hashtags
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-8">
-        {trendingHashtags.length > 0 && (
+      {/* Featured Tab */}
+      {activeTab === "featured" && (
+        <div className="max-w-md mx-auto px-4 py-6 space-y-8">
+          {trendingHashtags.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Trending Hashtags</h2>
+              <div className="space-y-2">
+                {trendingHashtags.slice(0, 5).map((tag) => (
+                  <button
+                    key={tag.tag}
+                    onClick={() => onHashtagClick?.(tag.tag)}
+                    className="w-full text-left px-3 py-2 rounded-lg bg-card hover:bg-card/80 transition-colors border border-border/50"
+                    data-testid={`trending-hashtag-${tag.tag}`}
+                  >
+                    <p className="font-semibold text-sm text-primary">#{tag.tag}</p>
+                    <p className="text-xs text-muted-foreground">{tag.posts.toLocaleString()} posts</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <FeaturedAfrican onCreatorClick={onUserProfileClick} />
+          <TrendingAfrican onHashtagClick={onHashtagClick} />
+          
           <div>
-            <h2 className="text-lg font-semibold mb-4">Trending Hashtags</h2>
-            <div className="space-y-2">
-              {trendingHashtags.slice(0, 5).map((tag) => (
+            <h2 className="text-lg font-semibold mb-4">Explore Genres</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {GENRE_LIST.map((genre) => (
+                <GenreCard 
+                  key={genre.id} 
+                  genreId={genre.id.toUpperCase()} 
+                  postsCount={Math.floor(Math.random() * 50) + 10}
+                  onClick={() => onGenreClick?.(genre.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <SuggestedCreators />
+
+          <div>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-categories">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Categories
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              {categories.map((category) => (
                 <button
-                  key={tag.tag}
-                  onClick={() => onHashtagClick?.(tag.tag)}
-                  className="w-full text-left px-3 py-2 rounded-lg bg-card hover:bg-card/80 transition-colors border border-border/50"
-                  data-testid={`trending-hashtag-${tag.tag}`}
+                  key={category.name}
+                  onClick={() => onCategoryClick?.(category.name.toLowerCase())}
+                  className="relative h-40 rounded-lg overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 hover-elevate"
+                  data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
                 >
-                  <p className="font-semibold text-sm text-primary">#{tag.tag}</p>
-                  <p className="text-xs text-muted-foreground">{tag.posts.toLocaleString()} posts</p>
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent/0 flex flex-col items-start justify-end p-4 group-hover:from-black/95 transition-all duration-300">
+                    <p className="text-white font-bold text-base">{category.name}</p>
+                    <p className="text-white/70 text-xs mt-1">Browse</p>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
-        )}
 
-        <FeaturedAfrican onCreatorClick={onUserProfileClick} />
-        <TrendingAfrican onHashtagClick={onHashtagClick} />
-        
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Explore Genres</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {GENRE_LIST.map((genre) => (
-              <GenreCard 
-                key={genre.id} 
-                genreId={genre.id.toUpperCase()} 
-                postsCount={Math.floor(Math.random() * 50) + 10}
-                onClick={() => onGenreClick?.(genre.id)}
-              />
-            ))}
+          <div>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-popular-posts">
+              <Flame className="h-5 w-5 text-primary" />
+              Popular Posts
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {displayPosts.map((post) => (
+                <button
+                  key={post.id}
+                  onClick={() => onPostClick?.(post.id)}
+                  className="aspect-square overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 group hover-elevate"
+                  data-testid={`popular-post-${post.id}`}
+                >
+                  <img
+                    src={post.image}
+                    alt="Post"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+      )}
 
-        <SuggestedCreators />
+      {/* Trending Tab */}
+      {activeTab === "trending" && (
+        <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Flame className="h-5 w-5 text-primary" />
+              Trending Now
+            </h2>
+            
+            {/* Trending Hashtags */}
+            <div className="mb-6">
+              <h3 className="text-base font-semibold mb-3">Hot Hashtags</h3>
+              <div className="space-y-2">
+                {trendingHashtags.map((tag) => (
+                  <button
+                    key={tag.tag}
+                    onClick={() => onHashtagClick?.(tag.tag)}
+                    className="w-full text-left px-3 py-2 rounded-lg bg-card hover:bg-card/80 transition-colors border border-border/50"
+                    data-testid={`trending-hashtag-explore-${tag.tag}`}
+                  >
+                    <p className="font-semibold text-sm text-primary">#{tag.tag}</p>
+                    <p className="text-xs text-muted-foreground">{tag.posts.toLocaleString()} posts • {tag.count} followers</p>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-categories">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Categories
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => onCategoryClick?.(category.name.toLowerCase())}
-                className="relative h-40 rounded-lg overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 hover-elevate"
-                data-testid={`category-${category.name.toLowerCase().replace(" ", "-")}`}
-              >
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent/0 flex flex-col items-start justify-end p-4 group-hover:from-black/95 transition-all duration-300">
-                  <p className="text-white font-bold text-base">{category.name}</p>
-                  <p className="text-white/70 text-xs mt-1">Browse</p>
-                </div>
-              </button>
-            ))}
+            {/* Trending Posts */}
+            <div>
+              <h3 className="text-base font-semibold mb-3">Trending Posts</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {displayPosts.map((post) => (
+                  <button
+                    key={post.id}
+                    onClick={() => onPostClick?.(post.id)}
+                    className="aspect-square overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 group hover-elevate relative"
+                    data-testid={`trending-post-${post.id}`}
+                  >
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                      <Flame className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
+      )}
 
-        <div>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="text-popular-posts">
-            <Flame className="h-5 w-5 text-primary" />
-            Popular Posts
-          </h2>
-          <div className="grid grid-cols-3 gap-2">
-            {displayPosts.map((post) => (
-              <button
-                key={post.id}
-                onClick={() => onPostClick?.(post.id)}
-                className="aspect-square overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300 group hover-elevate"
-                data-testid={`popular-post-${post.id}`}
-              >
-                <img
-                  src={post.image}
-                  alt="Post"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-              </button>
-            ))}
-          </div>
+      {/* Hashtags Tab */}
+      {activeTab === "hashtags" && (
+        <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+          <HashtagExplore onHashtagClick={onHashtagClick} />
         </div>
-      </div>
+      )}
     </div>
   );
 }
