@@ -123,6 +123,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
     const newLiked = !isLiked;
     const newLikes = newLiked ? likes + 1 : Math.max(0, likes - 1);
     
+    console.log("[PostCard] handleLike called - toggling from", isLiked, "to", newLiked);
     setIsLiked(newLiked);
     setLikes(newLikes);
 
@@ -135,12 +136,14 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
 
       if (res.ok) {
         const data = await res.json();
+        console.log("[PostCard] Like response:", data);
         if (data.likes !== undefined) {
           setLikes(data.likes);
         }
         setIsLiked(data.liked);
       } else {
         // Rollback on error
+        console.log("[PostCard] Like failed, rolling back");
         setIsLiked(previousLiked);
         setLikes(previousLikes);
         toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
@@ -148,15 +151,17 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
       onLike?.(post.id);
     } catch (error) {
       // Rollback on error
+      console.log("[PostCard] Like error:", error);
       setIsLiked(previousLiked);
       setLikes(previousLikes);
       toast({ title: "Error", description: "Failed to like post", variant: "destructive" });
     }
   };
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = async () => {
     // Call the actual like API function for double-tap - always toggle like state
-    handleLike();
+    console.log("[PostCard] Double-tap detected on post", post.id, "current isLiked:", isLiked);
+    await handleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1000);
   };
