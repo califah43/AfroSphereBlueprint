@@ -276,91 +276,63 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   // Listen for post refresh events to refetch user's posts
   useEffect(() => {
     const handleRefresh = async () => {
-      try {
-        let userId: string = "";
-        if (isOwnProfile) {
-          const storedData = localStorage.getItem("currentUserData");
-          if (storedData) {
-            const userData = JSON.parse(storedData);
-            userId = userData.id || "";
-            setIsAccountPrivate(userData.isPrivate || false);
-          }
-        } else if (username) {
-          const res = await fetch(`/api/users/username/${username}`);
-          if (res.ok) {
-            const userData = await res.json();
-            userId = userData.id || "";
-            setIsAccountPrivate(userData.isPrivate || false);
-          }
-        }
-
-        if (userId) {
-          // Load cached data immediately
-          const cachedPostsKey = `posts_${userId}`;
-          const cachedLikedKey = `liked_${userId}`;
-          const cachedSavedKey = `saved_${userId}`;
-          
-          const cachedPosts = localStorage.getItem(cachedPostsKey);
-          const cachedLiked = localStorage.getItem(cachedLikedKey);
-          const cachedSaved = localStorage.getItem(cachedSavedKey);
-          
-          if (cachedPosts) {
-            try {
-              setUserPosts(JSON.parse(cachedPosts));
-            } catch (e) {
-              // Invalid cache, ignore
-            }
-          }
-          
-          if (cachedLiked) {
-            try {
-              setLikedPosts(JSON.parse(cachedLiked));
-            } catch (e) {
-              // Invalid cache, ignore
-            }
-          }
-          
-          if (cachedSaved && isOwnProfile) {
-            try {
-              setSavedPosts(JSON.parse(cachedSaved));
-            } catch (e) {
-              // Invalid cache, ignore
-            }
-          }
-          
-          // Build fetch requests - only fetch saved posts for own profile
-          const fetchRequests = [
-            fetch(`/api/posts/user/${userId}`),
-            fetch(`/api/posts/user/${userId}/liked`),
-          ];
-          
+      // Just trigger a refetch of the main data - reuse the main fetch logic
+      const fetchUserData = async () => {
+        let currentUserId: string = "";
+        try {
           if (isOwnProfile) {
-            fetchRequests.push(fetch(`/api/posts/user/${userId}/saved`));
+            const storedData = localStorage.getItem("currentUserData");
+            if (storedData) {
+              const userData = JSON.parse(storedData);
+              currentUserId = userData.id || "";
+            }
+          } else if (username) {
+            const res = await fetch(`/api/users/username/${username}`);
+            if (res.ok) {
+              const userData = await res.json();
+              currentUserId = userData.id || "";
+            }
           }
-          
-          const responses = await Promise.all(fetchRequests);
-          const [postsRes, likedRes, ...savedArray] = responses;
-          const savedRes = isOwnProfile ? savedArray[0] : null;
-          
-          if (postsRes.ok) {
-            const posts = await postsRes.json();
-            setUserPosts(posts || []);
-            localStorage.setItem(cachedPostsKey, JSON.stringify(posts || []));
+
+          if (currentUserId) {
+            const cachedPostsKey = `posts_${currentUserId}`;
+            const cachedLikedKey = `liked_${currentUserId}`;
+            const cachedSavedKey = `saved_${currentUserId}`;
+            
+            const fetchRequests = [
+              fetch(`/api/posts/user/${currentUserId}`),
+              fetch(`/api/posts/user/${currentUserId}/liked`),
+            ];
+            
+            if (isOwnProfile) {
+              fetchRequests.push(fetch(`/api/posts/user/${currentUserId}/saved`));
+            }
+            
+            const responses = await Promise.all(fetchRequests);
+            const [postsRes, likedRes, ...savedArray] = responses;
+            const savedRes = isOwnProfile ? savedArray[0] : null;
+            
+            if (postsRes.ok) {
+              const posts = await postsRes.json();
+              setUserPosts(posts || []);
+              localStorage.setItem(cachedPostsKey, JSON.stringify(posts || []));
+            }
+            if (likedRes.ok) {
+              const liked = await likedRes.json();
+              setLikedPosts(liked || []);
+              localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
+            }
+            if (isOwnProfile && savedRes && savedRes.ok) {
+              const saved = await savedRes.json();
+              setSavedPosts(saved || []);
+              localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
+            }
           }
-          if (likedRes.ok) {
-            const liked = await likedRes.json();
-            setLikedPosts(liked || []);
-            localStorage.setItem(cachedLikedKey, JSON.stringify(liked || []));
-          }
-          if (isOwnProfile && savedRes && savedRes.ok) {
-            const saved = await savedRes.json();
-            setSavedPosts(saved || []);
-            localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
-          }
+        } catch (error) {
+          console.log("Error refreshing user posts:", error);
         }
-      } catch (error) {
-        console.log("Error refreshing user posts:", error);
-      }
+      };
+      await fetchUserData();
     };
 
     const handlePrivacyChange = () => {
@@ -379,7 +351,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       window.removeEventListener('refreshPosts', handleRefresh);
       window.removeEventListener('userPrivacyChanged', handlePrivacyChange);
     };
-  }, [username, isOwnProfile]);
+  }, [isOwnProfile, username]);
   
   // Get the username for API calls (use stored for own profile, fallback for others)
   const getApiUsername = () => {
