@@ -8,13 +8,25 @@ import multer from "multer";
 const storage = new DbStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge } from "@shared/schema";
 import { sendPushNotification } from "./firebase-admin";
+import { WebSocketServer } from "ws";
+import type { WebSocket } from "ws";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
-// Real-time updates via polling - clients refetch automatically
+// WebSocket manager for real-time post updates
+const postSubscriptions = new Map<string, Set<WebSocket>>();
+
 const broadcastUpdate = (event: string, data: any) => {
-  // Broadcast logic - clients use React Query to refetch when needed
+  if (event === 'post:liked' && data.postId) {
+    const subscribers = postSubscriptions.get(data.postId);
+    if (subscribers) {
+      const message = JSON.stringify({ type: 'post:updated', postId: data.postId, likes: data.likes });
+      subscribers.forEach(ws => {
+        if (ws.readyState === 1) ws.send(message);
+      });
+    }
+  }
   console.log(`Update: ${event}`, data);
 };
 
@@ -2271,5 +2283,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // Setup WebSocket for real-time post updates
+  const wss = new WebSocketServer({ server: httpServer, path: '/api/posts/watch' });
+
+  wss.on('connection', (ws: WebSocket) => {
+    let subscribedPostId: string | null = null;
+
+    ws.on('message', (data: string) => {
+      try {
+        const message = JSON.parse(data);
+        
+        if (message.action === 'subscribe' && message.postId) {
+          subscribedPostId = message.postId;
+          
+          if (!postSubscriptions.has(subscribedPostId)) {
+            postSubscriptions.set(subscribedPostId, new Set());
+          }
+          postSubscriptions.get(subscribedPostId)!.add(ws);
+        }
+      } catch (e) {
+        console.error('WebSocket message parse error:', e);
+      }
+    });
+
+    ws.on('close', () => {
+      if (subscribedPostId) {
+        const subscribers = postSubscriptions.get(subscribedPostId);
+        if (subscribers) {
+          subscribers.delete(ws);
+          if (subscribers.size === 0) {
+            postSubscriptions.delete(subscribedPostId);
+          }
+        }
+      }
+    });
+  });
+
   return httpServer;
 }

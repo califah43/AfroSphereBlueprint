@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Trash2, Flag, Copy, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import EngagementBar from "./EngagementBar";
 import { queryClient } from "@/lib/queryClient";
 import { preloadImage } from "@/lib/imageCache";
 import { FontSizes } from "@/lib/fontSizes";
+import { usePostWatcher } from "@/hooks/usePostWatcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,6 +67,15 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState(0);
   const { toast } = useToast();
+  
+  // Real-time like count updates via WebSocket
+  const handlePostUpdate = useCallback((data: any) => {
+    if (data.likes !== undefined) {
+      setLikes(data.likes);
+    }
+  }, []);
+  
+  usePostWatcher(post.id, handlePostUpdate);
   
   // Get all images for carousel and preload them for fast navigation
   const allImages = useMemo(() => {
