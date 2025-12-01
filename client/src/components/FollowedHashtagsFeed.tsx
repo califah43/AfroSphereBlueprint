@@ -21,18 +21,7 @@ export default function FollowedHashtagsFeed({
 }: FollowedHashtagsFeedProps) {
   const { t } = useLanguage();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [refreshKey, setRefreshKey] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Listen for real-time post updates
-  useEffect(() => {
-    const handlePostUpdate = (event: CustomEvent) => {
-      setRefreshKey(prev => prev + 1);
-    };
-
-    window.addEventListener('postUpdate' as any, handlePostUpdate as EventListener);
-    return () => window.removeEventListener('postUpdate' as any, handlePostUpdate as EventListener);
-  }, []);
 
   // Fetch posts from followed hashtags
   const { data: followedHashtags = [], isLoading: isHashtagsLoading } = useQuery({
@@ -48,7 +37,7 @@ export default function FollowedHashtagsFeed({
 
   // Fetch posts for followed hashtags
   const { data: hashtagPosts = [], isLoading: isPostsLoading } = useQuery({
-    queryKey: ['/api/posts/hashtags/followed', userId, refreshKey],
+    queryKey: ['/api/posts/hashtags/followed', userId],
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     placeholderData: keepPreviousData,

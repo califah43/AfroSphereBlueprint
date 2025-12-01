@@ -164,7 +164,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                 }
               }
             } catch (e) {
-              console.log("Error checking follow status:", e);
+              // Silent fail - follow status check isn't critical
             }
           }
           
