@@ -186,24 +186,50 @@ export class DbStorage implements IStorage {
   }
 
   async likePost(userId: string, postId: string): Promise<Like> {
-    let like: Like | null = null;
-    await db.transaction(async (tx) => {
-      // Add like record
-      const [newLike] = await tx.insert(likes).values({ userId, postId }).returning();
-      like = newLike;
-      // Atomically increment post like count
-      await tx.update(posts).set({ likes: sql`${posts.likes} + 1` }).where(eq(posts.id, postId));
-    });
-    return like!;
+    try {
+      let insertedLike: Like | null = null;
+      
+      await db.transaction(async (tx) => {
+        // Check if already liked
+        const existingLike = await tx.query.likes.findFirst({
+          where: and(eq(likes.userId, userId), eq(likes.postId, postId)),
+        });
+        if (existingLike) throw new Error('Already liked');
+        
+        // Add like record
+        const [newLike] = await tx.insert(likes).values({ userId, postId }).returning();
+        insertedLike = newLike;
+        
+        // Get current post and increment count
+        const post = await tx.query.posts.findFirst({ where: eq(posts.id, postId) });
+        if (post) {
+          await tx.update(posts).set({ likes: (post.likes || 0) + 1 }).where(eq(posts.id, postId));
+        }
+      });
+      
+      return insertedLike!;
+    } catch (error) {
+      console.error('likePost error:', error);
+      throw error;
+    }
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
-    await db.transaction(async (tx) => {
-      // Remove like record
-      await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
-      // Atomically decrement post like count
-      await tx.update(posts).set({ likes: sql`CASE WHEN ${posts.likes} > 0 THEN ${posts.likes} - 1 ELSE 0 END` }).where(eq(posts.id, postId));
-    });
+    try {
+      await db.transaction(async (tx) => {
+        // Remove like record
+        await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
+        
+        // Get current post and decrement count
+        const post = await tx.query.posts.findFirst({ where: eq(posts.id, postId) });
+        if (post) {
+          await tx.update(posts).set({ likes: Math.max(0, (post.likes || 0) - 1) }).where(eq(posts.id, postId));
+        }
+      });
+    } catch (error) {
+      console.error('unlikePost error:', error);
+      throw error;
+    }
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
@@ -214,24 +240,50 @@ export class DbStorage implements IStorage {
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
-    let like: Like | null = null;
-    await db.transaction(async (tx) => {
-      // Add like record
-      const [newLike] = await tx.insert(likes).values({ userId, commentId }).returning();
-      like = newLike;
-      // Atomically increment comment like count
-      await tx.update(comments).set({ likes: sql`${comments.likes} + 1` }).where(eq(comments.id, commentId));
-    });
-    return like!;
+    try {
+      let insertedLike: Like | null = null;
+      
+      await db.transaction(async (tx) => {
+        // Check if already liked
+        const existingLike = await tx.query.likes.findFirst({
+          where: and(eq(likes.userId, userId), eq(likes.commentId, commentId)),
+        });
+        if (existingLike) throw new Error('Already liked');
+        
+        // Add like record
+        const [newLike] = await tx.insert(likes).values({ userId, commentId }).returning();
+        insertedLike = newLike;
+        
+        // Get current comment and increment count
+        const comment = await tx.query.comments.findFirst({ where: eq(comments.id, commentId) });
+        if (comment) {
+          await tx.update(comments).set({ likes: (comment.likes || 0) + 1 }).where(eq(comments.id, commentId));
+        }
+      });
+      
+      return insertedLike!;
+    } catch (error) {
+      console.error('likeComment error:', error);
+      throw error;
+    }
   }
 
   async unlikeComment(userId: string, commentId: string): Promise<void> {
-    await db.transaction(async (tx) => {
-      // Remove like record
-      await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
-      // Atomically decrement comment like count
-      await tx.update(comments).set({ likes: sql`CASE WHEN ${comments.likes} > 0 THEN ${comments.likes} - 1 ELSE 0 END` }).where(eq(comments.id, commentId));
-    });
+    try {
+      await db.transaction(async (tx) => {
+        // Remove like record
+        await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
+        
+        // Get current comment and decrement count
+        const comment = await tx.query.comments.findFirst({ where: eq(comments.id, commentId) });
+        if (comment) {
+          await tx.update(comments).set({ likes: Math.max(0, (comment.likes || 0) - 1) }).where(eq(comments.id, commentId));
+        }
+      });
+    } catch (error) {
+      console.error('unlikeComment error:', error);
+      throw error;
+    }
   }
 
   async followUser(followerId: string, followingId: string): Promise<Follow> {
