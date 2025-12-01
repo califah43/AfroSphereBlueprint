@@ -614,13 +614,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             {userBadges && userBadges.length > 0 && (
               <div className="flex items-center gap-1">
                 {userBadges.map((badge: any) => (
-                  <div key={badge.id} className="w-4 h-4 inline-block" title={badge.name}>
-                    <img 
-                      src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
-                      alt={badge.name}
-                      className="w-full h-full"
-                    />
-                  </div>
+                  <BadgeDisplay key={badge.id} badge={badge} />
                 ))}
               </div>
             )}
