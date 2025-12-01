@@ -505,10 +505,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner - Thin Strip - 4:1 Aspect Ratio */}
+      {/* Banner - 500px Height */}
       <div 
         className="relative -mt-0 cursor-pointer group w-full"
-        style={{ aspectRatio: '4/1', overflow: 'visible' }}
+        style={{ height: '500px', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
