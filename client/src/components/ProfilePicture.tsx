@@ -18,7 +18,7 @@ const sizeMap = {
   md: "h-12 w-12",
   lg: "h-24 w-24",
   xl: "h-16 w-16",
-  xxl: "h-28 w-28",
+  xxl: "h-20 w-20",
 };
 
 const iconSizeMap = {
