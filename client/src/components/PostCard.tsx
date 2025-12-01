@@ -155,10 +155,10 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   const handleDoubleClick = () => {
-    // Fire like immediately without waiting - Instagram style instant feedback
+    // Fire like immediately without waiting - TikTok style instant feedback
     handleLike();
     setShowHeart(true);
-    setTimeout(() => setShowHeart(false), 600);
+    setTimeout(() => setShowHeart(false), 500);
   };
 
   const handleBookmark = async () => {
@@ -465,11 +465,12 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <Heart 
-              className="w-28 h-28 drop-shadow-lg" 
+              className="w-32 h-32 drop-shadow-2xl" 
               style={{ 
                 color: 'hsl(25 95% 50%)',
                 fill: 'hsl(25 95% 50%)',
-                animation: 'instagramHeartBurst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' 
+                filter: 'drop-shadow(0 0 12px hsl(25 95% 50% / 0.6))',
+                animation: 'instagramHeartBurst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' 
               }} 
             />
           </div>

@@ -225,18 +225,22 @@
   }
 }
 
-/* Smooth double-tap like animation */
+/* TikTok-style double-tap like animation - snappy and beautiful */
 @keyframes instagramHeartBurst {
   0% {
-    transform: scale(0.1);
+    transform: scale(0.2) rotate(-15deg);
     opacity: 1;
   }
-  50% {
-    transform: scale(1.15);
+  40% {
+    transform: scale(1.2) rotate(5deg);
     opacity: 1;
+  }
+  70% {
+    transform: scale(1.05) rotate(0deg);
+    opacity: 0.8;
   }
   100% {
-    transform: scale(1);
+    transform: scale(0.8) rotate(0deg);
     opacity: 0;
   }
 }
