@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, MessageCircle, Eye, Bookmark, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -37,19 +37,6 @@ export default function EngagementBar({
   const [localIsLiked, setLocalIsLiked] = useState(isLiked);
   const [localIsBookmarked, setLocalIsBookmarked] = useState(isBookmarked);
   const [heartScale, setHeartScale] = useState(1);
-
-  // Sync with parent component's prop changes (e.g., when double-tap updates isLiked)
-  useEffect(() => {
-    setLocalIsLiked(isLiked);
-  }, [isLiked]);
-
-  useEffect(() => {
-    setLocalIsBookmarked(isBookmarked);
-  }, [isBookmarked]);
-
-  useEffect(() => {
-    setLocalLikes(likes);
-  }, [likes]);
 
   const handleLike = () => {
     setLocalIsLiked(!localIsLiked);
