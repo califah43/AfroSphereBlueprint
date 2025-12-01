@@ -52,15 +52,32 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const { uploadProfilePicture, isUploading } = useProfilePictureUpload();
   const { toast } = useToast();
 
-  // Clear all badge cache from localStorage on mount
+  // Show cached badges immediately on mount for instant display
   useEffect(() => {
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('badges_')) {
-        localStorage.removeItem(key);
+    if (isOwnProfile) {
+      const storedData = localStorage.getItem("currentUserData");
+      if (storedData) {
+        try {
+          const userData = JSON.parse(storedData);
+          const userId = userData.id;
+          if (userId) {
+            const cachedBadges = localStorage.getItem(`badges_${userId}`);
+            if (cachedBadges) {
+              try {
+                const badges = JSON.parse(cachedBadges);
+                setUserBadges(badges);
+                console.log("[Profile] Loaded cached badges instantly:", badges);
+              } catch (e) {
+                // Invalid cache
+              }
+            }
+          }
+        } catch (e) {
+          // Invalid storage
+        }
       }
-    });
-  }, []);
+    }
+  }, [isOwnProfile]);
 
   // Fetch user data and posts from backend
   useEffect(() => {
@@ -207,7 +224,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             const badgesArray = Array.isArray(badges) ? badges : [];
             console.log("[Profile] Setting user badges:", badgesArray);
             setUserBadges(badgesArray);
-            // Don't cache badges - always fetch fresh to ensure latest assignments show
+            // Cache badges in localStorage for instant loading next time
+            localStorage.setItem(`badges_${currentUserId}`, JSON.stringify(badgesArray));
           } else {
             console.log("[Profile] Badges fetch failed with status:", badgesRes.status);
             setUserBadges([]);
@@ -259,6 +277,19 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     }
 
     function fetchBadgesForUser(userId: string) {
+      // Try to load from cache first for instant display
+      const cachedBadges = localStorage.getItem(`badges_${userId}`);
+      if (cachedBadges) {
+        try {
+          const badges = JSON.parse(cachedBadges);
+          setUserBadges(badges);
+          console.log("[Profile] Showing cached badges instantly:", badges);
+        } catch (e) {
+          // Invalid cache, ignore
+        }
+      }
+      
+      // Always fetch fresh in background
       fetch(`/api/badges/user/${userId}`)
         .then(res => {
           if (res.ok) return res.json();
@@ -266,12 +297,14 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         })
         .then(badges => {
           const badgesArray = Array.isArray(badges) ? badges : [];
-          console.log("[Profile] Badges loaded immediately:", badgesArray);
+          console.log("[Profile] Fresh badges loaded:", badgesArray);
           setUserBadges(badgesArray);
+          // Update cache
+          localStorage.setItem(`badges_${userId}`, JSON.stringify(badgesArray));
         })
         .catch(err => {
           console.log("[Profile] Badge fetch failed:", err);
-          setUserBadges([]);
+          // Still keep cached badges showing if fetch fails
         });
     }
   }, [username, isOwnProfile]);
