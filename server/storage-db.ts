@@ -207,10 +207,10 @@ export class DbStorage implements IStorage {
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
-    const result = await db.execute(
-      sql`SELECT EXISTS(SELECT 1 FROM ${likes} WHERE ${eq(likes.userId, userId)} AND ${eq(likes.postId, postId)})`
-    );
-    return result[0].exists === true;
+    const result = await db.query.likes.findFirst({
+      where: and(eq(likes.userId, userId), eq(likes.postId, postId)),
+    });
+    return !!result;
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
