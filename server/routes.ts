@@ -487,8 +487,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Apply offset and limit
       const paginatedFeed = feed.slice(offset, offset + limit);
+      
+      // Add badges to each post in feed
+      const allUsers = await db.query.users.findMany();
+      const feedWithBadges = await Promise.all(paginatedFeed.map(async (post) => {
+        const user = allUsers.find(u => u.id === post.userId);
+        let badges: any[] = [];
+        if (user) {
+          try {
+            badges = await storage.getUserBadges(user.id);
+          } catch (e) {
+            // No badges, proceed
+          }
+        }
+        return { ...post, badges };
+      }));
 
-      res.json(paginatedFeed);
+      res.json(feedWithBadges);
     } catch (error) {
       console.error("Feed fetch error:", error);
       // Fallback to simple recent posts
@@ -574,9 +589,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/posts/:id", async (req, res) => {
-    const post = await storage.getPost(req.params.id);
-    if (!post) return res.status(404).json({ error: "Post not found" });
-    res.json(post);
+    try {
+      const post = await storage.getPost(req.params.id);
+      if (!post) return res.status(404).json({ error: "Post not found" });
+      
+      // Add badges to post
+      let badges: any[] = [];
+      try {
+        badges = await storage.getUserBadges(post.userId);
+      } catch (e) {
+        // No badges, proceed
+      }
+      
+      res.json({ ...post, badges });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch post" });
+    }
   });
 
   app.post("/api/posts", async (req, res) => {
