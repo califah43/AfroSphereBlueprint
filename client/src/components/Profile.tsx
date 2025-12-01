@@ -505,10 +505,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         </div>
       )}
 
-      {/* Banner - 500px Height Zoomed In */}
+      {/* Banner - Original 4:1 Aspect Ratio */}
       <div 
-        className="relative -mt-0 cursor-pointer group w-full overflow-hidden"
-        style={{ height: '500px' }}
+        className="relative -mt-0 cursor-pointer group w-full"
+        style={{ aspectRatio: '4/1', overflow: 'visible' }}
         onClick={() => setShowHeaderViewer(true)}
         data-testid="div-profile-banner"
       >
@@ -517,15 +517,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <img
               src={userProfile.banner}
               alt="Profile banner"
-              className="w-full h-full object-cover object-center opacity-85 group-hover:opacity-75 transition-opacity"
-              style={{ transform: 'scale(1.3)' }}
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
             />
           ) : (
             <img
               src={bannerImage}
               alt="Profile banner"
-              className="w-full h-full object-cover object-center opacity-85 group-hover:opacity-75 transition-opacity"
-              style={{ transform: 'scale(1.3)' }}
+              className="w-full h-full object-cover opacity-85 group-hover:opacity-75 transition-opacity"
             />
           )}
         </div>
