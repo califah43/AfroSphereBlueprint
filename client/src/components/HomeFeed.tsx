@@ -53,6 +53,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
+  const lastScrollYRef = useRef(0);
 
   // Helper to format time - Memoized to prevent recreation on each render
   const formatTimeAgo = useCallback((dateString: string | null | undefined): string => {
@@ -183,7 +184,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   };
 
   // Facebook-style header hide/show on scroll + infinite scroll
-  // IMPORTANT: Only depend on refs and simple booleans, NOT on displayedPosts to prevent constant re-attachment
+  // Use ref to track scroll position without creating infinite loops
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -191,25 +192,20 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     const handleScroll = () => {
       const currentScrollY = container.scrollTop;
       const { scrollHeight, clientHeight } = container;
-      const scrollDelta = currentScrollY - lastScrollTop;
+      const lastScrollY = lastScrollYRef.current;
       
-      // Facebook-style: hide on scroll down, show IMMEDIATELY on scroll up
-      if (!isRefreshing && pullDistance === 0) {
-        // Scroll up ANY amount = show header immediately
-        if (scrollDelta < 0) {
-          setIsHeaderVisible(true);
-        } 
-        // Scroll down = hide header
-        else if (scrollDelta > 0) {
-          setIsHeaderVisible(false);
-        }
-      } else {
+      // Facebook-style: show header on ANY upward scroll
+      if (currentScrollY < lastScrollY) {
+        // Scrolling UP - show header immediately
         setIsHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY + 3) {
+        // Scrolling DOWN significantly - hide header
+        setIsHeaderVisible(false);
       }
-
-      setLastScrollTop(currentScrollY);
       
-      // Load more when near bottom - use closures to access current displayedPosts length
+      lastScrollYRef.current = currentScrollY;
+      
+      // Load more when near bottom
       if (scrollHeight - currentScrollY - clientHeight < 500) {
         const currentLength = scrollContainerRef.current?.querySelector('[data-testid="container-home-feed"]')?.childElementCount || 0;
         if (currentLength < 50) {
@@ -228,7 +224,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [isRefreshing, pullDistance]);
+  }, []);
 
   return (
     <div
