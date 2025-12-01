@@ -78,7 +78,14 @@ export const insertPostSchema = createInsertSchema(posts).omit({
 });
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
-export type Post = typeof posts.$inferSelect;
+export type Post = typeof posts.$inferSelect & { badges?: Badge[] };
+export interface Badge {
+  id: string;
+  name: string;
+  iconSvg: string;
+  type: string;
+  description: string;
+}
 
 // ============ COMMENTS ============
 export const comments = pgTable("comments", {
