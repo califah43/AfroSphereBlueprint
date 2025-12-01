@@ -611,12 +611,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             {isAccountPrivate && (
               <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
             )}
-            {userBadges && userBadges.length > 0 && (
-              <div className="flex items-center gap-1">
-                {userBadges.map((badge: any) => (
-                  <BadgeDisplay key={badge.id} badge={badge} />
-                ))}
-              </div>
+            {userId && userBadges && userBadges.length > 0 && (
+              <BadgeDisplay userId={userId} preloadedBadges={userBadges} />
             )}
           </div>
           
