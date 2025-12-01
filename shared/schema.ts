@@ -201,12 +201,10 @@ export const badges = pgTable("badges", {
   type: text("type").notNull(),
   description: text("description").notNull(),
   iconSvg: text("icon_svg").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertBadgeSchema = createInsertSchema(badges).omit({
   id: true,
-  createdAt: true,
 });
 
 export type InsertBadge = z.infer<typeof insertBadgeSchema>;
