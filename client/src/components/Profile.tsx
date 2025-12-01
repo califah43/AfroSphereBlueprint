@@ -6,7 +6,6 @@ import { Settings, Heart, Share2, X, MapPin, Briefcase, Link, Users, Grid3X3, Lo
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { FontSizes } from "@/lib/fontSizes";
-import CreatorBadge from "./CreatorBadge";
 import BadgeDisplay from "./BadgeDisplay";
 import ProfilePictureModal from "./ProfilePictureModal";
 import ProfilePicture from "./ProfilePicture";
@@ -640,10 +639,6 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             <span>Joined {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
           </div>
 
-          {/* Creator Badge */}
-          <div className="flex items-center mb-2">
-            <CreatorBadge type="fashion-vanguard" size="sm" />
-          </div>
         </div>
 
         {/* Professional Info - Compact & Refined */}

@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import CreatorBadge, { type BadgeType } from "./CreatorBadge";
 
 interface Creator {
   id?: string;
@@ -12,16 +11,9 @@ interface Creator {
   bio: string;
   followers: string;
   avatar?: string;
-  badge?: BadgeType;
 }
 
 const suggestedCreatorUsernames = ["adikeafrica", "beat_masta", "kojoart"];
-
-const badgeMap: Record<string, BadgeType> = {
-  "adikeafrica": "fashion-vanguard",
-  "beat_masta": "music-star",
-  "kojoart": "top-artist",
-};
 
 export default function SuggestedCreators() {
   const [suggestedCreators, setSuggestedCreators] = useState<Creator[]>([]);
@@ -50,7 +42,6 @@ export default function SuggestedCreators() {
                 name: userData.displayName || userData.username,
                 bio: userData.bio || "Creative on AfroSphere",
                 followers: (userData.followerCount || 0).toLocaleString(),
-                badge: badgeMap[username],
               });
 
               // Check follow status if user is logged in
