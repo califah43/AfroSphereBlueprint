@@ -78,14 +78,7 @@ export const insertPostSchema = createInsertSchema(posts).omit({
 });
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
-export type Post = typeof posts.$inferSelect & { badges?: Badge[] };
-export interface Badge {
-  id: string;
-  name: string;
-  iconSvg: string;
-  type: string;
-  description: string;
-}
+export type Post = typeof posts.$inferSelect & { badges?: typeof badges.$inferSelect[] };
 
 // ============ COMMENTS ============
 export const comments = pgTable("comments", {
@@ -205,9 +198,9 @@ export type UserReport = typeof userReports.$inferSelect;
 export const badges = pgTable("badges", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
+  type: text("type").notNull(),
   description: text("description").notNull(),
   iconSvg: text("icon_svg").notNull(),
-  color: text("color").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
