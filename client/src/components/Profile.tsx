@@ -611,8 +611,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             {isAccountPrivate && (
               <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
             )}
-            {userId && userBadges && userBadges.length > 0 && (
-              <BadgeDisplay userId={userId} preloadedBadges={userBadges} />
+            {userBadges && userBadges.length > 0 && (
+              <BadgeDisplay preloadedBadges={userBadges} />
             )}
           </div>
           
