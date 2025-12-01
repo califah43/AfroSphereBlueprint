@@ -104,8 +104,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
         }
-        // Invalidate cache and refetch
-        queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+        // Refetch posts for new content
+        queryClient.refetchQueries({ queryKey: ['/api/posts'] });
       }
     };
     
