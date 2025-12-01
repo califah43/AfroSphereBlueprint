@@ -52,6 +52,16 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const { uploadProfilePicture, isUploading } = useProfilePictureUpload();
   const { toast } = useToast();
 
+  // Clear all badge cache from localStorage on mount
+  useEffect(() => {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('badges_')) {
+        localStorage.removeItem(key);
+      }
+    });
+  }, []);
+
   // Fetch user data and posts from backend
   useEffect(() => {
     const fetchUserData = async () => {
