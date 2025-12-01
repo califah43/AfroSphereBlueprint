@@ -500,7 +500,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Apply offset and limit
       const paginatedFeed = feed.slice(offset, offset + limit);
       
-      // Add badges to each post in feed
+      // Get user's liked posts if viewerId provided
+      let userLikedPostIds = new Set<string>();
+      if (viewerId) {
+        try {
+          const userLikes = await db.query.likes.findMany({
+            where: eq(likes.userId, viewerId),
+          });
+          userLikedPostIds = new Set(userLikes.filter(l => l.postId).map(l => l.postId!));
+        } catch (e) {
+          console.error('Failed to fetch user likes:', e);
+        }
+      }
+      
+      // Add badges and isLiked to each post in feed
       const allUsers = await db.query.users.findMany();
       const feedWithBadges = await Promise.all(paginatedFeed.map(async (post) => {
         const user = allUsers.find(u => u.id === post.userId);
@@ -513,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error(`[Feed] Badge fetch error for user ${user.username}:`, e);
           }
         }
-        return { ...post, badges };
+        return { ...post, badges, isLiked: userLikedPostIds.has(post.id) };
       }));
 
       res.json(feedWithBadges);
@@ -524,7 +537,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const posts = await storage.listPosts(limit, offset);
         const allUsers = await db.query.users.findMany();
         
-        // Add badges to each post
+        // Get user's liked posts if viewerId provided
+        let userLikedPostIds = new Set<string>();
+        if (viewerId) {
+          try {
+            const userLikes = await db.query.likes.findMany({
+              where: eq(likes.userId, viewerId),
+            });
+            userLikedPostIds = new Set(userLikes.filter(l => l.postId).map(l => l.postId!));
+          } catch (e) {
+            console.error('Failed to fetch user likes:', e);
+          }
+        }
+        
+        // Add badges and isLiked to each post
         const postsWithBadges = await Promise.all(posts.map(async (post) => {
           const user = allUsers.find(u => u.id === post.userId);
           let badges: any[] = [];
@@ -535,7 +561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // No badges, proceed
             }
           }
-          return { ...post, badges };
+          return { ...post, badges, isLiked: userLikedPostIds.has(post.id) };
         }));
         
         res.json(postsWithBadges);
