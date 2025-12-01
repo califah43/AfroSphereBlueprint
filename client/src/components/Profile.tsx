@@ -219,24 +219,61 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         console.log("Error fetching user data:", error);
         setPostsLoading(false);
       }
-      
-      // Always try to fetch badges after main fetch completes (even if it failed)
-      if (currentUserId) {
-        try {
-          const badgesRes = await fetch(`/api/badges/user/${currentUserId}`);
-          if (badgesRes.ok) {
-            const badges = await badgesRes.json();
-            const badgesArray = Array.isArray(badges) ? badges : [];
-            console.log("[Profile] Badges fetched successfully:", badgesArray);
-            setUserBadges(badgesArray);
-          }
-        } catch (badgeError) {
-          console.log("[Profile] Badge fetch failed:", badgeError);
-        }
-      }
     };
 
     fetchUserData();
+  }, [username, isOwnProfile]);
+
+  // Fetch badges immediately and independently - don't wait for posts
+  useEffect(() => {
+    let currentUserId: string = "";
+    
+    if (isOwnProfile) {
+      const storedData = localStorage.getItem("currentUserData");
+      if (storedData) {
+        try {
+          const userData = JSON.parse(storedData);
+          currentUserId = userData.id || "";
+        } catch (e) {
+          // Invalid cache, ignore
+        }
+      }
+    } else if (username) {
+      // For other profiles, we need to fetch their user ID first
+      fetch(`/api/users/username/${username}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('User not found');
+        })
+        .then(userData => {
+          if (userData?.id) {
+            fetchBadgesForUser(userData.id);
+          }
+        })
+        .catch(err => console.log("[Profile] Failed to fetch user for badges:", err));
+      return;
+    }
+
+    if (currentUserId) {
+      fetchBadgesForUser(currentUserId);
+    }
+
+    function fetchBadgesForUser(userId: string) {
+      fetch(`/api/badges/user/${userId}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to fetch badges');
+        })
+        .then(badges => {
+          const badgesArray = Array.isArray(badges) ? badges : [];
+          console.log("[Profile] Badges loaded immediately:", badgesArray);
+          setUserBadges(badgesArray);
+        })
+        .catch(err => {
+          console.log("[Profile] Badge fetch failed:", err);
+          setUserBadges([]);
+        });
+    }
   }, [username, isOwnProfile]);
 
   // Fetch weekly stats
