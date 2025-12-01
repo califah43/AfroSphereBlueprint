@@ -186,30 +186,23 @@ export class DbStorage implements IStorage {
   }
 
   async likePost(userId: string, postId: string): Promise<Like> {
-    // Get current post
-    const post = await db.query.posts.findFirst({ where: eq(posts.id, postId) });
-    const currentLikes = post?.likes || 0;
+    // Insert like record
+    const [newLike] = await db.insert(likes).values({ userId, postId }).returning();
     
-    // Insert like record and update count in transaction
-    let like: Like | null = null;
-    await db.transaction(async (tx) => {
-      const [newLike] = await tx.insert(likes).values({ userId, postId }).returning();
-      like = newLike;
-      await tx.update(posts).set({ likes: currentLikes + 1 }).where(eq(posts.id, postId));
-    });
-    return like!;
+    // Update post like count
+    const likeCount = await db.query.likes.findMany({ where: eq(likes.postId, postId) });
+    await db.update(posts).set({ likes: likeCount.length }).where(eq(posts.id, postId));
+    
+    return newLike;
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
-    // Get current post
-    const post = await db.query.posts.findFirst({ where: eq(posts.id, postId) });
-    const currentLikes = Math.max(0, (post?.likes || 0) - 1);
+    // Remove like record
+    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
     
-    // Remove like record and update count in transaction
-    await db.transaction(async (tx) => {
-      await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
-      await tx.update(posts).set({ likes: currentLikes }).where(eq(posts.id, postId));
-    });
+    // Update post like count
+    const likeCount = await db.query.likes.findMany({ where: eq(likes.postId, postId) });
+    await db.update(posts).set({ likes: likeCount.length }).where(eq(posts.id, postId));
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
@@ -220,30 +213,23 @@ export class DbStorage implements IStorage {
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
-    // Get current comment
-    const comment = await db.query.comments.findFirst({ where: eq(comments.id, commentId) });
-    const currentLikes = comment?.likes || 0;
+    // Insert like record
+    const [newLike] = await db.insert(likes).values({ userId, commentId }).returning();
     
-    // Insert like record and update count in transaction
-    let like: Like | null = null;
-    await db.transaction(async (tx) => {
-      const [newLike] = await tx.insert(likes).values({ userId, commentId }).returning();
-      like = newLike;
-      await tx.update(comments).set({ likes: currentLikes + 1 }).where(eq(comments.id, commentId));
-    });
-    return like!;
+    // Update comment like count
+    const likeCount = await db.query.likes.findMany({ where: eq(likes.commentId, commentId) });
+    await db.update(comments).set({ likes: likeCount.length }).where(eq(comments.id, commentId));
+    
+    return newLike;
   }
 
   async unlikeComment(userId: string, commentId: string): Promise<void> {
-    // Get current comment
-    const comment = await db.query.comments.findFirst({ where: eq(comments.id, commentId) });
-    const currentLikes = Math.max(0, (comment?.likes || 0) - 1);
+    // Remove like record
+    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
     
-    // Remove like record and update count in transaction
-    await db.transaction(async (tx) => {
-      await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
-      await tx.update(comments).set({ likes: currentLikes }).where(eq(comments.id, commentId));
-    });
+    // Update comment like count
+    const likeCount = await db.query.likes.findMany({ where: eq(likes.commentId, commentId) });
+    await db.update(comments).set({ likes: likeCount.length }).where(eq(comments.id, commentId));
   }
 
   async followUser(followerId: string, followingId: string): Promise<Follow> {
