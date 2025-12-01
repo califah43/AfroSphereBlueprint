@@ -129,6 +129,8 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     staleTime: 60 * 60 * 1000, // Data stays fresh for 60 minutes - only refresh when user manually does pull-to-refresh or clicks home tab twice
     gcTime: 60 * 60 * 1000, // Keep cache for 60 minutes
     refetchInterval: false, // Don't auto-refetch - let user manually refresh
+    refetchOnMount: false, // Don't refetch when component mounts
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
     placeholderData: keepPreviousData, // Keep showing old data while refetching - no skeleton flash!
     queryFn: stableQueryFn,
   });
