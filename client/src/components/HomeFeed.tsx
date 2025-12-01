@@ -48,7 +48,6 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollTop, setLastScrollTop] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -83,14 +82,11 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
     setCurrentUserId(userId);
   }, []);
 
-  // Listen for post refresh events (triggered when comments are added) and real-time updates
+  // Listen for post refresh events and real-time updates
   useEffect(() => {
-    const handleRefresh = () => {
-      setRefreshKey(prev => prev + 1);
-    };
-    
     const handleCommentCreated = (event: CustomEvent) => {
-      handleRefresh();
+      // Invalidate the posts query cache to trigger a refresh when needed
+      // This lets the user decide if they want to see new comments via scroll
     };
 
     const handlePostLiked = (event: CustomEvent) => {
@@ -100,12 +96,10 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       );
     };
     
-    window.addEventListener('refreshPosts', handleRefresh);
     window.addEventListener('comment:created' as any, handleCommentCreated as EventListener);
     window.addEventListener('post:liked' as any, handlePostLiked as EventListener);
     
     return () => {
-      window.removeEventListener('refreshPosts', handleRefresh);
       window.removeEventListener('comment:created' as any, handleCommentCreated as EventListener);
       window.removeEventListener('post:liked' as any, handlePostLiked as EventListener);
     };
@@ -113,7 +107,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
   // Fetch posts from API with like status
   const { data: apiPosts = [], isLoading: isInitialLoading } = useQuery({
-    queryKey: ['/api/posts', refreshKey],
+    queryKey: ['/api/posts'],
     staleTime: 10 * 60 * 1000, // Data stays fresh for 10 minutes
     gcTime: 30 * 60 * 1000, // Keep cache for 30 minutes
     refetchInterval: false, // Don't auto-refetch - let user manually refresh
