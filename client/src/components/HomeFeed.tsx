@@ -207,12 +207,16 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       const { scrollHeight, clientHeight } = container;
       const lastScrollY = lastScrollYRef.current;
       
-      // Facebook-style: show header on ANY upward scroll
-      if (currentScrollY < lastScrollY) {
-        // Scrolling UP - show header immediately
+      // Always show header when near top (within 50px of top)
+      if (currentScrollY < 50) {
         setIsHeaderVisible(true);
-      } else if (currentScrollY > lastScrollY + 3) {
-        // Scrolling DOWN significantly - hide header
+      }
+      // Show header when scrolling UP
+      else if (currentScrollY < lastScrollY) {
+        setIsHeaderVisible(true);
+      }
+      // Only hide header when scrolling DOWN significantly (past 50px threshold and scrolling down at least 10px)
+      else if (currentScrollY >= 50 && currentScrollY > lastScrollY + 10) {
         setIsHeaderVisible(false);
       }
       
