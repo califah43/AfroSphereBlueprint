@@ -155,10 +155,8 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   const handleDoubleClick = () => {
-    // Call the actual like API function for double-tap too
-    if (!isLiked) {
-      handleLike();
-    }
+    // Call the actual like API function for double-tap - always toggle like state
+    handleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1000);
   };
