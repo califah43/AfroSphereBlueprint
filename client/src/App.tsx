@@ -297,8 +297,13 @@ export default function App() {
     if (tab === "create") {
       setModalView("create");
     } else {
-      setActiveTab(tab as MainView);
-      setModalView("none");
+      // If clicking the same tab, scroll to top and refresh
+      if (activeTab === tab) {
+        window.dispatchEvent(new CustomEvent('tab:refresh', { detail: { tab } }));
+      } else {
+        setActiveTab(tab as MainView);
+        setModalView("none");
+      }
     }
   };
 

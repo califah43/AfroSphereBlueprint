@@ -97,13 +97,26 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
         prev.map(p => p.id === postId ? { ...p, likes: likes || 0 } : p)
       );
     };
+
+    const handleTabRefresh = (event: CustomEvent) => {
+      if (event.detail.tab === "home") {
+        // Scroll to top
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        // Invalidate cache and refetch
+        queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      }
+    };
     
     window.addEventListener('comment:created' as any, handleCommentCreated as EventListener);
     window.addEventListener('post:liked' as any, handlePostLiked as EventListener);
+    window.addEventListener('tab:refresh' as any, handleTabRefresh as EventListener);
     
     return () => {
       window.removeEventListener('comment:created' as any, handleCommentCreated as EventListener);
       window.removeEventListener('post:liked' as any, handlePostLiked as EventListener);
+      window.removeEventListener('tab:refresh' as any, handleTabRefresh as EventListener);
     };
   }, []);
 
