@@ -65,8 +65,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   // Fetch user data and posts from backend
   useEffect(() => {
     const fetchUserData = async () => {
+      let currentUserId: string = "";
       try {
-        let currentUserId: string = "";
         if (isOwnProfile) {
           const storedData = localStorage.getItem("currentUserData");
           if (storedData) {
@@ -217,21 +217,22 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
       } catch (error) {
         console.log("Error fetching user data:", error);
-        // Even if there's an error, try to fetch badges separately
+        setPostsLoading(false);
+      }
+      
+      // Always try to fetch badges after main fetch completes (even if it failed)
+      if (currentUserId) {
         try {
-          if (currentUserId) {
-            const badgesRes = await fetch(`/api/badges/user/${currentUserId}`);
-            if (badgesRes.ok) {
-              const badges = await badgesRes.json();
-              const badgesArray = Array.isArray(badges) ? badges : [];
-              console.log("[Profile] Fallback badge fetch successful:", badgesArray);
-              setUserBadges(badgesArray);
-            }
+          const badgesRes = await fetch(`/api/badges/user/${currentUserId}`);
+          if (badgesRes.ok) {
+            const badges = await badgesRes.json();
+            const badgesArray = Array.isArray(badges) ? badges : [];
+            console.log("[Profile] Badges fetched successfully:", badgesArray);
+            setUserBadges(badgesArray);
           }
         } catch (badgeError) {
-          console.log("[Profile] Fallback badge fetch failed:", badgeError);
+          console.log("[Profile] Badge fetch failed:", badgeError);
         }
-        setPostsLoading(false);
       }
     };
 
