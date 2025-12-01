@@ -196,16 +196,16 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       // Facebook-style header hide/show logic with threshold to prevent jitter
       if (!isRefreshing && pullDistance === 0) {
         // Keep header visible near top (refresh zone) or during pull attempts
-        if (currentScrollY < 50) {
+        if (currentScrollY < 80) {
           setIsHeaderVisible(true);
         } else {
-          // Only toggle on significant scroll (15px threshold)
+          // Only toggle on significant scroll (8px threshold for responsiveness)
           // scroll down significantly → hide header
-          if (scrollDelta > 15) {
+          if (scrollDelta > 8) {
             setIsHeaderVisible(false);
           }
-          // scroll up significantly → show header
-          else if (scrollDelta < -15) {
+          // scroll up even slightly → show header
+          else if (scrollDelta < -8) {
             setIsHeaderVisible(true);
           }
           // small scrolls don't change header state
