@@ -1,6 +1,6 @@
 import { db } from './db';
 import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows, admins, adminPermissions, saves } from '@shared/schema';
-import { eq, and, inArray, like, desc } from 'drizzle-orm';
+import { eq, and, inArray, like, desc, sql } from 'drizzle-orm';
 import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow, type Admin, type InsertAdmin, type AdminPermission, type Save } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
@@ -123,10 +123,14 @@ export class DbStorage implements IStorage {
   }
 
   async getUserLikedPosts(userId: string): Promise<Post[]> {
-    const userLikes = await db.query.likes.findMany({ where: eq(likes.userId, userId) });
-    const likedPostIds = userLikes.filter(l => l.postId).map(l => l.postId!);
-    if (likedPostIds.length === 0) return [];
-    return db.query.posts.findMany({ where: inArray(posts.id, likedPostIds) });
+    // Optimized single query using raw SQL for better performance
+    const result = await db.execute(sql`
+      SELECT DISTINCT p.* FROM posts p
+      INNER JOIN likes l ON p.id = l.post_id
+      WHERE l.user_id = ${userId}
+      ORDER BY p.created_at DESC
+    `);
+    return result.rows as Post[];
   }
 
   async listPostsByCategory(category: string, limit = 20): Promise<Post[]> {
@@ -517,15 +521,14 @@ export class DbStorage implements IStorage {
   }
 
   async getSavedPosts(userId: string): Promise<Post[]> {
-    const savedPosts = await db.query.saves.findMany({
-      where: eq(saves.userId, userId),
-    });
-    if (savedPosts.length === 0) return [];
-    const postIds = savedPosts.map(s => s.postId);
-    return db.query.posts.findMany({
-      where: inArray(posts.id, postIds),
-      orderBy: desc(posts.createdAt)
-    });
+    // Optimized single query using raw SQL for better performance
+    const result = await db.execute(sql`
+      SELECT DISTINCT p.* FROM posts p
+      INNER JOIN saves s ON p.id = s.post_id
+      WHERE s.user_id = ${userId}
+      ORDER BY p.created_at DESC
+    `);
+    return result.rows as Post[];
   }
 
   async suspendUser(userId: string, reason: string): Promise<User | undefined> {
