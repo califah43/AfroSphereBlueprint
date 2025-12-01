@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface ProfilePictureProps {
   src?: string;
   alt?: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "xxl";
   onClick?: () => void;
   className?: string;
   style?: React.CSSProperties;
@@ -18,6 +18,7 @@ const sizeMap = {
   md: "h-12 w-12",
   lg: "h-24 w-24",
   xl: "h-16 w-16",
+  xxl: "h-28 w-28",
 };
 
 const iconSizeMap = {
@@ -25,6 +26,7 @@ const iconSizeMap = {
   md: 24,
   lg: 48,
   xl: 32,
+  xxl: 56,
 };
 
 const buttonSizeMap = {
@@ -32,6 +34,7 @@ const buttonSizeMap = {
   md: "h-6 w-6 p-1",
   lg: "h-8 w-8 p-1.5",
   xl: "h-7 w-7 p-1",
+  xxl: "h-8 w-8 p-1.5",
 };
 
 const cameraIconSizeMap = {
@@ -39,6 +42,7 @@ const cameraIconSizeMap = {
   md: 14,
   lg: 18,
   xl: 16,
+  xxl: 18,
 };
 
 export default function ProfilePicture({

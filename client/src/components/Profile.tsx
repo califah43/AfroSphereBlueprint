@@ -593,13 +593,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
         {/* Avatar - Overlaps Banner from Bottom */}
         <div 
-          style={{ position: 'absolute', bottom: -15, left: 15, zIndex: 20 }}
+          style={{ position: 'absolute', bottom: -20, left: 15, zIndex: 20 }}
           onClick={(e) => e.stopPropagation()}
         >
           <ProfilePicture
             src={userProfile?.profileImageUrl || userProfile?.avatar}
             alt="Profile picture"
-            size="xl"
+            size="xxl"
             onClick={() => setShowImageViewer(true)}
             editable={false}
             className="shadow-sm"
