@@ -186,22 +186,24 @@ export class DbStorage implements IStorage {
   }
 
   async likePost(userId: string, postId: string): Promise<Like> {
-    const [like] = await db.insert(likes).values({ userId, postId }).returning();
-    // Update post like count
-    const post = await db.query.posts.findFirst({ where: eq(posts.id, postId) });
-    if (post) {
-      await db.update(posts).set({ likes: (post.likes || 0) + 1 }).where(eq(posts.id, postId));
-    }
-    return like;
+    let like: Like | null = null;
+    await db.transaction(async (tx) => {
+      // Add like record
+      const [newLike] = await tx.insert(likes).values({ userId, postId }).returning();
+      like = newLike;
+      // Atomically increment post like count
+      await tx.update(posts).set({ likes: sql`${posts.likes} + 1` }).where(eq(posts.id, postId));
+    });
+    return like!;
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
-    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
-    // Update post like count
-    const post = await db.query.posts.findFirst({ where: eq(posts.id, postId) });
-    if (post) {
-      await db.update(posts).set({ likes: Math.max(0, (post.likes || 0) - 1) }).where(eq(posts.id, postId));
-    }
+    await db.transaction(async (tx) => {
+      // Remove like record
+      await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
+      // Atomically decrement post like count
+      await tx.update(posts).set({ likes: sql`CASE WHEN ${posts.likes} > 0 THEN ${posts.likes} - 1 ELSE 0 END` }).where(eq(posts.id, postId));
+    });
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
