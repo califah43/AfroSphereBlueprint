@@ -207,27 +207,31 @@ export class DbStorage implements IStorage {
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
-    const like = await db.query.likes.findFirst({ where: and(eq(likes.userId, userId), eq(likes.postId, postId)) });
-    return !!like;
+    const result = await db.execute(
+      sql`SELECT EXISTS(SELECT 1 FROM ${likes} WHERE ${eq(likes.userId, userId)} AND ${eq(likes.postId, postId)})`
+    );
+    return result[0].exists === true;
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
-    const [like] = await db.insert(likes).values({ userId, commentId }).returning();
-    // Update comment like count
-    const comment = await db.query.comments.findFirst({ where: eq(comments.id, commentId) });
-    if (comment) {
-      await db.update(comments).set({ likes: (comment.likes || 0) + 1 }).where(eq(comments.id, commentId));
-    }
-    return like;
+    let like: Like | null = null;
+    await db.transaction(async (tx) => {
+      // Add like record
+      const [newLike] = await tx.insert(likes).values({ userId, commentId }).returning();
+      like = newLike;
+      // Atomically increment comment like count
+      await tx.update(comments).set({ likes: sql`${comments.likes} + 1` }).where(eq(comments.id, commentId));
+    });
+    return like!;
   }
 
   async unlikeComment(userId: string, commentId: string): Promise<void> {
-    await db.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
-    // Update comment like count
-    const comment = await db.query.comments.findFirst({ where: eq(comments.id, commentId) });
-    if (comment) {
-      await db.update(comments).set({ likes: Math.max(0, (comment.likes || 0) - 1) }).where(eq(comments.id, commentId));
-    }
+    await db.transaction(async (tx) => {
+      // Remove like record
+      await tx.delete(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
+      // Atomically decrement comment like count
+      await tx.update(comments).set({ likes: sql`CASE WHEN ${comments.likes} > 0 THEN ${comments.likes} - 1 ELSE 0 END` }).where(eq(comments.id, commentId));
+    });
   }
 
   async followUser(followerId: string, followingId: string): Promise<Follow> {
