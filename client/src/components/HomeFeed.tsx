@@ -193,18 +193,15 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
       const { scrollHeight, clientHeight } = container;
       const scrollDelta = currentScrollY - lastScrollTop;
       
-      // Facebook-style: hide on scroll down, show on scroll up
+      // Facebook-style: hide on scroll down, show IMMEDIATELY on scroll up
       if (!isRefreshing && pullDistance === 0) {
-        // Always visible at the very top
-        if (currentScrollY < 10) {
+        // Scroll up ANY amount = show header immediately
+        if (scrollDelta < 0) {
           setIsHeaderVisible(true);
-        } else {
-          // Scroll down = hide header, scroll up = show header
-          if (scrollDelta > 0) {
-            setIsHeaderVisible(false);
-          } else if (scrollDelta < 0) {
-            setIsHeaderVisible(true);
-          }
+        } 
+        // Scroll down = hide header
+        else if (scrollDelta > 0) {
+          setIsHeaderVisible(false);
         }
       } else {
         setIsHeaderVisible(true);
