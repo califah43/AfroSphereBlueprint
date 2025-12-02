@@ -2250,6 +2250,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing userId" });
       }
 
+      // Prevent browser caching for saved posts so updates show immediately
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+
       const savedPosts = await storage.getSavedPosts(userId);
       const allUsers = await db.query.users.findMany();
       
