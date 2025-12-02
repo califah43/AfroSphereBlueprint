@@ -44,25 +44,8 @@ export async function fetchHomeFeedPosts(formatTimeAgo: (date: string | null | u
       });
     }
 
-    // Batch check likes for real posts
-    let likedPostIds: string[] = [];
-    if (userId && posts.length > 0) {
-      try {
-        const likeRes = await fetch('/api/likes/posts/batch-check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, postIds: posts.map((p: any) => p.id) }),
-        });
-        if (likeRes.ok) {
-          const likeData = await likeRes.json();
-          likedPostIds = likeData.likedPostIds || [];
-        }
-      } catch (e) {
-        console.error('Failed to fetch likes:', e);
-      }
-    }
-    
-    // Transform real posts using pre-fetched user data, likes, and badges
+    // Transform real posts using pre-fetched user data, likes, bookmarks, and badges
+    // Backend already returns isLiked and isBookmarked, so we use those directly
     const transformedRealPosts = (posts || []).map((p: any) => {
       const user = userMap.get(p.userId);
       return {
@@ -80,7 +63,8 @@ export async function fetchHomeFeedPosts(formatTimeAgo: (date: string | null | u
         comments: p.commentCount !== undefined ? p.commentCount : 0,
         timeAgo: formatTimeAgo(p.createdAt),
         category: p.category || "for-you",
-        isLiked: likedPostIds.includes(p.id),
+        isLiked: p.isLiked || false,
+        isBookmarked: p.isBookmarked || false,
         badges: badgeMap.get(p.userId) || [],
       };
     }).filter((post: any) => post.author.username !== "creator");
