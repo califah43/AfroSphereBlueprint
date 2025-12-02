@@ -216,10 +216,21 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           
           if (isOwnProfile && savedRes && savedRes.ok) {
             const saved = await savedRes.json();
-            console.log("[Profile] Saved posts fetched:", saved);
+            console.log("[Profile] Saved posts response received:", saved);
+            console.log("[Profile] Saved posts type:", typeof saved);
+            console.log("[Profile] Is array?", Array.isArray(saved));
             console.log("[Profile] Saved posts count:", Array.isArray(saved) ? saved.length : 0);
-            setSavedPosts(Array.isArray(saved) ? saved : []);
-            localStorage.setItem(cachedSavedKey, JSON.stringify(Array.isArray(saved) ? saved : []));
+            
+            const postsToSet = Array.isArray(saved) ? saved : [];
+            console.log("[Profile] About to setSavedPosts with:", postsToSet);
+            setSavedPosts(postsToSet);
+            console.log("[Profile] setSavedPosts called successfully");
+            
+            localStorage.setItem(cachedSavedKey, JSON.stringify(postsToSet));
+          } else if (isOwnProfile && savedRes) {
+            console.log("[Profile] Saved posts fetch NOT OK, status:", savedRes.status);
+          } else if (isOwnProfile) {
+            console.log("[Profile] No savedRes object found");
           }
           
           if (badgesRes.ok) {
