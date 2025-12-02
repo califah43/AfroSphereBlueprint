@@ -922,7 +922,16 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               
               {activeTab === "liked" && (
                 <>
-                  {(() => {
+                  {postsLoading ? (
+                    <div className="grid grid-cols-3 gap-1 mt-4">
+                      {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div
+                          key={i}
+                          className="aspect-square overflow-hidden rounded-md bg-muted animate-pulse"
+                        />
+                      ))}
+                    </div>
+                  ) : (() => {
                     const filteredLikedPosts = likedPosts.filter(post => post.userId !== userId);
                     return filteredLikedPosts.length === 0 ? (
                       <div className="py-16 text-center">
