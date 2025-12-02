@@ -2253,7 +2253,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const savedPosts = await storage.getSavedPosts(userId);
       const allUsers = await db.query.users.findMany();
       
-      // Add badges to each post
+      // Get user's liked posts
+      let userLikedPostIds = new Set<string>();
+      try {
+        const userLikes = await db.query.likes.findMany({
+          where: eq(likes.userId, userId),
+        });
+        userLikedPostIds = new Set(userLikes.filter(l => l.postId).map(l => l.postId!));
+      } catch (e) {
+        console.error('Failed to fetch user likes:', e);
+      }
+      
+      // Add badges, isLiked, and isBookmarked to each post
       const postsWithBadges = await Promise.all(savedPosts.map(async (post) => {
         const user = allUsers.find(u => u.id === post.userId);
         let badges: any[] = [];
@@ -2264,7 +2275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // No badges, proceed
           }
         }
-        return { ...post, badges };
+        return { ...post, badges, isLiked: userLikedPostIds.has(post.id), isBookmarked: true };
       }));
       
       res.json(postsWithBadges);
