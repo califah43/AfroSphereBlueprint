@@ -1,6 +1,6 @@
 import { db } from './db';
 import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, blockedUsers, userReports, badges, userBadges, followRequests, hashtags, hashtagFollows, admins, adminPermissions, saves } from '@shared/schema';
-import { eq, and, inArray, like, desc, sql } from 'drizzle-orm';
+import { eq, and, inArray, like, desc, sql, innerJoin } from 'drizzle-orm';
 import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type BlockedUser, type UserReport, type Badge, type UserBadge, type InsertBadge, type Hashtag, type HashtagFollow, type Admin, type InsertAdmin, type AdminPermission, type Save } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
@@ -534,14 +534,14 @@ export class DbStorage implements IStorage {
   }
 
   async getSavedPosts(userId: string): Promise<Post[]> {
-    // Optimized single query using raw SQL for better performance
-    const result = await db.execute(sql`
-      SELECT DISTINCT p.* FROM posts p
-      INNER JOIN saves s ON p.id = s.post_id
-      WHERE s.user_id = ${userId}
-      ORDER BY p.created_at DESC
-    `);
-    return result.rows as Post[];
+    // Use Drizzle query builder for reliable column name handling
+    const result = await db
+      .select()
+      .from(posts)
+      .innerJoin(saves, eq(posts.id, saves.postId))
+      .where(eq(saves.userId, userId))
+      .orderBy(desc(posts.createdAt));
+    return result.map(row => row.posts);
   }
 
   async suspendUser(userId: string, reason: string): Promise<User | undefined> {
