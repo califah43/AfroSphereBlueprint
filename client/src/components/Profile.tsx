@@ -971,38 +971,41 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                         />
                       ))}
                     </div>
-                  ) : !Array.isArray(savedPosts) || savedPosts.length === 0 ? (
-                    <div className="py-16 text-center">
-                      <Bookmark className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                      <p className="text-muted-foreground font-medium">No saved posts yet</p>
-                      <p className="text-sm text-muted-foreground mt-1">Posts you save will appear here</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-1 mt-4">
-                      {savedPosts.map((post) => {
-                        const imageUrl = post.images && post.images.length > 0 ? post.images[0] : (post.imageUrl || post.image);
-                        return (
-                          <button
-                            key={post.id}
-                            onClick={() => onPostClick?.(post.id)}
-                            className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate relative"
-                            data-testid={`saved-post-grid-${post.id}`}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt="Saved post"
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                            {post.images && post.images.length > 1 && (
-                              <div className="absolute top-1 right-1 bg-black/60 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-semibold">
-                                {post.images.length}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                  ) : (() => {
+                    const filteredSavedPosts = savedPosts.filter(post => post.userId !== userId);
+                    return filteredSavedPosts.length === 0 ? (
+                      <div className="py-16 text-center">
+                        <Bookmark className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                        <p className="text-muted-foreground font-medium">No saved posts yet</p>
+                        <p className="text-sm text-muted-foreground mt-1">Posts you save will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-1 mt-4">
+                        {filteredSavedPosts.map((post) => {
+                          const imageUrl = post.images && post.images.length > 0 ? post.images[0] : (post.imageUrl || post.image);
+                          return (
+                            <button
+                              key={post.id}
+                              onClick={() => onPostClick?.(post.id)}
+                              className="aspect-square overflow-hidden rounded-md group transition-all duration-300 hover-elevate relative"
+                              data-testid={`saved-post-grid-${post.id}`}
+                            >
+                              <img
+                                src={imageUrl}
+                                alt="Saved post"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              {post.images && post.images.length > 1 && (
+                                <div className="absolute top-1 right-1 bg-black/60 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-semibold">
+                                  {post.images.length}
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </>
               )}
             </div>
