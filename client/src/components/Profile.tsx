@@ -215,8 +215,10 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           
           if (isOwnProfile && savedRes && savedRes.ok) {
             const saved = await savedRes.json();
-            setSavedPosts(saved || []);
-            localStorage.setItem(cachedSavedKey, JSON.stringify(saved || []));
+            console.log("[Profile] Saved posts fetched:", saved);
+            console.log("[Profile] Saved posts count:", Array.isArray(saved) ? saved.length : 0);
+            setSavedPosts(Array.isArray(saved) ? saved : []);
+            localStorage.setItem(cachedSavedKey, JSON.stringify(Array.isArray(saved) ? saved : []));
           }
           
           if (badgesRes.ok) {
@@ -961,7 +963,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                         />
                       ))}
                     </div>
-                  ) : savedPosts.length === 0 ? (
+                  ) : !Array.isArray(savedPosts) || savedPosts.length === 0 ? (
                     <div className="py-16 text-center">
                       <Bookmark className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                       <p className="text-muted-foreground font-medium">No saved posts yet</p>
