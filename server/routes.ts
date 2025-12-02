@@ -2256,6 +2256,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.set('Expires', '0');
 
       const savedPosts = await storage.getSavedPosts(userId);
+      console.log(`[Route] /api/posts/user/${userId}/saved: Returning ${savedPosts.length} posts`);
+      
       const allUsers = await db.query.users.findMany();
       
       // Get user's liked posts
@@ -2285,6 +2287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(postsWithBadges);
     } catch (error) {
+      console.error('Error in /api/posts/user/:userId/saved:', error);
       res.status(400).json({ error: "Failed to fetch saved posts" });
     }
   });

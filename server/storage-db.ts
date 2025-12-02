@@ -535,25 +535,16 @@ export class DbStorage implements IStorage {
 
   async getSavedPosts(userId: string): Promise<Post[]> {
     try {
-      // Get all saves for this user
-      const userSaves = await db.query.saves.findMany({
-        where: eq(saves.userId, userId)
-      });
+      // Query directly from the saves and posts tables
+      const result = await db.execute(sql`
+        SELECT p.* FROM posts p
+        INNER JOIN saves s ON p.id = s."postId"
+        WHERE s."userId" = ${userId}
+        ORDER BY p."createdAt" DESC
+      `);
       
-      if (userSaves.length === 0) return [];
-      
-      // Extract post IDs
-      const postIds = userSaves.map(s => s.postId);
-      
-      // Fetch posts by IDs, ordered by most recent
-      const savedPosts = await db.query.posts.findMany({
-        where: inArray(posts.id, postIds)
-      });
-      
-      // Sort by creation date descending
-      return savedPosts.sort((a, b) => 
-        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-      );
+      console.log(`[getSavedPosts] User ${userId}: Found ${result.rows.length} saved posts`);
+      return (result.rows || []) as Post[];
     } catch (error) {
       console.error('Error fetching saved posts:', error);
       return [];
