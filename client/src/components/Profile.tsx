@@ -932,7 +932,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                       ))}
                     </div>
                   ) : (() => {
-                    const filteredLikedPosts = likedPosts.filter(post => post.userId !== userId);
+                    const currentUserId = isOwnProfile ? (() => { try { return JSON.parse(localStorage.getItem("currentUserData") || "{}").id || ""; } catch (e) { return ""; } })() : userId;
+                    const filteredLikedPosts = likedPosts.filter(post => post.userId !== currentUserId);
                     return filteredLikedPosts.length === 0 ? (
                       <div className="py-16 text-center">
                         <Heart className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
@@ -981,7 +982,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                       ))}
                     </div>
                   ) : (() => {
-                    const filteredSavedPosts = savedPosts.filter(post => post.userId !== userId);
+                    const currentUserId = isOwnProfile ? (() => { try { return JSON.parse(localStorage.getItem("currentUserData") || "{}").id || ""; } catch (e) { return ""; } })() : userId;
+                    const filteredSavedPosts = savedPosts.filter(post => post.userId !== currentUserId);
                     return filteredSavedPosts.length === 0 ? (
                       <div className="py-16 text-center">
                         <Bookmark className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
