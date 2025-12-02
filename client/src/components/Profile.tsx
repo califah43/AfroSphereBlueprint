@@ -134,7 +134,6 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         // Fetch user's posts and badges in parallel
         if (currentUserId) {
           setPostsLoading(true);
-          console.log("[Profile] Starting fetch for userId:", currentUserId, "isOwnProfile:", isOwnProfile);
           
           // Load cached data immediately from localStorage
           const cachedBadgesKey = `badges_${currentUserId}`;
@@ -165,10 +164,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           if (cachedSaved) {
             try {
               const parsedSaved = JSON.parse(cachedSaved);
-              console.log("[Profile] Loaded cached saved posts:", parsedSaved.length);
               setSavedPosts(parsedSaved);
             } catch (e) {
-              console.log("[Profile] Failed to parse cached saved posts");
+              // Invalid cache, ignore
             }
           }
           
@@ -215,21 +213,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           // Fetch SAVED POSTS - only if own profile
           if (isOwnProfile) {
             try {
-              console.log("[Profile] Fetching saved posts for user:", currentUserId);
               const savedRes = await fetch(`/api/posts/user/${currentUserId}/saved?t=${Date.now()}`);
-              console.log("[Profile] Saved posts response status:", savedRes.status, savedRes.ok);
               
               if (savedRes.ok) {
                 const saved = await savedRes.json();
-                console.log("[Profile] Raw saved response:", saved);
-                console.log("[Profile] Is array:", Array.isArray(saved), "Length:", saved?.length || 0);
-                
                 const postsToSet = Array.isArray(saved) ? saved : [];
-                console.log("[Profile] Setting saved posts state with", postsToSet.length, "posts");
                 setSavedPosts(postsToSet);
                 localStorage.setItem(cachedSavedKey, JSON.stringify(postsToSet));
-              } else {
-                console.log("[Profile] Saved posts request failed with status:", savedRes.status);
               }
             } catch (e) {
               console.error("[Profile] Error fetching saved posts:", e);
@@ -242,11 +232,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
             if (badgesRes.ok) {
               const badges = await badgesRes.json();
               const badgesArray = Array.isArray(badges) ? badges : [];
-              console.log("[Profile] Setting user badges:", badgesArray);
               setUserBadges(badgesArray);
               localStorage.setItem(`badges_${currentUserId}`, JSON.stringify(badgesArray));
             } else {
-              console.log("[Profile] Badges fetch failed with status:", badgesRes.status);
               setUserBadges([]);
             }
           } catch (e) {

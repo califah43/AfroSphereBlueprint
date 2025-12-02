@@ -15,6 +15,7 @@ AfroSphere is a cultural social media platform designed for African creators to 
 - Session persistence - stays logged in on page reload
 - Firebase authentication properly synced to PostgreSQL database
 - Posts sorted by newest first
+- **Saved Posts Feature** - Users can save posts from feed, view in profile Saved tab
 - **Warm African Design System** - Complete color palette applied across all UI components
 
 ## Session 5 Features - Warm African-Inspired Design System
@@ -140,6 +141,7 @@ All colors implemented as CSS variables in `index.css` for seamless dark/light m
 - Follow/follower system with counts
 - Comment threads with replies
 - Like/unlike for posts and comments
+- Save/unsave posts with persistent storage
 - 6 African language support (English, Swahili, Yoruba, Hausa, Amharic, Xhosa)
 
 ## Ready for Deployment

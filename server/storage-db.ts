@@ -535,36 +535,28 @@ export class DbStorage implements IStorage {
 
   async getSavedPosts(userId: string): Promise<Post[]> {
     try {
-      console.log(`[getSavedPosts] Fetching saves for user: ${userId}`);
-      
-      // Step 1: Get all saves for this user
+      // Get all saves for this user
       const userSaves = await db.select().from(saves).where(eq(saves.userId, userId));
-      console.log(`[getSavedPosts] Found ${userSaves.length} saves in database`);
       
       if (userSaves.length === 0) {
-        console.log(`[getSavedPosts] No saves found, returning empty array`);
         return [];
       }
       
-      // Step 2: Get post IDs from saves
+      // Get post IDs from saves
       const postIds = userSaves.map(s => s.postId).filter(Boolean);
-      console.log(`[getSavedPosts] Post IDs to fetch: ${postIds.join(', ')}`);
       
       if (postIds.length === 0) {
-        console.log(`[getSavedPosts] No valid post IDs, returning empty array`);
         return [];
       }
       
-      // Step 3: Fetch those posts
+      // Fetch those posts
       const savedPosts = await db.select().from(posts).where(inArray(posts.id, postIds));
-      console.log(`[getSavedPosts] Fetched ${savedPosts.length} posts from database`);
       
-      // Step 4: Sort by newest first
+      // Sort by newest first
       const sorted = savedPosts.sort((a, b) => 
         new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
       );
       
-      console.log(`[getSavedPosts] Returning ${sorted.length} sorted posts`);
       return sorted;
     } catch (error) {
       console.error('[getSavedPosts] Error:', error);
