@@ -194,7 +194,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           
           // Only fetch saved posts if viewing own profile
           if (isOwnProfile) {
-            fetchRequests.push(fetch(`/api/posts/user/${currentUserId}/saved`));
+            // Add cache-busting query parameter to force fresh data
+            fetchRequests.push(fetch(`/api/posts/user/${currentUserId}/saved?t=${Date.now()}`));
           }
           
           const responses = await Promise.all(fetchRequests);
