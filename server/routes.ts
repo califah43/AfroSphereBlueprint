@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { DbStorage } from "./storage-db";
 import { db } from "./db";
-import { posts, likes, users, follows, hashtags, hashtagFollows } from "@shared/schema";
+import { posts, likes, users, follows, hashtags, hashtagFollows, saves } from "@shared/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
 import multer from "multer";
 const storage = new DbStorage();
@@ -502,6 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get user's liked posts if viewerId provided
       let userLikedPostIds = new Set<string>();
+      let userSavedPostIds = new Set<string>();
       if (viewerId) {
         try {
           const userLikes = await db.query.likes.findMany({
@@ -510,6 +511,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userLikedPostIds = new Set(userLikes.filter(l => l.postId).map(l => l.postId!));
         } catch (e) {
           console.error('Failed to fetch user likes:', e);
+        }
+        try {
+          const userSaves = await db.query.saves.findMany({
+            where: eq(saves.userId, viewerId),
+          });
+          userSavedPostIds = new Set(userSaves.filter(s => s.postId).map(s => s.postId!));
+        } catch (e) {
+          console.error('Failed to fetch user saves:', e);
         }
       }
       
@@ -526,7 +535,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error(`[Feed] Badge fetch error for user ${user.username}:`, e);
           }
         }
-        return { ...post, badges, isLiked: userLikedPostIds.has(post.id) };
+        return { ...post, badges, isLiked: userLikedPostIds.has(post.id), isBookmarked: userSavedPostIds.has(post.id) };
       }));
 
       res.json(feedWithBadges);
@@ -539,6 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Get user's liked posts if viewerId provided
         let userLikedPostIds = new Set<string>();
+        let userSavedPostIds = new Set<string>();
         if (viewerId) {
           try {
             const userLikes = await db.query.likes.findMany({
@@ -547,6 +557,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userLikedPostIds = new Set(userLikes.filter(l => l.postId).map(l => l.postId!));
           } catch (e) {
             console.error('Failed to fetch user likes:', e);
+          }
+          try {
+            const userSaves = await db.query.saves.findMany({
+              where: eq(saves.userId, viewerId),
+            });
+            userSavedPostIds = new Set(userSaves.filter(s => s.postId).map(s => s.postId!));
+          } catch (e) {
+            console.error('Failed to fetch user saves:', e);
           }
         }
         
@@ -561,7 +579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // No badges, proceed
             }
           }
-          return { ...post, badges, isLiked: userLikedPostIds.has(post.id) };
+          return { ...post, badges, isLiked: userLikedPostIds.has(post.id), isBookmarked: userSavedPostIds.has(post.id) };
         }));
         
         res.json(postsWithBadges);
