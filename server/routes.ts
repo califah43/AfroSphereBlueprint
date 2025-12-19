@@ -166,13 +166,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/check-username/:username", async (req, res) => {
     try {
       const username = req.params.username.toLowerCase();
-      // Case-insensitive username check
-      const existingUser = await storage.getUserByUsername(username);
+      // Check both in-memory storage and database
+      let existingUser = await storage.getUserByUsername(username);
+      
+      // If not found in primary storage, check all users in database
+      if (!existingUser) {
+        try {
+          const allUsers = await db.query.users.findMany();
+          existingUser = allUsers.find(u => u.username.toLowerCase() === username);
+        } catch (e) {
+          console.log("Database check skipped for username");
+        }
+      }
+      
       if (existingUser) {
         return res.status(409).json({ available: false, error: "Username already taken" });
       }
       res.json({ available: true });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Username check error:", error);
       res.status(400).json({ error: "Invalid request" });
     }
   });
