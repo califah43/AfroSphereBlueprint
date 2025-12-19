@@ -386,9 +386,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/users/:id", async (req, res) => {
-    const user = await storage.getUser(req.params.id);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    try {
+      const user = await storage.getUser(req.params.id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      res.json(user);
+    } catch (error: any) {
+      console.error("Get user error:", error);
+      res.status(500).json({ error: "Failed to fetch user" });
+    }
   });
 
   app.patch("/api/users/:id", async (req, res) => {
