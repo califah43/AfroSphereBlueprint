@@ -153,6 +153,29 @@ export default function App() {
           setAppState("main");
         }, 1500);
         return () => clearTimeout(timer);
+      } else {
+        // BYPASS: Create a test user for development
+        const testUserId = "dev-user-" + Math.random().toString(36).substr(2, 9);
+        const testUserData = {
+          id: testUserId,
+          username: "testuser",
+          displayName: "Test User",
+          bio: "Development test account",
+          avatar: "",
+          banner: "",
+          followerCount: 0,
+          followingCount: 0,
+          postCount: 0,
+          status: "active"
+        };
+        localStorage.setItem("currentUserId", testUserId);
+        localStorage.setItem("currentUserData", JSON.stringify(testUserData));
+        
+        // Show splash screen briefly then go to main
+        const timer = setTimeout(() => {
+          setAppState("main");
+        }, 1500);
+        return () => clearTimeout(timer);
       }
     };
     
