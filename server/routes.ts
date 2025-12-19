@@ -167,8 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const username = req.params.username.toLowerCase();
       // Case-insensitive username check
-      const allUsers = await db.query.users.findMany();
-      const existingUser = allUsers.find(u => u.username.toLowerCase() === username);
+      const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(409).json({ available: false, error: "Username already taken" });
       }
@@ -285,9 +284,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/all", async (req, res) => {
     try {
       const allUsers = await db.query.users.findMany();
+      if (!allUsers || !Array.isArray(allUsers)) {
+        return res.json([]);
+      }
       res.json(allUsers);
     } catch (error) {
-      res.status(400).json({ error: "Failed to fetch users" });
+      // Fallback to empty array if database query fails
+      res.json([]);
     }
   });
 
