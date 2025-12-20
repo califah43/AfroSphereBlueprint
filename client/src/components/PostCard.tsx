@@ -252,7 +252,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const authorAvatar = post.author?.avatar;
 
   return (
-    <div className="bg-background overflow-hidden mb-0 border-b border-border/20" data-testid={`card-post-${post.id}`}>
+    <div className="bg-background overflow-hidden mb-0 border-b border-border/20 premium-card transition-premium animate-fade-in-up" data-testid={`card-post-${post.id}`}>
       {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style (Compact) */}
       <div className="flex items-start gap-3 px-3 py-2.5">
         <button 
@@ -260,7 +260,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
           className="flex-shrink-0 hover-elevate transition-all"
           data-testid={`button-author-profile-${post.id}`}
         >
-          <Avatar className="w-11 h-11 select-none pointer-events-auto ring-1 ring-border/20">
+          <Avatar className="w-11 h-11 select-none pointer-events-auto ring-2 ring-primary/30 hover:ring-primary/50 transition-premium">
             <AvatarImage src={authorAvatar} className="select-none user-select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} data-testid={`img-avatar-${post.id}`} />
             <AvatarFallback className="bg-gradient-to-br from-primary/30 to-orange-500/30 font-semibold select-none">{authorUsername[0]?.toUpperCase() || "A"}</AvatarFallback>
           </Avatar>

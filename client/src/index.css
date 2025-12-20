@@ -196,8 +196,37 @@
   }
 
   .gold-glow {
-    @apply shadow-lg;
-    box-shadow: 0 0 12px hsl(45 85% 55% / 0.4);
+    box-shadow: 0 0 20px hsl(45 85% 55% / 0.5), 0 0 40px hsl(45 85% 55% / 0.2);
+  }
+
+  .gold-glow-lg {
+    box-shadow: 0 0 32px hsl(45 85% 55% / 0.6), 0 0 64px hsl(45 85% 55% / 0.3);
+  }
+
+  .premium-shadow {
+    box-shadow: 
+      0 4px 6px hsl(0 0% 0% / 0.1),
+      0 10px 20px hsl(0 0% 0% / 0.15),
+      0 20px 40px hsl(0 0% 0% / 0.08);
+  }
+
+  .premium-shadow-lg {
+    box-shadow: 
+      0 8px 16px hsl(0 0% 0% / 0.15),
+      0 16px 32px hsl(0 0% 0% / 0.2),
+      0 32px 64px hsl(0 0% 0% / 0.1);
+  }
+
+  .glass-effect {
+    background: hsl(30 11% 15% / 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(30 8% 22% / 0.5);
+  }
+
+  .glass-effect-lg {
+    background: hsl(30 11% 15% / 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid hsl(30 8% 24% / 0.6);
   }
 
   .warm-border {
@@ -208,6 +237,7 @@
     @apply relative inline-flex items-center justify-center;
     background: hsl(25 60% 45%);
     border: 2px solid hsl(45 85% 55%);
+    box-shadow: 0 0 16px hsl(25 60% 45% / 0.4);
   }
 
   .kente-accent {
@@ -222,6 +252,30 @@
   /* Feed image aspect ratio: 1080x1350 (4:5) */
   .aspect-feed {
     aspect-ratio: 4 / 5;
+  }
+
+  /* Premium card enhancement */
+  .premium-card {
+    background: hsl(30 11% 15%);
+    border: 1px solid hsl(30 8% 22%);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  }
+
+  .premium-card:hover {
+    border-color: hsl(30 8% 28%);
+    box-shadow: 
+      0 8px 16px hsl(0 0% 0% / 0.15),
+      0 16px 32px hsl(0 0% 0% / 0.2);
+  }
+
+  /* Smooth transitions */
+  .transition-premium {
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  }
+
+  .transition-smooth {
+    transition: all 0.2s ease-out;
   }
 }
 
@@ -243,4 +297,34 @@
     transform: scale(0.8) rotate(0deg);
     opacity: 0;
   }
+}
+
+/* Premium subtle glow animation */
+@keyframes subtleGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px hsl(45 85% 55% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px hsl(45 85% 55% / 0.5);
+  }
+}
+
+/* Smooth fade-in for cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.animate-subtle-glow {
+  animation: subtleGlow 3s ease-in-out infinite;
 }
