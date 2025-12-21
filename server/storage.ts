@@ -564,6 +564,26 @@ export class MemStorage implements IStorage {
     const permissions = this.adminPermissions.get(adminId) || [];
     return permissions.includes(permission);
   }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getAllPosts(): Promise<Post[]> {
+    return Array.from(this.posts.values());
+  }
+
+  async getAllFollows(): Promise<Follow[]> {
+    return Array.from(this.follows.values());
+  }
+
+  async getAllLikes(): Promise<Like[]> {
+    return Array.from(this.likes.values());
+  }
+
+  async getAllBadges(): Promise<Badge[]> {
+    return Array.from(this.badges.values());
+  }
 }
 
 export const storage = new MemStorage();

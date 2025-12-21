@@ -4,9 +4,11 @@ import * as schema from '@shared/schema';
 
 const databaseUrl = process.env.DATABASE_URL;
 
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL not set");
+let db: any = null;
+
+if (databaseUrl) {
+  const client = postgres(databaseUrl, { prepare: false });
+  db = drizzle(client, { schema });
 }
 
-const client = postgres(databaseUrl, { prepare: false });
-export const db = drizzle(client, { schema });
+export { db };
