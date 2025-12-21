@@ -730,59 +730,61 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           </div>
         )}
 
-        {/* Stats - Spacious & Clean */}
+        {/* Stats - Premium Style */}
         {userProfile && (
-        <div className="grid grid-cols-2 gap-1 mb-4 p-2 bg-card rounded-lg border border-border">
+        <div className="grid grid-cols-2 gap-2 mb-4 p-3 bg-gradient-to-br from-card/60 to-card/30 backdrop-blur-sm rounded-xl border border-primary/20 premium-shadow">
           <button
             onClick={onFollowersClick}
-            className="text-center py-1"
+            className="text-center py-2 px-2 rounded-lg hover:bg-primary/10 transition-colors hover-elevate group"
             data-testid="button-view-followers"
           >
-            <p className="text-sm font-black text-primary" data-testid="text-followers-count">{userProfile.followers}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Followers</p>
+            <p className="text-base font-black bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent group-hover:from-primary/90 group-hover:to-orange-400/90 transition-all" data-testid="text-followers-count">{userProfile.followers}</p>
+            <p className="text-xs text-muted-foreground uppercase font-semibold mt-1">Followers</p>
           </button>
           <button
             onClick={onFollowingClick}
-            className="text-center py-1"
+            className="text-center py-2 px-2 rounded-lg hover:bg-primary/10 transition-colors hover-elevate group"
             data-testid="button-view-following"
           >
-            <p className="text-sm font-black text-primary" data-testid="text-following-count">{userProfile.following}</p>
-            <p className="text-xs text-muted-foreground uppercase font-medium mt-0.5">Following</p>
+            <p className="text-base font-black bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent group-hover:from-primary/90 group-hover:to-orange-400/90 transition-all" data-testid="text-following-count">{userProfile.following}</p>
+            <p className="text-xs text-muted-foreground uppercase font-semibold mt-1">Following</p>
           </button>
         </div>
         )}
 
-        {/* Weekly Activity Summary - This Week */}
+        {/* Weekly Activity Summary - Premium Design */}
         {isOwnProfile && weeklyStats && (
-          <div className="mb-4 p-2 bg-gradient-to-br from-primary/8 to-primary/5 rounded-lg border border-primary/20">
-            <div className="flex items-center gap-1 mb-2">
-              <Calendar className="h-3 w-3 text-primary" />
-              <h3 className="font-bold text-xs text-foreground">This Week</h3>
+          <div className="mb-4 p-3 bg-gradient-to-br from-primary/15 to-primary/5 rounded-xl border border-primary/30 premium-shadow-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-primary/20 rounded-lg">
+                <Calendar className="h-4 w-4 text-primary" />
+              </div>
+              <h3 className="font-bold text-sm text-foreground">Weekly Activity</h3>
             </div>
-            <div className="grid grid-cols-3 gap-1">
-              <div className="text-center py-1 bg-card/50 rounded-md">
-                <p className="text-xs font-bold text-primary" data-testid="text-posts-this-week">{weeklyStats.postsThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-0">Posts</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center py-2 px-1 bg-gradient-to-br from-card/60 to-card/30 rounded-lg border border-primary/10 hover:border-primary/30 hover:bg-card/50 transition-all hover-elevate">
+                <p className="text-sm font-black bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent" data-testid="text-posts-this-week">{weeklyStats.postsThisWeek}</p>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">Posts</p>
               </div>
-              <div className="text-center py-1 bg-card/50 rounded-md">
-                <p className="text-xs font-bold text-orange-500" data-testid="text-likes-this-week">{weeklyStats.likesThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-0">Likes</p>
+              <div className="text-center py-2 px-1 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-lg border border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/15 transition-all hover-elevate">
+                <p className="text-sm font-black text-orange-500" data-testid="text-likes-this-week">{weeklyStats.likesThisWeek}</p>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">Likes</p>
               </div>
-              <div className="text-center py-1 bg-card/50 rounded-md">
-                <p className="text-xs font-bold text-red-600" data-testid="text-engagement-this-week">{weeklyStats.totalEngagementThisWeek}</p>
-                <p className="text-xs text-muted-foreground mt-0">Engagement</p>
+              <div className="text-center py-2 px-1 bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-lg border border-pink-500/20 hover:border-pink-500/40 hover:bg-pink-500/15 transition-all hover-elevate">
+                <p className="text-sm font-black text-pink-500" data-testid="text-engagement-this-week">{weeklyStats.totalEngagementThisWeek}</p>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">Engagement</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Action Buttons - Warm African Design */}
+        {/* Action Buttons - Premium Design */}
         {userProfile && (
         <div className="flex gap-2 mb-6">
           {isOwnProfile ? (
             <>
               <Button
-                className="flex-1 bg-gradient-to-r from-primary via-orange-500 to-red-600 hover:from-primary/90 hover:via-orange-500/90 hover:to-red-600/90 text-white font-bold rounded-lg text-xs h-9 shadow-md gold-glow transition-all"
+                className="flex-1 bg-gradient-to-r from-primary via-orange-500 to-red-600 hover:from-primary/90 hover:via-orange-500/90 hover:to-red-600/90 text-white font-bold rounded-xl text-xs h-10 shadow-lg gold-glow-lg transition-all hover:shadow-2xl hover:scale-[1.02]"
                 onClick={onEditProfile}
                 data-testid="button-edit-profile"
               >
@@ -791,18 +793,18 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover-elevate transition-all"
+                className="h-10 w-10 hover-elevate transition-all border border-primary/20 hover:border-primary/50 hover:bg-primary/10"
                 onClick={onSettings}
                 data-testid="button-settings"
                 title="Settings"
               >
-                <Settings size={18} />
+                <Settings size={20} />
               </Button>
             </>
           ) : (
             <>
               <Button 
-                className={`flex-1 font-bold rounded-lg text-xs h-9 shadow-sm transition-all ${isFollowRequestPending ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : isFollowing ? 'bg-card border border-primary/30 text-foreground hover:bg-card/80 hover:border-primary/50' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 gold-glow'}`}
+                className={`flex-1 font-bold rounded-xl text-xs h-10 transition-all ${isFollowRequestPending ? 'bg-card border border-primary/40 text-foreground hover:bg-card/90 hover:border-primary/60 shadow-sm' : isFollowing ? 'bg-card border border-primary/40 text-foreground hover:bg-card/90 hover:border-primary/60 shadow-sm' : 'bg-gradient-to-r from-primary to-orange-500 text-white hover:from-primary/90 hover:to-orange-500/90 gold-glow-lg shadow-lg hover:shadow-2xl'}`}
                 onClick={toggleFollow}
                 disabled={isLoading || isFollowRequestPending}
                 data-testid="button-follow"
@@ -812,20 +814,20 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover-elevate transition-all"
+                className="h-10 w-10 hover-elevate transition-all border border-destructive/20 hover:border-destructive/50 hover:bg-destructive/10"
                 data-testid="button-report-user"
                 title="Report user"
               >
-                <Flag size={18} />
+                <Flag size={20} />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover-elevate transition-all"
+                className="h-10 w-10 hover-elevate transition-all border border-destructive/20 hover:border-destructive/50 hover:bg-destructive/10"
                 data-testid="button-block-user"
                 title="Block user"
               >
-                <Ban size={18} />
+                <Ban size={20} />
               </Button>
             </>
           )}
