@@ -290,3 +290,5 @@ export const insertAdminSchema = createInsertSchema(admins).omit({
 });
 
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+
+export * from "./replit_integrations/chat/schema";

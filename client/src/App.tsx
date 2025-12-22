@@ -35,6 +35,7 @@ import PostSignupPreferences from "./components/PostSignupPreferences";
 import TrendingPosts from "./components/TrendingPosts";
 import FollowedHashtagsFeed from "./components/FollowedHashtagsFeed";
 import HashtagExplore from "./components/HashtagExplore";
+import AIAssistant from "./components/AIAssistant";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
@@ -509,6 +510,7 @@ export default function App() {
           )}
 
           <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+          <AIAssistant />
 
           {modalView === "create" && (
             <CreatePost

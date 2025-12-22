@@ -32,6 +32,9 @@ export { storage };
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // AI Integrations
+  registerChatRoutes(app);
+  registerImageRoutes(app);
   // Helper function to format time ago
   const formatTimeAgo = (createdAt: string | Date | null): string => {
     if (!createdAt) return "now";
