@@ -17,26 +17,25 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 h-24">
+    <div className="fixed bottom-0 left-0 right-0 z-50 h-24 pointer-events-none">
       {/* Premium Glassmorphism Background with more blur and better gradient */}
-      <div className="absolute inset-x-4 bottom-4 h-16 bg-card/40 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-2xl pointer-events-none" />
+      <div className="absolute inset-x-4 bottom-4 h-16 bg-card/40 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-2xl" />
       
-      <div className="relative max-w-md mx-auto h-full flex items-center justify-around px-6 pb-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+        <div className="flex items-center justify-around gap-4 px-6">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
 
-          return (
-            <div key={item.id} className="relative group">
-              <Button
-                variant="ghost"
-                size="icon"
+            return (
+              <button
+                key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`relative h-12 w-12 transition-all duration-300 ${
+                className={`relative group p-3 rounded-full transition-all duration-300 cursor-pointer ${
                   isActive 
                     ? "text-primary scale-110" 
                     : "text-muted-foreground hover:text-foreground/80"
-                } hover-elevate`}
+                }`}
                 data-testid={`button-nav-${item.id}`}
               >
                 {/* Active Background Glow */}
@@ -51,29 +50,21 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                       : "group-hover:scale-110"
                   }`}
                 />
-              </Button>
-              
-              {/* Premium Active Indicator */}
-              {isActive && (
-                <>
-                  {/* Top bar indicator */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-1.5 w-8 bg-gradient-to-r from-primary to-orange-400 rounded-full gold-glow animate-pulse shadow-lg" />
-                  
-                  {/* Bottom dot indicator */}
-                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-primary to-orange-400 gold-glow animate-pulse shadow-lg" />
-                  
-                  {/* Animated ring */}
-                  <div className="absolute inset-0 rounded-full border border-primary/40 animate-spin" style={{ animationDuration: '3s' }} />
-                </>
-              )}
-              
-              {/* Hover effect indicator */}
-              {!isActive && (
-                <div className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/5 transition-colors duration-300" />
-              )}
-            </div>
-          );
-        })}
+                
+                {/* Premium Active Indicator */}
+                {isActive && (
+                  <>
+                    {/* Top bar indicator */}
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 h-1.5 w-8 bg-gradient-to-r from-primary to-orange-400 rounded-full gold-glow animate-pulse shadow-lg" />
+                    
+                    {/* Bottom dot indicator */}
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-primary to-orange-400 gold-glow animate-pulse shadow-lg" />
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
