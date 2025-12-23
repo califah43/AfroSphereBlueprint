@@ -7,6 +7,8 @@ import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSche
 import { sendPushNotification } from "./firebase-admin";
 import { WebSocketServer } from "ws";
 import type { WebSocket } from "ws";
+import { registerChatRoutes } from "./replit_integrations/chat";
+import { registerImageRoutes } from "./replit_integrations/image";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
