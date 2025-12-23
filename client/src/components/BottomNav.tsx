@@ -17,11 +17,11 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 h-24 pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 z-50 h-24">
       {/* Premium Glassmorphism Background with more blur and better gradient */}
-      <div className="absolute inset-x-4 bottom-4 h-16 bg-card/40 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-2xl pointer-events-auto" />
+      <div className="absolute inset-x-4 bottom-4 h-16 bg-card/40 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-2xl pointer-events-none" />
       
-      <div className="relative max-w-md mx-auto h-full flex items-center justify-around px-6 pb-4 pointer-events-auto">
+      <div className="relative max-w-md mx-auto h-full flex items-center justify-around px-6 pb-4">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;

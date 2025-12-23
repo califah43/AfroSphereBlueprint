@@ -510,7 +510,6 @@ export default function App() {
           )}
 
           <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-          <AIAssistant />
 
           {modalView === "create" && (
             <CreatePost
