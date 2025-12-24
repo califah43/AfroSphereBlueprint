@@ -36,11 +36,13 @@ import TrendingPosts from "./components/TrendingPosts";
 import FollowedHashtagsFeed from "./components/FollowedHashtagsFeed";
 import HashtagExplore from "./components/HashtagExplore";
 import AIAssistant from "./components/AIAssistant";
+import Messaging from "./components/Messaging";
+import Premium from "./components/Premium";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
 type MainView = "home" | "explore" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre" | "hashtag-explore";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre" | "hashtag-explore" | "messaging" | "premium";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
@@ -542,6 +544,8 @@ export default function App() {
                 onClose={() => setModalView("none")}
                 onLogout={handleLogout}
                 onEditProfile={() => setModalView("edit-profile")}
+                onPremium={() => setModalView("premium")}
+                onMessaging={() => setModalView("messaging")}
                 onTextSizeChange={(size) => {
                   setTextSize(size);
                   localStorage.setItem("textSize", size);
@@ -641,6 +645,14 @@ export default function App() {
               </div>
             );
           })()}
+
+          {modalView === "messaging" && (
+            <Messaging onClose={() => setModalView("none")} />
+          )}
+
+          {modalView === "premium" && (
+            <Premium onClose={() => setModalView("none")} />
+          )}
             </div>
           </div>
           <Toaster />

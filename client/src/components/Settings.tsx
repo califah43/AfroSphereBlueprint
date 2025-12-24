@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { 
   ChevronRight, X, LogOut, Bell, Lock, Shield, Palette, Users, Eye, 
   Heart, Share2, Volume2, Smartphone, Mail, AlertCircle,
-  HelpCircle, Info, Trash2, CheckCircle2, Moon, Sun, Globe
+  HelpCircle, Info, Trash2, CheckCircle2, Moon, Sun, Globe, Crown, MessageCircle
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,8 @@ interface SettingsProps {
   onClose: () => void;
   onLogout?: () => void;
   onEditProfile?: () => void;
+  onPremium?: () => void;
+  onMessaging?: () => void;
   userId?: string;
   onTextSizeChange?: (size: "normal" | "large" | "extra-large") => void;
 }
@@ -59,7 +61,7 @@ interface SettingsSections {
   };
 }
 
-export default function Settings({ onClose, onLogout, onEditProfile, userId, onTextSizeChange }: SettingsProps) {
+export default function Settings({ onClose, onLogout, onEditProfile, onPremium, onMessaging, userId, onTextSizeChange }: SettingsProps) {
   const { toast } = useToast();
   const { t, language, setLanguage } = useLanguage();
   const [settings, setSettings] = useState<SettingsSections>({
@@ -824,6 +826,45 @@ export default function Settings({ onClose, onLogout, onEditProfile, userId, onT
               description={t("settings.languageDesc")}
               onClick={() => setEditMode("language")}
             />
+          </div>
+        </div>
+
+        {/* PREMIUM SECTION */}
+        <div>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Premium</h3>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-4 px-4 border-primary/30 hover:bg-primary/5"
+              onClick={() => {
+                onPremium?.();
+                onClose();
+              }}
+              data-testid="button-premium"
+            >
+              <Crown className="h-5 w-5 text-amber-500 flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-medium">Unlock Premium</p>
+                <p className="text-xs text-muted-foreground">Get exclusive features and benefits</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-primary ml-auto" />
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-4 px-4 border-primary/30 hover:bg-primary/5"
+              onClick={() => {
+                onMessaging?.();
+                onClose();
+              }}
+              data-testid="button-messages"
+            >
+              <MessageCircle className="h-5 w-5 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-medium">Messages</p>
+                <p className="text-xs text-muted-foreground">View and reply to messages</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-primary ml-auto" />
+            </Button>
           </div>
         </div>
 
