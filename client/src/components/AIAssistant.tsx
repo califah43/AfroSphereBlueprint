@@ -119,16 +119,16 @@ export default function AIAssistant() {
 
   return (
     <>
-      <div className="fixed bottom-24 right-6 z-50">
+      <div className="fixed top-4 right-4 z-50">
         <Button
           size="icon"
-          className="h-14 w-14 rounded-full bg-gradient-to-br from-primary via-orange-500 to-red-600 shadow-2xl gold-glow-lg hover:scale-110 active:scale-95 transition-all"
+          className="h-10 w-10 rounded-full bg-gradient-to-br from-primary via-orange-500 to-red-600 shadow-xl gold-glow hover:scale-110 active:scale-95 transition-all"
           onClick={() => {
             setIsOpen(true);
             if (!conversationId) startConversation();
           }}
         >
-          <Sparkles className="h-7 w-7 text-white" />
+          <Sparkles className="h-5 w-5 text-white" />
         </Button>
       </div>
 
