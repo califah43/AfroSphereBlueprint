@@ -41,8 +41,8 @@ import Premium from "./components/Premium";
 import fashionImage from "@assets/generated_images/African_fashion_post_example_3f594112.png";
 
 type AppState = "splash" | "onboarding" | "auth" | "post-signup-username" | "post-signup-profile" | "post-signup-preferences" | "main" | "admin" | "blocked";
-type MainView = "home" | "explore" | "notifications" | "profile";
-type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre" | "hashtag-explore" | "messaging" | "premium";
+type MainView = "home" | "explore" | "messaging" | "notifications" | "profile";
+type ModalView = "none" | "create" | "edit-profile" | "settings" | "comments" | "search" | "hashtag" | "post-detail" | "followers" | "share" | "user-profile" | "category" | "genre" | "hashtag-explore" | "premium";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("splash");
@@ -498,6 +498,11 @@ export default function App() {
               <Notifications onUserClick={handleOpenUserProfile} />
             </div>
           )}
+          {activeTab === "messaging" && (
+            <div className="flex-1 overflow-y-auto">
+              <Messaging onClose={() => setActiveTab("home")} />
+            </div>
+          )}
           {activeTab === "profile" && (
             <div className="flex-1 overflow-y-auto">
               <Profile
@@ -645,10 +650,6 @@ export default function App() {
               </div>
             );
           })()}
-
-          {modalView === "messaging" && (
-            <Messaging onClose={() => setModalView("none")} />
-          )}
 
           {modalView === "premium" && (
             <Premium onClose={() => setModalView("none")} />

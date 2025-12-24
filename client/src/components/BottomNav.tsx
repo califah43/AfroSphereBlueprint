@@ -1,4 +1,4 @@
-import { Home, Compass, Bell, User } from "lucide-react";
+import { Home, Compass, Bell, User, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -12,6 +12,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const navItems = [
     { id: "home", icon: Home, label: t("nav.home") },
     { id: "explore", icon: Compass, label: t("nav.explore") },
+    { id: "messaging", icon: MessageCircle, label: "Messages" },
     { id: "notifications", icon: Bell, label: t("nav.notifications") },
     { id: "profile", icon: User, label: t("nav.profile") },
   ];
