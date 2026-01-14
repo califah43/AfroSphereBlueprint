@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, Send, Search, Plus, Block, Flag, Trash2 } from "lucide-react";
+import { X, Send, Search, Plus, Blocks, Flag, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -229,7 +229,7 @@ export default function Messaging({ onClose }: MessagingProps) {
                   onClick={() => handleBlockUser(selectedConversation)}
                   data-testid="option-block-user"
                 >
-                  <Block className="h-4 w-4 mr-2" />
+                  <Blocks className="h-4 w-4 mr-2" />
                   {currentConversation.isBlocked ? "Unblock" : "Block"} User
                 </DropdownMenuItem>
                 <DropdownMenuItem data-testid="option-report">
@@ -249,7 +249,7 @@ export default function Messaging({ onClose }: MessagingProps) {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1" viewportRef={scrollRef}>
+          <ScrollArea className="flex-1">
             <div className="space-y-4 p-4">
               {messages.map((msg) => (
                 <div

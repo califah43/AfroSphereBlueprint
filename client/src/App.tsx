@@ -550,7 +550,10 @@ export default function App() {
                 onLogout={handleLogout}
                 onEditProfile={() => setModalView("edit-profile")}
                 onPremium={() => setModalView("premium")}
-                onMessaging={() => setModalView("messaging")}
+                onMessaging={() => {
+                  setActiveTab("messaging");
+                  setModalView("none");
+                }}
                 onTextSizeChange={(size) => {
                   setTextSize(size);
                   localStorage.setItem("textSize", size);

@@ -684,15 +684,32 @@ export default function Settings({ onClose, onLogout, onEditProfile, onPremium, 
           <div className="py-12 text-center text-muted-foreground">{t("settings.loading")}</div>
         ) : (
         <>
+        {/* PREMIUM SECTION */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary px-1">Subscription</h3>
+          <SettingButton 
+            icon={Crown} 
+            label="Premium" 
+            description="Unlock ORÍ+, discovery boosts & more" 
+            onClick={onPremium} 
+          />
+        </div>
+
         {/* ACCOUNT SECTION */}
         <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">{t("settings.account")}</h3>
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4 mt-6">{t("settings.account")}</h3>
           <div className="space-y-2">
             <SettingButton
               icon={Mail}
               label={t("settings.emailPhone")}
               description={t("settings.emailPhoneDesc")}
               onClick={() => setEditMode("email")}
+            />
+            <SettingButton
+              icon={MessageCircle}
+              label="Messages"
+              description="View and reply to conversations"
+              onClick={onMessaging}
             />
             <SettingButton
               icon={Lock}
@@ -826,45 +843,6 @@ export default function Settings({ onClose, onLogout, onEditProfile, onPremium, 
               description={t("settings.languageDesc")}
               onClick={() => setEditMode("language")}
             />
-          </div>
-        </div>
-
-        {/* PREMIUM SECTION */}
-        <div>
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Premium</h3>
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 h-auto py-4 px-4 border-primary/30 hover:bg-primary/5"
-              onClick={() => {
-                onPremium?.();
-                onClose();
-              }}
-              data-testid="button-premium"
-            >
-              <Crown className="h-5 w-5 text-amber-500 flex-shrink-0" />
-              <div className="text-left">
-                <p className="font-medium">Unlock Premium</p>
-                <p className="text-xs text-muted-foreground">Get exclusive features and benefits</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-primary ml-auto" />
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 h-auto py-4 px-4 border-primary/30 hover:bg-primary/5"
-              onClick={() => {
-                onMessaging?.();
-                onClose();
-              }}
-              data-testid="button-messages"
-            >
-              <MessageCircle className="h-5 w-5 text-primary flex-shrink-0" />
-              <div className="text-left">
-                <p className="font-medium">Messages</p>
-                <p className="text-xs text-muted-foreground">View and reply to messages</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-primary ml-auto" />
-            </Button>
           </div>
         </div>
 
