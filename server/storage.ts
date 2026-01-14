@@ -63,6 +63,12 @@ export interface IStorage {
   removeBadge(userId: string, badgeId: string): Promise<void>;
   getAllFCMTokens(): Promise<Map<string, string>>;
 
+  // Saved Posts
+  savePost(userId: string, postId: string): Promise<void>;
+  unsavePost(userId: string, postId: string): Promise<void>;
+  isSavedPost(userId: string, postId: string): Promise<boolean>;
+  getSavedPosts(userId: string): Promise<Post[]>;
+
   // Admin
   createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin>;
   getAdmin(userId: string): Promise<Admin | undefined>;
@@ -529,6 +535,29 @@ export class MemStorage implements IStorage {
 
   async getAllFCMTokens(): Promise<Map<string, string>> {
     return this.fcmTokens;
+  }
+
+  // ============ SAVED POSTS ============
+  private savedPosts: Map<string, Set<string>> = new Map(); // userId -> Set<postId>
+
+  async savePost(userId: string, postId: string): Promise<void> {
+    if (!this.savedPosts.has(userId)) {
+      this.savedPosts.set(userId, new Set());
+    }
+    this.savedPosts.get(userId)!.add(postId);
+  }
+
+  async unsavePost(userId: string, postId: string): Promise<void> {
+    this.savedPosts.get(userId)?.delete(postId);
+  }
+
+  async isSavedPost(userId: string, postId: string): Promise<boolean> {
+    return this.savedPosts.get(userId)?.has(postId) || false;
+  }
+
+  async getSavedPosts(userId: string): Promise<Post[]> {
+    const postIds = Array.from(this.savedPosts.get(userId) || []);
+    return postIds.map(id => this.posts.get(id)).filter((p): p is Post => !!p);
   }
 
   // ============ ADMIN ============

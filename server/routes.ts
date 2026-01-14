@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { MemStorage } from "./storage";
 import multer from "multer";
 const storage = new MemStorage();
-import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge, type User, type Post } from "@shared/schema";
 import { sendPushNotification } from "./firebase-admin";
 import { WebSocketServer } from "ws";
 import type { WebSocket } from "ws";
@@ -487,18 +487,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts/user/:userId", async (req, res) => {
     try {
       const posts = await storage.listPostsByUser(req.params.userId);
-      const allUsers = await db.query.users.findMany();
       
       // Add badges to each post
       const postsWithBadges = await Promise.all(posts.map(async (post) => {
-        const user = allUsers.find(u => u.id === post.userId);
         let badges: any[] = [];
-        if (user) {
-          try {
-            badges = await storage.getUserBadges(user.id);
-          } catch (e) {
-            // No badges, proceed
-          }
+        try {
+          badges = await storage.getUserBadges(post.userId);
+        } catch (e) {
+          // No badges, proceed
         }
         return { ...post, badges };
       }));
@@ -512,18 +508,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts/user/:userId/liked", async (req, res) => {
     try {
       const posts = await storage.getUserLikedPosts(req.params.userId);
-      const allUsers = await db.query.users.findMany();
       
       // Add badges to each post
       const postsWithBadges = await Promise.all(posts.map(async (post) => {
-        const user = allUsers.find(u => u.id === post.userId);
         let badges: any[] = [];
-        if (user) {
-          try {
-            badges = await storage.getUserBadges(user.id);
-          } catch (e) {
-            // No badges, proceed
-          }
+        try {
+          badges = await storage.getUserBadges(post.userId);
+        } catch (e) {
+          // No badges, proceed
         }
         return { ...post, badges };
       }));
@@ -2081,14 +2073,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/trending/hashtags", async (req, res) => {
     try {
-      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
-      
-      const allHashtags = await db.query.hashtags.findMany({
-        orderBy: desc(hashtags.usageCount),
-        limit,
-      });
-      
-      res.json(allHashtags);
+      // In-memory fallback
+      res.json([]);
     } catch (error) {
       console.error("Trending hashtags error:", error);
       res.status(400).json({ error: "Failed to fetch trending hashtags" });
@@ -2147,31 +2133,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const savedPosts = await storage.getSavedPosts(userId);
       console.log(`[Route] /api/posts/user/${userId}/saved: Returning ${savedPosts.length} posts`);
       
-      const allUsers = await db.query.users.findMany();
-      
-      // Get user's liked posts
-      let userLikedPostIds = new Set<string>();
-      try {
-        const userLikes = await db.query.likes.findMany({
-          where: eq(likes.userId, userId),
-        });
-        userLikedPostIds = new Set(userLikes.filter(l => l.postId).map(l => l.postId!));
-      } catch (e) {
-        console.error('Failed to fetch user likes:', e);
-      }
-      
       // Add badges, isLiked, and isBookmarked to each post
       const postsWithBadges = await Promise.all(savedPosts.map(async (post) => {
-        const user = allUsers.find(u => u.id === post.userId);
         let badges: any[] = [];
-        if (user) {
-          try {
-            badges = await storage.getUserBadges(user.id);
-          } catch (e) {
-            // No badges, proceed
-          }
+        try {
+          badges = await storage.getUserBadges(post.userId);
+        } catch (e) {
+          // No badges, proceed
         }
-        return { ...post, badges, isLiked: userLikedPostIds.has(post.id), isBookmarked: true };
+        const isLiked = await storage.hasUserLikedPost(userId, post.id);
+        return { ...post, badges, isLiked, isBookmarked: true };
       }));
       
       res.json(postsWithBadges);
@@ -2226,7 +2197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      const allPosts = await db.query.posts.findMany();
+      const allPosts = await storage.getAllPosts();
       const matchingPosts = allPosts.filter(post => {
         if (!post.hashtags) return false;
         const postTags = post.hashtags.split(',').map(t => t.trim().toLowerCase());
