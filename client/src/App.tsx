@@ -500,7 +500,13 @@ export default function App() {
           )}
           {activeTab === "messaging" && (
             <div className="flex-1 overflow-y-auto">
-              <Messaging onClose={() => setActiveTab("home")} />
+              <Messaging 
+                onClose={() => setActiveTab("home")} 
+                onProfileClick={(username) => {
+                  setSelectedUsername(username);
+                  setModalView("user-profile");
+                }}
+              />
             </div>
           )}
           {activeTab === "profile" && (
@@ -517,7 +523,6 @@ export default function App() {
           )}
 
           <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-          <AIAssistant />
 
           {modalView === "create" && (
             <CreatePost
