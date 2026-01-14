@@ -365,9 +365,9 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
             <div className="p-6 text-center border-t bg-muted/10 pb-12">
               <p className="text-sm font-bold text-destructive">You have blocked this user</p>
               <Button 
-                variant="link" 
+                variant="ghost" 
                 size="sm" 
-                className="text-primary font-black uppercase tracking-widest text-[10px]"
+                className="text-primary font-black uppercase tracking-widest text-[10px] hover:bg-transparent"
                 onClick={() => handleBlockUser(selectedConversation)}
               >
                 Unblock to send messages
