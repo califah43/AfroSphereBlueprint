@@ -381,7 +381,20 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
           <div className="sticky top-0 z-10 p-4 border-b bg-background/80 backdrop-blur-sm space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-black tracking-tight">Messages</h2>
-              <Button size="icon" variant="ghost" className="rounded-full bg-primary/5 hover:bg-primary/10">
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="rounded-full bg-primary/5 hover:bg-primary/10"
+                onClick={() => {
+                  // Simulate starting a new chat by selecting a random existing user
+                  // or just showing a toast for now since we don't have a contact selector
+                  const availableUsers = conversations.map(c => c.id);
+                  if (availableUsers.length > 0) {
+                    handleSelectConversation(availableUsers[0]);
+                  }
+                }}
+                data-testid="button-new-message"
+              >
                 <Plus className="h-5 w-5 text-primary" />
               </Button>
             </div>
