@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { requestNotificationPermission, setupMessageListener } from "./lib/fcm";
 import { useSwipeBack } from "@/hooks/useSwipeBack";
+import { motion, AnimatePresence } from "framer-motion";
 import SplashScreen from "./components/SplashScreen";
 import OnboardingSlides from "./components/OnboardingSlides";
 import AuthScreen from "./components/AuthScreen";
@@ -644,18 +645,16 @@ export default function App() {
             const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
             const currentUsername = currentUserData.username || "";
             return (
-              <div className="flex-1 overflow-y-auto">
-                <Profile
-                  isOwnProfile={selectedUsername === currentUsername}
-                  username={selectedUsername}
-                  onClose={() => setModalView("none")}
-                  onEditProfile={() => setModalView("edit-profile")}
-                  onSettings={() => setModalView("settings")}
-                  onPostClick={handleOpenPostDetail}
-                  onFollowersClick={() => setModalView("followers")}
-                  onFollowingClick={() => setModalView("followers")}
-                />
-              </div>
+              <Profile
+                isOwnProfile={selectedUsername === currentUsername}
+                username={selectedUsername}
+                onClose={() => setModalView("none")}
+                onEditProfile={() => setModalView("edit-profile")}
+                onSettings={() => setModalView("settings")}
+                onPostClick={handleOpenPostDetail}
+                onFollowersClick={() => setModalView("followers")}
+                onFollowingClick={() => setModalView("followers")}
+              />
             );
           })()}
 
