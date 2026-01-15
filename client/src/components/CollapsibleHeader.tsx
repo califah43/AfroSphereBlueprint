@@ -8,7 +8,7 @@ interface CollapsibleHeaderProps {
 }
 
 export default function CollapsibleHeader({ isRefreshing, activeCategory, onCategoryChange, isVisible = true }: CollapsibleHeaderProps) {
-  const categories = ["For You", "Fashion", "Music", "Art", "Culture", "Lifestyle"];
+  const categories = ["For You", "Fashion", "Music", "Art", "Culture", "Lifestyle", "Literature", "Film", "Design", "Food", "Education"];
 
   return (
     <div

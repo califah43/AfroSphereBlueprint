@@ -40,6 +40,10 @@ const categories = [
   { name: "Fashion", image: fashionHero },
   { name: "Music", image: musicHero },
   { name: "Visual Art", image: artHero },
+  { name: "Literature", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400" },
+  { name: "Film", image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=400" },
+  { name: "Design", image: "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=400" },
+  { name: "Food", image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=400" },
 ];
 
 const popularPosts = [

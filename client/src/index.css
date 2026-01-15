@@ -279,6 +279,16 @@
   }
 }
 
+/* Snappy heart pop animation */
+@keyframes heartPop {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  15% { transform: scale(1.2) rotate(0deg); opacity: 1; }
+  30% { transform: scale(0.95) rotate(5deg); }
+  45% { transform: scale(1.05) rotate(0deg); }
+  80% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
 /* TikTok-style double-tap like animation - snappy and beautiful */
 @keyframes instagramHeartBurst {
   0% {
