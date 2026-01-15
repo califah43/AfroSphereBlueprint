@@ -562,118 +562,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============ COMMENT ROUTES ============
   app.get("/api/comments/post/:postId", async (req, res) => {
-    const { userId } = req.query;
-    const comments = await storage.listComments(req.params.postId);
-    
-    // Get all users once to avoid repeated queries
-    const allUsers = await db.query.users.findMany();
-    
-    // Get user's liked comments if userId provided
-    let likedCommentIds = new Set<string>();
-    if (userId) {
-      try {
-        const userLikes = await db.query.likes.findMany({
-          where: eq(likes.userId, userId as string),
-        });
-        likedCommentIds = new Set(userLikes.filter(l => l.commentId).map(l => l.commentId!));
-      } catch (e) {
-        // If query fails, just proceed without like data
-      }
-    }
-    
-    // Enrich comments with username, avatar, and replies
-    const enrichedComments = await Promise.all(comments.map(async (comment) => {
-      let author = "creator";
-      let avatar = "";
+    try {
+      const { userId } = req.query;
+      const comments = await storage.listComments(req.params.postId);
       
-      // Try to get user by database UUID first
-      let user = allUsers.find(u => u.id === comment.userId);
-      
-      // If not found by UUID, try by Firebase UID
-      if (!user) {
-        user = allUsers.find(u => u.firebaseUid === comment.userId);
-      }
-      
-      if (user) {
-        author = user.displayName || user.username;
-        avatar = user.avatar || "";
-      }
-      
-      const replies = await storage.getCommentReplies(comment.id);
-      
-      // Enrich replies with usernames, avatars, and isLiked status
-      const enrichedReplies = await Promise.all(replies.map(async (reply) => {
-        let replyAuthor = "creator";
-        let replyAvatar = "";
-        
-        // Try by database UUID first
-        let replyUser = allUsers.find(u => u.id === reply.userId);
-        
-        // If not found by UUID, try by Firebase UID
-        if (!replyUser) {
-          replyUser = allUsers.find(u => u.firebaseUid === reply.userId);
+      const enrichedComments = await Promise.all(comments.map(async (comment) => {
+        let author = "creator";
+        let avatar = "";
+        const user = await storage.getUser(comment.userId);
+        if (user) {
+          author = user.displayName || user.username;
+          avatar = user.avatar || "";
         }
         
-        if (replyUser) {
-          replyAuthor = replyUser.displayName || replyUser.username;
-          replyAvatar = replyUser.avatar || "";
+        let authorBadges: any[] = [];
+        if (user) {
+          try { authorBadges = await storage.getUserBadges(user.id); } catch (e) {}
         }
-        
-        // Get badges for reply author
-        let replyBadges: any[] = [];
-        if (replyUser) {
-          try {
-            replyBadges = await storage.getUserBadges(replyUser.id);
-          } catch (e) {
-            // No badges, proceed
+
+        const isLiked = userId ? await storage.hasUserLikedPost(userId as string, comment.id) : false;
+
+        const replies = await storage.getCommentReplies(comment.id);
+        const enrichedReplies = await Promise.all(replies.map(async (reply) => {
+          let replyAuthor = "creator";
+          let replyAvatar = "";
+          const replyUser = await storage.getUser(reply.userId);
+          if (replyUser) {
+            replyAuthor = replyUser.displayName || replyUser.username;
+            replyAvatar = replyUser.avatar || "";
           }
-        }
+          let replyBadges: any[] = [];
+          if (replyUser) {
+            try { replyBadges = await storage.getUserBadges(replyUser.id); } catch (e) {}
+          }
+          return {
+            ...reply,
+            author: replyAuthor,
+            avatar: replyAvatar,
+            timeAgo: formatTimeAgo(reply.createdAt),
+            replies: [],
+            isLiked: false, // simplified
+            badges: replyBadges,
+          };
+        }));
 
         return {
-          id: reply.id,
-          userId: reply.userId,
-          postId: reply.postId,
-          text: reply.text,
-          likes: reply.likes || 0,
-          createdAt: reply.createdAt,
-          replyTo: reply.replyTo,
-          author: replyAuthor,
-          avatar: replyAvatar,
-          timeAgo: formatTimeAgo(reply.createdAt),
-          replies: [],
-          isLiked: likedCommentIds.has(reply.id),
-          badges: replyBadges,
+          ...comment,
+          author,
+          avatar,
+          timeAgo: formatTimeAgo(comment.createdAt),
+          replies: enrichedReplies,
+          isLiked,
+          badges: authorBadges,
         };
       }));
-      
-      // Get badges for comment author
-      let authorBadges: any[] = [];
-      if (user) {
-        try {
-          authorBadges = await storage.getUserBadges(user.id);
-        } catch (e) {
-          // No badges, proceed
-        }
-      }
-
-      return {
-        id: comment.id,
-        userId: comment.userId,
-        postId: comment.postId,
-        text: comment.text,
-        likes: comment.likes || 0,
-        createdAt: comment.createdAt,
-        replyTo: comment.replyTo,
-        author: author,
-        avatar: avatar,
-        timeAgo: formatTimeAgo(comment.createdAt),
-        replies: enrichedReplies,
-        isLiked: likedCommentIds.has(comment.id),
-        badges: authorBadges,
-      };
-    }));
-    
-    res.json(enrichedComments);
+      res.json(enrichedComments);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to fetch comments" });
+    }
   });
 
   app.get("/api/comments/:id", async (req, res) => {
