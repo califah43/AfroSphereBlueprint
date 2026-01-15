@@ -635,22 +635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Map Firebase UID to database user ID and get username
       try {
-        const allUsers = await db.query.users.findMany();
-        let user = allUsers.find(u => u.id === userId);
-        
-        // If not found by UUID, try by Firebase UID (for backward compat)
-        if (!user) {
-          user = allUsers.find(u => u.firebaseUid === userId);
-        }
-        
-        // If still not found, try finding by any matching pattern (loose match)
-        if (!user && userId) {
-          user = allUsers.find(u => 
-            u.username === req.body.username || 
-            u.firebaseUid === userId ||
-            u.id === userId
-          );
-        }
+        const user = await storage.getUser(userId) || (await storage.getAllUsers()).find(u => u.firebaseUid === userId);
         
         if (user) {
           userId = user.id; // Use database UUID
@@ -820,11 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId, commentId } = req.body;
       
       // Check if user has already liked this comment
-      const existingLike = await db.query.likes.findFirst({
-        where: and(eq(likes.userId, userId as string), eq(likes.commentId, commentId as string)),
-      });
-      
-      const hasLiked = !!existingLike;
+      const hasLiked = await storage.hasUserLikedComment(userId, commentId);
       
       if (hasLiked) {
         // Remove like
@@ -857,14 +838,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFollowing = await storage.isFollowing(followerId, followingId);
       if (isFollowing) {
         await storage.unfollowUser(followerId, followingId);
-        const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
-        const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
+        
+        // Count updates handled in storage or locally
+        const follower = await storage.getUser(followerId);
+        const following = await storage.getUser(followingId);
+        
         if (follower) {
-          await db.update(users).set({ followingCount: Math.max(0, (follower.followingCount || 1) - 1) }).where(eq(users.id, followerId));
+          await storage.updateUser(followerId, { followingCount: Math.max(0, (follower.followingCount || 1) - 1) });
         }
         if (following) {
-          await db.update(users).set({ followerCount: Math.max(0, (following.followerCount || 1) - 1) }).where(eq(users.id, followingId));
+          await storage.updateUser(followingId, { followerCount: Math.max(0, (following.followerCount || 1) - 1) });
         }
+        
         res.json({ following: false });
         return;
       }
@@ -892,13 +877,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Regular follow for public accounts
       await storage.followUser(followerId, followingId);
-      const follower = await db.query.users.findFirst({ where: eq(users.id, followerId) });
-      const following = await db.query.users.findFirst({ where: eq(users.id, followingId) });
+      
+      const follower = await storage.getUser(followerId);
+      const following = await storage.getUser(followingId);
+      
       if (follower) {
-        await db.update(users).set({ followingCount: (follower.followingCount || 0) + 1 }).where(eq(users.id, followerId));
+        await storage.updateUser(followerId, { followingCount: (follower.followingCount || 0) + 1 });
       }
       if (following) {
-        await db.update(users).set({ followerCount: (following.followerCount || 0) + 1 }).where(eq(users.id, followingId));
+        await storage.updateUser(followingId, { followerCount: (following.followerCount || 0) + 1 });
       }
       
       try {
@@ -1063,19 +1050,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/:userId/followed-hashtags", async (req, res) => {
     try {
       const { userId } = req.params;
-      const followedHashtags = await db.query.hashtagFollows.findMany({
-        where: eq(hashtagFollows.userId, userId),
-      });
+      const allFollows = await storage.getAllHashtagFollows();
+      const followedHashtags = allFollows.filter(f => f.userId === userId);
       
       const hashtagIds = followedHashtags.map(f => f.hashtagId);
       if (hashtagIds.length === 0) {
         return res.json([]);
       }
       
-      const userHashtags = await db.query.hashtags.findMany({
-        where: inArray(hashtags.id, hashtagIds),
-        orderBy: desc(hashtags.usageCount),
-      });
+      const allHashtags = await storage.getAllHashtags();
+      const userHashtags = allHashtags.filter(h => hashtagIds.includes(h.id))
+        .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
       
       res.json(userHashtags);
     } catch (error) {
@@ -1382,15 +1367,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get dashboard statistics
   app.get("/api/admin/stats", async (req, res) => {
     try {
-      const allUsers = await db.query.users.findMany();
-      const allPosts = await db.query.posts.findMany();
-      const allComments = await db.query.comments.findMany();
-      const allLikes = await db.query.likes.findMany();
+      const allUsers = await storage.getAllUsers();
+      const allPosts = await storage.getAllPosts();
+      const allComments = await storage.getAllComments();
+      const allLikes = await storage.getAllLikes();
       
       const now = new Date();
       const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const todayUsers = allUsers.filter(u => new Date(u.firebaseUid || "") > dayAgo).length;
-      const todayPosts = allPosts.filter(p => new Date(p.createdAt || "") > dayAgo).length;
+      const todayUsers = allUsers.filter(u => u.firebaseUid && new Date(u.firebaseUid) > dayAgo).length;
+      const todayPosts = allPosts.filter(p => p.createdAt && new Date(p.createdAt) > dayAgo).length;
       
       res.json({
         totalUsers: allUsers.length,
@@ -1409,7 +1394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users
   app.get("/api/admin/users", async (req, res) => {
     try {
-      const allUsers = await db.query.users.findMany();
+      const allUsers = await storage.getAllUsers();
       const enrichedUsers = await Promise.all(
         allUsers.map(async (user) => ({
           id: user.id,
@@ -1441,7 +1426,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.params.id;
       
       // Delete all posts by user
-      const userPosts = await db.query.posts.findMany({ where: eq(posts.userId, userId) });
+      const allPosts = await storage.getAllPosts();
+      const userPosts = allPosts.filter(p => p.userId === userId);
       for (const post of userPosts) {
         await storage.deletePost(post.id);
       }
@@ -1477,7 +1463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all posts
   app.get("/api/admin/posts", async (req, res) => {
     try {
-      const allPosts = await db.query.posts.findMany();
+      const allPosts = await storage.getAllPosts();
       const enrichedPosts = await Promise.all(
         allPosts.map(async (post) => {
           const user = await storage.getUser(post.userId);
@@ -1519,7 +1505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (typeof likes !== "number") {
         return res.status(400).json({ error: "Invalid likes value" });
       }
-      await db.update(posts).set({ likes }).where(eq(posts.id, req.params.id));
+      await storage.updatePost(req.params.id, { likes });
       res.json({ success: true, likes });
     } catch (error) {
       res.status(400).json({ error: "Failed to update likes" });
@@ -1540,8 +1526,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/logs", async (req, res) => {
     try {
       // Return recent system activities as logs
-      const recentPosts = await db.query.posts.findMany({ limit: 10 });
-      const recentComments = await db.query.comments.findMany({ limit: 10 });
+      const allPosts = await storage.getAllPosts();
+      const allComments = await storage.getAllComments();
+      const recentPosts = allPosts.slice(-10);
+      const recentComments = allComments.slice(-10);
       
       const logs = [
         ...recentPosts.map(p => ({
@@ -1571,8 +1559,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all notifications for admin
   app.get("/api/admin/notifications", async (req, res) => {
     try {
-      const allNotifications = await db.query.notifications.findMany({ limit: 100 });
-      res.json(allNotifications.map(n => ({
+      const allNotifications = await storage.getAllNotifications();
+      res.json(allNotifications.slice(0, 100).map(n => ({
         id: n.id,
         title: n.type.charAt(0).toUpperCase() + n.type.slice(1),
         message: n.message,
@@ -1591,8 +1579,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all reports for admin
   app.get("/api/admin/reports", async (req, res) => {
     try {
-      const allReports = await db.query.userReports.findMany({ limit: 100 });
-      res.json(allReports.map(r => ({
+      const allReports = await storage.getAllReports();
+      res.json(allReports.slice(0, 100).map(r => ({
         id: r.id,
         reporter: r.userId,
         reason: r.reportType,

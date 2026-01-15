@@ -610,8 +610,36 @@ export class MemStorage implements IStorage {
     return Array.from(this.likes.values());
   }
 
-  async getAllBadges(): Promise<Badge[]> {
-    return Array.from(this.badges.values());
+  async getAllComments(): Promise<Comment[]> {
+    return Array.from(this.comments.values());
+  }
+
+  async getAllNotifications(): Promise<Notification[]> {
+    return Array.from(this.notifications.values());
+  }
+
+  async getAllReports(): Promise<UserReport[]> {
+    return Array.from(this.userReports.values());
+  }
+
+  async getAllFollowRequests(): Promise<FollowRequest[]> {
+    return Array.from(this.followRequests.values());
+  }
+
+  async getAllHashtags(): Promise<Hashtag[]> {
+    return Array.from(this.hashtags.values());
+  }
+
+  async getAllHashtagFollows(): Promise<HashtagFollow[]> {
+    return Array.from(this.hashtagFollows.values());
+  }
+
+  async updatePost(id: string, updates: Partial<Post>): Promise<Post | undefined> {
+    const post = this.posts.get(id);
+    if (!post) return undefined;
+    const updated = { ...post, ...updates };
+    this.posts.set(id, updated);
+    return updated;
   }
 }
 
