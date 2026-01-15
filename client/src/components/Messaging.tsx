@@ -334,7 +334,7 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
 
           {/* Message Input */}
           {!currentConversation.isBlocked ? (
-            <div className="p-4 border-t bg-background/50 backdrop-blur-sm pb-10">
+            <div className="p-4 border-t bg-background/50 backdrop-blur-sm pb-24">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -362,7 +362,7 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
               </form>
             </div>
           ) : (
-            <div className="p-6 text-center border-t bg-muted/10 pb-12">
+            <div className="p-6 text-center border-t bg-muted/10 pb-28">
               <p className="text-sm font-bold text-destructive">You have blocked this user</p>
               <Button 
                 variant="ghost" 

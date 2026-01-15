@@ -159,7 +159,6 @@ export const GENRES: Record<string, Genre> = {
     id: "education",
     name: "Education & Knowledge",
     description: "Learning, teaching, and knowledge sharing",
-    id: "education",
     emoji: "🎓",
     color: "text-emerald-600",
     hexColor: "#059669",
