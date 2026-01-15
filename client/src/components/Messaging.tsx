@@ -76,6 +76,8 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
   ]);
 
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [newChatSearch, setNewChatSearch] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,6 +92,7 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
 
   const handleSelectConversation = (id: string) => {
     setSelectedConversation(id);
+    setIsCreatingNew(false);
     // Load messages for this conversation - reverse order for latest at bottom
     setMessages([
       {
@@ -125,6 +128,28 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
     setConversations(prev =>
       prev.map(conv => (conv.id === id ? { ...conv, unread: 0 } : conv))
     );
+  };
+
+  const startNewChat = (user: any) => {
+    // Check if conversation already exists
+    const existing = conversations.find(c => c.username === user.username);
+    if (existing) {
+      handleSelectConversation(existing.id);
+    } else {
+      const newConv: Conversation = {
+        id: `new-${Date.now()}`,
+        username: user.username,
+        displayName: user.displayName || user.username,
+        avatar: user.avatar || `https://avatar.vercel.sh/${user.username}`,
+        lastMessage: "Start a conversation",
+        timestamp: "Now",
+        unread: 0,
+        oriDescription: user.bio || "African creator exploring new horizons."
+      };
+      setConversations(prev => [newConv, ...prev]);
+      handleSelectConversation(newConv.id);
+    }
+    setIsCreatingNew(false);
   };
 
   const handleSendMessage = () => {
@@ -207,7 +232,61 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {selectedConversation && currentConversation ? (
+      {isCreatingNew ? (
+        <>
+          {/* New Chat Header */}
+          <div className="sticky top-0 z-10 p-4 border-b bg-background/80 backdrop-blur-sm space-y-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-full h-8 w-8"
+                onClick={() => setIsCreatingNew(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <h2 className="text-xl font-black tracking-tight">New Message</h2>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search people..."
+                value={newChatSearch}
+                onChange={(e) => setNewChatSearch(e.target.value)}
+                className="pl-10 rounded-xl bg-muted/30 border-none"
+                autoFocus
+              />
+            </div>
+          </div>
+          
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Suggested</p>
+              {/* Using existing conversations as "suggested" for demo, in real app would search all users */}
+              {conversations.filter(c => 
+                c.username.toLowerCase().includes(newChatSearch.toLowerCase()) || 
+                c.displayName.toLowerCase().includes(newChatSearch.toLowerCase())
+              ).map(user => (
+                <button
+                  key={user.id}
+                  onClick={() => startNewChat(user)}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-muted/30 transition-all active:scale-[0.98]"
+                >
+                  <img
+                    src={user.avatar}
+                    alt={user.displayName}
+                    className="h-10 w-10 rounded-full object-cover border border-primary/10"
+                  />
+                  <div className="text-left">
+                    <p className="font-bold text-sm">{user.displayName}</p>
+                    <p className="text-xs text-muted-foreground">@{user.username}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+        </>
+      ) : selectedConversation && currentConversation ? (
         <>
           {/* Chat Header */}
           <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-sm">
@@ -385,14 +464,7 @@ export default function Messaging({ onClose, onProfileClick }: MessagingProps) {
                 size="icon" 
                 variant="ghost" 
                 className="rounded-full bg-primary/5 hover:bg-primary/10"
-                onClick={() => {
-                  // Simulate starting a new chat by selecting a random existing user
-                  // or just showing a toast for now since we don't have a contact selector
-                  const availableUsers = conversations.map(c => c.id);
-                  if (availableUsers.length > 0) {
-                    handleSelectConversation(availableUsers[0]);
-                  }
-                }}
+                onClick={() => setIsCreatingNew(true)}
                 data-testid="button-new-message"
               >
                 <Plus className="h-5 w-5 text-primary" />
