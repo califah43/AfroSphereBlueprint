@@ -651,11 +651,17 @@ export default function App() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]"
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) setModalView("none");
+                  }}
                 >
                   <Profile
                     isOwnProfile={selectedUsername === currentUsername}
                     username={selectedUsername}
-                    onClose={() => setModalView("none")}
+                    onClose={() => {
+                      setModalView("none");
+                      setSelectedUsername(null);
+                    }}
                     onEditProfile={() => setModalView("edit-profile")}
                     onSettings={() => setModalView("settings")}
                     onPostClick={handleOpenPostDetail}

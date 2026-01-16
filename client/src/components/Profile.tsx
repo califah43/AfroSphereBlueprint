@@ -591,7 +591,7 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         }
       }}
       animate={controls}
-      initial={{ height: "65vh", borderRadius: "24px" }}
+      initial={{ height: "65vh", borderRadius: "24px", y: 0 }}
       exit={{ y: "100%", opacity: 0 }}
       transition={{ 
         type: "spring", 
