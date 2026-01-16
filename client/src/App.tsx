@@ -641,24 +641,31 @@ export default function App() {
             />
           )}
 
-          {modalView === "user-profile" && selectedUsername && (() => {
-            const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
-            const currentUsername = currentUserData.username || "";
-            return (
-              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]">
-                <Profile
-                  isOwnProfile={selectedUsername === currentUsername}
-                  username={selectedUsername}
-                  onClose={() => setModalView("none")}
-                  onEditProfile={() => setModalView("edit-profile")}
-                  onSettings={() => setModalView("settings")}
-                  onPostClick={handleOpenPostDetail}
-                  onFollowersClick={() => setModalView("followers")}
-                  onFollowingClick={() => setModalView("followers")}
-                />
-              </div>
-            );
-          })()}
+          <AnimatePresence>
+            {modalView === "user-profile" && selectedUsername && (() => {
+              const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
+              const currentUsername = currentUserData.username || "";
+              return (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]"
+                >
+                  <Profile
+                    isOwnProfile={selectedUsername === currentUsername}
+                    username={selectedUsername}
+                    onClose={() => setModalView("none")}
+                    onEditProfile={() => setModalView("edit-profile")}
+                    onSettings={() => setModalView("settings")}
+                    onPostClick={handleOpenPostDetail}
+                    onFollowersClick={() => setModalView("followers")}
+                    onFollowingClick={() => setModalView("followers")}
+                  />
+                </motion.div>
+              );
+            })()}
+          </AnimatePresence>
 
           {modalView === "premium" && (
             <Premium onClose={() => setModalView("none")} />
