@@ -560,23 +560,31 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
   const controls = useAnimation();
   const dragControls = useDragControls();
-  const [isFullHeight, setIsAccountFullHeight] = useState(false);
+  const [isFullHeight, setIsAccountFullHeight] = useState(isOwnProfile);
 
   useEffect(() => {
-    if (isFullHeight) {
-      controls.start({ height: "100vh", borderRadius: "0px" });
-    } else {
-      controls.start({ height: "65vh", borderRadius: "24px" });
+    if (isOwnProfile) {
+      setIsAccountFullHeight(true);
     }
-  }, [isFullHeight, controls]);
+  }, [isOwnProfile]);
+
+  useEffect(() => {
+    if (isOwnProfile) return;
+    if (isFullHeight) {
+      controls.start({ height: "100vh", borderRadius: "0px", y: 0 });
+    } else {
+      controls.start({ height: "65vh", borderRadius: "24px", y: 0 });
+    }
+  }, [isFullHeight, controls, isOwnProfile]);
 
   return (
     <motion.div 
-      drag="y"
+      drag={isOwnProfile ? false : "y"}
       dragDirectionLock
       dragConstraints={{ top: 0 }}
       dragElastic={0.05}
       onDragEnd={(_, info) => {
+        if (isOwnProfile) return;
         // Expand if swiped up significantly
         if (info.offset.y < -50 || info.velocity.y < -500) {
           setIsAccountFullHeight(true);
@@ -590,8 +598,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           }
         }
       }}
-      animate={controls}
-      initial={{ height: "65vh", borderRadius: "24px", y: 0 }}
+      animate={isOwnProfile ? { height: "100%", borderRadius: "0px", y: 0 } : controls}
+      initial={isOwnProfile ? { height: "100%", borderRadius: "0px", y: 0 } : { height: "65vh", borderRadius: "24px", y: 0 }}
       exit={{ y: "100%", opacity: 0 }}
       transition={{ 
         type: "spring", 
@@ -599,11 +607,13 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
         stiffness: 300,
         mass: 0.8
       }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-background shadow-2xl overflow-hidden flex flex-col"
+      className={`${isOwnProfile ? "relative w-full h-full" : "fixed bottom-0 left-0 right-0 z-50"} bg-background shadow-2xl overflow-hidden flex flex-col`}
       data-testid="container-profile"
     >
-      <div className="w-12 h-1.5 bg-muted/30 rounded-full mx-auto my-3 flex-shrink-0 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors" />
-      <div className="flex-1 overflow-y-auto custom-scrollbar overscroll-contain">
+      {!isOwnProfile && (
+        <div className="w-12 h-1.5 bg-muted/30 rounded-full mx-auto my-3 flex-shrink-0 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors" />
+      )}
+      <div className={`flex-1 overflow-y-auto custom-scrollbar overscroll-contain ${isOwnProfile ? "" : ""}`}>
         <div className="pb-20">
           {/* Sticky Header - Only show for other profiles */}
       {!isOwnProfile && (

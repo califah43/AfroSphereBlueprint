@@ -54,7 +54,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   const [selectedPostId, setSelectedPostId] = useState<string>("");
-  const [selectedUsername, setSelectedUsername] = useState<string>("");
+  const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
   const [logoClickCount, setLogoClickCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [clickResetTimer, setClickResetTimer] = useState<NodeJS.Timeout | null>(null);
@@ -514,6 +514,7 @@ export default function App() {
             <div className="flex-1 overflow-y-auto">
               <Profile
                 isOwnProfile={true}
+                username={JSON.parse(localStorage.getItem("currentUserData") || "{}").username}
                 onEditProfile={() => setModalView("edit-profile")}
                 onSettings={() => setModalView("settings")}
                 onPostClick={handleOpenPostDetail}
@@ -652,7 +653,10 @@ export default function App() {
                   exit={{ opacity: 0 }}
                   className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]"
                   onClick={(e) => {
-                    if (e.target === e.currentTarget) setModalView("none");
+                    if (e.target === e.currentTarget) {
+                      setModalView("none");
+                      setTimeout(() => setSelectedUsername(null), 300);
+                    }
                   }}
                 >
                   <Profile
@@ -660,7 +664,11 @@ export default function App() {
                     username={selectedUsername}
                     onClose={() => {
                       setModalView("none");
-                      setSelectedUsername(null);
+                      setTimeout(() => {
+                        setSelectedUsername(null);
+                        // Force layout recalculation and remove any accidental blur
+                        document.body.style.overflow = "auto";
+                      }, 300);
                     }}
                     onEditProfile={() => setModalView("edit-profile")}
                     onSettings={() => setModalView("settings")}
