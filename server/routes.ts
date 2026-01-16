@@ -9,6 +9,7 @@ import { WebSocketServer } from "ws";
 import type { WebSocket } from "ws";
 import { registerChatRoutes } from "./replit_integrations/chat";
 import { registerImageRoutes } from "./replit_integrations/image";
+import { sendEmail, getSignupEmailTemplate, getPasswordChangeEmailTemplate } from "./lib/email";
 
 // Multer for file uploads (memory storage)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -124,6 +125,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ error: "Username already exists" });
       }
       const user = await storage.createUser(parsed);
+      
+      // Send welcome email
+      if (user.email) {
+        sendEmail(user.email, "Welcome to AfroSphere!", getSignupEmailTemplate(user.username)).catch(console.error);
+      }
+      
       res.json(user);
     } catch (error) {
       res.status(400).json({ error: "Invalid request" });
@@ -324,10 +331,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Allow firebaseUid to be updated even if not in updateUserSchema
       const updates = req.body;
+      const oldUser = await storage.getUser(req.params.id);
       const user = await storage.updateUser(req.params.id, updates);
       
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+      
+      // If password changed, send notification email
+      if (updates.password && oldUser && oldUser.password !== updates.password && user.email) {
+        sendEmail(user.email, "Security Alert: Password Changed", getPasswordChangeEmailTemplate(user.username)).catch(console.error);
       }
       
       res.json(user);
