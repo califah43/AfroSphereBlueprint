@@ -351,6 +351,12 @@ export class MemStorage implements IStorage {
 
   // ============ FOLLOWS ============
   async followUser(followerId: string, followingId: string): Promise<Follow> {
+    // Check if user already following - prevent duplicates
+    const existingFollow = Array.from(this.follows.values()).find(f => f.followerId === followerId && f.followingId === followingId);
+    if (existingFollow) {
+      return existingFollow;
+    }
+
     const id = randomUUID();
     const follow: Follow = { id, followerId, followingId, createdAt: new Date() };
     this.follows.set(id, follow);
