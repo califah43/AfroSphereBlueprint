@@ -591,7 +591,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
     >
       <div className="w-12 h-1.5 bg-muted/30 rounded-full mx-auto my-3 flex-shrink-0 cursor-grab active:cursor-grabbing" />
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-      {/* Sticky Header - Only show for other profiles */}
+        <div className="pb-20">
+          {/* Sticky Header - Only show for other profiles */}
       {!isOwnProfile && (
         <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-between z-20">
           {onClose && (
@@ -1114,6 +1115,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
           }}
         />
       )}
-    </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
