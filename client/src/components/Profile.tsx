@@ -564,9 +564,9 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
 
   useEffect(() => {
     if (isFullHeight) {
-      controls.start({ height: "100vh", y: 0 });
+      controls.start({ height: "100vh", borderRadius: "0px" });
     } else {
-      controls.start({ height: "65vh", y: "0%" });
+      controls.start({ height: "65vh", borderRadius: "24px" });
     }
   }, [isFullHeight, controls]);
 
@@ -575,22 +575,34 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       drag="y"
       dragDirectionLock
       dragConstraints={{ top: 0 }}
-      dragElastic={0.1}
+      dragElastic={0.05}
       onDragEnd={(_, info) => {
-        if (info.offset.y < -100) setIsAccountFullHeight(true);
-        if (info.offset.y > 100) {
-          if (isFullHeight) setIsAccountFullHeight(false);
-          else if (onClose) onClose();
+        // Expand if swiped up significantly
+        if (info.offset.y < -50 || info.velocity.y < -500) {
+          setIsAccountFullHeight(true);
+        }
+        // Handle closing or collapsing
+        if (info.offset.y > 100 || info.velocity.y > 500) {
+          if (isFullHeight) {
+            setIsAccountFullHeight(false);
+          } else if (onClose) {
+            onClose();
+          }
         }
       }}
       animate={controls}
-      initial={{ height: "65vh" }}
-      transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl shadow-2xl overflow-hidden flex flex-col"
+      initial={{ height: "65vh", borderRadius: "24px" }}
+      transition={{ 
+        type: "spring", 
+        damping: 30, 
+        stiffness: 300,
+        mass: 0.8
+      }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-background shadow-2xl overflow-hidden flex flex-col"
       data-testid="container-profile"
     >
-      <div className="w-12 h-1.5 bg-muted/30 rounded-full mx-auto my-3 flex-shrink-0 cursor-grab active:cursor-grabbing" />
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="w-12 h-1.5 bg-muted/30 rounded-full mx-auto my-3 flex-shrink-0 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors" />
+      <div className="flex-1 overflow-y-auto custom-scrollbar overscroll-contain">
         <div className="pb-20">
           {/* Sticky Header - Only show for other profiles */}
       {!isOwnProfile && (

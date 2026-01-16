@@ -645,16 +645,18 @@ export default function App() {
             const currentUserData = localStorage.getItem("currentUserData") ? JSON.parse(localStorage.getItem("currentUserData")!) : {};
             const currentUsername = currentUserData.username || "";
             return (
-              <Profile
-                isOwnProfile={selectedUsername === currentUsername}
-                username={selectedUsername}
-                onClose={() => setModalView("none")}
-                onEditProfile={() => setModalView("edit-profile")}
-                onSettings={() => setModalView("settings")}
-                onPostClick={handleOpenPostDetail}
-                onFollowersClick={() => setModalView("followers")}
-                onFollowingClick={() => setModalView("followers")}
-              />
+              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]">
+                <Profile
+                  isOwnProfile={selectedUsername === currentUsername}
+                  username={selectedUsername}
+                  onClose={() => setModalView("none")}
+                  onEditProfile={() => setModalView("edit-profile")}
+                  onSettings={() => setModalView("settings")}
+                  onPostClick={handleOpenPostDetail}
+                  onFollowersClick={() => setModalView("followers")}
+                  onFollowingClick={() => setModalView("followers")}
+                />
+              </div>
             );
           })()}
 
