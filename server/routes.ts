@@ -2228,5 +2228,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // ============ BLOCKED USERS ============
+  app.post("/api/blocks", async (req, res) => {
+    try {
+      const { userId, blockedUserId } = req.body;
+      if (!userId || !blockedUserId) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      const block = await storage.blockUser(userId, blockedUserId);
+      res.json(block);
+    } catch (error) {
+      console.error("[Route] Error blocking user:", error);
+      res.status(500).json({ error: "Failed to block user" });
+    }
+  });
+
+  app.get("/api/blocks/check/:userId/:blockedUserId", async (req, res) => {
+    try {
+      const { userId, blockedUserId } = req.params;
+      const isBlocked = await storage.isBlocked(userId, blockedUserId);
+      res.json({ isBlocked });
+    } catch (error) {
+      console.error("[Route] Error checking block status:", error);
+      res.status(500).json({ error: "Failed to check block status" });
+    }
+  });
+
+  // ============ USER REPORTS ============
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const report = await storage.createReport(req.body);
+      res.json(report);
+    } catch (error) {
+      console.error("[Route] Error creating report:", error);
+      res.status(400).json({ error: "Failed to submit report" });
+    }
+  });
+
+  app.get("/api/admin/reports", async (req, res) => {
+    try {
+      const reports = await storage.getAllReports();
+      res.json(reports);
+    } catch (error) {
+      console.error("[Route] Error fetching reports:", error);
+      res.status(500).json({ error: "Failed to fetch reports" });
+    }
+  });
+
   return httpServer;
 }

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge, type Admin, type InsertAdmin, type AdminPermission } from "@shared/schema";
+import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge, type Admin, type InsertAdmin, type AdminPermission, type BlockedUser, type UserReport, type FollowRequest, type Hashtag, type HashtagFollow } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -18,6 +18,7 @@ export interface IStorage {
   listPostsByUser(userId: string): Promise<Post[]>;
   listPostsByCategory(category: string, limit?: number): Promise<Post[]>;
   createPost(post: InsertPost): Promise<Post>;
+  updatePost(id: string, updates: Partial<Post>): Promise<Post | undefined>;
   deletePost(id: string): Promise<void>;
   getUserLikedPosts(userId: string): Promise<Post[]>;
   
@@ -41,7 +42,6 @@ export interface IStorage {
   isFollowing(followerId: string, followingId: string): Promise<boolean>;
   getFollowers(userId: string): Promise<User[]>;
   getFollowing(userId: string): Promise<User[]>;
-  
   
   // Notifications
   createNotification(notification: any): Promise<Notification>;
@@ -75,6 +75,12 @@ export interface IStorage {
   getAdminPermissions(adminId: string): Promise<string[]>;
   removeAdmin(adminId: string): Promise<void>;
   verifyAdminPermission(adminId: string, permission: string): Promise<boolean>;
+
+  // Block & Report
+  blockUser(userId: string, blockedUserId: string): Promise<BlockedUser>;
+  isBlocked(userId: string, blockedUserId: string): Promise<boolean>;
+  createReport(report: Partial<UserReport>): Promise<UserReport>;
+  getAllReports(): Promise<UserReport[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -85,10 +91,15 @@ export class MemStorage implements IStorage {
   private follows: Map<string, Follow> = new Map();
   private creatorBadges: Map<string, CreatorBadge> = new Map();
   private badges: Map<string, Badge> = new Map();
-  private userBadges: Map<string, UserBadge[]> = new Map(); // userId -> badges
+  private userBadges: Map<string, UserBadge[]> = new Map();
   private notifications: Map<string, Notification> = new Map();
   private settings: Map<string, UserSettings> = new Map();
-  private fcmTokens: Map<string, string> = new Map(); // userId -> fcmToken
+  private fcmTokens: Map<string, string> = new Map();
+  private savedPosts: Map<string, Set<string>> = new Map();
+  private admins: Map<string, Admin> = new Map();
+  private adminPermissions: Map<string, string[]> = new Map();
+  private blockedUsers: Map<string, BlockedUser> = new Map();
+  private userReports: Map<string, UserReport> = new Map();
 
   // ============ USERS ============
   async getUser(id: string): Promise<User | undefined> {
@@ -215,6 +226,14 @@ export class MemStorage implements IStorage {
     return newPost;
   }
 
+  async updatePost(id: string, updates: Partial<Post>): Promise<Post | undefined> {
+    const post = this.posts.get(id);
+    if (!post) return undefined;
+    const updated = { ...post, ...updates };
+    this.posts.set(id, updated);
+    return updated;
+  }
+
   async deletePost(id: string): Promise<void> {
     const post = this.posts.get(id);
     if (post) {
@@ -286,11 +305,8 @@ export class MemStorage implements IStorage {
 
   // ============ LIKES ============
   async likePost(userId: string, postId: string): Promise<Like> {
-    // Check if user already liked this post - prevent duplicates
     const existingLike = Array.from(this.likes.values()).find(l => l.userId === userId && l.postId === postId);
-    if (existingLike) {
-      return existingLike; // Return existing like, don't create duplicate
-    }
+    if (existingLike) return existingLike;
     
     const id = randomUUID();
     const like: Like = { id, userId, postId, commentId: null, createdAt: new Date() };
@@ -320,11 +336,8 @@ export class MemStorage implements IStorage {
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
-    // Check if user already liked this comment - prevent duplicates
     const existingLike = Array.from(this.likes.values()).find(l => l.userId === userId && l.commentId === commentId);
-    if (existingLike) {
-      return existingLike; // Return existing like, don't create duplicate
-    }
+    if (existingLike) return existingLike;
     
     const id = randomUUID();
     const like: Like = { id, userId, postId: null, commentId, createdAt: new Date() };
@@ -351,11 +364,8 @@ export class MemStorage implements IStorage {
 
   // ============ FOLLOWS ============
   async followUser(followerId: string, followingId: string): Promise<Follow> {
-    // Check if user already following - prevent duplicates
     const existingFollow = Array.from(this.follows.values()).find(f => f.followerId === followerId && f.followingId === followingId);
-    if (existingFollow) {
-      return existingFollow;
-    }
+    if (existingFollow) return existingFollow;
 
     const id = randomUUID();
     const follow: Follow = { id, followerId, followingId, createdAt: new Date() };
@@ -380,13 +390,11 @@ export class MemStorage implements IStorage {
     const follow = Array.from(this.follows.values()).find(f => f.followerId === followerId && f.followingId === followingId);
     if (follow) {
       this.follows.delete(follow.id);
-      
       const follower = this.users.get(followerId);
       if (follower) {
         follower.followingCount = Math.max(0, (follower.followingCount || 1) - 1);
         this.users.set(followerId, follower);
       }
-      
       const following = this.users.get(followingId);
       if (following) {
         following.followerCount = Math.max(0, (following.followerCount || 1) - 1);
@@ -400,69 +408,13 @@ export class MemStorage implements IStorage {
   }
 
   async getFollowers(userId: string): Promise<User[]> {
-    const followerIds = Array.from(this.follows.values())
-      .filter(f => f.followingId === userId)
-      .map(f => f.followerId);
+    const followerIds = Array.from(this.follows.values()).filter(f => f.followingId === userId).map(f => f.followerId);
     return followerIds.map(id => this.users.get(id)).filter((u): u is User => !!u);
   }
 
   async getFollowing(userId: string): Promise<User[]> {
-    const followingIds = Array.from(this.follows.values())
-      .filter(f => f.followerId === userId)
-      .map(f => f.followingId);
+    const followingIds = Array.from(this.follows.values()).filter(f => f.followerId === userId).map(f => f.followingId);
     return followingIds.map(id => this.users.get(id)).filter((u): u is User => !!u);
-  }
-
-  // ============ NEW BADGES SYSTEM ============
-  async getBadges(): Promise<Badge[]> {
-    return Array.from(this.badges.values());
-  }
-
-  async createBadge(badge: InsertBadge): Promise<Badge> {
-    const id = randomUUID();
-    const newBadge: Badge = {
-      id,
-      ...badge,
-      createdAt: new Date(),
-    };
-    this.badges.set(id, newBadge);
-    return newBadge;
-  }
-
-  async deleteBadge(badgeId: string): Promise<void> {
-    this.badges.delete(badgeId);
-  }
-
-  async getUserBadges(userId: string): Promise<Badge[]> {
-    const userBadgeIds = this.userBadges.get(userId) || [];
-    return userBadgeIds
-      .map(ub => this.badges.get(ub.badgeId))
-      .filter((b): b is Badge => !!b);
-  }
-
-  async assignBadge(userId: string, badgeId: string): Promise<UserBadge> {
-    const id = randomUUID();
-    const userBadge: UserBadge = {
-      id,
-      userId,
-      badgeId,
-      assignedAt: new Date(),
-    };
-    const existing = this.userBadges.get(userId) || [];
-    if (!existing.find(ub => ub.badgeId === badgeId)) {
-      this.userBadges.set(userId, [...existing, userBadge]);
-    }
-    return userBadge;
-  }
-
-  async removeBadge(userId: string, badgeId: string): Promise<void> {
-    const existing = this.userBadges.get(userId) || [];
-    const updated = existing.filter(ub => ub.badgeId !== badgeId);
-    if (updated.length > 0) {
-      this.userBadges.set(userId, updated);
-    } else {
-      this.userBadges.delete(userId);
-    }
   }
 
   // ============ NOTIFICATIONS ============
@@ -544,8 +496,6 @@ export class MemStorage implements IStorage {
   }
 
   // ============ SAVED POSTS ============
-  private savedPosts: Map<string, Set<string>> = new Map(); // userId -> Set<postId>
-
   async savePost(userId: string, postId: string): Promise<void> {
     if (!this.savedPosts.has(userId)) {
       this.savedPosts.set(userId, new Set());
@@ -567,9 +517,6 @@ export class MemStorage implements IStorage {
   }
 
   // ============ ADMIN ============
-  private admins: Map<string, Admin> = new Map();
-  private adminPermissions: Map<string, string[]> = new Map(); // adminId -> permissions[]
-
   async createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin> {
     const id = randomUUID();
     const newAdmin: Admin = {
@@ -600,29 +547,7 @@ export class MemStorage implements IStorage {
     return permissions.includes(permission);
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
-  async getAllPosts(): Promise<Post[]> {
-    return Array.from(this.posts.values());
-  }
-
-  async getAllFollows(): Promise<Follow[]> {
-    return Array.from(this.follows.values());
-  }
-
-  async getAllLikes(): Promise<Like[]> {
-    return Array.from(this.likes.values());
-  }
-
-  async getAllComments(): Promise<Comment[]> {
-    return Array.from(this.comments.values());
-  }
-
   // ============ BLOCKED USERS ============
-  private blockedUsers: Map<string, BlockedUser> = new Map();
-
   async blockUser(userId: string, blockedUserId: string): Promise<BlockedUser> {
     const id = randomUUID();
     const blockedUser: BlockedUser = { id, userId, blockedUserId, createdAt: new Date() };
@@ -637,8 +562,6 @@ export class MemStorage implements IStorage {
   }
 
   // ============ USER REPORTS ============
-  private userReports: Map<string, UserReport> = new Map();
-
   async createReport(report: Partial<UserReport>): Promise<UserReport> {
     const id = randomUUID();
     const newReport: UserReport = {
@@ -653,6 +576,60 @@ export class MemStorage implements IStorage {
     };
     this.userReports.set(id, newReport);
     return newReport;
+  }
+
+  async getAllReports(): Promise<UserReport[]> {
+    return Array.from(this.userReports.values());
+  }
+
+  // ============ BADGES ============
+  async getBadges(): Promise<Badge[]> {
+    return Array.from(this.badges.values());
+  }
+
+  async createBadge(badge: InsertBadge): Promise<Badge> {
+    const id = randomUUID();
+    const newBadge: Badge = {
+      id,
+      ...badge,
+      createdAt: new Date(),
+    };
+    this.badges.set(id, newBadge);
+    return newBadge;
+  }
+
+  async deleteBadge(badgeId: string): Promise<void> {
+    this.badges.delete(badgeId);
+  }
+
+  async getUserBadges(userId: string): Promise<Badge[]> {
+    const userBadgeIds = this.userBadges.get(userId) || [];
+    return userBadgeIds.map(ub => this.badges.get(ub.badgeId)).filter((b): b is Badge => !!b);
+  }
+
+  async assignBadge(userId: string, badgeId: string): Promise<UserBadge> {
+    const id = randomUUID();
+    const userBadge: UserBadge = {
+      id,
+      userId,
+      badgeId,
+      assignedAt: new Date(),
+    };
+    const existing = this.userBadges.get(userId) || [];
+    if (!existing.find(ub => ub.badgeId === badgeId)) {
+      this.userBadges.set(userId, [...existing, userBadge]);
+    }
+    return userBadge;
+  }
+
+  async removeBadge(userId: string, badgeId: string): Promise<void> {
+    const existing = this.userBadges.get(userId) || [];
+    const updated = existing.filter(ub => ub.badgeId !== badgeId);
+    if (updated.length > 0) {
+      this.userBadges.set(userId, updated);
+    } else {
+      this.userBadges.delete(userId);
+    }
   }
 }
 
