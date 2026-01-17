@@ -729,62 +729,86 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
       {/* Padding wrapper for content */}
       <div className="px-4 py-2">
         {/* Name & Username - Clean & Simple */}
-        <div className="mb-1 mt-2">
+        <div className="mb-4 mt-2">
           {/* Display Name with Badges */}
-          <div className="flex items-center gap-0.5 mb-0">
-            <h1 className="font-black tracking-tight text-sm" data-testid="text-profile-displayname">
+          <div className="flex items-center gap-1.5 mb-1">
+            <h1 className="font-black tracking-tight text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text" data-testid="text-profile-displayname">
               {userProfile?.displayName || "Loading..."}
             </h1>
             {isAccountPrivate && (
-              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" data-testid="icon-private-indicator" />
+              <Lock className="h-4 w-4 text-primary/60 flex-shrink-0" data-testid="icon-private-indicator" />
             )}
             {userBadges && userBadges.length > 0 && (
-              <>
-                {console.log("[Profile Render] Showing badges, count:", userBadges.length)}
+              <div className="flex items-center">
                 <BadgeDisplay preloadedBadges={userBadges} />
-              </>
+              </div>
             )}
           </div>
           
           {/* Unique Username Handle */}
-          <p className="text-xs text-muted-foreground font-medium mb-0.5" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
+          <p className="text-sm text-primary font-bold mb-3 tracking-wide" data-testid="text-profile-username">@{userProfile?.username || "user"}</p>
 
-          {/* Bio - Compact elegance */}
-          <p className="text-xs text-foreground leading-tight mb-0.5 whitespace-pre-wrap" data-testid="text-profile-bio">
-            {userProfile?.bio || "Creative on AfroSphere"}
-          </p>
-
-          {/* Join Date */}
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 mb-2">
-            <Calendar size={12} />
-            <span>Joined {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+          {/* Bio - Spacious & Elegant */}
+          <div className="relative mb-4 group">
+            <div className="absolute -left-3 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/40 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-wrap font-medium" data-testid="text-profile-bio">
+              {userProfile?.bio || "Creative on AfroSphere"}
+            </p>
           </div>
 
-        </div>
-
-        {/* Professional Info - Compact & Refined */}
-        {userProfile && (userProfile.profession || userProfile.location || userProfile.website) && (
-          <div className="flex flex-col gap-1 mb-4 text-xs -mt-1">
-            {userProfile.profession && (
-              <div className="flex items-center gap-2 text-foreground">
-                <Briefcase className="h-3 w-3 text-primary/60 flex-shrink-0" />
-                <span className="font-medium truncate">{userProfile.profession}</span>
+          {/* Info Grid - Sharp & Detailed */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 mb-4">
+            {userProfile?.profession && (
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-card/40 border border-primary/10 hover:border-primary/30 transition-all hover-elevate">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Briefcase size={14} className="text-primary" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Profession</span>
+                  <span className="text-xs font-bold text-foreground truncate">{userProfile.profession}</span>
+                </div>
               </div>
             )}
-            {userProfile.location && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-3 w-3 text-primary/60 flex-shrink-0" />
-                <span className="truncate">{userProfile.location}</span>
+            {userProfile?.location && (
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-card/40 border border-primary/10 hover:border-primary/30 transition-all hover-elevate">
+                <div className="p-2 bg-orange-500/10 rounded-lg">
+                  <MapPin size={14} className="text-orange-500" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Location</span>
+                  <span className="text-xs font-bold text-foreground truncate">{userProfile.location}</span>
+                </div>
               </div>
             )}
-            {userProfile.website && (
-              <a href={`https://${userProfile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors truncate">
-                <Link className="h-3 w-3 flex-shrink-0" />
-                <span className="truncate text-xs">{userProfile.website}</span>
+            {userProfile?.website && (
+              <a 
+                href={`https://${userProfile.website}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center gap-3 p-2.5 rounded-xl bg-card/40 border border-primary/10 hover:border-primary/30 transition-all hover-elevate group"
+              >
+                <div className="p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                  <Link size={14} className="text-blue-500" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Website</span>
+                  <span className="text-xs font-bold text-primary truncate group-hover:underline">{userProfile.website}</span>
+                </div>
               </a>
             )}
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-card/40 border border-primary/10 hover:border-primary/30 transition-all hover-elevate">
+              <div className="p-2 bg-pink-500/10 rounded-lg">
+                <Calendar size={14} className="text-pink-500" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Member Since</span>
+                <span className="text-xs font-bold text-foreground truncate">
+                  {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
 
         {/* Stats - Premium Style */}
         {userProfile && (
