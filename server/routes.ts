@@ -2157,6 +2157,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ BLOCK & REPORT ROUTES ============
+  app.post("/api/blocks", async (req, res) => {
+    try {
+      const { userId, blockedUserId } = req.body;
+      if (!userId || !blockedUserId) {
+        return res.status(400).json({ error: "Missing userId or blockedUserId" });
+      }
+      const block = await storage.blockUser(userId, blockedUserId);
+      res.json(block);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to block user" });
+    }
+  });
+
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const { userId, reportedUserId, reportType, description, postId } = req.body;
+      if (!userId || (!reportedUserId && !postId)) {
+        return res.status(400).json({ error: "Missing required report fields" });
+      }
+      const report = await storage.createReport({
+        userId,
+        reportedUserId,
+        reportType,
+        description,
+        postId
+      });
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create report" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // Setup WebSocket for real-time post updates

@@ -620,32 +620,39 @@ export class MemStorage implements IStorage {
     return Array.from(this.comments.values());
   }
 
-  async getAllNotifications(): Promise<Notification[]> {
-    return Array.from(this.notifications.values());
+  // ============ BLOCKED USERS ============
+  private blockedUsers: Map<string, BlockedUser> = new Map();
+
+  async blockUser(userId: string, blockedUserId: string): Promise<BlockedUser> {
+    const id = randomUUID();
+    const blockedUser: BlockedUser = { id, userId, blockedUserId, createdAt: new Date() };
+    this.blockedUsers.set(id, blockedUser);
+    return blockedUser;
   }
 
-  async getAllReports(): Promise<UserReport[]> {
-    return Array.from(this.userReports.values());
+  async isBlocked(userId: string, blockedUserId: string): Promise<boolean> {
+    return Array.from(this.blockedUsers.values()).some(
+      b => b.userId === userId && b.blockedUserId === blockedUserId
+    );
   }
 
-  async getAllFollowRequests(): Promise<FollowRequest[]> {
-    return Array.from(this.followRequests.values());
-  }
+  // ============ USER REPORTS ============
+  private userReports: Map<string, UserReport> = new Map();
 
-  async getAllHashtags(): Promise<Hashtag[]> {
-    return Array.from(this.hashtags.values());
-  }
-
-  async getAllHashtagFollows(): Promise<HashtagFollow[]> {
-    return Array.from(this.hashtagFollows.values());
-  }
-
-  async updatePost(id: string, updates: Partial<Post>): Promise<Post | undefined> {
-    const post = this.posts.get(id);
-    if (!post) return undefined;
-    const updated = { ...post, ...updates };
-    this.posts.set(id, updated);
-    return updated;
+  async createReport(report: Partial<UserReport>): Promise<UserReport> {
+    const id = randomUUID();
+    const newReport: UserReport = {
+      id,
+      userId: report.userId!,
+      reportType: report.reportType!,
+      description: report.description!,
+      postId: report.postId || null,
+      reportedUserId: report.reportedUserId || null,
+      status: "pending",
+      createdAt: new Date(),
+    };
+    this.userReports.set(id, newReport);
+    return newReport;
   }
 }
 

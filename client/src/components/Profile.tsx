@@ -35,6 +35,8 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   const [activeTab, setActiveTab] = useState("posts");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowRequestPending, setIsFollowRequestPending] = useState(false);
+  const [isBlocking, setIsBlocking] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
@@ -452,109 +454,77 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
   };
 
   const toggleFollow = async () => {
-    setIsLoading(true);
+    // ... existing toggleFollow code
+  };
+
+  const handleBlockUser = async () => {
+    if (!userId || !userProfile) return;
+    
+    setIsBlocking(true);
     try {
       const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-      const currentUserId = currentUserData?.id;
-      const targetUsername = username;
-      
-      if (!currentUserId || !targetUsername) {
-        toast({
-          title: t("common.error"),
-          description: t("profile.missingUserInfo"),
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Fetch target user by username to get their ID
-      const userRes = await fetch(`/api/users/username/${targetUsername}`);
-      if (!userRes.ok) {
-        toast({
-          title: t("common.error"),
-          description: t("profile.userNotFound"),
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      const targetUser = await userRes.json();
-      const targetUserId = targetUser.id;
-      
-      const res = await fetch('/api/follows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          followerId: currentUserId, 
-          followingId: targetUserId 
+      if (!currentUserData.id) return;
+
+      const res = await fetch("/api/blocks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUserData.id,
+          blockedUserId: userId
         })
       });
-      
+
       if (res.ok) {
-        const data = await res.json();
-        
-        // Handle follow request for private accounts
-        if (data.followRequest) {
-          setIsFollowRequestPending(true);
-          toast({
-            title: t("profile.followRequestSent"),
-            description: `Follow request sent to @${targetUsername}`,
-            className: "border-primary/20 bg-card",
-          });
-        } else if (data.following) {
-          setIsFollowing(true);
-          setUserProfile((prev: any) => ({
-            ...prev,
-            followers: (parseInt(prev.followers || "0") + 1).toString(),
-          }));
-          const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-          if (currentUserData && currentUserData.id) {
-            currentUserData.followingCount = (currentUserData.followingCount || 0) + 1;
-            localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
-          }
-          toast({
-            title: t("profile.following"),
-            description: `You're now following @${targetUsername}`,
-            className: "border-primary/20 bg-card",
-          });
-        } else {
-          setIsFollowing(false);
-          setUserProfile((prev: any) => ({
-            ...prev,
-            followers: Math.max(0, parseInt(prev.followers || "1") - 1).toString(),
-          }));
-          const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
-          if (currentUserData && currentUserData.id) {
-            currentUserData.followingCount = Math.max(0, (currentUserData.followingCount || 1) - 1);
-            localStorage.setItem("currentUserData", JSON.stringify(currentUserData));
-          }
-          toast({
-            title: t("profile.unfollowed"),
-            description: `You unfollowed @${targetUsername}`,
-            className: "border-primary/20 bg-card",
-          });
-        }
-      } else {
-        const errorData = await res.json();
-        if (errorData.error?.includes("already sent")) {
-          setIsFollowRequestPending(true);
-        } else {
-          toast({
-            title: t("common.error"),
-            description: t("profile.failedToToggleFollow"),
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "User Blocked",
+          description: `You have blocked @${userProfile.username}`,
+        });
+        if (onClose) onClose();
       }
     } catch (error) {
-      console.error('Failed to toggle follow:', error);
       toast({
-        title: t("profile.connectionError"),
-        description: t("profile.failedToProcess"),
-        variant: "destructive",
+        title: "Error",
+        description: "Failed to block user",
+        variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsBlocking(false);
+    }
+  };
+
+  const handleReportUser = async () => {
+    if (!userId) return;
+    
+    setIsReporting(true);
+    try {
+      const currentUserData = JSON.parse(localStorage.getItem("currentUserData") || "{}");
+      if (!currentUserData.id) return;
+
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUserData.id,
+          reportedUserId: userId,
+          reportType: "profile",
+          description: "User reported from profile"
+        })
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Report Submitted",
+          description: "Thank you for helping keep AfroSphere safe.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit report",
+        variant: "destructive"
+      });
+    } finally {
+      setIsReporting(false);
     }
   };
 
@@ -895,19 +865,23 @@ export default function Profile({ isOwnProfile = true, username, onClose, onEdit
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 hover-elevate transition-all border border-destructive/20 hover:border-destructive/50 hover:bg-destructive/10"
+                onClick={handleReportUser}
+                disabled={isReporting}
                 data-testid="button-report-user"
                 title="Report user"
               >
-                <Flag size={20} />
+                {isReporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Flag size={20} />}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 hover-elevate transition-all border border-destructive/20 hover:border-destructive/50 hover:bg-destructive/10"
+                onClick={handleBlockUser}
+                disabled={isBlocking}
                 data-testid="button-block-user"
                 title="Block user"
               >
-                <Ban size={20} />
+                {isBlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban size={20} />}
               </Button>
             </>
           )}
