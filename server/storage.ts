@@ -451,7 +451,7 @@ export class MemStorage implements IStorage {
 
   async saveUserSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
     let settings = Array.from(this.settings.values()).find(s => s.userId === userId);
-    const defaults = {
+    const defaults: UserSettings = {
       userId,
       privateAccount: false,
       allowComments: true,
@@ -471,14 +471,24 @@ export class MemStorage implements IStorage {
       displayTextSize: "normal",
       displayLanguage: "en",
       updatedAt: new Date(),
-    } as UserSettings;
+    };
     
     if (!settings) {
-      settings = { ...defaults, ...updates, userId } as UserSettings;
+      settings = { ...defaults, ...updates, userId };
     } else {
       settings = { ...settings, ...updates, updatedAt: new Date(), userId };
     }
     this.settings.set(userId, settings);
+
+    // If privateAccount status changed, update the user object too
+    if (updates.privateAccount !== undefined) {
+      const user = this.users.get(userId);
+      if (user) {
+        user.isPrivate = updates.privateAccount;
+        this.users.set(userId, user);
+      }
+    }
+
     return settings;
   }
 

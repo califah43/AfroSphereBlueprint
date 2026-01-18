@@ -2366,5 +2366,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ SETTINGS ROUTES ============
+  app.get("/api/users/:userId/settings", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const settings = await storage.saveUserSettings(userId, {}); // Get or create defaults
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.patch("/api/users/:userId/settings", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const updates = req.body;
+      const settings = await storage.saveUserSettings(userId, updates);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
   return httpServer;
 }
