@@ -561,6 +561,95 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getAllPosts(): Promise<Post[]> {
+    return Array.from(this.posts.values());
+  }
+
+  async getAllFollows(): Promise<Follow[]> {
+    return Array.from(this.follows.values());
+  }
+
+  async getAllComments(): Promise<Comment[]> {
+    return Array.from(this.comments.values());
+  }
+
+  async getAllLikes(): Promise<Like[]> {
+    return Array.from(this.likes.values());
+  }
+
+  async getAllNotifications(): Promise<Notification[]> {
+    return Array.from(this.notifications.values());
+  }
+
+  async hasUserLikedComment(userId: string, commentId: string): Promise<boolean> {
+    return Array.from(this.likes.values()).some(l => l.userId === userId && l.commentId === commentId);
+  }
+
+  async hasFollowRequest(followerId: string, followingId: string): Promise<boolean> {
+    return false; // Stub
+  }
+
+  async createFollowRequest(followerId: string, followingId: string): Promise<any> {
+    return null; // Stub
+  }
+
+  async getFollowRequests(userId: string): Promise<any[]> {
+    return []; // Stub
+  }
+
+  async acceptFollowRequest(requestId: string): Promise<void> {}
+  async declineFollowRequest(requestId: string): Promise<void> {}
+
+  async isFollowingHashtag(userId: string, hashtag: string): Promise<boolean> {
+    return false; // Stub
+  }
+
+  async followHashtag(userId: string, hashtag: string): Promise<void> {}
+  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {}
+
+  async getAllHashtags(): Promise<Hashtag[]> {
+    return []; // Stub
+  }
+
+  async getAllHashtagFollows(): Promise<HashtagFollow[]> {
+    return []; // Stub
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const q = query.toLowerCase();
+    return Array.from(this.users.values()).filter(u => 
+      u.username.toLowerCase().includes(q) || 
+      (u.displayName && u.displayName.toLowerCase().includes(q))
+    );
+  }
+
+  async searchPosts(query: string): Promise<Post[]> {
+    const q = query.toLowerCase();
+    return Array.from(this.posts.values()).filter(p => 
+      (p.caption && p.caption.toLowerCase().includes(q))
+    );
+  }
+
+  async searchHashtags(query: string): Promise<Hashtag[]> {
+    return []; // Stub
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    this.users.delete(userId);
+  }
+
+  async getBadgeUsers(badgeId: string): Promise<User[]> {
+    return []; // Stub
+  }
+
+  async getAllBadgesWithUsers(): Promise<any[]> {
+    return []; // Stub
+  }
+
   // ============ USER REPORTS ============
   async createReport(report: Partial<UserReport>): Promise<UserReport> {
     const id = randomUUID();
