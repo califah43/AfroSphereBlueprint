@@ -24,13 +24,18 @@ export default function HashtagExplore({ userId, onHashtagClick }: HashtagExplor
 
   // Fetch all hashtags
   const { data: allHashtags = [], isLoading } = useQuery({
-    queryKey: ['/api/hashtags/search', ''],
+    queryKey: ['/api/trending/hashtags'],
     staleTime: 15 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     queryFn: async () => {
-      const res = await fetch(`/api/hashtags/search?query=`);
+      const res = await fetch(`/api/trending/hashtags`);
       if (!res.ok) return [];
-      return res.json();
+      const data = await res.json();
+      return data.map((h: any) => ({
+        id: h.tag,
+        tag: h.tag,
+        usageCount: h.posts
+      }));
     },
   });
 
@@ -40,9 +45,8 @@ export default function HashtagExplore({ userId, onHashtagClick }: HashtagExplor
     staleTime: 15 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     queryFn: async () => {
-      const res = await fetch(`/api/users/${userId}/followed-hashtags`);
-      if (!res.ok) return [];
-      return res.json();
+      // Stub since we don't have a specific endpoint yet, but storage supports it
+      return [];
     },
   });
 

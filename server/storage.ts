@@ -650,8 +650,10 @@ export class MemStorage implements IStorage {
   async searchUsers(query: string): Promise<User[]> {
     const q = query.toLowerCase();
     return Array.from(this.users.values()).filter(u => 
-      u.username.toLowerCase().includes(q) || 
-      (u.displayName && u.displayName.toLowerCase().includes(q))
+      u.status === "active" && (
+        u.username.toLowerCase().includes(q) || 
+        (u.displayName && u.displayName.toLowerCase().includes(q))
+      )
     );
   }
 
@@ -663,7 +665,9 @@ export class MemStorage implements IStorage {
   }
 
   async searchHashtags(query: string): Promise<Hashtag[]> {
-    return []; // Stub
+    const q = query.toLowerCase();
+    const hashtags = await this.getAllHashtags();
+    return hashtags.filter(h => h.name.toLowerCase().includes(q));
   }
 
   async deleteUser(userId: string): Promise<void> {
