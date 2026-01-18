@@ -605,18 +605,46 @@ export class MemStorage implements IStorage {
   async declineFollowRequest(requestId: string): Promise<void> {}
 
   async isFollowingHashtag(userId: string, hashtag: string): Promise<boolean> {
-    return false; // Stub
+    return Array.from(this.hashtagFollows.values()).some(f => f.userId === userId && f.hashtagId === hashtag);
   }
 
-  async followHashtag(userId: string, hashtag: string): Promise<void> {}
-  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {}
+  async followHashtag(userId: string, hashtag: string): Promise<void> {
+    const id = randomUUID();
+    this.hashtagFollows.set(id, { id, userId, hashtagId: hashtag, createdAt: new Date() });
+  }
+
+  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {
+    const follow = Array.from(this.hashtagFollows.values()).find(f => f.userId === userId && f.hashtagId === hashtag);
+    if (follow) this.hashtagFollows.delete(follow.id);
+  }
 
   async getAllHashtags(): Promise<Hashtag[]> {
-    return []; // Stub
+    const hashtagMap = new Map<string, Hashtag>();
+    
+    Array.from(this.posts.values()).forEach(post => {
+      if (post.hashtags && Array.isArray(post.hashtags)) {
+        post.hashtags.forEach(tag => {
+          const existing = hashtagMap.get(tag);
+          if (existing) {
+            existing.postsCount = (existing.postsCount || 0) + 1;
+          } else {
+            hashtagMap.set(tag, {
+              id: tag,
+              name: tag,
+              postsCount: 1,
+              followersCount: 0,
+              createdAt: new Date()
+            });
+          }
+        });
+      }
+    });
+
+    return Array.from(hashtagMap.values());
   }
 
   async getAllHashtagFollows(): Promise<HashtagFollow[]> {
-    return []; // Stub
+    return Array.from(this.hashtagFollows.values());
   }
 
   async searchUsers(query: string): Promise<User[]> {
@@ -702,7 +730,7 @@ export class MemStorage implements IStorage {
       id,
       userId,
       badgeId,
-      assignedAt: new Date(),
+      createdAt: new Date(),
     };
     const existing = this.userBadges.get(userId) || [];
     if (!existing.find(ub => ub.badgeId === badgeId)) {

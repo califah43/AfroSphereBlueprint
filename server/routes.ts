@@ -2300,5 +2300,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ TRENDING ROUTES ============
+  app.get("/api/trending/hashtags", async (req, res) => {
+    try {
+      const hashtags = await storage.getAllHashtags();
+      // Sort by post count desc
+      const trending = hashtags
+        .sort((a, b) => (b.postsCount || 0) - (a.postsCount || 0))
+        .map(h => ({
+          tag: h.name,
+          posts: h.postsCount || 0,
+          count: h.followersCount || 0
+        }));
+      res.json(trending);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch trending hashtags" });
+    }
+  });
+
+  app.get("/api/trending/posts", async (req, res) => {
+    try {
+      const allPosts = await storage.getAllPosts();
+      const trending = allPosts
+        .sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0))
+        .slice(0, 20);
+      res.json(trending);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch trending posts" });
+    }
+  });
+
+  // ============ HASHTAG ROUTES ============
+  app.get("/api/hashtags/:tag/posts", async (req, res) => {
+    try {
+      const tag = req.params.tag.toLowerCase();
+      const allPosts = await storage.getAllPosts();
+      const hashtagPosts = allPosts.filter(p => 
+        p.hashtags && Array.isArray(p.hashtags) && p.hashtags.includes(tag)
+      );
+      res.json(hashtagPosts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch hashtag posts" });
+    }
+  });
+
+  app.post("/api/hashtags/:tag/follow", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const tag = req.params.tag.toLowerCase();
+      await storage.followHashtag(userId, tag);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to follow hashtag" });
+    }
+  });
+
+  app.post("/api/hashtags/:tag/unfollow", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const tag = req.params.tag.toLowerCase();
+      await storage.unfollowHashtag(userId, tag);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to unfollow hashtag" });
+    }
+  });
+
   return httpServer;
 }

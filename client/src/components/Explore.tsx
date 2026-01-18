@@ -73,11 +73,13 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
           fetch('/api/trending/posts')
         ]);
         
+        if (!hashtagRes.ok || !postsRes.ok) throw new Error('Fetch failed');
+        
         const hashtags = await hashtagRes.json();
         const posts = await postsRes.json();
         
-        setTrendingHashtags(hashtags.slice(0, 10));
-        setTrendingPosts(posts.slice(0, 6).map((p: any) => ({ 
+        setTrendingHashtags(hashtags);
+        setTrendingPosts(posts.map((p: any) => ({ 
           id: p.id, 
           image: p.image, 
           likes: p.likes || 0, 
