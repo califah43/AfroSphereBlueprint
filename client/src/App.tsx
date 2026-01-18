@@ -65,13 +65,44 @@ export default function App() {
     const saved = localStorage.getItem("textSize") as "normal" | "large" | "extra-large" | null;
     return saved || "normal";
   });
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved !== "false";
+  });
+
+  // Load user settings on startup
+  useEffect(() => {
+    const userId = localStorage.getItem("currentUserId");
+    if (userId) {
+      fetch(`/api/users/${userId}/settings`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.displayTextSize) {
+            setTextSize(data.displayTextSize);
+            localStorage.setItem("textSize", data.displayTextSize);
+          }
+          if (data.displayDarkMode !== undefined) {
+            setIsDarkMode(data.displayDarkMode);
+            localStorage.setItem("darkMode", data.displayDarkMode.toString());
+            if (data.displayDarkMode) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          }
+        })
+        .catch(e => console.error("Failed to load initial settings", e));
+    }
+  }, []);
 
   useEffect(() => {
     const darkMode = localStorage.getItem("darkMode");
     if (darkMode === "false") {
       document.documentElement.classList.remove("dark");
+      setIsDarkMode(false);
     } else {
       document.documentElement.classList.add("dark");
+      setIsDarkMode(true);
     }
   }, []);
 

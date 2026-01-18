@@ -108,19 +108,46 @@ export default function Settings({ onClose, onLogout, onEditProfile, onPremium, 
   useEffect(() => {
     if (userId) {
       setIsLoading(true);
-      fetch(`/api/settings/${userId}`)
-        .then(r => r.json())
+      fetch(`/api/users/${userId}/settings`)
+        .then(r => {
+          if (!r.ok) throw new Error("Failed to fetch settings");
+          return r.json();
+        })
         .then(data => {
           const loadedLanguage = (data.displayLanguage as "en" | "sw" | "yo" | "ha" | "am" | "xh") || language;
           setSettings(prev => ({
             ...prev,
-            account: { privateAccount: data.privateAccount, allowComments: data.allowComments, allowMentions: data.allowMentions },
-            notifications: { likes: data.notificationsLikes, comments: data.notificationsComments, follows: data.notificationsFollows, trending: data.notificationsTrending, pushNotifications: data.notificationsPush, emailNotifications: data.notificationsEmail },
-            privacy: { downloadData: false, activityStatus: data.privacyActivityStatus },
-            display: { ...prev.display, darkMode: data.displayDarkMode, textSize: data.displayTextSize, language: loadedLanguage },
-            content: { hideExplicit: data.contentHideExplicit, mutedWords: data.contentMutedWords, restrictedMode: data.contentRestrictedMode },
+            account: { 
+              privateAccount: data.privateAccount ?? false, 
+              allowComments: data.allowComments ?? true, 
+              allowMentions: data.allowMentions ?? true 
+            },
+            notifications: { 
+              likes: data.notificationsLikes ?? true, 
+              comments: data.notificationsComments ?? true, 
+              follows: data.notificationsFollows ?? true, 
+              trending: data.notificationsTrending ?? true, 
+              pushNotifications: data.notificationsPush ?? true, 
+              emailNotifications: data.notificationsEmail ?? true 
+            },
+            privacy: { 
+              downloadData: false, 
+              activityStatus: data.privacyActivityStatus ?? true 
+            },
+            display: { 
+              ...prev.display, 
+              darkMode: data.displayDarkMode ?? true, 
+              textSize: data.displayTextSize ?? "normal", 
+              language: loadedLanguage 
+            },
+            content: { 
+              hideExplicit: data.contentHideExplicit ?? false, 
+              mutedWords: data.contentMutedWords ?? false, 
+              restrictedMode: data.contentRestrictedMode ?? false 
+            },
           }));
         })
+        .catch(err => console.error("Error loading settings:", err))
         .finally(() => setIsLoading(false));
     }
   }, [userId]);
@@ -143,26 +170,17 @@ export default function Settings({ onClose, onLogout, onEditProfile, onPremium, 
     if (section === "display" && key === "textSize" && onTextSizeChange) {
       onTextSizeChange(value);
     }
+
+    if (section === "display" && key === "darkMode") {
+      if (value) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem("darkMode", value.toString());
+    }
     
     if (userId) {
-      // If private account is toggled, also update user profile
-      if (section === "account" && key === "privateAccount") {
-        fetch(`/api/users/${userId}`, { 
-          method: 'PATCH', 
-          body: JSON.stringify({ isPrivate: value }), 
-          headers: { 'Content-Type': 'application/json' } 
-        }).then(() => {
-          // Update localStorage too
-          const storedData = localStorage.getItem("currentUserData");
-          if (storedData) {
-            const userData = JSON.parse(storedData);
-            userData.isPrivate = value;
-            localStorage.setItem("currentUserData", JSON.stringify(userData));
-            window.dispatchEvent(new Event('userPrivacyChanged'));
-          }
-        }).catch(e => console.error('Privacy update failed:', e));
-      }
-      
       const mapped: any = {
         privateAccount: newSettings.account.privateAccount,
         allowComments: newSettings.account.allowComments,
@@ -181,7 +199,23 @@ export default function Settings({ onClose, onLogout, onEditProfile, onPremium, 
         displayTextSize: newSettings.display.textSize,
         displayLanguage: newSettings.display.language,
       };
-      fetch(`/api/settings/${userId}`, { method: 'POST', body: JSON.stringify(mapped), headers: { 'Content-Type': 'application/json' } }).catch(e => console.error('Settings save failed:', e));
+
+      fetch(`/api/users/${userId}/settings`, { 
+        method: 'PATCH', 
+        body: JSON.stringify(mapped), 
+        headers: { 'Content-Type': 'application/json' } 
+      }).then(res => {
+        if (res.ok && section === "account" && key === "privateAccount") {
+          // Update local storage if privacy changed
+          const storedData = localStorage.getItem("currentUserData");
+          if (storedData) {
+            const userData = JSON.parse(storedData);
+            userData.isPrivate = value;
+            localStorage.setItem("currentUserData", JSON.stringify(userData));
+            window.dispatchEvent(new Event('userPrivacyChanged'));
+          }
+        }
+      }).catch(e => console.error('Settings save failed:', e));
     }
   };
 
