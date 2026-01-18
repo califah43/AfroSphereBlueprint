@@ -227,6 +227,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============ USER ROUTES ============
+  app.get("/api/users/search", async (req, res) => {
+    try {
+      const query = (req.query.q as string || "").toLowerCase();
+      const allUsers = await storage.getAllUsers();
+      
+      const filteredUsers = allUsers.filter(u => 
+        u.status === "active" && 
+        (u.username.toLowerCase().includes(query) || 
+         (u.displayName && u.displayName.toLowerCase().includes(query)))
+      ).slice(0, 20);
+
+      res.json(filteredUsers.map(u => ({
+        id: u.id,
+        username: u.username,
+        displayName: u.displayName,
+        avatar: u.avatar,
+        followerCount: u.followerCount || 0,
+        bio: u.bio,
+      })));
+    } catch (error) {
+      console.error("User search error:", error);
+      res.status(500).json({ error: "Failed to search users" });
+    }
+  });
+
   app.get("/api/users/all", async (req, res) => {
     try {
       const allUsers = await storage.getAllUsers();

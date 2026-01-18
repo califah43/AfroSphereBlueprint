@@ -93,6 +93,34 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
     fetchTrending();
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.length >= 2) {
+        setIsSearching(true);
+        try {
+          const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`);
+          const data = await res.json();
+          setSearchResults(data);
+          setShowSearchResults(true);
+        } catch (e) {
+          console.error("Search failed", e);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowSearchResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   const displayPosts = trendingPosts.length > 0 ? trendingPosts : popularPosts;
 
   return (
@@ -100,16 +128,57 @@ export default function Explore({ onSearchClick, onPostClick, onHashtagClick, on
       <div className="sticky top-0 bg-background z-10 border-b border-border">
         <div className="max-w-md mx-auto px-4 py-3 space-y-4">
           <h1 className="text-2xl font-bold" data-testid="text-explore-title">Explore</h1>
-          <button
-            onClick={onSearchClick}
-            className="relative w-full text-left"
-            data-testid="button-open-search"
-          >
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <div className="pl-10 pr-4 py-2 rounded-full bg-muted text-muted-foreground text-sm">
-              Search creators, hashtags...
-            </div>
-          </button>
+            <input
+              type="text"
+              placeholder="Search creators, hashtags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              data-testid="input-explore-search"
+            />
+            
+            {showSearchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">Searching...</div>
+                ) : searchResults.length > 0 ? (
+                  <div className="py-2">
+                    {searchResults.map((user) => (
+                      <button
+                        key={user.id}
+                        onClick={() => {
+                          onUserProfileClick?.(user.username);
+                          setShowSearchResults(false);
+                          setSearchQuery("");
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted transition-colors text-left"
+                      >
+                        <Avatar className="h-10 w-10 border border-primary/20">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt={user.username} className="object-cover" />
+                          ) : (
+                            <AvatarFallback className="bg-primary/10 text-primary">
+                              {user.username.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold text-sm">@{user.username}</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {user.displayName || user.bio || "No bio"}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-sm text-muted-foreground">No creators found</div>
+                )}
+              </div>
+            )}
+          </div>
           
           {/* Tabs for Featured, Trending, Hashtags */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
