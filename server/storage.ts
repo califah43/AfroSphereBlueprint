@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge, type Admin, type InsertAdmin, type AdminPermission, type BlockedUser, type UserReport, type FollowRequest, type Hashtag, type HashtagFollow } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, badges, userBadges, hashtags, hashtagFollows, saves, blockedUsers, userReports, type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge, type Admin, type InsertAdmin, type AdminPermission, type BlockedUser, type UserReport, type FollowRequest, type Hashtag, type HashtagFollow } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -11,6 +12,7 @@ export interface IStorage {
   banUser(userId: string, reason: string): Promise<User | undefined>;
   disableUser(userId: string, reason: string): Promise<User | undefined>;
   restoreUser(userId: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   
   // Posts
   getPost(id: string): Promise<Post | undefined>;
@@ -21,6 +23,7 @@ export interface IStorage {
   updatePost(id: string, updates: Partial<Post>): Promise<Post | undefined>;
   deletePost(id: string): Promise<void>;
   getUserLikedPosts(userId: string): Promise<Post[]>;
+  getPostsByGenre(genre: string): Promise<Post[]>;
   
   // Comments
   getComment(id: string): Promise<Comment | undefined>;
@@ -35,6 +38,7 @@ export interface IStorage {
   hasUserLikedPost(userId: string, postId: string): Promise<boolean>;
   likeComment(userId: string, commentId: string): Promise<Like>;
   unlikeComment(userId: string, commentId: string): Promise<void>;
+  hasUserLikedComment(userId: string, commentId: string): Promise<boolean>;
   
   // Follows
   followUser(followerId: string, followingId: string): Promise<Follow>;
@@ -61,7 +65,6 @@ export interface IStorage {
   getUserBadges(userId: string): Promise<Badge[]>;
   assignBadge(userId: string, badgeId: string): Promise<UserBadge>;
   removeBadge(userId: string, badgeId: string): Promise<void>;
-  getAllFCMTokens(): Promise<Map<string, string>>;
 
   // Saved Posts
   savePost(userId: string, postId: string): Promise<void>;
@@ -69,732 +72,366 @@ export interface IStorage {
   isSavedPost(userId: string, postId: string): Promise<boolean>;
   getSavedPosts(userId: string): Promise<Post[]>;
 
-  // Admin
-  createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin>;
-  getAdmin(userId: string): Promise<Admin | undefined>;
-  getAdminPermissions(adminId: string): Promise<string[]>;
-  removeAdmin(adminId: string): Promise<void>;
-  verifyAdminPermission(adminId: string, permission: string): Promise<boolean>;
+  // Hashtags
+  getHashtag(name: string): Promise<Hashtag | undefined>;
+  getAllHashtags(): Promise<Hashtag[]>;
+  isFollowingHashtag(userId: string, hashtag: string): Promise<boolean>;
+  followHashtag(userId: string, hashtag: string): Promise<void>;
+  unfollowHashtag(userId: string, hashtag: string): Promise<void>;
+  getFollowedHashtags(userId: string): Promise<string[]>;
 
   // Block & Report
   blockUser(userId: string, blockedUserId: string): Promise<BlockedUser>;
   isBlocked(userId: string, blockedUserId: string): Promise<boolean>;
   createReport(report: Partial<UserReport>): Promise<UserReport>;
-  getAllReports(): Promise<UserReport[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User> = new Map();
-  private posts: Map<string, Post> = new Map();
-  private comments: Map<string, Comment> = new Map();
-  private likes: Map<string, Like> = new Map();
-  private follows: Map<string, Follow> = new Map();
-  private creatorBadges: Map<string, CreatorBadge> = new Map();
-  private badges: Map<string, Badge> = new Map();
-  private userBadges: Map<string, UserBadge[]> = new Map();
-  private notifications: Map<string, Notification> = new Map();
-  private settings: Map<string, UserSettings> = new Map();
-  private fcmTokens: Map<string, string> = new Map();
-  private savedPosts: Map<string, Set<string>> = new Map();
-  private admins: Map<string, Admin> = new Map();
-  private adminPermissions: Map<string, string[]> = new Map();
-  private blockedUsers: Map<string, BlockedUser> = new Map();
-  private userReports: Map<string, UserReport> = new Map();
-  private hashtags: Map<string, Hashtag> = new Map();
-  private hashtagFollows: Map<string, HashtagFollow> = new Map();
-
+export class DatabaseStorage implements IStorage {
   // ============ USERS ============
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(u => u.username === username);
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = {
-      ...insertUser,
-      id,
-      email: "",
-      phone: "",
-      displayName: "",
-      bio: "",
-      location: "",
-      avatar: "",
-      profileImageUrl: "",
-      banner: "",
-      website: "",
-      profession: "",
-      isPrivate: false,
-      firebaseUid: null,
-      fcmToken: null,
-      followerCount: 0,
-      followingCount: 0,
-      postCount: 0,
-      status: "active",
-      suspensionReason: "",
-      bannedReason: "",
-      disabledReason: "",
-    };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async updateUser(id: string, updates: any): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    const updated = { ...user, ...updates };
-    this.users.set(id, updated);
-    return updated;
+    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return user;
   }
 
   async suspendUser(userId: string, reason: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-    const updated = { ...user, status: "suspended", suspensionReason: reason };
-    this.users.set(userId, updated);
-    return updated;
+    const [user] = await db.update(users).set({ status: "suspended", suspensionReason: reason }).where(eq(users.id, userId)).returning();
+    return user;
   }
 
   async banUser(userId: string, reason: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-    const updated = { ...user, status: "banned", bannedReason: reason };
-    this.users.set(userId, updated);
-    return updated;
+    const [user] = await db.update(users).set({ status: "banned", bannedReason: reason }).where(eq(users.id, userId)).returning();
+    return user;
   }
 
   async disableUser(userId: string, reason: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-    const updated = { ...user, status: "disabled", disabledReason: reason };
-    this.users.set(userId, updated);
-    return updated;
+    const [user] = await db.update(users).set({ status: "disabled", disabledReason: reason }).where(eq(users.id, userId)).returning();
+    return user;
   }
 
   async restoreUser(userId: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-    const updated = { ...user, status: "active", suspensionReason: "", bannedReason: "", disabledReason: "" };
-    this.users.set(userId, updated);
-    return updated;
+    const [user] = await db.update(users).set({ status: "active", suspensionReason: "", bannedReason: "", disabledReason: "" }).where(eq(users.id, userId)).returning();
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users);
   }
 
   // ============ POSTS ============
   async getPost(id: string): Promise<Post | undefined> {
-    return this.posts.get(id);
+    const [post] = await db.select().from(posts).where(eq(posts.id, id));
+    return post;
   }
 
   async listPosts(limit = 20, offset = 0): Promise<Post[]> {
-    return Array.from(this.posts.values())
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
-      .slice(offset, offset + limit);
+    return db.select().from(posts).orderBy(desc(posts.createdAt)).limit(limit).offset(offset);
   }
 
   async listPostsByUser(userId: string): Promise<Post[]> {
-    return Array.from(this.posts.values())
-      .filter(p => p.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    return db.select().from(posts).where(eq(posts.userId, userId)).orderBy(desc(posts.createdAt));
   }
 
   async listPostsByCategory(category: string, limit = 20): Promise<Post[]> {
-    return Array.from(this.posts.values())
-      .filter(p => p.category === category)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
-      .slice(0, limit);
+    return db.select().from(posts).where(eq(posts.category, category)).orderBy(desc(posts.createdAt)).limit(limit);
   }
 
   async createPost(post: InsertPost): Promise<Post> {
-    const id = randomUUID();
-    const newPost: Post = {
-      ...post,
-      caption: post.caption || null,
-      images: post.images || null,
-      hashtags: post.hashtags || null,
-      id,
-      likes: 0,
-      commentCount: 0,
-      engagementScore: 0,
-      createdAt: new Date(),
-    };
-    this.posts.set(id, newPost);
-    const user = this.users.get(post.userId);
-    if (user) {
-      user.postCount = (user.postCount || 0) + 1;
-      this.users.set(post.userId, user);
-    }
+    const [newPost] = await db.insert(posts).values(post).returning();
+    await db.update(users).set({ postCount: sql`${users.postCount} + 1` }).where(eq(users.id, post.userId));
     return newPost;
   }
 
   async updatePost(id: string, updates: Partial<Post>): Promise<Post | undefined> {
-    const post = this.posts.get(id);
-    if (!post) return undefined;
-    const updated = { ...post, ...updates };
-    this.posts.set(id, updated);
+    const [updated] = await db.update(posts).set(updates).where(eq(posts.id, id)).returning();
     return updated;
   }
 
   async deletePost(id: string): Promise<void> {
-    const post = this.posts.get(id);
+    const post = await this.getPost(id);
     if (post) {
-      const user = this.users.get(post.userId);
-      if (user) {
-        user.postCount = Math.max(0, (user.postCount || 1) - 1);
-        this.users.set(post.userId, user);
-      }
+      await db.delete(posts).where(eq(posts.id, id));
+      await db.update(users).set({ postCount: sql`GREATEST(0, ${users.postCount} - 1)` }).where(eq(users.id, post.userId));
     }
-    this.posts.delete(id);
   }
 
   async getUserLikedPosts(userId: string): Promise<Post[]> {
-    const likedPostIds = Array.from(this.likes.values())
-      .filter(like => like.userId === userId && like.postId)
-      .map(like => like.postId!);
-    
-    return Array.from(this.posts.values())
-      .filter(p => likedPostIds.includes(p.id))
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    const userLikes = await db.select().from(likes).where(and(eq(likes.userId, userId), sql`${likes.postId} IS NOT NULL`));
+    const postIds = userLikes.map((l: any) => l.postId!);
+    if (postIds.length === 0) return [];
+    return db.select().from(posts).where(sql`${posts.id} IN (${sql.join(postIds.map((id: any) => sql`${id}`), sql`, `)})`).orderBy(desc(posts.createdAt));
+  }
+
+  async getPostsByGenre(genre: string): Promise<Post[]> {
+    return db.select().from(posts).where(eq(sql`LOWER(${posts.category})`, genre.toLowerCase())).orderBy(desc(posts.createdAt));
   }
 
   // ============ COMMENTS ============
   async getComment(id: string): Promise<Comment | undefined> {
-    return this.comments.get(id);
+    const [comment] = await db.select().from(comments).where(eq(comments.id, id));
+    return comment;
   }
 
   async listComments(postId: string): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter(c => c.postId === postId && !c.replyTo)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    return db.select().from(comments).where(and(eq(comments.postId, postId), sql`${comments.replyTo} IS NULL`)).orderBy(desc(comments.createdAt));
   }
 
   async getCommentReplies(commentId: string): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter(c => c.replyTo === commentId)
-      .sort((a, b) => (a.createdAt?.getTime() || 0) - (b.createdAt?.getTime() || 0));
+    return db.select().from(comments).where(eq(comments.replyTo, commentId)).orderBy(desc(comments.createdAt));
   }
 
   async createComment(comment: InsertComment): Promise<Comment> {
-    const id = randomUUID();
-    const newComment: Comment = {
-      ...comment,
-      replyTo: comment.replyTo || null,
-      id,
-      likes: 0,
-      createdAt: new Date(),
-    };
-    this.comments.set(id, newComment);
-    const post = this.posts.get(comment.postId);
-    if (post) {
-      post.commentCount = (post.commentCount || 0) + 1;
-      this.posts.set(comment.postId, post);
-    }
+    const [newComment] = await db.insert(comments).values(comment).returning();
+    await db.update(posts).set({ commentCount: sql`${posts.commentCount} + 1` }).where(eq(posts.id, comment.postId));
     return newComment;
   }
 
   async deleteComment(id: string): Promise<void> {
-    const comment = this.comments.get(id);
+    const comment = await this.getComment(id);
     if (comment) {
-      const post = this.posts.get(comment.postId);
-      if (post) {
-        post.commentCount = Math.max(0, (post.commentCount || 1) - 1);
-        this.posts.set(comment.postId, post);
-      }
+      await db.delete(comments).where(eq(comments.id, id));
+      await db.update(posts).set({ commentCount: sql`GREATEST(0, ${posts.commentCount} - 1)` }).where(eq(posts.id, comment.postId));
     }
-    this.comments.delete(id);
   }
 
   // ============ LIKES ============
   async likePost(userId: string, postId: string): Promise<Like> {
-    const existingLike = Array.from(this.likes.values()).find(l => l.userId === userId && l.postId === postId);
-    if (existingLike) return existingLike;
-    
-    const id = randomUUID();
-    const like: Like = { id, userId, postId, commentId: null, createdAt: new Date() };
-    this.likes.set(id, like);
-    const post = this.posts.get(postId);
-    if (post) {
-      post.likes = (post.likes || 0) + 1;
-      this.posts.set(postId, post);
-    }
+    const [existing] = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
+    if (existing) return existing;
+    const [like] = await db.insert(likes).values({ userId, postId }).returning();
+    await db.update(posts).set({ likes: sql`${posts.likes} + 1` }).where(eq(posts.id, postId));
     return like;
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
-    const like = Array.from(this.likes.values()).find(l => l.userId === userId && l.postId === postId);
+    const [like] = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
     if (like) {
-      this.likes.delete(like.id);
-      const post = this.posts.get(postId);
-      if (post) {
-        post.likes = Math.max(0, (post.likes || 1) - 1);
-        this.posts.set(postId, post);
-      }
+      await db.delete(likes).where(eq(likes.id, like.id));
+      await db.update(posts).set({ likes: sql`GREATEST(0, ${posts.likes} - 1)` }).where(eq(posts.id, postId));
     }
   }
 
   async hasUserLikedPost(userId: string, postId: string): Promise<boolean> {
-    return !!Array.from(this.likes.values()).find(l => l.userId === userId && l.postId === postId);
+    const [like] = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId)));
+    return !!like;
   }
 
   async likeComment(userId: string, commentId: string): Promise<Like> {
-    const existingLike = Array.from(this.likes.values()).find(l => l.userId === userId && l.commentId === commentId);
-    if (existingLike) return existingLike;
-    
-    const id = randomUUID();
-    const like: Like = { id, userId, postId: null, commentId, createdAt: new Date() };
-    this.likes.set(id, like);
-    const comment = this.comments.get(commentId);
-    if (comment) {
-      comment.likes = (comment.likes || 0) + 1;
-      this.comments.set(commentId, comment);
-    }
+    const [existing] = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
+    if (existing) return existing;
+    const [like] = await db.insert(likes).values({ userId, commentId }).returning();
+    await db.update(comments).set({ likes: sql`${comments.likes} + 1` }).where(eq(comments.id, commentId));
     return like;
   }
 
   async unlikeComment(userId: string, commentId: string): Promise<void> {
-    const like = Array.from(this.likes.values()).find(l => l.userId === userId && l.commentId === commentId);
+    const [like] = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
     if (like) {
-      this.likes.delete(like.id);
-      const comment = this.comments.get(commentId);
-      if (comment) {
-        comment.likes = Math.max(0, (comment.likes || 1) - 1);
-        this.comments.set(commentId, comment);
-      }
+      await db.delete(likes).where(eq(likes.id, like.id));
+      await db.update(comments).set({ likes: sql`GREATEST(0, ${comments.likes} - 1)` }).where(eq(comments.id, commentId));
     }
+  }
+
+  async hasUserLikedComment(userId: string, commentId: string): Promise<boolean> {
+    const [like] = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.commentId, commentId)));
+    return !!like;
   }
 
   // ============ FOLLOWS ============
   async followUser(followerId: string, followingId: string): Promise<Follow> {
-    const existingFollow = Array.from(this.follows.values()).find(f => f.followerId === followerId && f.followingId === followingId);
-    if (existingFollow) return existingFollow;
-
-    const id = randomUUID();
-    const follow: Follow = { id, followerId, followingId, createdAt: new Date() };
-    this.follows.set(id, follow);
-    
-    const follower = this.users.get(followerId);
-    if (follower) {
-      follower.followingCount = (follower.followingCount || 0) + 1;
-      this.users.set(followerId, follower);
-    }
-    
-    const following = this.users.get(followingId);
-    if (following) {
-      following.followerCount = (following.followerCount || 0) + 1;
-      this.users.set(followingId, following);
-    }
-    
+    const [existing] = await db.select().from(follows).where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)));
+    if (existing) return existing;
+    const [follow] = await db.insert(follows).values({ followerId, followingId }).returning();
+    await db.update(users).set({ followingCount: sql`${users.followingCount} + 1` }).where(eq(users.id, followerId));
+    await db.update(users).set({ followerCount: sql`${users.followerCount} + 1` }).where(eq(users.id, followingId));
     return follow;
   }
 
   async unfollowUser(followerId: string, followingId: string): Promise<void> {
-    const follow = Array.from(this.follows.values()).find(f => f.followerId === followerId && f.followingId === followingId);
+    const [follow] = await db.select().from(follows).where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)));
     if (follow) {
-      this.follows.delete(follow.id);
-      const follower = this.users.get(followerId);
-      if (follower) {
-        follower.followingCount = Math.max(0, (follower.followingCount || 1) - 1);
-        this.users.set(followerId, follower);
-      }
-      const following = this.users.get(followingId);
-      if (following) {
-        following.followerCount = Math.max(0, (following.followerCount || 1) - 1);
-        this.users.set(followingId, following);
-      }
+      await db.delete(follows).where(eq(follows.id, follow.id));
+      await db.update(users).set({ followingCount: sql`GREATEST(0, ${users.followingCount} - 1)` }).where(eq(users.id, followerId));
+      await db.update(users).set({ followerCount: sql`GREATEST(0, ${users.followerCount} - 1)` }).where(eq(users.id, followingId));
     }
   }
 
   async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    return !!Array.from(this.follows.values()).find(f => f.followerId === followerId && f.followingId === followingId);
+    const [follow] = await db.select().from(follows).where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)));
+    return !!follow;
   }
 
   async getFollowers(userId: string): Promise<User[]> {
-    const followerIds = Array.from(this.follows.values()).filter(f => f.followingId === userId).map(f => f.followerId);
-    return followerIds.map(id => this.users.get(id)).filter((u): u is User => !!u);
+    const followList = await db.select().from(follows).where(eq(follows.followingId, userId));
+    const ids = followList.map((f: any) => f.followerId);
+    if (ids.length === 0) return [];
+    return db.select().from(users).where(sql`${users.id} IN (${sql.join(ids.map((id: any) => sql`${id}`), sql`, `)})`);
   }
 
   async getFollowing(userId: string): Promise<User[]> {
-    const followingIds = Array.from(this.follows.values()).filter(f => f.followerId === userId).map(f => f.followingId);
-    return followingIds.map(id => this.users.get(id)).filter((u): u is User => !!u);
+    const followList = await db.select().from(follows).where(eq(follows.followerId, userId));
+    const ids = followList.map((f: any) => f.followingId);
+    if (ids.length === 0) return [];
+    return db.select().from(users).where(sql`${users.id} IN (${sql.join(ids.map((id: any) => sql`${id}`), sql`, `)})`);
   }
 
   // ============ NOTIFICATIONS ============
   async createNotification(notification: any): Promise<Notification> {
-    const id = randomUUID();
-    const newNotification: Notification = {
-      ...notification,
-      id,
-      read: false,
-      createdAt: new Date(),
-    };
-    this.notifications.set(id, newNotification);
+    const [newNotification] = await db.insert(notifications).values(notification).returning();
     return newNotification;
   }
 
   async listNotifications(userId: string): Promise<Notification[]> {
-    return Array.from(this.notifications.values())
-      .filter(n => n.userId === userId)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    return db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
   }
 
   async markNotificationAsRead(id: string): Promise<void> {
-    const notification = this.notifications.get(id);
-    if (notification) {
-      notification.read = true;
-      this.notifications.set(id, notification);
-    }
+    await db.update(notifications).set({ read: true }).where(eq(notifications.id, id));
   }
 
   // ============ SETTINGS ============
   async getUserSettings(userId: string): Promise<UserSettings | undefined> {
-    return Array.from(this.settings.values()).find(s => s.userId === userId);
-  }
-
-  async saveUserSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
-    let settings = Array.from(this.settings.values()).find(s => s.userId === userId);
-    const defaults: UserSettings = {
-      userId,
-      privateAccount: false,
-      allowComments: true,
-      allowMentions: true,
-      notificationsLikes: true,
-      notificationsComments: true,
-      notificationsFollows: true,
-      notificationsTrending: true,
-      notificationsPush: true,
-      notificationsEmail: true,
-      privacyActivityStatus: true,
-      privacyReadReceipts: true,
-      contentHideExplicit: false,
-      contentMutedWords: false,
-      contentRestrictedMode: false,
-      displayDarkMode: true,
-      displayTextSize: "normal",
-      displayLanguage: "en",
-      updatedAt: new Date(),
-    };
-    
-    if (!settings) {
-      settings = { ...defaults, ...updates, userId };
-    } else {
-      settings = { ...settings, ...updates, updatedAt: new Date(), userId };
-    }
-    this.settings.set(userId, settings);
-
-    // If privateAccount status changed, update the user object too
-    if (updates.privateAccount !== undefined) {
-      const user = this.users.get(userId);
-      if (user) {
-        user.isPrivate = updates.privateAccount;
-        this.users.set(userId, user);
-      }
-    }
-
+    const [settings] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
     return settings;
   }
 
-  // ============ FCM TOKENS ============
+  async saveUserSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
+    const existing = await this.getUserSettings(userId);
+    if (existing) {
+      const [updated] = await db.update(userSettings).set({ ...updates, updatedAt: new Date() }).where(eq(userSettings.userId, userId)).returning();
+      if (updates.privateAccount !== undefined) {
+        await db.update(users).set({ isPrivate: updates.privateAccount }).where(eq(users.id, userId));
+      }
+      return updated;
+    } else {
+      const [inserted] = await db.insert(userSettings).values({ ...updates, userId } as any).returning();
+      return inserted;
+    }
+  }
+
   async saveFCMToken(userId: string, token: string): Promise<void> {
-    this.fcmTokens.set(userId, token);
+    await db.update(users).set({ fcmToken: token }).where(eq(users.id, userId));
   }
 
   async getFCMToken(userId: string): Promise<string | undefined> {
-    return this.fcmTokens.get(userId);
-  }
-
-  async getAllFCMTokens(): Promise<Map<string, string>> {
-    return this.fcmTokens;
-  }
-
-  // ============ SAVED POSTS ============
-  async savePost(userId: string, postId: string): Promise<void> {
-    if (!this.savedPosts.has(userId)) {
-      this.savedPosts.set(userId, new Set());
-    }
-    this.savedPosts.get(userId)!.add(postId);
-  }
-
-  async unsavePost(userId: string, postId: string): Promise<void> {
-    this.savedPosts.get(userId)?.delete(postId);
-  }
-
-  async isSavedPost(userId: string, postId: string): Promise<boolean> {
-    return this.savedPosts.get(userId)?.has(postId) || false;
-  }
-
-  async getSavedPosts(userId: string): Promise<Post[]> {
-    const postIds = Array.from(this.savedPosts.get(userId) || []);
-    return postIds.map(id => this.posts.get(id)).filter((p): p is Post => !!p);
-  }
-
-  // ============ ADMIN ============
-  async createAdmin(admin: InsertAdmin, permissions: string[]): Promise<Admin> {
-    const id = randomUUID();
-    const newAdmin: Admin = {
-      ...admin,
-      id,
-      createdAt: new Date(),
-    };
-    this.admins.set(id, newAdmin);
-    this.adminPermissions.set(id, permissions);
-    return newAdmin;
-  }
-
-  async getAdmin(userId: string): Promise<Admin | undefined> {
-    return Array.from(this.admins.values()).find(a => a.userId === userId);
-  }
-
-  async getAdminPermissions(adminId: string): Promise<string[]> {
-    return this.adminPermissions.get(adminId) || [];
-  }
-
-  async removeAdmin(adminId: string): Promise<void> {
-    this.admins.delete(adminId);
-    this.adminPermissions.delete(adminId);
-  }
-
-  async verifyAdminPermission(adminId: string, permission: string): Promise<boolean> {
-    const permissions = this.adminPermissions.get(adminId) || [];
-    return permissions.includes(permission);
-  }
-
-  // ============ BLOCKED USERS ============
-  async blockUser(userId: string, blockedUserId: string): Promise<BlockedUser> {
-    const id = randomUUID();
-    const blockedUser: BlockedUser = { id, userId, blockedUserId, createdAt: new Date() };
-    this.blockedUsers.set(id, blockedUser);
-    return blockedUser;
-  }
-
-  async isBlocked(userId: string, blockedUserId: string): Promise<boolean> {
-    return Array.from(this.blockedUsers.values()).some(
-      b => b.userId === userId && b.blockedUserId === blockedUserId
-    );
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
-  async getAllPosts(): Promise<Post[]> {
-    return Array.from(this.posts.values());
-  }
-
-  async getAllFollows(): Promise<Follow[]> {
-    return Array.from(this.follows.values());
-  }
-
-  async getAllComments(): Promise<Comment[]> {
-    return Array.from(this.comments.values());
-  }
-
-  async getAllLikes(): Promise<Like[]> {
-    return Array.from(this.likes.values());
-  }
-
-  async getAllNotifications(): Promise<Notification[]> {
-    return Array.from(this.notifications.values());
-  }
-
-  async hasUserLikedComment(userId: string, commentId: string): Promise<boolean> {
-    return Array.from(this.likes.values()).some(l => l.userId === userId && l.commentId === commentId);
-  }
-
-  async hasFollowRequest(followerId: string, followingId: string): Promise<boolean> {
-    return false; // Stub
-  }
-
-  async createFollowRequest(followerId: string, followingId: string): Promise<any> {
-    return null; // Stub
-  }
-
-  async getFollowRequests(userId: string): Promise<any[]> {
-    return []; // Stub
-  }
-
-  async acceptFollowRequest(requestId: string): Promise<void> {}
-  async declineFollowRequest(requestId: string): Promise<void> {}
-
-  async isFollowingHashtag(userId: string, hashtag: string): Promise<boolean> {
-    return Array.from(this.hashtagFollows.values()).some(f => f.userId === userId && f.hashtagId === hashtag);
-  }
-
-  async followHashtag(userId: string, hashtag: string): Promise<void> {
-    const id = randomUUID();
-    this.hashtagFollows.set(id, { id, userId, hashtagId: hashtag, createdAt: new Date() });
-  }
-
-  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {
-    const follow = Array.from(this.hashtagFollows.values()).find(f => f.userId === userId && f.hashtagId === hashtag);
-    if (follow) this.hashtagFollows.delete(follow.id);
-  }
-
-  async getAllHashtags(): Promise<Hashtag[]> {
-    const hashtagMap = new Map<string, Hashtag>();
-    
-    Array.from(this.posts.values()).forEach(post => {
-      if (post.hashtags && Array.isArray(post.hashtags)) {
-        post.hashtags.forEach(tag => {
-          const existing = hashtagMap.get(tag);
-          if (existing) {
-            existing.postsCount = (existing.postsCount || 0) + 1;
-          } else {
-            hashtagMap.set(tag, {
-              id: tag,
-              name: tag,
-              postsCount: 1,
-              followersCount: 0,
-              createdAt: new Date()
-            });
-          }
-        });
-      }
-    });
-
-    return Array.from(hashtagMap.values());
-  }
-
-  async getAllHashtagFollows(): Promise<HashtagFollow[]> {
-    return Array.from(this.hashtagFollows.values());
-  }
-
-  async searchUsers(query: string): Promise<User[]> {
-    const q = query.toLowerCase();
-    return Array.from(this.users.values()).filter(u => 
-      u.status === "active" && (
-        u.username.toLowerCase().includes(q) || 
-        (u.displayName && u.displayName.toLowerCase().includes(q))
-      )
-    );
-  }
-
-  async searchPosts(query: string): Promise<Post[]> {
-    const q = query.toLowerCase();
-    return Array.from(this.posts.values()).filter(p => 
-      (p.caption && p.caption.toLowerCase().includes(q))
-    );
-  }
-
-  async searchHashtags(query: string): Promise<Hashtag[]> {
-    const q = query.toLowerCase();
-    const hashtags = await this.getAllHashtags();
-    return hashtags.filter(h => h.name.toLowerCase().includes(q));
-  }
-
-  async deleteUser(userId: string): Promise<void> {
-    this.users.delete(userId);
-  }
-
-  async getBadgeUsers(badgeId: string): Promise<User[]> {
-    return []; // Stub
-  }
-
-  async getAllBadgesWithUsers(): Promise<any[]> {
-    return []; // Stub
-  }
-
-  // ============ USER REPORTS ============
-  async createReport(report: Partial<UserReport>): Promise<UserReport> {
-    const id = randomUUID();
-    const newReport: UserReport = {
-      id,
-      userId: report.userId!,
-      reportType: report.reportType!,
-      description: report.description!,
-      postId: report.postId || null,
-      reportedUserId: report.reportedUserId || null,
-      status: "pending",
-      createdAt: new Date(),
-    };
-    this.userReports.set(id, newReport);
-    return newReport;
-  }
-
-  async getHashtag(name: string): Promise<Hashtag | undefined> {
-    return Array.from(this.hashtags.values()).find(h => h.name.toLowerCase() === name.toLowerCase());
-  }
-
-  async getAllHashtags(): Promise<Hashtag[]> {
-    return Array.from(this.hashtags.values());
-  }
-
-  async getPostsByGenre(genre: string): Promise<Post[]> {
-    const q = genre.toLowerCase();
-    return Array.from(this.posts.values())
-      .filter(p => (p as any).category?.toLowerCase() === q)
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
-  }
-
-  async getFollowedHashtags(userId: string): Promise<string[]> {
-    return Array.from(this.hashtagFollows.values())
-      .filter(f => f.userId === userId)
-      .map(f => f.hashtagId);
-  }
-
-  async isFollowingHashtag(userId: string, hashtag: string): Promise<boolean> {
-    return Array.from(this.hashtagFollows.values()).some(f => f.userId === userId && f.hashtagId === hashtag);
-  }
-
-  async followHashtag(userId: string, hashtag: string): Promise<void> {
-    const id = randomUUID();
-    this.hashtagFollows.set(id, { id, userId, hashtagId: hashtag, createdAt: new Date() });
-  }
-
-  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {
-    const follow = Array.from(this.hashtagFollows.values()).find(f => f.userId === userId && f.hashtagId === hashtag);
-    if (follow) this.hashtagFollows.delete(follow.id);
+    const user = await this.getUser(userId);
+    return user?.fcmToken || undefined;
   }
 
   // ============ BADGES ============
   async getBadges(): Promise<Badge[]> {
-    return Array.from(this.badges.values());
+    return db.select().from(badges);
   }
 
   async createBadge(badge: InsertBadge): Promise<Badge> {
-    const id = randomUUID();
-    const newBadge: Badge = {
-      id,
-      ...badge,
-      createdAt: new Date(),
-    };
-    this.badges.set(id, newBadge);
+    const [newBadge] = await db.insert(badges).values(badge).returning();
     return newBadge;
   }
 
   async deleteBadge(badgeId: string): Promise<void> {
-    this.badges.delete(badgeId);
+    await db.delete(badges).where(eq(badges.id, badgeId));
   }
 
   async getUserBadges(userId: string): Promise<Badge[]> {
-    const userBadgeIds = this.userBadges.get(userId) || [];
-    return userBadgeIds.map(ub => this.badges.get(ub.badgeId)).filter((b): b is Badge => !!b);
+    const uBadges = await db.select().from(userBadges).where(eq(userBadges.userId, userId));
+    const ids = uBadges.map((ub: any) => ub.badgeId);
+    if (ids.length === 0) return [];
+    return db.select().from(badges).where(sql`${badges.id} IN (${sql.join(ids.map((id: any) => sql`${id}`), sql`, `)})`);
   }
 
   async assignBadge(userId: string, badgeId: string): Promise<UserBadge> {
-    const id = randomUUID();
-    const userBadge: UserBadge = {
-      id,
-      userId,
-      badgeId,
-      createdAt: new Date(),
-    };
-    const existing = this.userBadges.get(userId) || [];
-    if (!existing.find(ub => ub.badgeId === badgeId)) {
-      this.userBadges.set(userId, [...existing, userBadge]);
-    }
-    return userBadge;
+    const [ub] = await db.insert(userBadges).values({ userId, badgeId }).returning();
+    return ub;
   }
 
   async removeBadge(userId: string, badgeId: string): Promise<void> {
-    const existing = this.userBadges.get(userId) || [];
-    const updated = existing.filter(ub => ub.badgeId !== badgeId);
-    if (updated.length > 0) {
-      this.userBadges.set(userId, updated);
-    } else {
-      this.userBadges.delete(userId);
+    await db.delete(userBadges).where(and(eq(userBadges.userId, userId), eq(userBadges.badgeId, badgeId)));
+  }
+
+  // ============ SAVED POSTS ============
+  async savePost(userId: string, postId: string): Promise<void> {
+    const [existing] = await db.select().from(saves).where(and(eq(saves.userId, userId), eq(saves.postId, postId)));
+    if (!existing) {
+      await db.insert(saves).values({ userId, postId });
     }
+  }
+
+  async unsavePost(userId: string, postId: string): Promise<void> {
+    await db.delete(saves).where(and(eq(saves.userId, userId), eq(saves.postId, postId)));
+  }
+
+  async isSavedPost(userId: string, postId: string): Promise<boolean> {
+    const [save] = await db.select().from(saves).where(and(eq(saves.userId, userId), eq(saves.postId, postId)));
+    return !!save;
+  }
+
+  async getSavedPosts(userId: string): Promise<Post[]> {
+    const userSaves = await db.select().from(saves).where(eq(saves.userId, userId));
+    const ids = userSaves.map((s: any) => s.postId);
+    if (ids.length === 0) return [];
+    return db.select().from(posts).where(sql`${posts.id} IN (${sql.join(ids.map((id: any) => sql`${id}`), sql`, `)})`).orderBy(desc(posts.createdAt));
+  }
+
+  // ============ HASHTAGS ============
+  async getHashtag(name: string): Promise<Hashtag | undefined> {
+    const [tag] = await db.select().from(hashtags).where(eq(sql`LOWER(${hashtags.tag})`, name.toLowerCase()));
+    return tag;
+  }
+
+  async getAllHashtags(): Promise<Hashtag[]> {
+    return db.select().from(hashtags);
+  }
+
+  async isFollowingHashtag(userId: string, hashtag: string): Promise<boolean> {
+    const [follow] = await db.select().from(hashtagFollows).where(and(eq(hashtagFollows.userId, userId), eq(hashtagFollows.hashtagId, hashtag)));
+    return !!follow;
+  }
+
+  async followHashtag(userId: string, hashtag: string): Promise<void> {
+    const [existing] = await db.select().from(hashtagFollows).where(and(eq(hashtagFollows.userId, userId), eq(hashtagFollows.hashtagId, hashtag)));
+    if (!existing) {
+      await db.insert(hashtagFollows).values({ userId, hashtagId: hashtag });
+    }
+  }
+
+  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {
+    await db.delete(hashtagFollows).where(and(eq(hashtagFollows.userId, userId), eq(hashtagFollows.hashtagId, hashtag)));
+  }
+
+  async getFollowedHashtags(userId: string): Promise<string[]> {
+    const list = await db.select().from(hashtagFollows).where(eq(hashtagFollows.userId, userId));
+    return list.map((f: any) => f.hashtagId);
+  }
+
+  // ============ BLOCKED USERS ============
+  async blockUser(userId: string, blockedUserId: string): Promise<BlockedUser> {
+    const [block] = await db.insert(blockedUsers).values({ userId, blockedUserId }).returning();
+    return block;
+  }
+
+  async isBlocked(userId: string, blockedUserId: string): Promise<boolean> {
+    const [block] = await db.select().from(blockedUsers).where(and(eq(blockedUsers.userId, userId), eq(blockedUsers.blockedUserId, blockedUserId)));
+    return !!block;
+  }
+
+  async createReport(report: Partial<UserReport>): Promise<UserReport> {
+    const [newReport] = await db.insert(userReports).values(report as any).returning();
+    return newReport;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
