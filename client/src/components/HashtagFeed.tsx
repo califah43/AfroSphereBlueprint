@@ -80,6 +80,37 @@ export default function HashtagFeed({ hashtag, onClose }: HashtagFeedProps) {
 
   const postCount = posts.length.toLocaleString();
 
+  const [isFollowing, setIsFollowing] = useState(false);
+  const userId = localStorage.getItem("currentUserId");
+
+  useEffect(() => {
+    if (userId && hashtag) {
+      fetch(`/api/users/${userId}/followed-hashtags`)
+        .then(res => res.json())
+        .then(followed => {
+          setIsFollowing(followed.includes(hashtag));
+        })
+        .catch(() => {});
+    }
+  }, [userId, hashtag]);
+
+  const handleFollowToggle = async () => {
+    if (!userId) return;
+    const endpoint = isFollowing ? 'unfollow' : 'follow';
+    try {
+      const res = await fetch(`/api/hashtags/${hashtag}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (res.ok) {
+        setIsFollowing(!isFollowing);
+      }
+    } catch (e) {
+      console.error("Failed to toggle hashtag follow", e);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 z-10">
@@ -98,8 +129,13 @@ export default function HashtagFeed({ hashtag, onClose }: HashtagFeedProps) {
               {postCount} posts
             </p>
           </div>
-          <Button variant="default" size="sm" data-testid="button-follow-hashtag">
-            Follow
+          <Button 
+            variant={isFollowing ? "outline" : "default"} 
+            size="sm" 
+            onClick={handleFollowToggle}
+            data-testid="button-follow-hashtag"
+          >
+            {isFollowing ? "Following" : "Follow"}
           </Button>
         </div>
       </div>

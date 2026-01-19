@@ -100,6 +100,8 @@ export class MemStorage implements IStorage {
   private adminPermissions: Map<string, string[]> = new Map();
   private blockedUsers: Map<string, BlockedUser> = new Map();
   private userReports: Map<string, UserReport> = new Map();
+  private hashtags: Map<string, Hashtag> = new Map();
+  private hashtagFollows: Map<string, HashtagFollow> = new Map();
 
   // ============ USERS ============
   async getUser(id: string): Promise<User | undefined> {
@@ -709,8 +711,39 @@ export class MemStorage implements IStorage {
     return newReport;
   }
 
-  async getAllReports(): Promise<UserReport[]> {
-    return Array.from(this.userReports.values());
+  async getHashtag(name: string): Promise<Hashtag | undefined> {
+    return Array.from(this.hashtags.values()).find(h => h.name.toLowerCase() === name.toLowerCase());
+  }
+
+  async getAllHashtags(): Promise<Hashtag[]> {
+    return Array.from(this.hashtags.values());
+  }
+
+  async getPostsByGenre(genre: string): Promise<Post[]> {
+    const q = genre.toLowerCase();
+    return Array.from(this.posts.values())
+      .filter(p => (p as any).genre?.toLowerCase() === q)
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+  }
+
+  async getFollowedHashtags(userId: string): Promise<string[]> {
+    return Array.from(this.hashtagFollows.values())
+      .filter(f => f.userId === userId)
+      .map(f => f.hashtagId);
+  }
+
+  async isFollowingHashtag(userId: string, hashtag: string): Promise<boolean> {
+    return Array.from(this.hashtagFollows.values()).some(f => f.userId === userId && f.hashtagId === hashtag);
+  }
+
+  async followHashtag(userId: string, hashtag: string): Promise<void> {
+    const id = randomUUID();
+    this.hashtagFollows.set(id, { id, userId, hashtagId: hashtag, createdAt: new Date() });
+  }
+
+  async unfollowHashtag(userId: string, hashtag: string): Promise<void> {
+    const follow = Array.from(this.hashtagFollows.values()).find(f => f.userId === userId && f.hashtagId === hashtag);
+    if (follow) this.hashtagFollows.delete(follow.id);
   }
 
   // ============ BADGES ============

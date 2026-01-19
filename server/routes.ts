@@ -2366,6 +2366,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ GENRE ROUTES ============
+  app.get("/api/genres/:genre/posts", async (req, res) => {
+    try {
+      const { genre } = req.params;
+      const posts = await storage.getPostsByGenre(genre);
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch genre posts" });
+    }
+  });
+
+  // ============ HASHTAG FOLLOW ROUTES ============
+  app.get("/api/users/:userId/followed-hashtags", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const hashtags = await storage.getFollowedHashtags(userId);
+      res.json(hashtags);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch followed hashtags" });
+    }
+  });
+
+  app.post("/api/hashtags/:hashtag/follow", async (req, res) => {
+    try {
+      const { hashtag } = req.params;
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ error: "User ID required" });
+      await storage.followHashtag(userId, hashtag);
+      res.json({ success: true, followed: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to follow hashtag" });
+    }
+  });
+
+  app.post("/api/hashtags/:hashtag/unfollow", async (req, res) => {
+    try {
+      const { hashtag } = req.params;
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ error: "User ID required" });
+      await storage.unfollowHashtag(userId, hashtag);
+      res.json({ success: true, followed: false });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to unfollow hashtag" });
+    }
+  });
+
   // ============ SETTINGS ROUTES ============
   app.get("/api/users/:userId/settings", async (req, res) => {
     try {
@@ -2388,5 +2434,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  return httpServer;
-}
+  // ============ BADGE ROUTES ============
+  app.get("/api/badges", async (req, res) => {
+    try {
+      const badges = await storage.getBadges();
+      res.json(badges);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch badges" });
+    }
+  });
+
+  app.get("/api/users/:userId/badges", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const badges = await storage.getUserBadges(userId);
+      res.json(badges);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user badges" });
+    }
+  });
