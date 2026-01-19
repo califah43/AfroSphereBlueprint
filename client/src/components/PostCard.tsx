@@ -248,6 +248,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   // Safe author fallback values
+  const authorUsername = post.author?.username || "Anonymous";
   const authorHandle = post.author?.uniqueUsername || post.author?.username || "unknown";
   const authorAvatar = post.author?.avatar;
   const isPremium = post.badges?.some(b => b.name && b.name.toLowerCase() === 'premium');
