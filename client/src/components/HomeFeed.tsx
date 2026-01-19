@@ -11,7 +11,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { fetchHomeFeedPosts } from "@/lib/feedQueryFn";
 
 const PostSkeleton = () => (
-  <div className="mb-6 animate-pulse space-y-3 bg-gradient-to-b from-muted/20 to-muted/10 rounded-2xl p-5 border border-border/20 opacity-50">
+  <div className="mb-6 animate-pulse space-y-3 bg-card rounded-2xl p-5 border border-border/20 opacity-50">
     <div className="flex items-center gap-3 mb-3">
       <div className="w-12 h-12 bg-muted/40 rounded-full"></div>
       <div className="flex-1">
@@ -296,7 +296,7 @@ export default function HomeFeed({ onOpenShare, onUserProfileClick, onHashtagCli
 
       {/* New Posts Indicator */}
       {hasNewPosts && !isRefreshing && (
-        <div className="flex justify-center py-2 sticky top-12 z-40 bg-background/95 backdrop-blur-sm">
+        <div className="flex justify-center py-2 sticky top-12 z-40 bg-card/95 backdrop-blur-sm">
           <button 
             onClick={() => {
               scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });

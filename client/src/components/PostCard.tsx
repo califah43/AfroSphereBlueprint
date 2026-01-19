@@ -254,7 +254,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   const authorAvatar = post.author?.avatar;
 
   return (
-    <div className="bg-background overflow-hidden mb-0 border-b border-border/20 premium-card transition-premium animate-fade-in-up" data-testid={`card-post-${post.id}`}>
+    <div className="bg-card overflow-hidden mb-0 border-b border-border/20 premium-card transition-premium animate-fade-in-up" data-testid={`card-post-${post.id}`}>
       {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style (Compact) */}
       <div className="flex items-start gap-3 px-3 py-2.5">
         <button 
