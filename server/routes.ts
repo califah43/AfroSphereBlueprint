@@ -2448,7 +2448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const badges = await storage.getUserBadges(userId);
-      res.json(badges);
+      res.json(badges || []);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch user badges" });
     }

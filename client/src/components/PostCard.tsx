@@ -248,9 +248,9 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   };
 
   // Safe author fallback values
-  const authorUsername = post.author?.username || "Anonymous";
   const authorHandle = post.author?.uniqueUsername || post.author?.username || "unknown";
-  const isPremium = post.badges?.some(b => b.name.toLowerCase() === 'premium');
+  const authorAvatar = post.author?.avatar;
+  const isPremium = post.badges?.some(b => b.name && b.name.toLowerCase() === 'premium');
 
   return (
     <div className={`bg-card overflow-hidden mb-0 border-b border-border/20 premium-card transition-premium animate-fade-in-up ${isPremium ? 'ring-1 ring-primary/20' : ''}`} data-testid={`card-post-${post.id}`}>
