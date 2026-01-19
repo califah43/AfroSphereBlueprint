@@ -49,12 +49,17 @@ export default function HashtagFeed({ hashtag, onClose }: HashtagFeedProps) {
     const fetchHashtagPosts = async () => {
       try {
         const res = await fetch(`/api/search/hashtag/${hashtag}`);
+        if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
         
         if (data && data.length > 0) {
           const formattedPosts: Post[] = data.map((p: any) => ({
             id: p.id,
-            author: { username: p.username || "creator" },
+            author: { 
+              id: p.authorId,
+              username: p.username || "creator",
+              uniqueUsername: p.uniqueUsername
+            },
             imageUrl: p.image,
             caption: p.caption,
             likes: p.likes || 0,
