@@ -218,15 +218,13 @@
   }
 
   .glass-effect {
-    background: hsl(30 11% 15% / 0.7);
+    @apply bg-card/70 border-border/50;
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(30 8% 22% / 0.5);
   }
 
   .glass-effect-lg {
-    background: hsl(30 11% 15% / 0.8);
+    @apply bg-card/80 border-border/60;
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(30 8% 24% / 0.6);
   }
 
   .warm-border {
@@ -256,14 +254,14 @@
 
   /* Premium card enhancement */
   .premium-card {
-    background: hsl(30 11% 15%);
-    border: 1px solid hsl(30 8% 22%);
+    @apply bg-card border-border;
+    border-width: 1px;
     border-radius: 16px;
     transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   }
 
   .premium-card:hover {
-    border-color: hsl(30 8% 28%);
+    @apply border-border/80;
     box-shadow: 
       0 8px 16px hsl(0 0% 0% / 0.15),
       0 16px 32px hsl(0 0% 0% / 0.2);
