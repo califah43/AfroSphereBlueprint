@@ -722,7 +722,7 @@ export class MemStorage implements IStorage {
   async getPostsByGenre(genre: string): Promise<Post[]> {
     const q = genre.toLowerCase();
     return Array.from(this.posts.values())
-      .filter(p => (p as any).genre?.toLowerCase() === q)
+      .filter(p => (p as any).category?.toLowerCase() === q)
       .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
   }
 

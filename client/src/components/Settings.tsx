@@ -166,6 +166,16 @@ export default function Settings({ onClose, onLogout, onEditProfile, onPremium, 
     };
     setSettings(newSettings);
     
+    // UI Feedback for premium-only features
+    if (key === 'downloadData' || key === 'contentRestrictedMode') {
+       toast({ 
+         title: "Premium Feature", 
+         description: "This advanced privacy control is available for Premium creators.",
+         variant: "default"
+       });
+       return;
+    }
+    
     // If text size changed, call the callback to update App state
     if (section === "display" && key === "textSize" && onTextSizeChange) {
       onTextSizeChange(value);

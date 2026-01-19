@@ -67,11 +67,36 @@ export default function EngagementBar({
     onBookmark?.();
   };
 
+  const [showBadgeInfo, setShowBadgeInfo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleBadgeClick = (e: any) => {
+      setShowBadgeInfo(e.detail.name);
+      setTimeout(() => setShowBadgeInfo(null), 5000);
+    };
+    window.addEventListener('badge:click', handleBadgeClick);
+    return () => window.removeEventListener('badge:click', handleBadgeClick);
+  }, []);
+
+  const getBadgeDescription = (badgeName: string) => {
+    switch(badgeName.toLowerCase()) {
+      case 'verified': return 'Authentic creator confirmed by AfroSphere.';
+      case 'premium': return 'Supporter of the African creative economy.';
+      case 'rising star': return 'Creator with rapidly growing engagement.';
+      default: return 'A special recognition badge for this creator.';
+    }
+  };
+
   return (
-    <div 
-      className="mx-3 my-3 px-3 py-2 rounded-full bg-black/40 dark:bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-between gap-3"
-      data-testid={`bar-engagement-${postId}`}
-    >
+    <div className="flex flex-col">
+      {/* Badge Info Overlay */}
+      {showBadgeInfo && (
+        <div className="px-4 py-2 bg-primary/10 border-y border-primary/20 animate-in slide-in-from-top duration-300">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-tighter">Badge Info: {showBadgeInfo}</p>
+          <p className="text-xs text-foreground/80 leading-snug">{getBadgeDescription(showBadgeInfo)}</p>
+        </div>
+      )}
+      <div className="mx-3 my-3 px-3 py-2 rounded-full bg-black/40 dark:bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-between gap-3" data-testid={`bar-engagement-${postId}`}>
       {/* Like Button */}
       <button
         onClick={handleLike}

@@ -250,11 +250,10 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
   // Safe author fallback values
   const authorUsername = post.author?.username || "Anonymous";
   const authorHandle = post.author?.uniqueUsername || post.author?.username || "unknown";
-  const authorId = post.author?.id || "";
-  const authorAvatar = post.author?.avatar;
+  const isPremium = post.badges?.some(b => b.name.toLowerCase() === 'premium');
 
   return (
-    <div className="bg-card overflow-hidden mb-0 border-b border-border/20 premium-card transition-premium animate-fade-in-up" data-testid={`card-post-${post.id}`}>
+    <div className={`bg-card overflow-hidden mb-0 border-b border-border/20 premium-card transition-premium animate-fade-in-up ${isPremium ? 'ring-1 ring-primary/20' : ''}`} data-testid={`card-post-${post.id}`}>
       {/* Header - Avatar LEFT, Info & Menu RIGHT - Twitter X Style (Compact) */}
       <div className="flex items-start gap-3 px-3 py-2.5">
         <button 
@@ -277,7 +276,16 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
               {post.badges && post.badges.length > 0 && (
                 <div className="flex items-center gap-0.5 flex-shrink-0">
                   {post.badges.map((badge) => (
-                    <div key={badge.id} className="w-4 h-4 inline-block flex-shrink-0 select-none" title={badge.name}>
+                    <button 
+                      key={badge.id} 
+                      className="w-4 h-4 inline-block flex-shrink-0 select-none hover:scale-110 transition-transform" 
+                      title={badge.name}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // This event is caught by EngagementBar via a shared mechanism or we can pass a callback
+                        window.dispatchEvent(new CustomEvent('badge:click', { detail: { name: badge.name } }));
+                      }}
+                    >
                       <img 
                         src={`data:image/svg+xml;base64,${btoa(badge.iconSvg)}`} 
                         alt={badge.name}
@@ -286,7 +294,7 @@ export default function PostCard({ post, isOwnPost = false, onLike, onComment, o
                         onContextMenu={(e) => e.preventDefault()}
                         data-testid={`img-badge-${badge.id}`}
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
