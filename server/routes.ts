@@ -1,8 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { MemStorage } from "./storage";
+import { storage } from "./storage";
 import multer from "multer";
-const storage = new MemStorage();
 import { insertUserSchema, updateUserSchema, insertPostSchema, insertCommentSchema, type Badge, type User, type Post } from "@shared/schema";
 import { sendPushNotification } from "./firebase-admin";
 import { WebSocketServer } from "ws";
@@ -963,7 +962,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/follow-requests/accept", async (req, res) => {
     try {
       const { requesterUserId, targetUserId } = req.body;
-      await storage.acceptFollowRequest(requesterUserId, targetUserId);
+      const requests = await storage.getFollowRequests(targetUserId);
+      const request = requests.find(r => r.followerId === requesterUserId);
+      if (!request) return res.status(404).json({ error: "Follow request not found" });
+      await storage.acceptFollowRequest(request.id);
       
       const requesterUser = await storage.getUser(requesterUserId);
       await storage.createNotification({
@@ -982,7 +984,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/follow-requests/decline", async (req, res) => {
     try {
       const { requesterUserId, targetUserId } = req.body;
-      await storage.declineFollowRequest(requesterUserId, targetUserId);
+      const requests = await storage.getFollowRequests(targetUserId);
+      const request = requests.find(r => r.followerId === requesterUserId);
+      if (!request) return res.status(404).json({ error: "Follow request not found" });
+      await storage.declineFollowRequest(request.id);
       res.json({ success: true });
     } catch (error) {
       res.status(400).json({ error: "Failed to decline follow request" });
@@ -1342,7 +1347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/reports", async (req, res) => {
     try {
       const { userId, reportType, description, postId, reportedUserId } = req.body;
-      const report = await storage.submitReport(userId, reportType, description, postId, reportedUserId);
+      const report = await storage.submitReport({ userId, reportType, description, postId, reportedUserId });
       res.json(report);
     } catch (error) {
       res.status(400).json({ error: "Failed to submit report" });
@@ -1948,7 +1953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing userId or role" });
       }
       const permissions = getPermissionsForRole(role);
-      const admin = await storage.createAdmin({ userId, role }, permissions);
+      const admin = await storage.createAdmin({ userId, role });
       res.json({ success: true, admin, permissions });
     } catch (error) {
       res.status(500).json({ error: "Failed to create admin" });
@@ -2304,13 +2309,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/trending/hashtags", async (req, res) => {
     try {
       const hashtags = await storage.getAllHashtags();
-      // Sort by post count desc
       const trending = hashtags
-        .sort((a, b) => (b.postsCount || 0) - (a.postsCount || 0))
+        .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
         .map(h => ({
-          tag: h.name,
-          posts: h.postsCount || 0,
-          count: h.followersCount || 0
+          tag: h.tag,
+          posts: h.usageCount || 0,
+          count: 0
         }));
       res.json(trending);
     } catch (error) {

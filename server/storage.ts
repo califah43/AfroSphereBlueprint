@@ -1,6 +1,6 @@
-import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, badges, userBadges, hashtags, hashtagFollows, saves, blockedUsers, userReports, type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge, type Admin, type InsertAdmin, type AdminPermission, type BlockedUser, type UserReport, type FollowRequest, type Hashtag, type HashtagFollow } from "@shared/schema";
+import { users, posts, comments, likes, follows, creatorBadges, notifications, userSettings, badges, userBadges, hashtags, hashtagFollows, saves, blockedUsers, userReports, followRequests, admins, adminPermissions, type User, type InsertUser, type Post, type InsertPost, type Comment, type InsertComment, type Like, type Follow, type CreatorBadge, type Notification, type UserSettings, type Badge, type UserBadge, type InsertBadge, type Admin, type InsertAdmin, type AdminPermission, type BlockedUser, type UserReport, type FollowRequest, type Hashtag, type HashtagFollow } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, or, sql } from "drizzle-orm";
+import { eq, and, desc, or, sql, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -82,8 +82,44 @@ export interface IStorage {
 
   // Block & Report
   blockUser(userId: string, blockedUserId: string): Promise<BlockedUser>;
+  unblockUser(userId: string, blockedUserId: string): Promise<void>;
+  getBlockedUsers(userId: string): Promise<BlockedUser[]>;
   isBlocked(userId: string, blockedUserId: string): Promise<boolean>;
   createReport(report: Partial<UserReport>): Promise<UserReport>;
+  submitReport(report: Partial<UserReport>): Promise<UserReport>;
+  getReports(): Promise<UserReport[]>;
+  getAllReports(): Promise<UserReport[]>;
+
+  // Bulk getters
+  getAllPosts(): Promise<Post[]>;
+  getAllFollows(): Promise<Follow[]>;
+  getAllComments(): Promise<Comment[]>;
+  getAllLikes(): Promise<Like[]>;
+  getAllNotifications(): Promise<Notification[]>;
+  getAllHashtagFollows(): Promise<HashtagFollow[]>;
+  getAllBadgesWithUsers(): Promise<any[]>;
+  getBadgeUsers(badgeId: string): Promise<User[]>;
+
+  // Search
+  searchUsers(query: string, limit: number): Promise<User[]>;
+  searchHashtags(query: string, limit: number): Promise<Hashtag[]>;
+  searchPosts(query: string, limit: number): Promise<Post[]>;
+
+  // Follow Requests
+  hasFollowRequest(followerId: string, followingId: string): Promise<boolean>;
+  createFollowRequest(followerId: string, followingId: string): Promise<FollowRequest>;
+  getFollowRequests(userId: string): Promise<FollowRequest[]>;
+  acceptFollowRequest(requestId: string): Promise<FollowRequest | undefined>;
+  declineFollowRequest(requestId: string): Promise<FollowRequest | undefined>;
+
+  // User management
+  deleteUser(userId: string): Promise<void>;
+
+  // Admin
+  createAdmin(admin: InsertAdmin): Promise<Admin>;
+  verifyAdminPermission(userId: string, permission: string): Promise<boolean>;
+  getAdminPermissions(userId: string): Promise<AdminPermission[]>;
+  removeAdmin(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -431,6 +467,177 @@ export class DatabaseStorage implements IStorage {
   async createReport(report: Partial<UserReport>): Promise<UserReport> {
     const [newReport] = await db.insert(userReports).values(report as any).returning();
     return newReport;
+  }
+
+  async unblockUser(userId: string, blockedUserId: string): Promise<void> {
+    await db.delete(blockedUsers).where(and(eq(blockedUsers.userId, userId), eq(blockedUsers.blockedUserId, blockedUserId)));
+  }
+
+  async getBlockedUsers(userId: string): Promise<BlockedUser[]> {
+    return db.select().from(blockedUsers).where(eq(blockedUsers.userId, userId));
+  }
+
+  async submitReport(report: Partial<UserReport>): Promise<UserReport> {
+    return this.createReport(report);
+  }
+
+  async getReports(): Promise<UserReport[]> {
+    return db.select().from(userReports).orderBy(desc(userReports.createdAt));
+  }
+
+  async getAllReports(): Promise<UserReport[]> {
+    return this.getReports();
+  }
+
+  // ============ BULK GETTERS ============
+  async getAllPosts(): Promise<Post[]> {
+    return db.select().from(posts).orderBy(desc(posts.createdAt));
+  }
+
+  async getAllFollows(): Promise<Follow[]> {
+    return db.select().from(follows);
+  }
+
+  async getAllComments(): Promise<Comment[]> {
+    return db.select().from(comments);
+  }
+
+  async getAllLikes(): Promise<Like[]> {
+    return db.select().from(likes);
+  }
+
+  async getAllNotifications(): Promise<Notification[]> {
+    return db.select().from(notifications);
+  }
+
+  async getAllHashtagFollows(): Promise<HashtagFollow[]> {
+    return db.select().from(hashtagFollows);
+  }
+
+  async getAllBadgesWithUsers(): Promise<any[]> {
+    const allBadges = await db.select().from(badges);
+    const result = await Promise.all(allBadges.map(async (badge: Badge) => {
+      const ubs = await db.select().from(userBadges).where(eq(userBadges.badgeId, badge.id));
+      const badgeUsers = await Promise.all(ubs.map(async (ub: UserBadge) => {
+        const [user] = await db.select().from(users).where(eq(users.id, ub.userId));
+        return user;
+      }));
+      return { ...badge, users: badgeUsers.filter(Boolean) };
+    }));
+    return result;
+  }
+
+  async getBadgeUsers(badgeId: string): Promise<User[]> {
+    const ubs = await db.select().from(userBadges).where(eq(userBadges.badgeId, badgeId));
+    if (ubs.length === 0) return [];
+    const ids = ubs.map((ub: any) => ub.userId);
+    return db.select().from(users).where(sql`${users.id} IN (${sql.join(ids.map((id: any) => sql`${id}`), sql`, `)})`);
+  }
+
+  // ============ SEARCH ============
+  async searchUsers(query: string, limit: number): Promise<User[]> {
+    return db.select().from(users).where(
+      or(
+        ilike(users.username, `%${query}%`),
+        ilike(users.displayName, `%${query}%`)
+      )
+    ).limit(limit);
+  }
+
+  async searchHashtags(query: string, limit: number): Promise<Hashtag[]> {
+    return db.select().from(hashtags).where(
+      ilike(hashtags.tag, `%${query}%`)
+    ).limit(limit);
+  }
+
+  async searchPosts(query: string, limit: number): Promise<Post[]> {
+    return db.select().from(posts).where(
+      or(
+        ilike(posts.caption, `%${query}%`),
+        ilike(posts.hashtags, `%${query}%`)
+      )
+    ).limit(limit);
+  }
+
+  // ============ FOLLOW REQUESTS ============
+  async hasFollowRequest(followerId: string, followingId: string): Promise<boolean> {
+    const [req] = await db.select().from(followRequests).where(
+      and(eq(followRequests.followerId, followerId), eq(followRequests.followingId, followingId), eq(followRequests.status, "pending"))
+    );
+    return !!req;
+  }
+
+  async createFollowRequest(followerId: string, followingId: string): Promise<FollowRequest> {
+    const [req] = await db.insert(followRequests).values({ followerId, followingId }).returning();
+    return req;
+  }
+
+  async getFollowRequests(userId: string): Promise<FollowRequest[]> {
+    return db.select().from(followRequests).where(
+      and(eq(followRequests.followingId, userId), eq(followRequests.status, "pending"))
+    ).orderBy(desc(followRequests.createdAt));
+  }
+
+  async acceptFollowRequest(requestId: string): Promise<FollowRequest | undefined> {
+    const [req] = await db.update(followRequests).set({ status: "accepted" }).where(eq(followRequests.id, requestId)).returning();
+    if (req) {
+      await this.followUser(req.followerId, req.followingId);
+    }
+    return req;
+  }
+
+  async declineFollowRequest(requestId: string): Promise<FollowRequest | undefined> {
+    const [req] = await db.update(followRequests).set({ status: "declined" }).where(eq(followRequests.id, requestId)).returning();
+    return req;
+  }
+
+  // ============ USER MANAGEMENT ============
+  async deleteUser(userId: string): Promise<void> {
+    await db.delete(comments).where(eq(comments.userId, userId));
+    await db.delete(likes).where(eq(likes.userId, userId));
+    await db.delete(follows).where(or(eq(follows.followerId, userId), eq(follows.followingId, userId)));
+    await db.delete(notifications).where(or(eq(notifications.userId, userId), eq(notifications.fromUserId, userId)));
+    await db.delete(saves).where(eq(saves.userId, userId));
+    await db.delete(userBadges).where(eq(userBadges.userId, userId));
+    await db.delete(hashtagFollows).where(eq(hashtagFollows.userId, userId));
+    await db.delete(blockedUsers).where(or(eq(blockedUsers.userId, userId), eq(blockedUsers.blockedUserId, userId)));
+    await db.delete(userReports).where(or(eq(userReports.userId, userId), eq(userReports.reportedUserId, userId)));
+    await db.delete(followRequests).where(or(eq(followRequests.followerId, userId), eq(followRequests.followingId, userId)));
+    await db.delete(adminPermissions).where(eq(adminPermissions.adminId, userId));
+    await db.delete(admins).where(eq(admins.userId, userId));
+    await db.delete(userSettings).where(eq(userSettings.userId, userId));
+    await db.delete(posts).where(eq(posts.userId, userId));
+    await db.delete(users).where(eq(users.id, userId));
+  }
+
+  // ============ ADMIN ============
+  async createAdmin(admin: InsertAdmin): Promise<Admin> {
+    const [newAdmin] = await db.insert(admins).values(admin).returning();
+    return newAdmin;
+  }
+
+  async verifyAdminPermission(userId: string, permission: string): Promise<boolean> {
+    const [admin] = await db.select().from(admins).where(eq(admins.userId, userId));
+    if (!admin) return false;
+    if (admin.role === "owner" || admin.role === "super_admin") return true;
+    const [perm] = await db.select().from(adminPermissions).where(
+      and(eq(adminPermissions.adminId, admin.id), eq(adminPermissions.permission, permission))
+    );
+    return !!perm;
+  }
+
+  async getAdminPermissions(userId: string): Promise<AdminPermission[]> {
+    const [admin] = await db.select().from(admins).where(eq(admins.userId, userId));
+    if (!admin) return [];
+    return db.select().from(adminPermissions).where(eq(adminPermissions.adminId, admin.id));
+  }
+
+  async removeAdmin(userId: string): Promise<void> {
+    const [admin] = await db.select().from(admins).where(eq(admins.userId, userId));
+    if (admin) {
+      await db.delete(adminPermissions).where(eq(adminPermissions.adminId, admin.id));
+      await db.delete(admins).where(eq(admins.id, admin.id));
+    }
   }
 }
 
